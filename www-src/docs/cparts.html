@@ -550,7 +550,7 @@ text='
 
 <Script>
     function fetchMe() {
-        fetch("https://api.github.com/users/michaelpb")
+        fetch("https://api.github.com/users/modulojs")
             .then(response => response.json())
             .then(cparts.script.cb(data => {
                 // Note that this callback is "wrapped" with
@@ -836,7 +836,7 @@ text='
     (by {{ staticdata.author }})
 </Template>
 <StaticData
-    -src="https://raw.githubusercontent.com/michaelpb/modulo/main/package.json"
+    -src="https://raw.githubusercontent.com/modulojs/modulo/main/package.json"
 ></StaticData>
 '
 ttitle2="FromAPI"
