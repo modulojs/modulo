@@ -9,7 +9,9 @@
     whatever templating engines are useful to your project!
 -->
 <template Modulo>
-    <script Configuration -src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js">
+    <Script -src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"
+          register="engine"
+          register-name="HandlebarsTemplater">
         // Using the -src attribute, we load Handlebars to be private within
         // this Script tag (and not pollute the global namespace).
 
@@ -34,8 +36,7 @@
                 return this.handlebarsTemplate(templateCtx, this.hbOptions);
             }
         }
-        modulo.register('engine', HandlebarsTemplater);
-    </script>
+    </Script>
 
     <Component name="ExampleComponent">
         <Props
@@ -72,8 +73,7 @@
 </template>
 
 
-<!--<script src="https://unpkg.com/mdu.js"></script>-->
-<script src="/js/Modulo.js"></script>
+<script src="https://unpkg.com/mdu.js"></script>
 
 <h1>Custom Template Engine: Handlebars.js Demo</h1>
 

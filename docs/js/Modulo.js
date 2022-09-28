@@ -1,4 +1,4 @@
-const LEGACY = []; // TODO rm
+const LEGACY = []; // XXX
 window.LEG = LEGACY;
 
 // Avoid overwriting other Modulo versions / instances
@@ -1183,26 +1183,6 @@ modulo.register('cpart', class StaticData {
     }
 });
 
-modulo.register('cpart', class Configuration {
-    static prebuildCallback(modulo, conf) {
-        const code = (conf.Content || '').trim();
-        delete conf.Content;
-        const opts = { exports: 'script' };
-        const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
-        const results = modulo.assets.invoke(func.hash, [ ]);
-        /*
-        // TODO: Possibly, add something like this to finish this CPart. Should
-        // be a helper, however -- maybe a confPreprocessor that applies to
-        // Library and Modulo as well?
-        for (const [ key, value ] of conf) {
-            if (key.includes('.')) {
-                modulo.utils.set(modulo.conf, key, value);
-            }
-        }
-        */
-    }
-});
-
 modulo.register('cpart', class Script {
     static prebuildCallback(modulo, conf) {
         const code = conf.Content || ''; // TODO: trim whitespace?
@@ -1225,6 +1205,18 @@ modulo.register('cpart', class Script {
         const func = modulo.assets.registerFunction(allArgs, code, opts);
         conf.Hash = modulo.assets.getHash(allArgs, code);
         conf.localVars = localVars;
+
+        if (conf.register) {
+            // XXX HAX TODO Refactor
+            // Run as prebuild
+            modulo.assert(conf.registerName, 'Must specify register name as well');
+            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
+            // NOTE: Uses "window" as "this." context for better compat
+            modulo.assets.runInline(`modulo.register("${ conf.register }", ` +
+                `${ exCode }.call(window, currentModulo).${ conf.registerName });\n`);
+            delete conf.Hash; // prevent getting run again
+            conf._HackHashDeleted = 'conf.register + ' + conf.Hash;
+        }
     }
 
     static defineCallback(modulo, conf) {
@@ -1233,10 +1225,10 @@ modulo.register('cpart', class Script {
             const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
             // TODO: Refactor:
             // NOTE: Uses "window" as "this." context for better compat
-            //modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
-            modulo.assets.invoke(conf.Hash, [ ]);
+            modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
             // currentModulo.registry.cparts.Script.require);\n`);
             delete conf.Hash; // prevent getting run again
+            conf._HackHashDeleted = '!conf.Parent + ' + conf.Hash;
         }
     }
 
