@@ -328,7 +328,8 @@ modulo.register('cpart', class Component {
         const { library } = modulo.config;
         //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
         //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
+        //const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
+        const exCode = `modulo.assets.functions['${ FuncDefHash }']`;
         //modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
         if (!FuncDefHash) {
             console.warn('Empty component specified:', FullName);
@@ -907,8 +908,9 @@ modulo.register('core', class AssetManager {
     }
 
     getInlineJS(opts) {
-        // TODO: XXX Fix currentModulo -> modulo
-        let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        // TODO: XXX Fix currentModulo -> modulo (refs #11)
+        //let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        let text = 'var _X = modulo.assets.invoke.bind(modulo.assets);\n';
         for (const [ hash, argStr ] of this.invocations) {
             //text += `try { _X('${ hash }', ${ argStr }); } catch (e) { console.log('${ hash } - ERROR:', e); }\n`;
             text += `_X('${ hash }', ${ argStr });\n`;
@@ -2143,15 +2145,16 @@ modulo.register('command', function build (modulo, opts = {}) {
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
-    pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
-    // TODO: Clean this up:
+    //pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
+    // TODO: Clean this up (refs #11)
+    pre.js.push('var currentModulo = modulo;'); // Ensure modulo has both aliases
     if (opts.bundle) {
         // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('currentModulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('currentModulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
+        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
+        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
     } else {
         // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
+        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
                     JSON.stringify(modulo.fetchQueue.data) + ';');
     }
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
@@ -2265,8 +2268,8 @@ if (typeof document !== 'undefined') {
 }
 
 
-var currentModulo = new Modulo(modulo);
-currentModulo.defs = {
+var currentModulo = modulo;
+modulo.defs = {
  "x": [
   {
    "Type": "Modulo",
@@ -2280,65 +2283,17 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x",
-   "Hash": "s34uku",
-   "cachedComponentDefs": {
-    "/libraries/eg.html": {
-     "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-     "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-     "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-     "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-     "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-     "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-     "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-     "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-     "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-     "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-     "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-     "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-     "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-     "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-     "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-     "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-     "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-     "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-     "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-    },
-    "/libraries/docseg.html": {
-     "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-     "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-     "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-     "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-     "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-     "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-     "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-     "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-     "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
-    }
-   }
+   "Hash": "x1o0cb7u"
   }
  ],
  "x_x": [
   {
-   "Type": "Script",
-   "RenderObj": "script",
+   "Type": "Configuration",
+   "RenderObj": "configuration",
    "Parent": "x_x",
    "DefName": null,
    "Name": "x",
-   "FullName": "x_x_x",
-   "localVars": [
-    "component",
-    "modulo",
-    "library",
-    "props",
-    "style",
-    "template",
-    "staticdata",
-    "configuration",
-    "script",
-    "state",
-    "element",
-    "cparts"
-   ]
+   "FullName": "x_x_x"
   },
   {
    "Type": "Library",
@@ -3424,7 +3379,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Page_x",
-   "Hash": "3n0giq"
+   "Hash": "x7vad96"
   },
   {
    "Type": "Script",
@@ -3659,7 +3614,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Demo_x",
-   "Hash": "x44d8e6",
+   "Hash": "xnob7me",
    "localVars": [
     "component",
     "modulo",
@@ -4149,7 +4104,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_JSON_x",
-   "Hash": "xcterp7"
+   "Hash": "ftn6om"
   }
  ],
  "x_x_eg_JSONArray": [
@@ -4806,7 +4761,7 @@ currentModulo.defs = {
   }
  ]
 };
-currentModulo.parentDefs = {
+modulo.parentDefs = {
  "x_x": {
   "Type": "Modulo",
   "ConfPreprocessors": [
@@ -4819,41 +4774,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x",
-  "Hash": "s34uku",
-  "cachedComponentDefs": {
-   "/libraries/eg.html": {
-    "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-    "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-    "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-    "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-    "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-    "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-    "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-    "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-    "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-    "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-    "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-    "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-    "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-    "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-    "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-    "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-    "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   },
-   "/libraries/docseg.html": {
-    "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-    "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-    "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-    "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-    "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-    "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-    "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-    "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-    "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
-   }
-  }
+  "Hash": "x1o0cb7u"
  },
  "x_x_x": {
   "Type": "Library",
@@ -5960,7 +5881,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_JSON_x",
-  "Hash": "xcterp7"
+  "Hash": "ftn6om"
  },
  "x_x_eg_JSONArray_x": {
   "Type": "StaticData",
@@ -6163,7 +6084,7 @@ currentModulo.parentDefs = {
   "Name": "x",
   "FullName": "x_x_eg_ConwayGameOfLife_x"
  }
-};currentModulo.assets.functions["1a5ar2m"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+};currentModulo.assets.functions["xg5of9b"]= function (modulo){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; }
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -18842,7 +18763,9 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     // Expose a global utility, which creates an object containing the contents
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
-    function getComponentDefs(path) {
+    function getComponentDefs(path, modulo) {
+        // TODO: Fix the modulo dependency injection here, once currentModulo
+        // is fixed (refs #11)
         if (modulo.parentDefs.x_x.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this
@@ -18882,7 +18805,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
         return componentTexts;
     }
     modulo.register('util', getComponentDefs);
-
+    window.getComponentDefs = getComponentDefs; //  TODO: Fix after currentModulo bug s (refs #11)
 
     // https://stackoverflow.com/questions/400212/
     function fallbackCopyTextToClipboard(text) {
@@ -18924,6 +18847,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     }
     modulo.register('util', copyTextToClipboard);
 
+    window.copyTextToClipboard = copyTextToClipboard ; //  TODO: Fix after currentModulo bugs (refs #11)
 return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "removeChildren": typeof removeChildren !== "undefined" ? removeChildren : undefined,
 "removeChildrenAndAdd": typeof removeChildrenAndAdd !== "undefined" ? removeChildrenAndAdd : undefined,
@@ -19503,1102 +19427,6 @@ return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "getComponentDefs": typeof getComponentDefs !== "undefined" ? getComponentDefs : undefined,
 "fallbackCopyTextToClipboard": typeof fallbackCopyTextToClipboard !== "undefined" ? fallbackCopyTextToClipboard : undefined,
 "copyTextToClipboard": typeof copyTextToClipboard !== "undefined" ? copyTextToClipboard : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function show() {
-            state.visible = true;
-        }
-        function hide() {
-            state.visible = false;
-        }
-    
-return { "show": typeof show !== "undefined" ? show : undefined,
-"hide": typeof hide !== "undefined" ? hide : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            const data = props.data || [];
-            const max = Math.max(...data);
-            const min = 0;// Math.min(...props.data),
-            return {
-                percent: data.map(item => ((item - min) / max) * 100),
-                width: Math.floor(100 / data.length),
-            }
-        }
-    
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            state.value = element.value;
-        }
-        function setValue(val) {
-            state.value = val;
-            element.value = val;
-            element.dispatchEvent(new Event('change'));
-        }
-    
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
-"setValue": typeof setValue !== "undefined" ? setValue : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        //console.log('mws-Page/Script is running', modulo);
-    
-return {  setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-function initializedCallback() {
-    const { path, showall } = props;
-    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
-    for (const groupObj of state.menu) {
-        if (showall) {
-            groupObj.active = true;
-        }
-        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
-            groupObj.active = true;
-        }
-    }
-}
-
-function _child(label, hash, keywords=[], filepath=null) {
-    if (!hash) {
-        hash = label.toLowerCase()
-    }
-    if (hash.endsWith('.html') && filepath === null) {
-        filepath = hash;
-    }
-    return {label, hash, keywords, filepath};
-}
-
-let componentTexts = {};
-try {
-    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
-} catch {
-    console.log('couldnt get componentTexts');
-}
-
-script.exports.menu = [
-    {
-        label: 'Table of Contents',
-        filename: '/docs/',
-    },
-
-    {
-        label: 'Tutorial',
-        filename: '/docs/tutorial_part1.html',
-        children: [
-            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
-            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
-            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
-        ],
-    },
-
-    {
-        label: 'Templating',
-        filename: '/docs/templating.html',
-        children: [
-            _child('Templates', null, ['templating philosophy', 'templating overview']),
-            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
-            _child('Filters', null, ['filter syntax', 'example filters']),
-            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
-            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
-            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
-            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
-        ],
-    },
-
-    {
-        label: 'Template Reference',
-        filename: '/docs/templating-reference.html',
-        children: [
-            _child('Built-in Template Tags', 'templatetags', [
-                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
-                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
-                'comparison', 'control-flow',
-            ]),
-            _child('Built-in Filters', 'filters', [
-                'add', 'allow', 'capfirst', 'concat', 'default',
-                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
-                'length', 'lower', 'number', 'pluralize', 'subtract',
-                'truncate', 'renderas', 'reversed', 'upper',
-            ]),
-        ],
-    },
-
-    {
-        label: 'CParts',
-        filename: '/docs/cparts.html',
-        children: [
-            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
-                                'rendering mode', 'manual rerender', 'shadow',
-                                'vanish', 'vanish-into-document', 'component.event',
-                                'component.slot', 'component.dataProp']),
-            _child('Props', 'props', ['accessing props', 'defining props',
-                                'setting props', 'using props']),
-            _child('Script', 'script', ['javascript', 'events', 'computed properties',
-                            'static execution', 'custom lifecycle methods',
-                                'script callback execution context', 'script exports']),
-            _child('State', 'state', ['state definition', 'state data types',
-                            'json', 'state variables', 'state.bind directive']),
-            _child('StaticData', 'staticdata', ['loading API', 'loading json',
-                            'transform function', 'bundling data']),
-            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
-            _child('Template', 'template', ['custom template', 'templating engine']),
-        ],
-    },
-
-    {
-        label: 'Lifecycle',
-        filename: '/docs/lifecycle.html',
-        children: [
-            _child('Global lifecycle', 'global',
-                ['lifestyle phases', 'prebuild', 'define', 'factory']),
-            _child('Component lifecycle', 'global',
-                ['consturctor', 'initialized', 'prepare', 'render',
-                'reconcile', 'update', 'event', 'eventCleanup']),
-            _child('Lifecycle callbacks', 'callbacks',
-                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
-                'renderobj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),
-        ],
-    },
-
-            /*_child('Factory lifecycle', 'factory',
-                ['renderObj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),*/
-    {
-        label: 'Directives',
-        filename: '/docs/directives.html',
-        children: [
-            _child('Directives', 'directives',
-                ['built-in directives', 'directive shortcuts',
-                'custom directives']),
-            _child('Built-in directives', 'builtin', [
-                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
-                    'data-prop', 'assignment',
-                    '[component.event]', '@click', '@...:=',
-                    '[component.slot]', '[state.bind]',
-                ]),
-            _child('Custom directives', 'custom', [
-                'refs', 'accessing dom', 'escape hatch',
-                'Mount callbacks', 'Unmount callbacks',
-                'template variables vs directives',
-                'script-tag custom directives',
-                'custom shortcuts',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'API & Extension',
-        filename: '/docs/api.html',
-        children: [
-            _child('Custom CParts', 'cparts'),
-            _child('CPart Spares', 'spares'),
-            _child('Custom Templating', 'template'),
-            _child('Custom Filters', 'customfilters'),
-            _child('Custom Template Tags', 'customtags'),
-            _child('Custom Template Syntax', 'customtags'),
-            _child('ModRec', 'modrec'),
-            _child('DOMCursor', 'cursor'),
-        ],
-    },
-    */
-
-    {
-        label: 'Examples',
-        filename: '/demos/',
-        children: [
-            _child('Starter Files', 'starter', [ 'snippets',
-                'component libraries', 'bootstrap', 'download', 'zip',
-                'page layouts', 'using vanish' ]),
-            _child('Example Library', 'library', Object.keys(componentTexts)),
-            _child('Experiments', 'experiments', [
-                'TestSuite', 'unit testing',
-                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
-                'FetchState cpart', 'jsx templating', 'babel.js',
-                'transpiling', 'cparts for apis',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'Project Info',
-        filename: '/docs/project-info.html',
-        children: [
-            _child('FAQ', 'faq'),
-            _child('Framework Design Philosophy', 'philosophy'),
-        ],
-    },
-    */
-];
-
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"_child": typeof _child !== "undefined" ? _child : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x44d8e6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-let componentTexts = null;
-let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
-
-function _setupGlobalVariables() {
-    const { getComponentDefs } = modulo.registry.utils;
-    if (!getComponentDefs) {
-          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
-    }
-    const docseg = getComponentDefs('/libraries/docseg.html');
-    const eg = getComponentDefs('/libraries/eg.html');
-    componentTexts = Object.assign({}, docseg, eg);
-}
-
-function tmpGetDirectives() {
-    console.count('DEPRECATED: Demo.js - tmpGetDirectives');
-    return [ 'script.codemirror' ];
-}
-
-function codemirrorMount({ el }) {
-    el.innerHTML = ''; // clear inner HTML before mounting
-    const demoType = props.demotype || 'snippet';
-    _setupCodemirrorSync(el, demoType, element, state);
-    const myElement = element;
-    setTimeout(() => {
-        myElement.codeMirrorEditor.refresh()
-        setTimeout(() => {
-            myElement.codeMirrorEditor.refresh()
-        }, 0); // Ensure refreshes after the first reflow
-    }, 0); // Ensure refreshes after the first reflow
-}
-
-function _setupCodemirrorSync(el, demoType, myElement, myState) {
-      let readOnly = false;
-      let lineNumbers = true;
-      if (demoType === 'snippet') {
-          readOnly = true;
-          lineNumbers = false;
-      }
-
-      const conf = {
-          value: myState.text,
-          mode: 'django',
-          theme: 'eclipse',
-          indentUnit: 4,
-          readOnly,
-          lineNumbers,
-      };
-
-      if (demoType === 'snippet') {
-          myState.showclipboard = true;
-      } else if (demoType === 'minipreview') {
-          myState.showpreview = true;
-          myState.showcomponentcopy = true;
-      }
-
-      if (!myElement.codeMirrorEditor) {
-          const { CodeMirror } = modulo.registry.utils;
-          if (typeof CodeMirror === 'undefined' || !CodeMirror) {
-              throw new Error('Have not loaded CodeMirror yet');
-          }
-          myElement.codeMirrorEditor = CodeMirror(el, conf);
-      }
-      myElement.codeMirrorEditor.refresh()
-}
-
-function selectTab(newTitle) {
-    //console.log('tab getting selected!', newTitle);
-    if (!element.codeMirrorEditor) {
-        return; // not ready yet
-    }
-    const currentTitle = state.selected;
-    state.selected = newTitle;
-    for (const tab of state.tabs) {
-        if (tab.title === currentTitle) { // save text back to state
-            tab.text = element.codeMirrorEditor.getValue();
-        } else if (tab.title === newTitle) {
-            state.text = tab.text;
-        }
-    }
-    element.codeMirrorEditor.setValue(state.text);
-    doRun();
-}
-
-function toEmbedScript(text, selected) {
-    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
-
-    // Escape all "script" tags, so it's safe according to HTML syntax:
-    const safeText = indentText.replace(/<script/gi, '<cpart Script')
-                            .replace(/<\/script\s*>/gi, '</cpart>');
-    const componentName = selected || 'Demo';
-    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
-    // Generate pastable snippet
-    const fullText = '<script Modulo src="https://unpkg.com/mdu.js">\n' +
-                      `  <Component name="${ componentName }">` + safeText + '\n' +
-                      '  </Component>\n' +
-                      '</script>' + '\n' + usage;
-    return fullText;
-}
-
-function toEmbedTemplate(text, selected) {
-    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
-
-    /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
-                            .replace(/<\/script\s*>/gi, '</cpart>');*/
-    const componentName = selected || 'Demo';
-    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
-    // Generate pastable snippet
-    const fullText = '<template Modulo>\n' +
-                      `  <Component name="${ componentName }">` + indentText + '\n' +
-                      '  </Component>\n' +
-                      '</template>\n' +
-                      '<script src="https://unpkg.com/mdu.js"></script>\n' + usage;
-    return fullText;
-}
-
-function doCopy(componentCopy = false) {
-    const { copyTextToClipboard } = modulo.registry.utils;
-    if (componentCopy) {
-        const fullText = toEmbedTemplate(state.text, state.selected);
-        state.showtoast = true;
-        state.toasttext = fullText;
-        copyTextToClipboard(fullText);
-    } else {
-        copyTextToClipboard(state.text);
-    }
-}
-
-function hideToast() {
-    state.showtoast = false;
-    state.toasttext = '';
-}
-
-function initializedCallback() {
-    if (componentTexts === null) {
-        _setupGlobalVariables();
-    }
-    //console.log('these are componentTexts', componentTexts);
-
-    let text;
-    let firstPreviewTag = null;
-    state.tabs = [];
-    if (props.fromlibrary) {
-        if (!componentTexts) {
-            componentTexts = false;
-            console.error('Couldnt load:', props.fromlibrary)
-            return;
-        }
-
-        const componentNames = props.fromlibrary.split(',');
-        for (const title of componentNames) {
-            if (firstPreviewTag === null) {
-                // XXX HACK, fix this once we have more dependable namespacing
-                for (const component of Object.values(modulo.parentDefs)) {
-                    if (component.Name === title) {
-                        firstPreviewTag = component.TagName;
-                        break;
-                    }
-                }
-            }
-            if (title in componentTexts) {
-                text = componentTexts[title].trim();
-                text = text.replace(/&#39;/g, "'"); // correct double escape
-                state.tabs.push({ text, title });
-            } else {
-                console.error('invalid fromlibrary:', title);
-                console.log(componentTexts);
-                return;
-            }
-        }
-    } else if (props.text) {
-        let title = props.ttitle || 'Example';
-        text = props.text.trim();
-        state.tabs.push({ title, text });
-        // XXX Hack, refactor -v
-        if (props.text2) {
-            title = props.ttitle2 || 'Example';
-            text = props.text2.trim();
-            state.tabs.push({ title, text });
-        }
-        if (props.text3) {
-            title = props.ttitle3 || 'Example';
-            text = props.text3.trim();
-            state.tabs.push({ title, text });
-        }
-        //console.log('this is props', props);
-    }
-
-    const demoType = props.demotype || 'snippet';
-    if (demoType === 'snippet') {
-        state.showclipboard = true;
-    } else if (demoType === 'minipreview') {
-        state.showpreview = true;
-        state.showcomponentcopy = true;
-    }
-
-    state.text = state.tabs[0].text; // load first
-
-    state.selected = state.tabs[0].title; // set first as tab title
-    //setupShaChecksum();
-    if (demoType === 'minipreview') {
-        if (firstPreviewTag) {
-            state.preview = `<${ firstPreviewTag }></${ firstPreviewTag }>`;
-        } else {
-            doRun();
-        }
-    }
-}
-
-function rerenderFirstTime() {
-    // This is required as a workaround for a side-effect of prerendering the
-    // firstPreviewTag. While it results in a faster initial page loading time,
-    // and no flicker, it will double attache events due to the
-    // patchAndDescendants in the first mount
-    if (state.nscounter < 2) {
-        const demoType = props.demotype || 'snippet';
-        if (demoType === 'minipreview') {
-            doRun();
-        }
-    }
-}
-
-function _newModulo() {
-    const mod = new Modulo(window.hackCoreModulo);
-    // Refresh queue & asset manager
-    mod.register('core', modulo.registry.core.FetchQueue);
-    mod.register('core', modulo.registry.core.AssetManager);
-    return mod;
-}
-
-function runModuloText(componentDef) {
-    const defDiv = document.createElement('div');
-    defDiv.innerHTML = componentDef;
-    const mod = _newModulo();
-    mod.loadFromDOM(defDiv);
-    mod.preprocessAndDefine();
-}
-
-function doRun() {
-    window._modExCounter = ++exCounter;
-    //console.log('There are ', exCounter, ' examples on this page. Gee!')
-    const namespace = `e${exCounter}g${state.nscounter}`; // TODO: later do hot reloading using same loader
-    state.nscounter++;
-    const tagName = 'DemoComponent';
-
-    if (element.codeMirrorEditor) {
-        state.text = element.codeMirrorEditor.getValue(); // make sure most up-to-date
-    }
-    runModuloText(`<Component namespace="${namespace}" name="${tagName}">` +
-                  `\n${state.text}\n</Component>`);
-
-    // Create a new modulo instance 
-    const fullname = `${namespace}-${tagName}`;
-    state.preview = `<${fullname}></${fullname}>`;
-    setTimeout(() => {
-        const div = element.querySelector('.editor-minipreview > div');
-        if (div) {
-            div.innerHTML = state.preview;
-            //console.log('assigned to', div.innerHTML);
-        } else {
-            console.log('warning, cant update minipreview', div);
-        }
-    }, 0);
-
-}
-
-function countUp() {
-    // TODO: Remove this when resolution context bug is fixed so that children
-    // no longer can reference parents
-    console.count('PROBLEM: Child event bubbling to parent!');
-}
-
-function doFullscreen() {
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-    if (state.fullscreen) {
-        state.fullscreen = false;
-        document.querySelector('html').style.overflow = "auto";
-        if (element.codeMirrorEditor) {
-            element.codeMirrorEditor.refresh()
-        }
-    } else {
-        state.fullscreen = true;
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-
-        // TODO: way to share variables in CSS
-        if (vw > 768) {
-              document.querySelector('html').style.overflow = "hidden";
-              if (element.codeMirrorEditor) {
-                  element.codeMirrorEditor.refresh()
-              }
-        }
-    }
-    if (element.codeMirrorEditor) {
-        //element.codeMirrorEditor.refresh()
-    }
-}
-
-/*
-function previewspotMount({ el }) {
-    element.previewSpot = el;
-    if (!element.isMounted) {
-        doRun(); // mount after first render
-    }
-}
-
-
-function setupShaChecksum() {
-    console.log('setupShaChecksum DISABLED'); return; ///////////////////
-
-    let mod = Modulo.factoryInstances['x-x'].baseRenderObj;
-    if (Modulo.isBackend && state && state.text.includes('$modulojs_sha384_checksum$')) {
-        if (!mod || !mod.script || !mod.script.getVersionInfo) {
-            console.log('no mod!');
-        } else {
-            const info = mod.script.getVersionInfo();
-            const checksum = info.checksum || '';
-            state.text = state.text.replace('$modulojs_sha384_checksum$', checksum)
-            element.setAttribute('text', state.text);
-        }
-    }
-}
-*/
-
-/*
-const component = factory.createTestElement();
-component.remove()
-console.log(component);
-element.previewSpot.innerHTML = '';
-element.previewSpot.appendChild(component);
-*/
-
-
-/*
-// Use a new asset manager when loading, to prevent it from getting into the main bundle
-let componentDef = state.text;
-componentDef = `<component name="${tagName}">\n${componentDef}\n</component>`;
-const loader = new Modulo.Loader(null, { attrs } );
-const oldAssetMgr = Modulo.assets;
-Modulo.assets = new Modulo.AssetManager();
-loader.loadString(componentDef);
-Modulo.assets = oldAssetMgr;
-
-const fullname = `${namespace}-${tagName}`;
-const factory = Modulo.factoryInstances[fullname];
-state.preview = `<${fullname}></${fullname}>`;
-
-// Hacky way to mount, required due to buggy dom resolver
-const {isBackend} = Modulo;
-if (!isBackend) {
-    setTimeout(() => {
-        const div = element.querySelector('.editor-minipreview > div');
-        if (div) {
-            div.innerHTML = state.preview;
-        } else {
-            console.log('warning, cant update minipreview', div);
-        }
-    }, 0);
-}
-*/
-
-
-/*
-function _setupCodemirror(el, demoType, myElement, myState) {
-    console.log('_setupCodemirror DISABLED'); return; ///////////////////
-    let expBackoff = 10;
-    //console.log('this is codemirror', Modulo.globals.CodeMirror);
-    const mountCM = () => {
-        // TODO: hack, allow JS deps or figure out loader or something
-        if (!Modulo.globals.CodeMirror) {
-            expBackoff *= 2;
-            setTimeout(mountCM, expBackoff); // poll again
-            return;
-        }
-
-        let readOnly = false;
-        let lineNumbers = true;
-        if (demoType === 'snippet') {
-            readOnly = true;
-            lineNumbers = false;
-        }
-
-        const conf = {
-            value: myState.text,
-            mode: 'django',
-            theme: 'eclipse',
-            indentUnit: 4,
-            readOnly,
-            lineNumbers,
-        };
-
-        if (demoType === 'snippet') {
-            myState.showclipboard = true;
-        } else if (demoType === 'minipreview') {
-            myState.showpreview = true;
-        }
-
-        if (!myElement.codeMirrorEditor) {
-            console.log('dead code?');
-            myElement.codeMirrorEditor = Modulo.globals.CodeMirror(el, conf);
-        }
-        myElement.codeMirrorEditor.refresh()
-        //myElement.rerender();
-    };
-    mountCM();
-    return;
-    const {isBackend} = Modulo;
-    if (!isBackend) {
-        // TODO: Ugly hack, need better tools for working with legacy
-        setTimeout(mountCM, expBackoff);
-    }
-
-    const myElem = element;
-    const myState = state;
-    const {isBackend} = Modulo;
-    return;
-    if (!isBackend) {
-        setTimeout(() => {
-            const div = myElem.querySelector('.editor-wrapper > div');
-            _setupCodemirror(div, demoType, myElem, myState);
-        }, 0); // put on queue
-    }
-
-}
-
-*/
-
-return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ? _setupGlobalVariables : undefined,
-"tmpGetDirectives": typeof tmpGetDirectives !== "undefined" ? tmpGetDirectives : undefined,
-"codemirrorMount": typeof codemirrorMount !== "undefined" ? codemirrorMount : undefined,
-"_setupCodemirrorSync": typeof _setupCodemirrorSync !== "undefined" ? _setupCodemirrorSync : undefined,
-"selectTab": typeof selectTab !== "undefined" ? selectTab : undefined,
-"toEmbedScript": typeof toEmbedScript !== "undefined" ? toEmbedScript : undefined,
-"toEmbedTemplate": typeof toEmbedTemplate !== "undefined" ? toEmbedTemplate : undefined,
-"doCopy": typeof doCopy !== "undefined" ? doCopy : undefined,
-"hideToast": typeof hideToast !== "undefined" ? hideToast : undefined,
-"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"rerenderFirstTime": typeof rerenderFirstTime !== "undefined" ? rerenderFirstTime : undefined,
-"_newModulo": typeof _newModulo !== "undefined" ? _newModulo : undefined,
-"runModuloText": typeof runModuloText !== "undefined" ? runModuloText : undefined,
-"doRun": typeof doRun !== "undefined" ? doRun : undefined,
-"countUp": typeof countUp !== "undefined" ? countUp : undefined,
-"doFullscreen": typeof doFullscreen !== "undefined" ? doFullscreen : undefined,
-"previewspotMount": typeof previewspotMount !== "undefined" ? previewspotMount : undefined,
-"setupShaChecksum": typeof setupShaChecksum !== "undefined" ? setupShaChecksum : undefined,
-"_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-function toggleExample(payload) {
-    if (state.selected === payload) {
-        state.selected = '';
-    } else {
-        state.selected = payload;
-    }
-}
-
-function initializedCallback() {
-    const { getComponentDefs } = modulo.registry.utils;
-    if (!getComponentDefs) {
-          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
-    }
-    const eg = getComponentDefs('/libraries/eg.html');
-    state.examples = [];
-    for (const [ name, content ] of Object.entries(eg)) {
-        state.examples.push({ name, content });
-    }
-    element.rerender();
-}
-
- 
-return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined,
-"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    script.exports.title = "ModuloNews";
-
-return {  setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function prepareCallback() {
-        const calcResult = (state.perc / 100) * state.total;
-        return { calcResult };
-    }
-
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function countUp() {
-        state.num++;
-    }
-
-return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function addItem() {
-        state.list.push(state.text); // add to list
-        state.text = ""; // clear input
-    }
-
-return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function fetchGitHub() {
-        fetch(`https://api.github.com/users/${state.search}`)
-            .then(response => response.json())
-            .then(githubCallback);
-    }
-    function githubCallback(apiData) {
-        state.name = apiData.name;
-        state.location = apiData.location;
-        state.bio = apiData.bio;
-        element.rerender();
-    }
-
-return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
-"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function isValid({ year, month, day }) {
-        month--; // Months are zero indexed
-        const d = new Date(year, month, day);
-        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
-    }
-    function next(part) {
-        state[part]++;
-        if (!isValid(state)) { // undo if not valid
-            state[part]--;
-        }
-    }
-    function previous(part) {
-        state[part]--;
-        if (!isValid(state)) { // undo if not valid
-            state[part]++;
-        }
-    }
-
-return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
-"next": typeof next !== "undefined" ? next : undefined,
-"previous": typeof previous !== "undefined" ? previous : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    // Getting big a range of numbers in JS. Use "script.exports"
-    // to export this as a one-time global constant.
-    // (Hint: Curious how it calculates prime? See CSS!)
-    script.exports.range = 
-        Array.from({length: 63}, (x, i) => i + 2);
-    function setNum(payload, ev) {
-        state.number = Number(ev.target.textContent);
-    }
-
-return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    const URL = 'https://jsonplaceholder.typicode.com/posts';
-    const fakedPosts = [];
-    const headers = [];
-
-    function initializedCallback() {
-        refresh(); // Refresh on first load
-    }
-
-    function refresh() {
-        fetch(URL).then(r => r.json()).then(data => {
-            // Since Typicode API doesn't save it's POST
-            // data, we'll have manually fake it here
-            state.posts = data.concat(fakedPosts);
-            element.rerender();
-        });
-    }
-
-    function submit() {
-        // Rename the state variables to be what the API suggests
-        const postData = {
-              userId: state.user,
-              title: state.topic,
-              body: state.comment,
-        };
-        state.topic = ''; // clear the comment & topic text
-        state.comment = '';
-        fakedPosts.push(postData); // Required for refresh()
-
-        // Send the POST request with fetch, then refresh after
-        const opts = {
-            method: 'POST',
-            body: JSON.stringify(postData),
-            headers: { 'Content-type': 'application/json; charset=UTF-8' },
-        };
-        fetch(URL, opts).then(r => r.json()).then(refresh);
-    }
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"refresh": typeof refresh !== "undefined" ? refresh : undefined,
-"submit": typeof submit !== "undefined" ? submit : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    let timeout = null;
-    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
-    function play() {
-        state.playing = true;
-        nextTick();
-    }
-    function pause() {
-        state.playing = false;
-    }
-    function setEasing(payload) {
-        state.easing = payload;
-    }
-
-    function nextTick() {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        const el = element;
-        timeout = setTimeout(() => {
-            el.rerender();
-        }, 2000 / state.speed);
-    }
-
-    function updateCallback() {
-        if (state.playing) {
-            while (state.data.length <= state.width) {
-                state.tick++;
-                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
-            }
-            state.data.shift(); // remove one from left
-            nextTick();
-        }
-    }
-
-return { "play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
-"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
-"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    const OPTS = '&limit=6&fields=title,author_name,cover_i';
-    const COVER ='https://covers.openlibrary.org/b/id/';
-    const API = 'https://openlibrary.org/search.json?q=';
-    function doSearch() {
-        const url = API + '?q=' + state.search + OPTS;
-        state.loading = true;
-        fetch(url)
-            .then(response => response.json())
-            .then(dataBackCallback);
-    }
-
-    function dataBackCallback(data) {
-        for (const item of data.docs) {
-            // For convenience, we prepare the cover URL
-            item.cover = COVER + item.cover_i + '-S.jpg';
-        }
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
-"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function typingCallback() {
-        state.loading = true;
-        const search = `q=${state.search}`;
-        const opts = 'limit=6&fields=title,author_name,cover_i';
-        const url = `${staticdata.apiBase}?${search}&${opts}`;
-        _globalDebounce(() => {
-            fetch(url)
-                .then(response => response.json())
-                .then(dataBackCallback);
-        });
-    }
-
-    function dataBackCallback(data) {
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-    let _globalDebounceTimeout = null;
-    function _globalDebounce(func) {
-        if (_globalDebounceTimeout) {
-            clearTimeout(_globalDebounceTimeout);
-        }
-        _globalDebounceTimeout = setTimeout(func, 500);
-    }
-
-return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined,
-"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
-"_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
-function setup(payload) {
-    const count = Number(payload);
-    let symbols = symbolsStr.substr(0, count/2).split("");
-    symbols = symbols.concat(symbols); // duplicate cards
-    let id = 0;
-    while (id < count) {
-        const index = Math.floor(Math.random()
-                                    * symbols.length);
-        const symbol = symbols.splice(index, 1)[0];
-        state.cards.push({symbol, id});
-        id++;
-    }
-}
-
-function failedFlipCallback() {
-    // Remove both from revealed array & set to null
-    state.revealed = state.revealed.filter(
-            id => id !== state.failedflip
-                    && id !== state.lastflipped);
-    state.failedflip = null;
-    state.lastflipped = null;
-    state.message = "";
-    element.rerender();
-}
-
-function flip(id) {
-    if (state.failedflip !== null) {
-        return;
-    }
-    id = Number(id);
-    if (state.revealed.includes(id)) {
-        return; // double click
-    } else if (state.lastflipped === null) {
-        state.lastflipped = id;
-        state.revealed.push(id);
-    } else {
-        state.revealed.push(id);
-        const {symbol} = state.cards[id];
-        const lastCard = state.cards[state.lastflipped];
-        if (symbol === lastCard.symbol) {
-            // Successful match! Check for win.
-            const {revealed, cards} = state;
-            if (revealed.length === cards.length) {
-                state.message = "You win!";
-                state.win = true;
-            } else {
-                state.message = "Nice match!";
-            }
-            state.lastflipped = null;
-        } else {
-            state.message = "No match.";
-            state.failedflip = id;
-            setTimeout(failedFlipCallback, 1000);
-        }
-    }
-}
-
-return { "setup": typeof setup !== "undefined" ? setup : undefined,
-"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
-"flip": typeof flip !== "undefined" ? flip : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function toggle([ i, j ]) {
-        if (!state.cells[i]) {
-            state.cells[i] = {};
-        }
-        state.cells[i][j] = !state.cells[i][j];
-    }
-
-    function play() {
-        state.playing = true;
-        setTimeout(() => {
-            if (state.playing) {
-                updateNextFrame();
-                element.rerender(); // manually rerender
-                play(); // cue next frame
-            }
-        }, 2000 / state.speed);
-    }
-
-    function pause() {
-        state.playing = false;
-    }
-
-    function clear() {
-        state.cells = {};
-    }
-
-    function randomize() {
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!state.cells[i]) {
-                    state.cells[i] = {};
-                }
-                state.cells[i][j] = (Math.random() > 0.5);
-            }
-        }
-    }
-
-    // Helper function for getting a cell from data
-    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
-    function updateNextFrame() {
-        const nextData = {};
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!nextData[i]) {
-                    nextData[i] = {};
-                }
-                const count = countNeighbors(i, j);
-                nextData[i][j] = get(i, j) ?
-                    (count === 2 || count === 3) : // stays alive
-                    (count === 3); // comes alive
-            }
-        }
-        state.cells = nextData;
-    }
-
-    function countNeighbors(i, j) {
-        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
-                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
-                get(i + 1, j - 1), get(i - 1, j + 1)];
-        return neighbors.filter(v => v).length;
-    }
-    script.exports.range = Array.from({length: 24}, (x, i) => i);
-
-return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
-"play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"clear": typeof clear !== "undefined" ? clear : undefined,
-"randomize": typeof randomize !== "undefined" ? randomize : undefined,
-"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
-"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
 currentModulo.assets.functions["xqf9b9l"]= function (tagName, modulo){
@@ -21701,7 +20529,7 @@ var OUT=[];
 
 return OUT.join("");
 };
-currentModulo.assets.functions["3n0giq"]= function (CTX, G){
+currentModulo.assets.functions["x7vad96"]= function (CTX, G){
 var OUT=[];
   OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
   OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
@@ -21735,7 +20563,7 @@ var OUT=[];
   } else { // "else"
   OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
   } // "endif"
-  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0 </main></footer></body></html>"
+  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1 </main></footer></body></html>"
 
 return OUT.join("");
 };
@@ -22499,6 +21327,1102 @@ var OUT=[];
 
 return OUT.join("");
 };
+currentModulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function show() {
+            state.visible = true;
+        }
+        function hide() {
+            state.visible = false;
+        }
+    
+return { "show": typeof show !== "undefined" ? show : undefined,
+"hide": typeof hide !== "undefined" ? hide : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            const data = props.data || [];
+            const max = Math.max(...data);
+            const min = 0;// Math.min(...props.data),
+            return {
+                percent: data.map(item => ((item - min) / max) * 100),
+                width: Math.floor(100 / data.length),
+            }
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            state.value = element.value;
+        }
+        function setValue(val) {
+            state.value = val;
+            element.value = val;
+            element.dispatchEvent(new Event('change'));
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+"setValue": typeof setValue !== "undefined" ? setValue : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        //console.log('mws-Page/Script is running', modulo);
+    
+return {  setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+function initializedCallback() {
+    const { path, showall } = props;
+    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
+    for (const groupObj of state.menu) {
+        if (showall) {
+            groupObj.active = true;
+        }
+        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
+            groupObj.active = true;
+        }
+    }
+}
+
+function _child(label, hash, keywords=[], filepath=null) {
+    if (!hash) {
+        hash = label.toLowerCase()
+    }
+    if (hash.endsWith('.html') && filepath === null) {
+        filepath = hash;
+    }
+    return {label, hash, keywords, filepath};
+}
+
+let componentTexts = {};
+try {
+    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
+} catch {
+    console.log('couldnt get componentTexts');
+}
+
+script.exports.menu = [
+    {
+        label: 'Table of Contents',
+        filename: '/docs/',
+    },
+
+    {
+        label: 'Tutorial',
+        filename: '/docs/tutorial_part1.html',
+        children: [
+            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
+            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
+            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
+        ],
+    },
+
+    {
+        label: 'Templating',
+        filename: '/docs/templating.html',
+        children: [
+            _child('Templates', null, ['templating philosophy', 'templating overview']),
+            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
+            _child('Filters', null, ['filter syntax', 'example filters']),
+            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
+            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
+            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
+            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
+        ],
+    },
+
+    {
+        label: 'Template Reference',
+        filename: '/docs/templating-reference.html',
+        children: [
+            _child('Built-in Template Tags', 'templatetags', [
+                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
+                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
+                'comparison', 'control-flow',
+            ]),
+            _child('Built-in Filters', 'filters', [
+                'add', 'allow', 'capfirst', 'concat', 'default',
+                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
+                'length', 'lower', 'number', 'pluralize', 'subtract',
+                'truncate', 'renderas', 'reversed', 'upper',
+            ]),
+        ],
+    },
+
+    {
+        label: 'CParts',
+        filename: '/docs/cparts.html',
+        children: [
+            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
+                                'rendering mode', 'manual rerender', 'shadow',
+                                'vanish', 'vanish-into-document', 'component.event',
+                                'component.slot', 'component.dataProp']),
+            _child('Props', 'props', ['accessing props', 'defining props',
+                                'setting props', 'using props']),
+            _child('Script', 'script', ['javascript', 'events', 'computed properties',
+                            'static execution', 'custom lifecycle methods',
+                                'script callback execution context', 'script exports']),
+            _child('State', 'state', ['state definition', 'state data types',
+                            'json', 'state variables', 'state.bind directive']),
+            _child('StaticData', 'staticdata', ['loading API', 'loading json',
+                            'transform function', 'bundling data']),
+            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
+            _child('Template', 'template', ['custom template', 'templating engine']),
+        ],
+    },
+
+    {
+        label: 'Lifecycle',
+        filename: '/docs/lifecycle.html',
+        children: [
+            _child('Global lifecycle', 'global',
+                ['lifestyle phases', 'prebuild', 'define', 'factory']),
+            _child('Component lifecycle', 'global',
+                ['consturctor', 'initialized', 'prepare', 'render',
+                'reconcile', 'update', 'event', 'eventCleanup']),
+            _child('Lifecycle callbacks', 'callbacks',
+                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
+                'renderobj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),
+        ],
+    },
+
+            /*_child('Factory lifecycle', 'factory',
+                ['renderObj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),*/
+    {
+        label: 'Directives',
+        filename: '/docs/directives.html',
+        children: [
+            _child('Directives', 'directives',
+                ['built-in directives', 'directive shortcuts',
+                'custom directives']),
+            _child('Built-in directives', 'builtin', [
+                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
+                    'data-prop', 'assignment',
+                    '[component.event]', '@click', '@...:=',
+                    '[component.slot]', '[state.bind]',
+                ]),
+            _child('Custom directives', 'custom', [
+                'refs', 'accessing dom', 'escape hatch',
+                'Mount callbacks', 'Unmount callbacks',
+                'template variables vs directives',
+                'script-tag custom directives',
+                'custom shortcuts',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'API & Extension',
+        filename: '/docs/api.html',
+        children: [
+            _child('Custom CParts', 'cparts'),
+            _child('CPart Spares', 'spares'),
+            _child('Custom Templating', 'template'),
+            _child('Custom Filters', 'customfilters'),
+            _child('Custom Template Tags', 'customtags'),
+            _child('Custom Template Syntax', 'customtags'),
+            _child('ModRec', 'modrec'),
+            _child('DOMCursor', 'cursor'),
+        ],
+    },
+    */
+
+    {
+        label: 'Examples',
+        filename: '/demos/',
+        children: [
+            _child('Starter Files', 'starter', [ 'snippets',
+                'component libraries', 'bootstrap', 'download', 'zip',
+                'page layouts', 'using vanish' ]),
+            _child('Example Library', 'library', Object.keys(componentTexts)),
+            _child('Experiments', 'experiments', [
+                'TestSuite', 'unit testing',
+                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
+                'FetchState cpart', 'jsx templating', 'babel.js',
+                'transpiling', 'cparts for apis',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'Project Info',
+        filename: '/docs/project-info.html',
+        children: [
+            _child('FAQ', 'faq'),
+            _child('Framework Design Philosophy', 'philosophy'),
+        ],
+    },
+    */
+];
+
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"_child": typeof _child !== "undefined" ? _child : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["xnob7me"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+let componentTexts = null;
+let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
+
+function _setupGlobalVariables() {
+    let { getComponentDefs } = modulo.registry.utils;
+    if (!getComponentDefs) {
+          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
+    }
+    const docseg = getComponentDefs('/libraries/docseg.html');
+    const eg = getComponentDefs('/libraries/eg.html');
+    componentTexts = Object.assign({}, docseg, eg);
+}
+
+function tmpGetDirectives() {
+    console.count('DEPRECATED: Demo.js - tmpGetDirectives');
+    return [ 'script.codemirror' ];
+}
+
+function codemirrorMount({ el }) {
+    el.innerHTML = ''; // clear inner HTML before mounting
+    const demoType = props.demotype || 'snippet';
+    _setupCodemirrorSync(el, demoType, element, state);
+    const myElement = element;
+    setTimeout(() => {
+        myElement.codeMirrorEditor.refresh()
+        setTimeout(() => {
+            myElement.codeMirrorEditor.refresh()
+        }, 0); // Ensure refreshes after the first reflow
+    }, 0); // Ensure refreshes after the first reflow
+}
+
+function _setupCodemirrorSync(el, demoType, myElement, myState) {
+      let readOnly = false;
+      let lineNumbers = true;
+      if (demoType === 'snippet') {
+          readOnly = true;
+          lineNumbers = false;
+      }
+
+      const conf = {
+          value: myState.text,
+          mode: 'django',
+          theme: 'eclipse',
+          indentUnit: 4,
+          readOnly,
+          lineNumbers,
+      };
+
+      if (demoType === 'snippet') {
+          myState.showclipboard = true;
+      } else if (demoType === 'minipreview') {
+          myState.showpreview = true;
+          myState.showcomponentcopy = true;
+      }
+
+      if (!myElement.codeMirrorEditor) {
+          const { CodeMirror } = modulo.registry.utils;
+          if (typeof CodeMirror === 'undefined' || !CodeMirror) {
+              throw new Error('Have not loaded CodeMirror yet');
+          }
+          myElement.codeMirrorEditor = CodeMirror(el, conf);
+      }
+      myElement.codeMirrorEditor.refresh()
+}
+
+function selectTab(newTitle) {
+    //console.log('tab getting selected!', newTitle);
+    if (!element.codeMirrorEditor) {
+        return; // not ready yet
+    }
+    const currentTitle = state.selected;
+    state.selected = newTitle;
+    for (const tab of state.tabs) {
+        if (tab.title === currentTitle) { // save text back to state
+            tab.text = element.codeMirrorEditor.getValue();
+        } else if (tab.title === newTitle) {
+            state.text = tab.text;
+        }
+    }
+    element.codeMirrorEditor.setValue(state.text);
+    doRun();
+}
+
+function toEmbedScript(text, selected) {
+    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
+
+    // Escape all "script" tags, so it's safe according to HTML syntax:
+    const safeText = indentText.replace(/<script/gi, '<cpart Script')
+                            .replace(/<\/script\s*>/gi, '</cpart>');
+    const componentName = selected || 'Demo';
+    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
+    // Generate pastable snippet
+    const fullText = '<script Modulo src="https://unpkg.com/mdu.js">\n' +
+                      `  <Component name="${ componentName }">` + safeText + '\n' +
+                      '  </Component>\n' +
+                      '</script>' + '\n' + usage;
+    return fullText;
+}
+
+function toEmbedTemplate(text, selected) {
+    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
+
+    /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
+                            .replace(/<\/script\s*>/gi, '</cpart>');*/
+    const componentName = selected || 'Demo';
+    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
+    // Generate pastable snippet
+    const fullText = '<template Modulo>\n' +
+                      `  <Component name="${ componentName }">` + indentText + '\n' +
+                      '  </Component>\n' +
+                      '</template>\n' +
+                      '<script src="https://unpkg.com/mdu.js"></script>\n' + usage;
+    return fullText;
+}
+
+function doCopy(componentCopy = false) {
+    const { copyTextToClipboard } = modulo.registry.utils;
+    if (componentCopy) {
+        const fullText = toEmbedTemplate(state.text, state.selected);
+        state.showtoast = true;
+        state.toasttext = fullText;
+        copyTextToClipboard(fullText);
+    } else {
+        copyTextToClipboard(state.text);
+    }
+}
+
+function hideToast() {
+    state.showtoast = false;
+    state.toasttext = '';
+}
+
+function initializedCallback() {
+    if (componentTexts === null) {
+        _setupGlobalVariables();
+    }
+    //console.log('these are componentTexts', componentTexts);
+
+    let text;
+    let firstPreviewTag = null;
+    state.tabs = [];
+    if (props.fromlibrary) {
+        if (!componentTexts) {
+            componentTexts = false;
+            console.error('Couldnt load:', props.fromlibrary)
+            return;
+        }
+
+        const componentNames = props.fromlibrary.split(',');
+        for (const title of componentNames) {
+            if (firstPreviewTag === null) {
+                // XXX HACK, fix this once we have more dependable namespacing
+                for (const component of Object.values(modulo.parentDefs)) {
+                    if (component.Name === title) {
+                        firstPreviewTag = component.TagName;
+                        break;
+                    }
+                }
+            }
+            if (title in componentTexts) {
+                text = componentTexts[title].trim();
+                text = text.replace(/&#39;/g, "'"); // correct double escape
+                state.tabs.push({ text, title });
+            } else {
+                console.error('invalid fromlibrary:', title);
+                console.log(componentTexts);
+                return;
+            }
+        }
+    } else if (props.text) {
+        let title = props.ttitle || 'Example';
+        text = props.text.trim();
+        state.tabs.push({ title, text });
+        // XXX Hack, refactor -v
+        if (props.text2) {
+            title = props.ttitle2 || 'Example';
+            text = props.text2.trim();
+            state.tabs.push({ title, text });
+        }
+        if (props.text3) {
+            title = props.ttitle3 || 'Example';
+            text = props.text3.trim();
+            state.tabs.push({ title, text });
+        }
+        //console.log('this is props', props);
+    }
+
+    const demoType = props.demotype || 'snippet';
+    if (demoType === 'snippet') {
+        state.showclipboard = true;
+    } else if (demoType === 'minipreview') {
+        state.showpreview = true;
+        state.showcomponentcopy = true;
+    }
+
+    state.text = state.tabs[0].text; // load first
+
+    state.selected = state.tabs[0].title; // set first as tab title
+    //setupShaChecksum();
+    if (demoType === 'minipreview') {
+        if (firstPreviewTag) {
+            state.preview = `<${ firstPreviewTag }></${ firstPreviewTag }>`;
+        } else {
+            doRun();
+        }
+    }
+}
+
+function rerenderFirstTime() {
+    // This is required as a workaround for a side-effect of prerendering the
+    // firstPreviewTag. While it results in a faster initial page loading time,
+    // and no flicker, it will double attache events due to the
+    // patchAndDescendants in the first mount
+    if (state.nscounter < 2) {
+        const demoType = props.demotype || 'snippet';
+        if (demoType === 'minipreview') {
+            doRun();
+        }
+    }
+}
+
+function _newModulo() {
+    const mod = new Modulo(window.hackCoreModulo);
+    // Refresh queue & asset manager
+    mod.register('core', modulo.registry.core.FetchQueue);
+    mod.register('core', modulo.registry.core.AssetManager);
+    return mod;
+}
+
+function runModuloText(componentDef) {
+    const defDiv = document.createElement('div');
+    defDiv.innerHTML = componentDef;
+    const mod = _newModulo();
+    mod.loadFromDOM(defDiv);
+    mod.preprocessAndDefine();
+}
+
+function doRun() {
+    window._modExCounter = ++exCounter;
+    //console.log('There are ', exCounter, ' examples on this page. Gee!')
+    const namespace = `e${exCounter}g${state.nscounter}`; // TODO: later do hot reloading using same loader
+    state.nscounter++;
+    const tagName = 'DemoComponent';
+
+    if (element.codeMirrorEditor) {
+        state.text = element.codeMirrorEditor.getValue(); // make sure most up-to-date
+    }
+    runModuloText(`<Component namespace="${namespace}" name="${tagName}">` +
+                  `\n${state.text}\n</Component>`);
+
+    // Create a new modulo instance 
+    const fullname = `${namespace}-${tagName}`;
+    state.preview = `<${fullname}></${fullname}>`;
+    setTimeout(() => {
+        const div = element.querySelector('.editor-minipreview > div');
+        if (div) {
+            div.innerHTML = state.preview;
+            //console.log('assigned to', div.innerHTML);
+        } else {
+            console.log('warning, cant update minipreview', div);
+        }
+    }, 0);
+
+}
+
+function countUp() {
+    // TODO: Remove this when resolution context bug is fixed so that children
+    // no longer can reference parents
+    console.count('PROBLEM: Child event bubbling to parent!');
+}
+
+function doFullscreen() {
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
+    if (state.fullscreen) {
+        state.fullscreen = false;
+        document.querySelector('html').style.overflow = "auto";
+        if (element.codeMirrorEditor) {
+            element.codeMirrorEditor.refresh()
+        }
+    } else {
+        state.fullscreen = true;
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+        // TODO: way to share variables in CSS
+        if (vw > 768) {
+              document.querySelector('html').style.overflow = "hidden";
+              if (element.codeMirrorEditor) {
+                  element.codeMirrorEditor.refresh()
+              }
+        }
+    }
+    if (element.codeMirrorEditor) {
+        //element.codeMirrorEditor.refresh()
+    }
+}
+
+/*
+function previewspotMount({ el }) {
+    element.previewSpot = el;
+    if (!element.isMounted) {
+        doRun(); // mount after first render
+    }
+}
+
+
+function setupShaChecksum() {
+    console.log('setupShaChecksum DISABLED'); return; ///////////////////
+
+    let mod = Modulo.factoryInstances['x-x'].baseRenderObj;
+    if (Modulo.isBackend && state && state.text.includes('$modulojs_sha384_checksum$')) {
+        if (!mod || !mod.script || !mod.script.getVersionInfo) {
+            console.log('no mod!');
+        } else {
+            const info = mod.script.getVersionInfo();
+            const checksum = info.checksum || '';
+            state.text = state.text.replace('$modulojs_sha384_checksum$', checksum)
+            element.setAttribute('text', state.text);
+        }
+    }
+}
+*/
+
+/*
+const component = factory.createTestElement();
+component.remove()
+console.log(component);
+element.previewSpot.innerHTML = '';
+element.previewSpot.appendChild(component);
+*/
+
+
+/*
+// Use a new asset manager when loading, to prevent it from getting into the main bundle
+let componentDef = state.text;
+componentDef = `<component name="${tagName}">\n${componentDef}\n</component>`;
+const loader = new Modulo.Loader(null, { attrs } );
+const oldAssetMgr = Modulo.assets;
+Modulo.assets = new Modulo.AssetManager();
+loader.loadString(componentDef);
+Modulo.assets = oldAssetMgr;
+
+const fullname = `${namespace}-${tagName}`;
+const factory = Modulo.factoryInstances[fullname];
+state.preview = `<${fullname}></${fullname}>`;
+
+// Hacky way to mount, required due to buggy dom resolver
+const {isBackend} = Modulo;
+if (!isBackend) {
+    setTimeout(() => {
+        const div = element.querySelector('.editor-minipreview > div');
+        if (div) {
+            div.innerHTML = state.preview;
+        } else {
+            console.log('warning, cant update minipreview', div);
+        }
+    }, 0);
+}
+*/
+
+
+/*
+function _setupCodemirror(el, demoType, myElement, myState) {
+    console.log('_setupCodemirror DISABLED'); return; ///////////////////
+    let expBackoff = 10;
+    //console.log('this is codemirror', Modulo.globals.CodeMirror);
+    const mountCM = () => {
+        // TODO: hack, allow JS deps or figure out loader or something
+        if (!Modulo.globals.CodeMirror) {
+            expBackoff *= 2;
+            setTimeout(mountCM, expBackoff); // poll again
+            return;
+        }
+
+        let readOnly = false;
+        let lineNumbers = true;
+        if (demoType === 'snippet') {
+            readOnly = true;
+            lineNumbers = false;
+        }
+
+        const conf = {
+            value: myState.text,
+            mode: 'django',
+            theme: 'eclipse',
+            indentUnit: 4,
+            readOnly,
+            lineNumbers,
+        };
+
+        if (demoType === 'snippet') {
+            myState.showclipboard = true;
+        } else if (demoType === 'minipreview') {
+            myState.showpreview = true;
+        }
+
+        if (!myElement.codeMirrorEditor) {
+            console.log('dead code?');
+            myElement.codeMirrorEditor = Modulo.globals.CodeMirror(el, conf);
+        }
+        myElement.codeMirrorEditor.refresh()
+        //myElement.rerender();
+    };
+    mountCM();
+    return;
+    const {isBackend} = Modulo;
+    if (!isBackend) {
+        // TODO: Ugly hack, need better tools for working with legacy
+        setTimeout(mountCM, expBackoff);
+    }
+
+    const myElem = element;
+    const myState = state;
+    const {isBackend} = Modulo;
+    return;
+    if (!isBackend) {
+        setTimeout(() => {
+            const div = myElem.querySelector('.editor-wrapper > div');
+            _setupCodemirror(div, demoType, myElem, myState);
+        }, 0); // put on queue
+    }
+
+}
+
+*/
+
+return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ? _setupGlobalVariables : undefined,
+"tmpGetDirectives": typeof tmpGetDirectives !== "undefined" ? tmpGetDirectives : undefined,
+"codemirrorMount": typeof codemirrorMount !== "undefined" ? codemirrorMount : undefined,
+"_setupCodemirrorSync": typeof _setupCodemirrorSync !== "undefined" ? _setupCodemirrorSync : undefined,
+"selectTab": typeof selectTab !== "undefined" ? selectTab : undefined,
+"toEmbedScript": typeof toEmbedScript !== "undefined" ? toEmbedScript : undefined,
+"toEmbedTemplate": typeof toEmbedTemplate !== "undefined" ? toEmbedTemplate : undefined,
+"doCopy": typeof doCopy !== "undefined" ? doCopy : undefined,
+"hideToast": typeof hideToast !== "undefined" ? hideToast : undefined,
+"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"rerenderFirstTime": typeof rerenderFirstTime !== "undefined" ? rerenderFirstTime : undefined,
+"_newModulo": typeof _newModulo !== "undefined" ? _newModulo : undefined,
+"runModuloText": typeof runModuloText !== "undefined" ? runModuloText : undefined,
+"doRun": typeof doRun !== "undefined" ? doRun : undefined,
+"countUp": typeof countUp !== "undefined" ? countUp : undefined,
+"doFullscreen": typeof doFullscreen !== "undefined" ? doFullscreen : undefined,
+"previewspotMount": typeof previewspotMount !== "undefined" ? previewspotMount : undefined,
+"setupShaChecksum": typeof setupShaChecksum !== "undefined" ? setupShaChecksum : undefined,
+"_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+function toggleExample(payload) {
+    if (state.selected === payload) {
+        state.selected = '';
+    } else {
+        state.selected = payload;
+    }
+}
+
+function initializedCallback() {
+    const { getComponentDefs } = modulo.registry.utils;
+    if (!getComponentDefs) {
+          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
+    }
+    const eg = getComponentDefs('/libraries/eg.html');
+    state.examples = [];
+    for (const [ name, content ] of Object.entries(eg)) {
+        state.examples.push({ name, content });
+    }
+    element.rerender();
+}
+
+ 
+return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined,
+"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    script.exports.title = "ModuloNews";
+
+return {  setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function prepareCallback() {
+        const calcResult = (state.perc / 100) * state.total;
+        return { calcResult };
+    }
+
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function countUp() {
+        state.num++;
+    }
+
+return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function addItem() {
+        state.list.push(state.text); // add to list
+        state.text = ""; // clear input
+    }
+
+return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function fetchGitHub() {
+        fetch(`https://api.github.com/users/${state.search}`)
+            .then(response => response.json())
+            .then(githubCallback);
+    }
+    function githubCallback(apiData) {
+        state.name = apiData.name;
+        state.location = apiData.location;
+        state.bio = apiData.bio;
+        element.rerender();
+    }
+
+return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
+"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function isValid({ year, month, day }) {
+        month--; // Months are zero indexed
+        const d = new Date(year, month, day);
+        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
+    }
+    function next(part) {
+        state[part]++;
+        if (!isValid(state)) { // undo if not valid
+            state[part]--;
+        }
+    }
+    function previous(part) {
+        state[part]--;
+        if (!isValid(state)) { // undo if not valid
+            state[part]++;
+        }
+    }
+
+return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
+"next": typeof next !== "undefined" ? next : undefined,
+"previous": typeof previous !== "undefined" ? previous : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    // Getting big a range of numbers in JS. Use "script.exports"
+    // to export this as a one-time global constant.
+    // (Hint: Curious how it calculates prime? See CSS!)
+    script.exports.range = 
+        Array.from({length: 63}, (x, i) => i + 2);
+    function setNum(payload, ev) {
+        state.number = Number(ev.target.textContent);
+    }
+
+return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    const URL = 'https://jsonplaceholder.typicode.com/posts';
+    const fakedPosts = [];
+    const headers = [];
+
+    function initializedCallback() {
+        refresh(); // Refresh on first load
+    }
+
+    function refresh() {
+        fetch(URL).then(r => r.json()).then(data => {
+            // Since Typicode API doesn't save it's POST
+            // data, we'll have manually fake it here
+            state.posts = data.concat(fakedPosts);
+            element.rerender();
+        });
+    }
+
+    function submit() {
+        // Rename the state variables to be what the API suggests
+        const postData = {
+              userId: state.user,
+              title: state.topic,
+              body: state.comment,
+        };
+        state.topic = ''; // clear the comment & topic text
+        state.comment = '';
+        fakedPosts.push(postData); // Required for refresh()
+
+        // Send the POST request with fetch, then refresh after
+        const opts = {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        };
+        fetch(URL, opts).then(r => r.json()).then(refresh);
+    }
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"refresh": typeof refresh !== "undefined" ? refresh : undefined,
+"submit": typeof submit !== "undefined" ? submit : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    let timeout = null;
+    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
+    function play() {
+        state.playing = true;
+        nextTick();
+    }
+    function pause() {
+        state.playing = false;
+    }
+    function setEasing(payload) {
+        state.easing = payload;
+    }
+
+    function nextTick() {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        const el = element;
+        timeout = setTimeout(() => {
+            el.rerender();
+        }, 2000 / state.speed);
+    }
+
+    function updateCallback() {
+        if (state.playing) {
+            while (state.data.length <= state.width) {
+                state.tick++;
+                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
+            }
+            state.data.shift(); // remove one from left
+            nextTick();
+        }
+    }
+
+return { "play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
+"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
+"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    const OPTS = '&limit=6&fields=title,author_name,cover_i';
+    const COVER ='https://covers.openlibrary.org/b/id/';
+    const API = 'https://openlibrary.org/search.json?q=';
+    function doSearch() {
+        const url = API + '?q=' + state.search + OPTS;
+        state.loading = true;
+        fetch(url)
+            .then(response => response.json())
+            .then(dataBackCallback);
+    }
+
+    function dataBackCallback(data) {
+        for (const item of data.docs) {
+            // For convenience, we prepare the cover URL
+            item.cover = COVER + item.cover_i + '-S.jpg';
+        }
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
+"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function typingCallback() {
+        state.loading = true;
+        const search = `q=${state.search}`;
+        const opts = 'limit=6&fields=title,author_name,cover_i';
+        const url = `${staticdata.apiBase}?${search}&${opts}`;
+        _globalDebounce(() => {
+            fetch(url)
+                .then(response => response.json())
+                .then(dataBackCallback);
+        });
+    }
+
+    function dataBackCallback(data) {
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+    let _globalDebounceTimeout = null;
+    function _globalDebounce(func) {
+        if (_globalDebounceTimeout) {
+            clearTimeout(_globalDebounceTimeout);
+        }
+        _globalDebounceTimeout = setTimeout(func, 500);
+    }
+
+return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined,
+"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
+"_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+function setup(payload) {
+    const count = Number(payload);
+    let symbols = symbolsStr.substr(0, count/2).split("");
+    symbols = symbols.concat(symbols); // duplicate cards
+    let id = 0;
+    while (id < count) {
+        const index = Math.floor(Math.random()
+                                    * symbols.length);
+        const symbol = symbols.splice(index, 1)[0];
+        state.cards.push({symbol, id});
+        id++;
+    }
+}
+
+function failedFlipCallback() {
+    // Remove both from revealed array & set to null
+    state.revealed = state.revealed.filter(
+            id => id !== state.failedflip
+                    && id !== state.lastflipped);
+    state.failedflip = null;
+    state.lastflipped = null;
+    state.message = "";
+    element.rerender();
+}
+
+function flip(id) {
+    if (state.failedflip !== null) {
+        return;
+    }
+    id = Number(id);
+    if (state.revealed.includes(id)) {
+        return; // double click
+    } else if (state.lastflipped === null) {
+        state.lastflipped = id;
+        state.revealed.push(id);
+    } else {
+        state.revealed.push(id);
+        const {symbol} = state.cards[id];
+        const lastCard = state.cards[state.lastflipped];
+        if (symbol === lastCard.symbol) {
+            // Successful match! Check for win.
+            const {revealed, cards} = state;
+            if (revealed.length === cards.length) {
+                state.message = "You win!";
+                state.win = true;
+            } else {
+                state.message = "Nice match!";
+            }
+            state.lastflipped = null;
+        } else {
+            state.message = "No match.";
+            state.failedflip = id;
+            setTimeout(failedFlipCallback, 1000);
+        }
+    }
+}
+
+return { "setup": typeof setup !== "undefined" ? setup : undefined,
+"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
+"flip": typeof flip !== "undefined" ? flip : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function toggle([ i, j ]) {
+        if (!state.cells[i]) {
+            state.cells[i] = {};
+        }
+        state.cells[i][j] = !state.cells[i][j];
+    }
+
+    function play() {
+        state.playing = true;
+        setTimeout(() => {
+            if (state.playing) {
+                updateNextFrame();
+                element.rerender(); // manually rerender
+                play(); // cue next frame
+            }
+        }, 2000 / state.speed);
+    }
+
+    function pause() {
+        state.playing = false;
+    }
+
+    function clear() {
+        state.cells = {};
+    }
+
+    function randomize() {
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!state.cells[i]) {
+                    state.cells[i] = {};
+                }
+                state.cells[i][j] = (Math.random() > 0.5);
+            }
+        }
+    }
+
+    // Helper function for getting a cell from data
+    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
+    function updateNextFrame() {
+        const nextData = {};
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!nextData[i]) {
+                    nextData[i] = {};
+                }
+                const count = countNeighbors(i, j);
+                nextData[i][j] = get(i, j) ?
+                    (count === 2 || count === 3) : // stays alive
+                    (count === 3); // comes alive
+            }
+        }
+        state.cells = nextData;
+    }
+
+    function countNeighbors(i, j) {
+        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
+                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
+                get(i + 1, j - 1), get(i - 1, j + 1)];
+        return neighbors.filter(v => v).length;
+    }
+    script.exports.range = Array.from({length: 24}, (x, i) => i);
+
+return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
+"play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"clear": typeof clear !== "undefined" ? clear : undefined,
+"randomize": typeof randomize !== "undefined" ? randomize : undefined,
+"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
+"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
 currentModulo.assets.functions["xv9bp4g"]= function (){
 return {
   "name": "mdu.js",
@@ -22560,137 +22484,8 @@ return {
   }
 };
 };
-currentModulo.assets.functions["xcterp7"]= function (){
-return {
-  "id": 542682907,
-  "node_id": "R_kgDOIFivGw",
-  "name": "modulo",
-  "full_name": "modulojs/modulo",
-  "private": false,
-  "owner": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "html_url": "https://github.com/modulojs/modulo",
-  "description": "A drop-in JavaScript framework for modular web components, kept to about 2000 lines",
-  "fork": false,
-  "url": "https://api.github.com/repos/modulojs/modulo",
-  "forks_url": "https://api.github.com/repos/modulojs/modulo/forks",
-  "keys_url": "https://api.github.com/repos/modulojs/modulo/keys{/key_id}",
-  "collaborators_url": "https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}",
-  "teams_url": "https://api.github.com/repos/modulojs/modulo/teams",
-  "hooks_url": "https://api.github.com/repos/modulojs/modulo/hooks",
-  "issue_events_url": "https://api.github.com/repos/modulojs/modulo/issues/events{/number}",
-  "events_url": "https://api.github.com/repos/modulojs/modulo/events",
-  "assignees_url": "https://api.github.com/repos/modulojs/modulo/assignees{/user}",
-  "branches_url": "https://api.github.com/repos/modulojs/modulo/branches{/branch}",
-  "tags_url": "https://api.github.com/repos/modulojs/modulo/tags",
-  "blobs_url": "https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}",
-  "git_tags_url": "https://api.github.com/repos/modulojs/modulo/git/tags{/sha}",
-  "git_refs_url": "https://api.github.com/repos/modulojs/modulo/git/refs{/sha}",
-  "trees_url": "https://api.github.com/repos/modulojs/modulo/git/trees{/sha}",
-  "statuses_url": "https://api.github.com/repos/modulojs/modulo/statuses/{sha}",
-  "languages_url": "https://api.github.com/repos/modulojs/modulo/languages",
-  "stargazers_url": "https://api.github.com/repos/modulojs/modulo/stargazers",
-  "contributors_url": "https://api.github.com/repos/modulojs/modulo/contributors",
-  "subscribers_url": "https://api.github.com/repos/modulojs/modulo/subscribers",
-  "subscription_url": "https://api.github.com/repos/modulojs/modulo/subscription",
-  "commits_url": "https://api.github.com/repos/modulojs/modulo/commits{/sha}",
-  "git_commits_url": "https://api.github.com/repos/modulojs/modulo/git/commits{/sha}",
-  "comments_url": "https://api.github.com/repos/modulojs/modulo/comments{/number}",
-  "issue_comment_url": "https://api.github.com/repos/modulojs/modulo/issues/comments{/number}",
-  "contents_url": "https://api.github.com/repos/modulojs/modulo/contents/{+path}",
-  "compare_url": "https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}",
-  "merges_url": "https://api.github.com/repos/modulojs/modulo/merges",
-  "archive_url": "https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}",
-  "downloads_url": "https://api.github.com/repos/modulojs/modulo/downloads",
-  "issues_url": "https://api.github.com/repos/modulojs/modulo/issues{/number}",
-  "pulls_url": "https://api.github.com/repos/modulojs/modulo/pulls{/number}",
-  "milestones_url": "https://api.github.com/repos/modulojs/modulo/milestones{/number}",
-  "notifications_url": "https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}",
-  "labels_url": "https://api.github.com/repos/modulojs/modulo/labels{/name}",
-  "releases_url": "https://api.github.com/repos/modulojs/modulo/releases{/id}",
-  "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
-  "created_at": "2022-09-28T16:20:49Z",
-  "updated_at": "2022-09-28T17:43:52Z",
-  "pushed_at": "2022-09-28T17:43:26Z",
-  "git_url": "git://github.com/modulojs/modulo.git",
-  "ssh_url": "git@github.com:modulojs/modulo.git",
-  "clone_url": "https://github.com/modulojs/modulo.git",
-  "svn_url": "https://github.com/modulojs/modulo",
-  "homepage": null,
-  "size": 11,
-  "stargazers_count": 1,
-  "watchers_count": 1,
-  "language": "JavaScript",
-  "has_issues": true,
-  "has_projects": true,
-  "has_downloads": true,
-  "has_wiki": true,
-  "has_pages": true,
-  "forks_count": 0,
-  "mirror_url": null,
-  "archived": false,
-  "disabled": false,
-  "open_issues_count": 0,
-  "license": {
-    "key": "lgpl-2.1",
-    "name": "GNU Lesser General Public License v2.1",
-    "spdx_id": "LGPL-2.1",
-    "url": "https://api.github.com/licenses/lgpl-2.1",
-    "node_id": "MDc6TGljZW5zZTEx"
-  },
-  "allow_forking": true,
-  "is_template": false,
-  "web_commit_signoff_required": false,
-  "topics": [
-
-  ],
-  "visibility": "public",
-  "forks": 0,
-  "open_issues": 0,
-  "watchers": 1,
-  "default_branch": "main",
-  "temp_clone_token": null,
-  "organization": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "network_count": 0,
-  "subscribers_count": 1
-};
+currentModulo.assets.functions["ftn6om"]= function (){
+return {"message":"API rate limit exceeded for 173.195.77.203. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"};
 };
 currentModulo.assets.functions["16lf05u"]= function (){
 return [
@@ -24137,10 +23932,4 @@ return {
   gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +
     'semantic-ui/0.16.1/images/loader-large.gif'
 };
-};
-currentModulo.assets.functions["xrn1o07"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <button @click:=\"script.doLog\">\n        Click to console.log\n    </button>\n"); // "<button @click:=\"script.doLog\"> Click to console.log </button>"
-
-return OUT.join("");
 };

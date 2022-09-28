@@ -295,7 +295,7 @@ modulo.register('cpart', class Component {
         const cpartNameString = Array.from(cpartTypes).join(', ');
 
         const code = (`
-            modulo = currentModulo;// HAX XXX
+            //modulo = currentModulo;// HAX XXX (refs #11)
             const { ${ cpartNameString } } = modulo.registry.cparts;
             const confArray = modulo.defs['${ FullName }'];
 
@@ -328,13 +328,14 @@ modulo.register('cpart', class Component {
         const { library } = modulo.config;
         //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
         //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
-        //modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
+        //const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
+        const exCode = `modulo.assets.functions['${ FuncDefHash }']`;
+        modulo.assets.runInline(`${ exCode }('${ conf.TagName }', modulo);\n`);
         if (!FuncDefHash) {
             console.warn('Empty component specified:', FullName);
             return;
         }
-        modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
+        //modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
     }
 
     /*
@@ -907,8 +908,9 @@ modulo.register('core', class AssetManager {
     }
 
     getInlineJS(opts) {
-        // TODO: XXX Fix currentModulo -> modulo
-        let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        // TODO: XXX Fix currentModulo -> modulo (refs #11)
+        //let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        let text = 'var _X = modulo.assets.invoke.bind(modulo.assets);\n';
         for (const [ hash, argStr ] of this.invocations) {
             //text += `try { _X('${ hash }', ${ argStr }); } catch (e) { console.log('${ hash } - ERROR:', e); }\n`;
             text += `_X('${ hash }', ${ argStr });\n`;
@@ -941,7 +943,8 @@ modulo.register('core', class AssetManager {
     wrapFunctionText(params, text, opts = {}, hash = null) {
         // TODO: e.g. change public API to this, make opts & hash required
         //let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
+        //let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
+        let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`; // #11
         prefix += `= function ${ opts.funcName || ''}(${ params.join(', ') }){`;
         let suffix = '};'
         if (opts.exports) {
@@ -1230,7 +1233,7 @@ modulo.register('cpart', class Script {
     static defineCallback(modulo, conf) {
         // XXX -- HAX
         if (!conf.Parent || (conf.Parent === 'x_x' && conf.Hash)) {
-            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
+            const exCode = `modulo.assets.functions['${ conf.Hash }']`
             // TODO: Refactor:
             // NOTE: Uses "window" as "this." context for better compat
             //modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
@@ -2143,15 +2146,16 @@ modulo.register('command', function build (modulo, opts = {}) {
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
-    pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
-    // TODO: Clean this up:
+    //pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
+    // TODO: Clean this up (refs #11)
+    pre.js.push('var currentModulo = modulo;'); // Ensure modulo has both aliases
     if (opts.bundle) {
         // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('currentModulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('currentModulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
+        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
+        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
     } else {
         // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
+        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
                     JSON.stringify(modulo.fetchQueue.data) + ';');
     }
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
@@ -2211,6 +2215,7 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
     Modulo.globals = window; // TODO, remove?
     modulo.globals = window;
     window.hackCoreModulo = new Modulo(modulo); // XXX
+    window.currentModulo = modulo; // XXX refs #11
     window.hackRunBlocking = (document.querySelectorAll('script[modulo]')).length === 1;
     if (window.hackRunBlocking) {
         // TODO - Cleanup this logic, need to determine advantages of running

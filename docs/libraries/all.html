@@ -1,11 +1,13 @@
 <!-- Load some global JS deps -->
-<Script -src="/js/codemirror_5.63.0/codemirror_bundled.js">
+<script Configuration -src="/js/codemirror_5.63.0/codemirror_bundled.js">
     modulo.register('util', CodeMirror); // Expose CodeMirror as a global utility
 
     // Expose a global utility, which creates an object containing the contents
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
-    function getComponentDefs(path) {
+    function getComponentDefs(path, modulo) {
+        // TODO: Fix the modulo dependency injection here, once currentModulo
+        // is fixed (refs #11)
         if (modulo.parentDefs.x_x.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this
@@ -45,7 +47,7 @@
         return componentTexts;
     }
     modulo.register('util', getComponentDefs);
-
+    window.getComponentDefs = getComponentDefs; //  TODO: Fix after currentModulo bug s (refs #11)
 
     // https://stackoverflow.com/questions/400212/
     function fallbackCopyTextToClipboard(text) {
@@ -86,7 +88,9 @@
         });
     }
     modulo.register('util', copyTextToClipboard);
-</Script>
+
+    window.copyTextToClipboard = copyTextToClipboard ; //  TODO: Fix after currentModulo bugs (refs #11)
+</script>
 
 <!-- Components referenced in below examples (registering with "x" for easy
 global use) -->

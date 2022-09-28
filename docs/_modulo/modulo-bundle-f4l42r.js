@@ -1,2272 +1,16 @@
-const LEGACY = []; // TODO rm
-window.LEG = LEGACY;
-
-// Avoid overwriting other Modulo versions / instances
-window.ModuloPrevious = window.Modulo;
-window.moduloPrevious = window.modulo;
-
-window.Modulo = class Modulo {
-    constructor(parentModulo = null, registryKeys = null) {
-        // Note: parentModulo arg is being used by mws/Demo.js
-        window._moduloID = this.id = (window._moduloID || 0) + 1; // Global ID
-
-        this.defs = {};
-        this.parentDefs = {};
-
-        if (parentModulo) {
-            this.parentModulo = parentModulo;
-
-            const { deepClone, cloneStub } = modulo.registry.utils;
-            this.config = deepClone(parentModulo.config, parentModulo);
-            this.registry = deepClone(parentModulo.registry, parentModulo);
-
-            this.assets = parentModulo.assetManager;
-            this.globals = parentModulo.globals;
-        } else {
-            this.config = {};
-            this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
-        }
-    }
-
-    static moduloClone(modulo, other) {
-        return modulo; // Never clone Modulos to prevent reference loops
-    }
-
-    create(type, name, conf = null) {
-        type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
-        const instance = new this.registry[type][name](modulo, conf);
-        conf.Instance = instance;
-        return instance;
-    }
-
-    register(type, cls, defaults = undefined) {
-        type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
-        this.assert(type in this.registry, 'Unknown registration type:', type);
-        this.registry[type][cls.name] = cls;
-
-        if (type === 'commands') { // Attach globally to 'm' alias
-            window.m = window.m || {};
-            window.m[cls.name] = () => cls(this);
-        }
-
-        if (cls.name[0].toUpperCase() === cls.name[0]) { // is CapFirst
-            const conf = Object.assign({ Type: cls.name }, cls.defaults, defaults);
-            this.config[cls.name.toLowerCase()] = conf;
-
-            // Global / core utility class getting registered
-            if (type === 'core') {
-                // TODO: Implement differently, like { fetchQ: utils.FetchQueue
-                // } or something, since right now it doesn't even get cloned.
-                const lowerName = cls.name[0].toLowerCase() + cls.name.slice(1);
-                this[lowerName] = new cls(this);
-                this.assets = this.assetManager;
-            }
-        }
-        if (type === 'cparts') { // CParts get loaded from DOM
-            this.registry.dom[cls.name.toLowerCase()] = cls;
-            this.config[cls.name.toLowerCase()].RenderObj = cls.name.toLowerCase();
-        }
-    }
-
-    loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const partialConfs = [];
-        const X = 'x';
-        const isModulo = node => this.getNodeModuloType(node, quietErrors);
-        for (const node of Array.from(elem.children).filter(isModulo)) {
-            const conf = this.loadPartialConfigFromNode(node);
-            conf.Parent = conf.Parent || parentName;
-            conf.DefName = conf.Name || null; // -name only, null otherwise
-            conf.Name = conf.Name || conf.name || X; // name or -name or 'x'
-            const parentNS = conf.Parent || X; // Cast falsy to 'x'
-            this.defs[parentNS] = this.defs[parentNS] || []; // Prep empty arr
-            this.defs[parentNS].push(conf); // Push to Namespace
-            partialConfs.push(conf);
-            conf.FullName = parentNS + '_' + conf.Name;
-        }
-        return partialConfs;
-    }
-
-    setupParents() {
-        for (const [ namespace, confArray ] of Object.entries(this.defs)) {
-            for (const conf of confArray) {
-                this.parentDefs[conf.FullName] = conf;
-            }
-        }
-    }
-
-    preprocessAndDefine() {
-        this.repeatConfigurePreprocessors(() => {
-            this.setupParents(); // Ensure sync'ed up
-            const names = [ 'prebuild', 'define' ]; // TODO, make config?
-            const lcObj = this.registry.cparts;
-            const defArray = Array.from(Object.values(this.defs)).flat();
-            const patches = this.getLifecyclePatches(lcObj, names, defArray);
-            this.applyPatches(patches);
-        });
-    }
-
-    loadString(text, parentFactoryName = null) {
-        const tmp_Cmp = new modulo.registry.cparts.Component({}, {}, modulo);
-        tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
-        this.reconciler = modulo.create('engine', 'Reconciler', {
-            directives: { 'modulo.dataPropLoad': tmp_Cmp }, // TODO: Change to "this", + resolve to conf stuff
-            directiveShortcuts: [ [ /:$/, 'modulo.dataProp' ] ],
-        });
-        const div = this.reconciler.loadString(text, {});
-        const result = this.loadFromDOM(div, parentFactoryName);
-        return result;
-    }
-
-    getLifecyclePatches(lcObj, lifecycleNames, defArray = null) {
-        const patches = [];
-        // TODO: Make this configurable
-        const typeOrder = defArray ? Array.from(new Set(defArray.map(({ Type }) => Type)))
-                                   : Object.keys(lcObj);
-        for (const lifecycleName of lifecycleNames) {
-            const methodName = lifecycleName + 'Callback';
-            //for (const [ typeUpper, obj ] of Object.entries(lcObj)) {
-            for (const typeName of typeOrder) {
-                if (!(typeName in lcObj) || !(methodName in lcObj[typeName])) {
-                    continue; // Skip if obj has not registered callback
-                }
-                const isType = ({ Type }) => Type === typeName;
-                const defaultConf = this.config[typeName.toLowerCase()];
-                const confs = defArray ? defArray.filter(isType) : [ defaultConf ];
-                for (const conf of confs) {
-                    patches.push([ lcObj[typeName], methodName, conf ]);
-                }
-            }
-        }
-        return patches;
-    }
-
-    applyPatches(patches, renderObj = null) {
-        for (const [ obj, methodName, conf ] of patches) {
-            const result = obj[methodName].call(obj, renderObj || this, conf, this);
-            if (renderObj && result && conf.RenderObj) {
-                renderObj[conf.RenderObj] = result;
-            }
-        }
-    }
-
-    repeatConfigurePreprocessors(cb) {
-        if (!this._repeatTries) {
-            this._repeatTries = 0;
-        }
-        //this.assert(this._repeatTries++ < 50, `Max repeat: ${lcName}`);
-        let changed = true; // Run at least once
-        while (changed) {
-            changed = false;
-            for (const [ namespace, confArray ] of Object.entries(this.defs)) {
-                for (const conf of confArray) {
-                    const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
-                    changed = changed || this.applyPreprocessor(conf, preprocessors);
-                }
-            }
-        }
-
-        if (Object.keys(this.fetchQueue.queue).length === 0) {
-            delete this._repeatTries;
-            cb(); // Synchronous path
-        } else {
-            this.fetchQueue.enqueueAll(
-              () => this.repeatConfigurePreprocessors(cb));
-        }
-    }
-
-    getNodeModuloType(node, quietErrors = false) {
-        const { tagName, nodeType, textContent } = node;
-        const err = msg => quietErrors || console.error('Modulo Load:', msg);
-
-        // node.nodeType equals 1 if the node is a DOM element (as opposed to
-        // text, or comment). Ignore comments, tolerate empty text nodes, but
-        // warn on others (since those are typically syntax mistakes).
-        if (nodeType !== 1) {
-            // Text nodes, comment nodes, etc
-            if (nodeType === 3 && textContent && textContent.trim()) {
-                err(`Unexpected text found near definitions: ${textContent}`);
-            }
-            return null;
-        }
-
-        let cPartName = tagName.toLowerCase();
-        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
-            for (const attrUnknownCase of node.getAttributeNames()) {
-                const attr = attrUnknownCase.toLowerCase();
-                if (attr in this.registry.dom && !node.getAttribute(attr)) {
-                    cPartName = attr;
-                    //break;
-                }
-                break; // should always be first?
-            }
-        }
-        if (!(cPartName in this.registry.dom)) {
-            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
-            err(`${ cPartName }. CParts: ${ Object.keys(this.registry.dom) }`);
-            return null;
-        }
-        return cPartName;
-    }
-
-    loadPartialConfigFromNode(node) {
-        const { mergeAttrs } = this.registry.utils;
-        const partTypeLC = this.getNodeModuloType(node); // Lowercase
-        const config = mergeAttrs(node, this.config[partTypeLC]);
-        config.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
-        if (partTypeLC in config && !config[partTypeLC]) {
-            delete config[partTypeLC]; // Remove attribute name used as type
-        }
-        return config;
-    }
-
-    applyPreprocessor(conf, preprocessorNames) {
-        for (const name of preprocessorNames) {
-            if (name in conf) {
-                const value = conf[name];
-                delete conf[name];
-                this.registry.confPreprocessors[name.toLowerCase()](this, conf, value);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    setupCParts(element, confArray) {
-        // TODO: Maybe move to initialized callback!?
-        for (const conf of confArray) {
-            const instance = element.cparts[conf.RenderObj];
-            instance.element = element;
-            instance.modulo = element.modulo;
-            instance.conf = conf;
-            instance.attrs = element.modulo.registry.utils.keyFilter(conf, isLower);
-        }
-    }
-
-    assert(value, ...info) {
-        if (!value) {
-            console.error(...info);
-            throw new Error(`Modulo Error: "${Array.from(info).join(' ')}"`);
-        }
-    }
-}
-
-// TODO: Move to conf
-Modulo.INVALID_WORDS = new Set((`
-    break case catch class const continue debugger default delete do else enum
-    export extends finally for if implements import in instanceof interface new
-    null package private protected public return static super switch throw try
-    typeof var let void  while with await async true false
-`).split(/\s+/ig));
-
-// Create a new modulo instance to be the global default instance
-var modulo = new Modulo(null, [
-    'cparts', 'dom', 'utils', 'library', 'core', 'engines', 'commands',
-    'templateFilters', 'templateTags', 'directives', 'directiveShortcuts',
-    'loadDirectives', 'loadDirectiveShortcuts', 'confPreprocessors',
-]);
-
-modulo.register('confPreprocessor', function src (modulo, conf, value) {
-    modulo.fetchQueue.enqueue(value, text => {
-        conf.Content = (text || '') + (conf.Content || '');
-    });
-});
-
-modulo.register('confPreprocessor', function content (modulo, conf, value) {
-    modulo.loadString(value, conf.FullName);
-    conf.Hash = modulo.registry.utils.hash(value);
-});
-
-modulo.register('cpart', class Component {
-    static prebuildCallback(modulo, conf) {
-        const { FullName, Hash, Name, Parent } = conf;
-        const { stripWord } = modulo.registry.utils;
-        const Children = modulo.defs[FullName];
-        if (!Children || Children.length === 0) {
-            console.warn('Empty component specified:', FullName);
-            return;
-        }
-        //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
-        conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
-        // TODO: Fix this logic when Library gets rewritten
-        const libInfo = modulo.parentDefs[conf.Parent || ''] || {};
-        conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace || 'x';
-        conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
-        const cpartTypes = new Set(Children.map(({ Type }) => Type));
-        const cpartNameString = Array.from(cpartTypes).join(', ');
-
-        const code = (`
-            modulo = currentModulo;// HAX XXX
-            const { ${ cpartNameString } } = modulo.registry.cparts;
-            const confArray = modulo.defs['${ FullName }'];
-
-            const cpartClasses = { ${ cpartNameString } };
-            const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-            class ${ Name } extends modulo.registry.utils.BaseElement {
-                constructor() {
-                    super();
-                    this.modulo = modulo;
-                    this.defHash = '${ Hash }';
-                    this.initRenderObj = initRenderObj;
-                    this.moduloChildrenData = confArray;
-                    this.moduloComponentConf = modulo.parentDefs['${ FullName }'];
-                }
-            }
-
-            const initRenderObj = { elementClass: ${ Name } };
-            modulo.applyPatches(factoryPatches, initRenderObj);
-            modulo.globals.customElements.define(tagName, ${ Name });
-            //console.log("Registered: ${ Name } as " + tagName);
-            return ${ Name };
-        `).replace(/\n {8}/g, "\n");
-        conf.FuncDefHash = modulo.assets.getHash([ 'tagName', 'modulo' ], code);
-        modulo.assets.registerFunction([ 'tagName', 'modulo' ], code);
-    }
-
-    static defineCallback(modulo, conf) {
-        const { FullName, FuncDefHash } = conf;
-        const { stripWord } = modulo.registry.utils;
-        const { library } = modulo.config;
-        //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
-        //modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
-        if (!FuncDefHash) {
-            console.warn('Empty component specified:', FullName);
-            return;
-        }
-        modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
-    }
-
-    /*
-    static factoryCallback(modulo, conf) {
-        conf.directiveShortcuts = [
-            [ /^@/, 'component.event' ],
-            [ /:$/, 'component.dataProp' ],
-        ];
-        conf.uniqueId = ++factory.id;
-    }
-    */
-
-    headTagLoad({ el }) {
-        //el.remove();
-        // DAED CODE
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    metaTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    linkTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    titleTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    scriptTagLoad({ el }) {
-        const newScript = el.ownerDocument.createElement('script');
-        newScript.src = el.src; // TODO: Possibly copy other attrs?
-        el.remove(); // delete old element
-        this.element.ownerDocument.head.append(newScript);
-    }
-
-    initializedCallback(renderObj) {
-        /*
-        this.localNameMap = this.element.factory().loader.localNameMap; // TODO: Fix
-        this.mode = this.attrs.mode || 'regular';
-        if (this.mode === 'shadow') {
-            this.element.attachShadow({ mode: 'open' });
-        }
-        */
-        this.mode = 'regular';
-        const opts = { directiveShortcuts: [], directives: [] };
-        for (const cPart of Object.values(this.element.cparts)) {
-            for (const directiveName of cPart.getDirectives ? cPart.getDirectives() : []) {
-                opts.directives[directiveName] = cPart;
-            }
-        }
-        this.reconciler = modulo.create('engine', 'Reconciler', opts);
-    }
-
-    getDirectives() {
-        const dirs = [
-            'component.dataPropMount',
-            'component.dataPropUnmount',
-            'component.eventMount',
-            'component.eventUnmount',
-            'component.slotLoad',
-        ];
-        const vanishTags = [ 'link', 'title', 'meta', 'script' ];
-        if (this.attrs.mode === 'vanish-into-document') {
-            dirs.push(...vanishTags);
-        }
-        if (this.attrs.mode !== 'shadow') {
-            // TODO: clean up Load callbacks, either eliminate slotLoad (and
-            // discontinue [component.slot]) in favor of only slotTagLoad, or
-            // refactor somehow
-            dirs.push('slot');
-            this.slotTagLoad = this.slotLoad.bind(this);
-        }
-        return dirs;
-    }
-
-    prepareCallback() {
-        const { originalHTML } = this.element;
-        return { originalHTML, innerHTML: null, patches: null };
-    }
-
-    reconcileCallback(renderObj) {
-        let { innerHTML, patches, root } = renderObj.component;
-        this.mode =this.attrs.mode || 'regular';
-        if (innerHTML !== null) {
-
-            // XXX ----------------
-            // HACK for vanish-into-document to preserve Modulo stuff
-            if (this.mode === 'vanish-into-document') {
-                const dE = this.element.ownerDocument.documentElement;
-                const elems = dE.querySelectorAll('template[modulo-embed],modulo');
-                this.element.ownerDocument.head.append(...Array.from(elems));
-            }
-            // XXX ----------------
-
-            if (this.mode === 'regular' || this.mode === 'vanish') {
-                root = this.element; // default, use element as root
-            } else if (this.mode === 'shadow') {
-                root = this.element.shadowRoot;
-            } else if (this.mode === 'vanish-into-document') {
-                root = this.element.ownerDocument.body; // render into body
-            } else {
-                this.modulo.assert(this.mode === 'custom-root', 'Err:', this.mode);
-            }
-            patches = this.reconciler.reconcile(root, innerHTML || '', this.localNameMap);// rm last arg
-        }
-        return { patches, innerHTML }; // TODO remove innerHTML from here
-    }
-
-    updateCallback(renderObj) {
-        const { patches, innerHTML } = renderObj.component;
-        if (patches) {
-            this.reconciler.applyPatches(patches);
-        }
-
-        if (!this.element.isMounted && (this.mode === 'vanish' ||
-                                        this.mode === 'vanish-into-document')) {
-            // First time initialized, and is one of the vanish modes
-            this.element.replaceWith(...this.element.childNodes); // Replace self
-            this.element.remove(); // TODO: rm when fully tested
-        }
-    }
-
-    handleEvent(func, payload, ev) {
-        this.element.lifecycle([ 'event' ]);
-        const { value } = (ev.target || {}); // Get value if is <INPUT>, etc
-        func.call(null, payload === undefined ? value : payload, ev);
-        this.element.lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
-        if (this.attrs.rerender !== 'manual') {
-            this.element.rerender(); // always rerender after events
-        }
-    }
-
-    slotLoad({ el, value }) {
-        let chosenSlot = value || el.getAttribute('name') || null;
-        const getSlot = c => c.getAttribute ? (c.getAttribute('slot') || null) : null;
-        let childs = this.element.originalChildren;
-        childs = childs.filter(child => getSlot(child) === chosenSlot);
-
-        if (!el.moduloSlotHasLoaded) { // clear innerHTML if this is first load
-            el.innerHTML = '';
-            el.moduloSlotHasLoaded = true;
-        }
-        el.append(...childs);
-    }
-
-    eventMount({ el, value, attrName, rawName }) {
-        // Note: attrName becomes "event name"
-        // TODO: Make it @click.payload, and then have this see if '.' exists
-        // in attrName and attach as payload if so
-        const { resolveDataProp } = this.modulo.registry.utils;
-        const get = (key, key2) => resolveDataProp(key, el, key2 && get(key2));
-        const func = get(attrName);
-        this.modulo.assert(func, `No function found for ${rawName} ${value}`);
-        if (!el.moduloEvents) {
-            el.moduloEvents = {};
-        }
-        const listen = ev => {
-            ev.preventDefault();
-            const payload = get(attrName + '.payload', 'payload');
-            const currentFunction = resolveDataProp(attrName, el);
-            this.handleEvent(currentFunction, payload, ev);
-        };
-        el.moduloEvents[attrName] = listen;
-        el.addEventListener(attrName, listen);
-    }
-
-    eventUnmount({ el, attrName }) {
-        el.removeEventListener(attrName, el.moduloEvents[attrName]);
-        // Modulo.assert(el.moduloEvents[attrName], 'Invalid unmount');
-        delete el.moduloEvents[attrName];
-    }
-
-    dataPropMount({ el, value, attrName, rawName }) { // element, 
-        const { get, set } = modulo.registry.utils;
-        // Resolve the given value and attach to dataProps
-        if (!el.dataProps) {
-            el.dataProps = {};
-            el.dataPropsAttributeNames = {};
-        }
-        const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
-        const renderObj = isVar ? this.element.getCurrentRenderObj() : {};
-        let val = isVar ? get(renderObj, value) : JSON.parse(value);
-        /* XXX */ if (attrName === 'click' && !val) { val = ()=> console.log('XXX ERROR: (DEBUGGING Wrong Script Tag) click is undefined', renderObj); }
-        //modulo.assert(val !== undefined, 'Error: Cannot assign value "undefined" to dataProp')
-        set(el.dataProps, attrName, val); // set according to path given
-        el.dataPropsAttributeNames[rawName] = attrName;
-        ///* XXX */ if (attrName === 'click') { console.log('XXX click', el, value, val); }
-    }
-
-    dataPropUnmount({ el, attrName, rawName }) {
-        delete el.dataProps[attrName];
-        delete el.dataPropsAttributeNames[rawName];
-    }
-}, { mode: 'regular', rerender: 'event', engine: 'Reconciler', ConfPreprocessors: [ 'Src', 'Content' ] });
-
-modulo.register('cpart', class Modulo {
-}, { ConfPreprocessors: [ 'Src', 'Content' ] });
-
-//                v- Later put somewhere more appropriate
-//modulo.register('util', Modulo);
-
-modulo.register('cpart', class Library {
-    /*
-    static configureCallback(modulo, conf) {
-        modulo.applyPreprocessor(conf, [ 'Src', 'Content' ]);
-        let { Content, Src, Hash, src, Name, name, namespace } = conf;
-        //const { hash } = modulo.registry.utils;
-        const regName = (Name || name || namespace || 'x').toLowerCase();
-        if (Hash) {
-            delete conf.Content; // Prevent repeat
-            delete conf.Hash; // Prevent repeat
-            let libName = regName;
-            if (libName === 'x') { // TODO fix this stuff, default to FN?
-                libName = 'm-' + conf.Hash;
-            }
-            let libraryModulo = modulo.registry.library[libName];
-            if (!libraryModulo) { // No existing library, fork into new one
-                libraryModulo = new modulo.registry.utils.Modulo(modulo);
-                libraryModulo.name = libName; // ".name" is for register()
-                modulo.register('library', libraryModulo);
-            }
-            const oldConf = libraryModulo.config.library || {};
-            libraryModulo.config.library = Object.assign(oldConf, conf);
-            libraryModulo.loadString(Content);
-            libraryModulo.runLifecycle(libraryModulo.registry.cparts, 'configure');
-            conf.RegName = regName; // Ensure RegName is set on conf as well
-            conf.LibName = libName; // ditto
-        }
-    }
-    static defineCallback(modulo, conf) {
-        if (conf.LibName) {
-            console.log('Does this even work??')
-            delete conf.LibName; // idempotent
-            const library = modulo.registry.library[conf.LibName];
-            library.runLifecycle(library.registry.cparts, 'define');
-        }
-    }
-    */
-}, { ConfPreprocessors: [ 'Src', 'Content' ] });
-
-modulo.register('util', function keyFilter (obj, func) {
-    const keys = func.call ? Object.keys(obj).filter(func) : func;
-    return Object.fromEntries(keys.map(key => [ key, obj[key] ]));
-});
-
-modulo.register('util', function cloneStub (obj, stubFunc = null) {
-    const clone = {};
-    stubFunc = stubFunc || (() => ({}));
-    for (const key of Object.keys(obj)) {
-        clone[key] = stubFunc(obj);
-    }
-    return clone;
-});
-
-// TODO: pass in modulo more consistently
-modulo.register('util', function deepClone (obj, modulo) {
-    if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
-        return obj;
-    }
-
-    const { constructor } = obj;
-    if (constructor.moduloClone) {
-        // Use a custom modulo-specific cloning function
-        return constructor.moduloClone(modulo, obj);
-    }
-    const clone = new constructor();
-    const { deepClone } = modulo.registry.utils;
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            clone[key] = deepClone(obj[key], modulo);
-        }
-    }
-    return clone;
-});
-
-modulo.register('util', function resolveDataProp (key, elem, defaultVal) {
-    if (elem.dataProps && key in elem.dataProps) {
-        return elem.dataProps[key];
-    }
-    return elem.hasAttribute(key) ? elem.getAttribute(key) : defaultVal;
-});
-
-/*
-modulo.register('util', function subObject (obj, array) {
-    return Object.fromEntries(array.map(key => [ key, obj[key] ])); // TODO: rm
-});
-*/
-
-modulo.register('util', function cleanWord (text) {
-    // todo: should merge with stripWord ? See if "strip" functionality is enough
-    return (text + '').replace(/[^a-zA-Z0-9$_\.]/g, '') || '';
-});
-
-modulo.register('util', function stripWord (text) {
-    return text.replace(/^[^a-zA-Z0-9$_\.]/, '')
-               .replace(/[^a-zA-Z0-9$_\.]$/, '');
-});
-
-
-modulo.register('util', function mergeAttrs (elem, defaults) {
-    // TODO: Write unit tests for this
-    const camelcase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
-    const obj = Object.assign({}, defaults);
-    const dataPropNames = elem.dataPropsAttributeNames || false;
-    for (const name of elem.getAttributeNames()) {
-        const dataPropKey = dataPropNames && dataPropNames[name];
-        if (dataPropKey) {
-            obj[camelcase(dataPropKey)] = elem.dataProps[dataPropKey];
-        } else {
-            obj[camelcase(name)] = elem.getAttribute(name);
-        }
-    }
-    return obj;
-});
-
-modulo.register('util', function hash (str) {
-    // Simple, insecure, "hashCode()" implementation. Returns base32 hash
-    let h = 0;
-    for(let i = 0; i < str.length; i++) {
-        //h = ((h << 5 - h) + str.charCodeAt(i)) | 0;
-        h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-    }
-    return (h || 0).toString(32).replace(/-/g, 'x');
-});
-
-modulo.register('util', function makeDiv(html) {
-    /* TODO: Have an options for doing <script  / etc preprocessing here:
-      <state -> <script type="modulo/state"
-      <\s*(state|props|template)([\s>]) -> <script type="modulo/\1"\2
-      </(state|props|template)> -> </script>*/
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div;
-});
-
-
-modulo.register('util', function normalize(html) {
-    // Normalize space to ' ' & trim around tags
-    return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
-});
-
-modulo.register('util', function saveFileAs(filename, text) {
-    const doc = Modulo.globals.document;
-    const element = doc.createElement('a');
-    const enc = encodeURIComponent(text); // TODO silo in globals
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + enc);
-    element.setAttribute('download', filename);
-    doc.body.appendChild(element);
-    element.click();
-    doc.body.removeChild(element);
-    return `./${filename}`; // by default, return local path
-});
-
-modulo.register('util', function get(obj, key) {
-    // TODO:  It's get that should autobind functions!!
-    return key.split('.').reduce((o, name) => o[name], obj);
-});
-
-modulo.register('util', function set(obj, keyPath, val, ctx = null) {
-    const index = keyPath.lastIndexOf('.') + 1; // 0 if not found
-    const key = keyPath.slice(index);
-    const path = keyPath.slice(0, index - 1); // exclude .
-    //const dataObj = index ? Modulo.utils.get(obj, path) : obj;
-    const dataObj = index ? modulo.registry.utils.get(obj, path) : obj;
-    dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
-});
-
-modulo.register('util', function dirname(path) {
-    return (path || '').match(/.*\//);
-});
-
-modulo.register('util', function resolvePath(workingDir, relPath) {
-    // TODO: Fix, refactor
-    if (!workingDir) {
-        console.log('Warning: Blank workingDir:', workingDir);
-    }
-    if (relPath.toLowerCase().startsWith('http')) {
-        return relPath; // already absolute
-    }
-    workingDir = workingDir || '';
-    // Similar to Node's path.resolve()
-    const combinedPath = workingDir + '/' + relPath;
-    const newPath = [];
-    for (const pathPart of combinedPath.split('/')) {
-        if (pathPart === '..') {
-            newPath.pop();
-        } else if (pathPart === '.') {
-            // No-op
-        } else if (pathPart.trim()) {
-            newPath.push(pathPart);
-        }
-    }
-    const prefix = workingDir.startsWith('/') ? '/' : '';
-    return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
-});
-
-
-modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
-    // NOTE - has old tests that can be resurrected
-    const fullName = `${namespace}-${name}`;
-    let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
-
-    // To prefix the selectors, we loop through them, with this RegExp that
-    // looks for { chars
-    content = content.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi, selector => {
-        selector = selector.trim();
-        if (selector.startsWith('@') || selector.startsWith(fullName)
-              || selector.startsWith('from') || selector.startsWith('to')) {
-            // TODO: Make a regexp to check if matches other keyframe
-            // stuff, 90% etc
-            // Skip, is @media or @keyframes, or already prefixed
-            return selector;
-        }
-
-        // Upgrade the ":host" pseudo-element to be the full name (since
-        // this is not a Shadow DOM style-sheet)
-        selector = selector.replace(new RegExp(/:host(\([^)]*\))?/, 'g'), hostClause => {
-            // TODO: this needs more thorough testing
-            const notBare = (hostClause && hostClause !== ':host');
-            return fullName + (notBare ? `:is(${hostClause})` : '');
-        });
-
-        // If it is not prefixed at this point, then be sure to prefix
-        if (!selector.startsWith(fullName)) {
-            selector = `${fullName} ${selector}`;
-        }
-        return selector;
-    });
-    return content;
-});
-
-
-// TODO: Since CPart will eventually have no base class, merge this
-// with the Component CPart:
-modulo.register('util', class BaseElement extends HTMLElement {
-    constructor() {
-        super();
-        this.initialize();
-    }
-
-    initialize() {
-        this.cparts = {};
-        this.isMounted = false;
-        this.isModulo = true;
-        this.originalHTML = null;
-        this.originalChildren = [];
-        //this.fullName = this.factory().fullName;
-        //this.initRenderObj = Object.assign({}, this.baseRenderObj);
-        //console.log('this is initRenderObj', this.initRenderObj);
-    }
-
-    rerender(original = null) {
-        if (original) { // TODO: this logic needs refactor
-            if (this.originalHTML === null) {
-                this.originalHTML = original.innerHTML;
-            }
-            this.originalChildren = Array.from(original.hasChildNodes() ?
-                                               original.childNodes : []);
-        }
-        this.lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
-    }
-
-    lifecycle(lcNames, rObj={}) {
-        this.renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
-        const patches = this.modulo.getLifecyclePatches(this.cparts, lcNames);
-        this.modulo.applyPatches(patches, this.renderObj);
-        //this.renderObj = null; // ?rendering is over, set to null
-    }
-
-    getCurrentRenderObj() {
-        return (this.eventRenderObj || this.renderObj || this.initRenderObj);
-    }
-
-    connectedCallback() {
-        if (!this.isMounted) {
-            setTimeout(() => this.parsedCallback(), 0);
-        }
-    }
-
-    parsedCallback() {
-        let original = this;
-        if (this.hasAttribute('modulo-original-html')) {
-            original = modulo.registry.utils.makeDiv(this.getAttribute('modulo-original-html'));
-        }
-        this.legacySetupCParts();
-        this.lifecycle([ 'initialized' ]);
-        this.rerender(original); // render and re-mount it's own childNodes
-        // TODO - Needs refactor, should do this somewhere else:
-        if (this.hasAttribute('modulo-original-html')) {
-            const { reconciler } = this.cparts.component;
-            reconciler.patch = reconciler.applyPatch; // Apply patches immediately
-            reconciler.patchAndDescendants(this, 'Mount');
-            reconciler.patch = reconciler.pushPatch;
-        }
-        this.isMounted = true;
-    }
-
-    legacySetupCParts() {
-        this.cparts = {};
-        const fullData = Array.from(this.moduloChildrenData);
-        fullData.unshift(this.moduloComponentConf); // Add in the Component def itself
-        const { cparts } = this.modulo.registry;
-        const isLower = key => key[0].toLowerCase() === key[0];
-        for (const conf of fullData) {
-            const partObj = this.initRenderObj[conf.RenderObj];
-            const instance = new cparts[conf.Type](this.modulo, conf, this);
-            // TODO: Decide on this interface, and maybe restore "modulo.create" as part of this
-            instance.element = this;
-            instance.modulo = this.modulo;
-            instance.conf = conf;
-            instance.attrs = this.modulo.registry.utils.keyFilter(conf, isLower);
-            this.cparts[conf.RenderObj] = instance;
-        }
-    }
-});
-
-modulo.register('core', class AssetManager {
-    constructor (modulo) {
-        this.modulo = modulo;
-        this.functions = {};
-        this.stylesheets = {};
-        this.invocations = [];
-        // TODO: rawAssets and rawAssetsArray are both likely dead code!
-        this.rawAssets = { js: {}, css: {} };
-        this.rawAssetsArray = { js: [], css: [] };
-    }
-
-    build(ext, opts, prefix = '') {
-        const { saveFileAs, hash } = this.modulo.registry.utils;
-        const text = prefix + modulo.assets.rawAssetsArray[ext].join('\n');
-        return saveFileAs(`modulo-${ opts.type }-${ hash(text) }.${ ext }`, text);
-    }
-
-    registerFunction(params, text, opts = {}) {
-        // Checks if text IS the hash, in which case use that, otherwise gen hash
-        const hash = text in this.functions ? text : this.getHash(params, text);
-        if (!(hash in this.functions)) {
-            const funcText = this.wrapFunctionText(params, text, opts, hash);
-            this.runInline(funcText);
-            /*
-            this.rawAssets.js[hash] = funcText; // "use strict" only in tag
-            window.currentModulo = this.modulo; // Ensure stays silo'ed in current
-            this.appendToHead('script', '"use strict";\n' + funcText);
-            */
-            this.modulo.assert(hash in this.functions, `Func ${hash} did not register`);
-            this.functions[hash].hash = hash;
-        }
-        return this.functions[hash];
-    }
-
-    registerStylesheet(text) {
-        const hash = this.modulo.registry.utils.hash(text);
-        if (!(hash in this.stylesheets)) {
-            this.stylesheets[hash] = true;
-            this.rawAssets.css[hash] = text;
-            this.rawAssetsArray.css.push(text);
-            this.appendToHead('style', text);
-        }
-    }
-
-    invoke(hash, args) {
-        this.invocations.push([ hash, JSON.stringify(args) ]);
-        args.push(this.modulo); // TODO: need to standardize Modulo dependency injection patterns
-        this.functions[hash].apply(window, args);
-    }
-
-    getInlineJS(opts) {
-        // TODO: XXX Fix currentModulo -> modulo
-        let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
-        for (const [ hash, argStr ] of this.invocations) {
-            //text += `try { _X('${ hash }', ${ argStr }); } catch (e) { console.log('${ hash } - ERROR:', e); }\n`;
-            text += `_X('${ hash }', ${ argStr });\n`;
-        }
-        return text;
-    }
-
-    runInline(funcText) {
-        const hash = this.modulo.registry.utils.hash(funcText);
-        if (!(hash in this.rawAssets.js)) {
-            this.rawAssets.js[hash] = funcText; // "use strict" only in tag
-            this.rawAssetsArray.js.push(funcText);
-        }
-        window.currentModulo = this.modulo; // Ensure stays silo'ed in current
-        // TODO: Make functions named, e.g. function x_Button_Template () etc,
-        // so stack traces / debugger looks better
-        this.appendToHead('script', '"use strict";\n' + funcText);
-    }
-
-    getSymbolsAsObjectAssignment(contents) {
-        const regexpG = /(function|class)\s+(\w+)/g;
-        const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
-        const matches = contents.match(regexpG) || [];
-        return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s))
-            .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
-            .join('');
-    }
-
-    wrapFunctionText(params, text, opts = {}, hash = null) {
-        // TODO: e.g. change public API to this, make opts & hash required
-        //let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        prefix += `= function ${ opts.funcName || ''}(${ params.join(', ') }){`;
-        let suffix = '};'
-        if (opts.exports) {
-            const symbolsString = this.getSymbolsAsObjectAssignment(text);
-            // TODO test: params = params.filter(text.includes.bind(text)); // Slight optimization
-            const localVarsIfs = params.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-            prefix += `var ${ opts.exports } = { exports: {} };  `;
-            prefix += `function __set(name, value) { ${ localVarsIfs } }`;
-            suffix = `return { ${symbolsString} setLocalVariable: __set, exports: ${ opts.exports }.exports}\n};`;
-        }
-        return `${prefix}\n${text}\n${suffix}`;
-    }
-
-    getHash(params, text) {
-        const { hash } = this.modulo.registry.utils;
-        return hash(params.join(',') + '|' + text);
-    }
-
-    appendToHead(tagName, codeStr) {
-        const doc = this.modulo.globals.document;
-        const elem = doc.createElement(tagName);
-        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
-        if (doc.head === null) {
-            // TODO: NOTE: this is still broken, can still trigger before head
-            // is created!
-            setTimeout(() => doc.head.append(elem), 0);
-        } else {
-            doc.head.append(elem);
-        }
-        elem.textContent = codeStr; // Blocking, causes eval
-    }
-});
-
-modulo.register('core', class FetchQueue {
-    constructor(modulo) {
-        this.modulo = modulo;
-        this.queue = {};
-        this.data = {};
-        this.waitCallbacks = [];
-    }
-
-    enqueue(fetchObj, callback, basePath = null) {
-        this.basePath = basePath ? basePath : this.basePath;
-        fetchObj = typeof fetchObj === 'string' ? { fetchObj } : fetchObj;
-        for (let [ label, src ] of Object.entries(fetchObj)) {
-            this._enqueue(src, label, callback);
-        }
-    }
-
-    _enqueue(src, label, callback) {
-        if (this.basePath && !this.basePath.endsWith('/')) {
-            // <-- TODO rm & straighten this stuff out
-            this.basePath = this.basePath + '/'; // make sure trails '/'
-        }
-
-        // TODO: FIX THIS ---v
-        //src = this.modulo.registry.utils.resolvePath(this.basePath || '', src);
-        src = (this.basePath || '') + src;
-
-        if (src in this.data) {
-            callback(this.data[src], label, src); // Synchronous route
-        } else if (!(src in this.queue)) {
-            this.queue[src] = [ callback ];
-            // TODO: Think about if we want to keep cache:no-store
-            //console.log('FETCH', src);
-            this.modulo.globals.fetch(src, { cache: 'no-store' })
-                .then(response => response.text())
-                .then(text => this.receiveData(text, label, src))
-                //.catch(err => console.error('Modulo Load ERR', src, err));
-        } else {
-            this.queue[src].push(callback); // add to end of src queue
-        }
-    }
-
-    receiveData(text, label, src) {
-        this.data[src] = text; // load data
-        const queue = this.queue[src];
-        delete this.queue[src]; // delete queue
-        queue.forEach(func => func(text, label, src));
-        this.checkWait();
-    }
-
-    enqueueAll(callback) {
-        const allQueues = Array.from(Object.values(this.queue));
-        let callbackCount = 0;
-        for (const queue of allQueues) {
-            queue.push(() => {
-                callbackCount++;
-                //console.log('callbackCount', callbackCount, callbackCount >= allQueues.length);
-                if (callbackCount >= allQueues.length) {
-                    callback();
-                }
-            });
-        }
-    }
-
-    wait(callback) {
-        // NOTE: There is a bug with this vs enqueueAll, specifically if we are
-        // already in a wait callback, it can end up triggering the next one
-        // immediately
-        //console.log({ wait: Object.keys(this.queue).length === 0 }, Object.keys(this.queue));
-        this.waitCallbacks.push(callback); // add to end of queue
-        this.checkWait(); // attempt to consume wait queue
-    }
-
-    checkWait() {
-        if (Object.keys(this.queue).length === 0) {
-            while (this.waitCallbacks.length > 0) {
-                this.waitCallbacks.shift()(); // clear while invoking
-            }
-        }
-    }
-});
-
-
-modulo.register('cpart', class Props {
-    initializedCallback(renderObj) {
-        const props = {};
-        const { resolveDataProp } = modulo.registry.utils;
-        for (const [ propName, def ] of Object.entries(this.attrs)) {
-            props[propName] = resolveDataProp(propName, this.element, def);
-            // TODO: Implement type-checked, and required
-        }
-        return props;
-    }
-
-    prepareCallback(renderObj) {
-        /* TODO: Remove after observedAttributes is implemented, e.g.:
-          static factoryCallback({ attrs }, { componentClass }, renderObj) {
-              //componentClass.observedAttributes = Object.keys(attrs);
-          }
-        */
-        return this.initializedCallback(renderObj);
-    }
-});
-
-
-modulo.register('cpart', class Style {
-    static prebuildCallback(modulo, conf) {
-
-        /*
-        //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
-        //    return;
-        //}
-        */
-        let { Content, Parent } = conf;
-        if (!Content) {
-            return;
-        }
-        if (Parent) {
-            let { namespace, mode, Name } = modulo.parentDefs[Parent];
-            // XXX HAX, conf is a big tangled mess
-            if (Name.startsWith('x_')) {
-                Name = Name.replace('x_', '');
-                if (!namespace) {
-                    namespace = 'x';
-                }
-            }
-            if (Name.startsWith(namespace)) {
-                Name = Name.replace(namespace + '_', '');
-                conf.Name = Name;
-            }
-            // XXX unHAX, conf is a big tangled mess
-            if (mode === 'regular') { // TODO finish
-                const { prefixAllSelectors } = modulo.registry.utils;
-                Content = prefixAllSelectors(namespace, Name, Content);
-            }
-        }
-        modulo.assets.registerStylesheet(Content);
-    }
-
-    initializedCallback(renderObj) {
-        const { component, style } = renderObj;
-        if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
-            console.log('Shadow styling!');
-            const style = Modulo.globals.document.createElement('style');
-            style.setAttribute('modulo-ignore', 'true');
-            style.textContent = style.content;// `<style modulo-ignore>${style.content}</style>`;
-            this.element.shadowRoot.append(style);
-        }
-    }
-});
-
-
-modulo.register('cpart', class Template {
-    static prebuildCallback(modulo, conf) {
-        modulo.assert(conf.Content, 'No Template Content specified.');
-        const engine = conf.engine || 'Templater';
-        const instance = new modulo.registry.engines[engine](modulo, conf);
-        conf.Hash = instance.Hash;
-        delete conf.Content;
-    }
-
-    initializedCallback() {
-        const engine = this.conf.engine || 'Templater';
-        this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
-    }
-
-    /*
-    prepareCallback(renderObj) {
-        // Exposes templates in render context, so stuff like
-        // "|renderas:template.row" works
-        const obj = {};
-        for (const template of this.element.cpartSpares.template) {
-            obj[template.attrs.name || 'regular'] = template;
-            //obj[template.name || 'regular'] = template;
-        }
-        return obj;
-    }
-    */
-
-    renderCallback(renderObj) {
-        if (!renderObj.component)renderObj.component={};// XXX fix
-        renderObj.component.innerHTML = this.templater.render(renderObj);
-    }
-});
-
-modulo.register('cpart', class StaticData {
-    static prebuildCallback(modulo, conf) {
-        // TODO put into conf, make default to JSON, and make CSV actually
-        // correct + instantly useful (e.g. separate headers, parse quotes)
-        const transforms = {
-            csv: s => JSON.stringify(s.split('\n').map(line => line.split(','))),
-            js: s => s,
-            json: s => JSON.stringify(JSON.parse(s)),
-            txt: s => JSON.stringify(s),
-        };
-        const transform = transforms[conf.type || 'js'];
-        const code = 'return ' + transform((conf.Content || '').trim()) + ';';
-        delete conf.Content;
-        conf.Hash = modulo.assets.getHash([], code);
-        modulo.assets.registerFunction([], code);
-        // TODO: Maybe evaluate and attach directly to conf here?
-    }
-
-    static factoryCallback(renderObj, conf, modulo) {
-        // Now, actually run code in Script tag to do factory method
-        return modulo.assets.functions[conf.Hash]();
-    }
-});
-
-modulo.register('cpart', class Configuration {
-    static prebuildCallback(modulo, conf) {
-        const code = (conf.Content || '').trim();
-        delete conf.Content;
-        const opts = { exports: 'script' };
-        const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
-        const results = modulo.assets.invoke(func.hash, [ ]);
-        /*
-        // TODO: Possibly, add something like this to finish this CPart. Should
-        // be a helper, however -- maybe a confPreprocessor that applies to
-        // Library and Modulo as well?
-        for (const [ key, value ] of conf) {
-            if (key.includes('.')) {
-                modulo.utils.set(modulo.conf, key, value);
-            }
-        }
-        */
-    }
-});
-
-modulo.register('cpart', class Script {
-    static prebuildCallback(modulo, conf) {
-        const code = conf.Content || ''; // TODO: trim whitespace?
-        delete conf.Content;
-        let localVars = Object.keys(modulo.registry.dom);// TODO fix...
-        localVars.push('element'); // add in element as a local var
-        localVars.push('cparts'); // give access to CParts JS interface
-
-        // Combine localVars + fixed args into allArgs
-        const args = [ 'modulo', 'require' ];
-        let allArgs = args.concat(localVars.filter(n => !args.includes(n)));
-
-        const opts = { exports: 'script' };
-        if (!conf.Parent) {
-            localVars = [];
-            allArgs = [ 'modulo' ];
-            delete opts.exports;
-        }
-
-        const func = modulo.assets.registerFunction(allArgs, code, opts);
-        conf.Hash = modulo.assets.getHash(allArgs, code);
-        conf.localVars = localVars;
-    }
-
-    static defineCallback(modulo, conf) {
-        // XXX -- HAX
-        if (!conf.Parent || (conf.Parent === 'x_x' && conf.Hash)) {
-            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
-            // TODO: Refactor:
-            // NOTE: Uses "window" as "this." context for better compat
-            //modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
-            modulo.assets.invoke(conf.Hash, [ ]);
-            // currentModulo.registry.cparts.Script.require);\n`);
-            delete conf.Hash; // prevent getting run again
-        }
-    }
-
-    static factoryCallback(renderObj, conf, modulo) {
-        const { Content, Hash, localVars } = conf;
-        if (!(Hash in modulo.assets.functions)) {
-            // debugger;
-            console.log('ERROR: Could not find Hash:', conf, renderObj);
-            return {};
-        }
-        const func = modulo.assets.functions[Hash];
-        // Now, actually run code in Script tag to do factory method
-        //const results = func.call(null, modulo, this.require || null);
-        const results = func.call(null, modulo, this.require || null);
-        if (results) {
-            results.localVars = localVars;
-            modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
-            return results;
-        } else {
-            modulo.assert(!conf.Parent, 'Falsy return for parented Script');
-            return {};
-        }
-    }
-
-    getDirectives() {
-        LEGACY.push('script.getDirectives');
-        let { script } = this.element.initRenderObj;
-        const isCbRegex = /(Unmount|Mount)$/;
-        if (!script) { script = {}; } // TODO XXX
-        return Object.keys(script)
-            .filter(key => key.match(isCbRegex))
-            .map(key => `script.${key}`);
-    }
-
-    cb(func) {
-        // DEAD-ish CODE (used in documentation, needs replacement...)
-        const renderObj = this.element.getCurrentRenderObj();
-        return (...args) => {
-            this.prepLocalVars(renderObj);
-            func(...args);
-            //this.clearLocalVariables(renderObj); // should do, set to "Invalid wrapped"
-        };
-    }
-
-    initializedCallback(renderObj) {
-        let { script } = renderObj;
-        //let script = conf;
-        // Attach callbacks from script to this, to hook into lifecycle.
-        const isCbRegex = /(Unmount|Mount|Callback)$/;
-        const cbs = Object.keys(script).filter(key => key.match(isCbRegex));
-        //cbs.push('initializedCallback', 'eventCallback'); // always CBs for these
-        cbs.push('eventCallback'); // always CBs for these
-        for (const cbName of cbs) {
-            if (cbName === 'initializedCallback') { // XXX refactor
-                continue;
-            }
-            this[cbName] = (arg) => {
-                // NOTE: renderObj is passed in for Callback, but not Mount
-                const renderObj = this.element.getCurrentRenderObj();
-                this.prepLocalVars(renderObj); // always prep (for event CB)
-                if (cbName in script) { // if it's specified in script
-                    Object.assign(renderObj.script, script[cbName](arg));
-                }
-            };
-        }
-        if (script.initializedCallback) {
-            this.prepLocalVars(renderObj); // always prep (for event CB)
-            Object.assign(script.exports, script.initializedCallback(renderObj));
-        }
-
-        /*
-        const originalScript = Object.assign({}, script);
-        this[cbName] = script[cbName] = (renderObj => {
-            this.prepLocalVars(renderObj);
-            if (cbName in originalScript) {
-                originalScript[cbName](renderObj);
-            }
-        });
-        */
-    }
-
-    // ## prepLocalVars
-    // To allow for local variables access to APIs provided by other CParts,
-    // sets local variables equal to the data returned by their callbacks.
-    // This is important: It's what enables us to avoid using the "this"
-    // context, since the current element is set before any custom code is run.
-    prepLocalVars(renderObj) {
-        if (!renderObj.script) {
-            console.error('ERROR: Script CPart missing from renderObj:', renderObj);
-            return false;
-        }
-        const { setLocalVariable, localVars } = renderObj.script;
-        if (setLocalVariable) { // (For autoexport:=false, there is no setLocalVar)
-            setLocalVariable('element', this.element);
-            setLocalVariable('cparts', this.element.cparts);
-            // TODO: Remove 'localVars' from configure script, clutters up build
-            for (const localVar of localVars) {
-                if (localVar in renderObj) {
-                    setLocalVariable(localVar, renderObj[localVar]);
-                }
-            }
-        }
-    }
-});
-
-modulo.register('cpart', class State {
-    getDirectives() {
-        LEGACY.push('state.getDirectives');
-        return [ 'state.bindMount', 'state.bindUnmount' ];
-    }
-
-    initializedCallback(renderObj) {
-        if (!this.data) {
-            // Initialize with deep copy of attributes
-            let { attrs } = this;
-            if (attrs && attrs.attrs) { // TODO: Hack code here, not sure why its like this
-                attrs = attrs.attrs;
-            }
-            this.data = Object.assign({}, attrs);
-            // TODO: Need to do proper deep-copy... is this okay?
-            this.data = JSON.parse(JSON.stringify(this.data));
-        }
-
-        this.boundElements = {}; // initialize
-        return this.data;
-    }
-
-    bindMount({ el, attrName, value }) {
-        // TODO: BUG: This should be attrName || el.getATtribute('name') (todo:
-        // write failing tests, then flip and see green)
-        const name = el.getAttribute('name') || attrName;
-        const val = modulo.registry.utils.get(this.data, name);
-        this.modulo.assert(val !== undefined, `state.bind "${name}" is undefined`);
-        const listen = () => {
-            // TODO: Refactor this function + propagate to be more consistent +
-            // extendable with types / conversions -- MAYBE even just attach it
-            // as stateChangeCallback!
-            let { value, type, checked, tagName } = el;
-            if (type && type === 'checkbox') {
-                value = !!checked;
-            } else if (type && (type === 'range' || type === 'number')) {
-                value = Number(value); // ensure ranges & numbers get evaled
-            }
-            this.set(name, value, el);
-        };
-        const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
-        const evName = value ? value : (isText ? 'keyup' : 'change');
-        //assert(!this.boundElements[name], `[state.bind]: Duplicate "${name}"`);
-
-        if (!(name in this.boundElements)) {
-            this.boundElements[name] = [];
-        }
-        this.boundElements[name].push([ el, evName, listen ]);
-        el.addEventListener(evName, listen); // todo: make optional, e.g. to support cparts?
-        this.propagate(name, val); // trigger initial assignment(s)
-    }
-
-    bindUnmount({ el, attrName }) {
-        const name = el.getAttribute('name') || attrName;
-        const remainingBound = [];
-        if (!(name in this.boundElements)) { // XXX HACK
-            console.log('Modulo ERROR: Could not unbind', name);
-            return;
-        }
-        for (const row of this.boundElements[name]) {
-            if (row[0] === el) {
-                row[0].removeEventListener(row[1], row[2]);
-            } else {
-                remainingBound.push(row);
-            }
-        }
-        this.boundElements[name] = remainingBound;
-    }
-
-    set(name, value, originalEl) {
-        /* if (valueOrEv.target) { this.data[valueOrEv.target.name] = name; } else { } if ((name in this.boundElements) && this.boundElements[name].length > 1) { } */
-        modulo.registry.utils.set(this.data, name, value);
-        this.propagate(name, value, originalEl);
-        this.element.rerender();
-    }
-
-    eventCallback() {
-        this._oldData = Object.assign({}, this.data);
-    }
-
-    propagate(name, val, originalEl = null) {
-        for (const [ el, evName, cb ] of (this.boundElements[name] || [])) {
-            if (originalEl && el === originalEl) {
-                continue; // don't propagate to self
-            }
-            if (el.stateChangedCallback) {
-                el.stateChangedCallback(name, val, originalEl);
-            } else if (el.type === 'checkbox') {
-                el.checked = !!val; // ensure is bool
-            } else {
-                el.value = val;
-            }
-        }
-    }
-
-    eventCleanupCallback() {
-        // TODO: Instead, should JUST do _lastPropagated (isntead of _oldData)
-        // with each key from boundElements, and thus more efficiently loop
-        // through
-        for (const name of Object.keys(this.data)) {
-            this.modulo.assert(name in this._oldData, `There is no "state.${name}"`);
-            const val = this.data[name];
-            if (name in this.boundElements && val !== this._oldData[name]) {
-                this.propagate(name, val);
-            }
-        }
-        this._oldData = null;
-    }
-});
-
-
-/* Implementation of Modulo Templating Language */
-modulo.register('engine', class Templater {
-    constructor(modulo, conf) {
-        this.modulo = modulo;
-        this.setup(conf.Content, conf); // TODO, refactor
-    }
-
-    setup(text, conf) {
-        Object.assign(this, modulo.config.templater, conf);
-        this.filters = Object.assign({}, modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, modulo.registry.templateTags, this.tags);
-        if (this.Hash) {
-            this.renderFunc = modulo.assets.functions[this.Hash];
-        } else {
-            this.compiledCode = this.compile(text);
-            const unclosed = this.stack.map(({ close }) => close).join(', ');
-            this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-            this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
-            this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);
-        }
-    }
-
-    static moduloClone(modulo, other) {
-        // Possible idea: Return a serializable array as args for new()
-        return new this('', other);
-    }
-
-    tokenizeText(text) {
-        // Join all modeTokens with | (OR in regex).
-        // Replace space with wildcard capture.
-        const re = '(' + this.modeTokens.join('|(').replace(/ +/g, ')(.+?)');
-        return text.split(RegExp(re)).filter(token => token !== undefined);
-    }
-
-    compile(text) {
-        // const prepComment = token => truncate(escapejs(trim(token)), 80);
-        const { normalize } = modulo.registry.utils;
-        this.stack = []; // Template tag stack
-        this.output = 'var OUT=[];\n'; // Variable used to accumulate code
-        let mode = 'text'; // Start in text mode
-        for (const token of this.tokenizeText(text)) {
-            if (mode) { // if in a "mode" (text or token), then call mode func
-                const result = this.modes[mode](token, this, this.stack);
-                if (result) { // Mode generated text output, add to code
-                    const comment = JSON.stringify(normalize(token).trim()); // TODO: maybe collapse all ws?
-                    this.output += `  ${result} // ${ comment }\n`;
-                }
-            }
-            // FSM for mode: ('text' -> null) (null -> token) (* -> 'text')
-            mode = (mode === 'text') ? null : (mode ? 'text' : token);
-        }
-        this.output += '\nreturn OUT.join("");'
-        return this.output;
-    }
-
-    render(renderObj) {
-        return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
-    }
-
-    parseExpr(text) {
-        // TODO: Store a list of variables / paths, so there can be warnings or
-        // errors when variables are unspecified
-        // TODO: Support this-style-variable being turned to thisStyleVariable
-        const filters = text.split('|');
-        let results = this.parseVal(filters.shift()); // Get left-most val
-        for (const [ fName, arg ] of filters.map(s => s.trim().split(':'))) {
-            const argList = arg ? ',' + this.parseVal(arg) : '';
-            results = `G.filters["${fName}"](${results}${argList})`;
-        }
-        return results;
-    }
-
-    parseCondExpr(string) {
-        // This RegExp splits around the tokens, with spaces added
-        const regExpText = ` (${this.opTokens.split(',').join('|')}) `;
-        return string.split(RegExp(regExpText));
-    }
-
-    parseVal(string) {
-        // Parses string literals, de-escaping as needed, numbers, and context
-        // variables
-        const { cleanWord } = modulo.registry.utils;
-        const s = string.trim();
-        if (s.match(/^('.*'|".*")$/)) { // String literal
-            return JSON.stringify(s.substr(1, s.length - 2));
-        }
-        return s.match(/^\d+$/) ? s : `CTX.${cleanWord(s)}`
-    }
-
-    escapeText(text) {
-        if (text && text.safe) {
-            return text;
-        }
-        return (text + '').replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/'/g, '&#x27;').replace(/"/g, '&quot;');
-    }
-}, {
-    modeTokens: ['{% %}', '{{ }}', '{# #}'],
-    opTokens: '==,>,<,>=,<=,!=,not in,is not,is,in,not,gt,lt',
-    opAliases: {
-        '==': 'X === Y',
-        'is': 'X === Y',
-        'gt': 'X > Y',
-        'lt': 'X < Y',
-        'is not': 'X !== Y',
-        'not': '!(Y)',
-        'in': '(Y).includes ? (Y).includes(X) : (X in Y)',
-        'not in': '!((Y).includes ? (Y).includes(X) : (X in Y))',
-    },
-});
-
-// TODO: Consider patterns like this to avoid excess reapplication of
-// filters:
-// (x = X, y = Y).includes ? y.includes(x) : (x in y)
-modulo.config.templater.modes = {
-    '{%': (text, tmplt, stack) => {
-        const tTag = text.trim().split(' ')[0];
-        const tagFunc = tmplt.tags[tTag];
-        if (stack.length && tTag === stack[stack.length - 1].close) {
-            return stack.pop().end; // Closing tag, return it's end code
-        } else if (!tagFunc) { // Undefined template tag
-            throw new Error(`Unknown template tag "${tTag}": ${text}`);
-        } // Normal opening tag
-        const result = tagFunc(text.slice(tTag.length + 1), tmplt);
-        if (result.end) { // Not self-closing, push to stack
-            stack.push({ close: `end${tTag}`, ...result });
-        }
-        return result.start || result;
-    },
-    '{#': (text, tmplt) => false, // falsy values are ignored
-    '{{': (text, tmplt) => `OUT.push(G.escapeText(${tmplt.parseExpr(text)}));`,
-    text: (text, tmplt) => text && `OUT.push(${JSON.stringify(text)});`,
-};
-
-modulo.config.templater.filters = (function () {
-    //const { get } = modulo.registry.utils; // TODO, fix this code duplciation
-    function get(obj, key) {
-        return obj[key];
-    }
-
-    function sorted(obj, arg) {
-        if (!obj) {
-            return obj;
-        }
-        // TODO Refactor or remove?
-        if (Array.isArray(obj)) {// && (!obj.length || typeof obj[0] !== 'object')) {
-            return obj.sort();
-        } else {
-            const keys = Array.from(Object.keys(obj)).sort(); // Loop through sorted
-            return keys.map(k => [k, obj[k]]);
-        }
-    }
-
-    // TODO: Once we get unit tests for build, replace jsobj with actual loop
-    // in build template (and just backtick escape as filter).
-    function jsobj(obj, arg) {
-        let s = '{\n';
-        for (const [key, value] of sorted(obj)) {
-            s += '  ' + JSON.stringify(key) + ': ';
-            if (typeof value === 'string') {
-                s += '// (' + value.split('\n').length + ' lines)\n`';
-                s += value.replace(/\\/g , '\\\\')
-                          .replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                s += '`,// (ends: ' + key + ') \n\n';
-            } else {
-                s += JSON.stringify(value, null, 4) + ',\n';
-            }
-        }
-        return s + '}';
-    }
-    const safe = s => Object.assign(new String(s), {safe: true});
-
-    //trim: s => s.trim(), // TODO: improve interface to be more useful
-    //invoke: (s, arg) => s(arg),
-    //getAttribute: (s, arg) => s.getAttribute(arg),
-
-    // Idea: Generalized "matches" filter that gets registered like such:
-    //     defaultOptions.filters.matches = {name: //ig}
-    // Then we could configure "named" RegExps in Script that get used in
-    // template
-
-    const filters = {
-        add: (s, arg) => s + arg,
-        allow: (s, arg) => arg.split(',').includes(s) ? s : '',
-        camelcase: s => s.replace(/-([a-z])/g, g => g[1].toUpperCase()),
-        capfirst: s => s.charAt(0).toUpperCase() + s.slice(1),
-        concat: (s, arg) => s.concat ? s.concat(arg) : s + arg,
-        //combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign(s, arg),
-        default: (s, arg) => s || arg,
-        yesno: (s, arg) => ((arg || 'yes,no') + ',,').split(',')[s === null ? 2 : (1 - (1 * !s))],
-        divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,
-        dividedinto: (s, arg) => Math.ceil((s * 1) / (arg * 1)),
-        escapejs: s => JSON.stringify(String(s)).replace(/(^"|"$)/g, ''),
-        first: s => s[0],
-        join: (s, arg) => (s || []).join(arg === undefined ? ", " : arg),
-        json: (s, arg) => JSON.stringify(s, null, arg || undefined),
-        last: s => s[s.length - 1],
-        length: s => s.length !== undefined ? s.length : Object.keys(s).length,
-        lower: s => s.toLowerCase(),
-        multiply: (s, arg) => (s * 1) * (arg * 1),
-        number: (s) => Number(s),
-        pluralize: (s, arg) => (arg.split(',')[(s === 1) * 1]) || '',
-        subtract: (s, arg) => s - arg,
-        truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
-        type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
-        renderas: (rCtx, template) => safe(template.Instance.render(rCtx)),
-        reversed: s => Array.from(s).reverse(),
-        upper: s => s.toUpperCase(),
-    };
-    const { values, keys, entries } = Object;
-    const extra = { get, jsobj, safe, sorted, values, keys, entries };
-    return Object.assign(filters, extra);
-})();
-
-modulo.config.templater.tags = {
-    'debugger': () => 'debugger;',
-    'if': (text, tmplt) => {
-        // Limit to 3 (L/O/R)
-        const [ lHand, op, rHand ] = tmplt.parseCondExpr(text);
-        const condStructure = !op ? 'X' : tmplt.opAliases[op] || `X ${op} Y`;
-        const condition = condStructure.replace(/([XY])/g,
-            (k, m) => tmplt.parseExpr(m === 'X' ? lHand : rHand));
-        const start = `if (${condition}) {`;
-        return {start, end: '}'};
-    },
-    'else': () => '} else {',
-    'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
-    'comment': () => ({ start: "/*", end: "*/"}),
-    'for': (text, tmplt) => {
-        // Make variable name be based on nested-ness of tag stack
-        const { cleanWord } = modulo.registry.utils;
-        const arrName = 'ARR' + tmplt.stack.length;
-        const [ varExp, arrExp ] = text.split(' in ');
-        let start = `var ${arrName}=${tmplt.parseExpr(arrExp)};`;
-        // TODO: Upgrade to of (after good testing), since probably no need to
-        // support for..in
-        start += `for (var KEY in ${arrName}) {`;
-        const [keyVar, valVar] = varExp.split(',').map(cleanWord);
-        if (valVar) {
-            start += `CTX.${keyVar}=KEY;`;
-        }
-        start += `CTX.${valVar ? valVar : varExp}=${arrName}[KEY];`;
-        return {start, end: '}'};
-    },
-    'empty': (text, {stack}) => {
-        // Make variable name be based on nested-ness of tag stack
-        const varName = 'G.FORLOOP_NOT_EMPTY' + stack.length;
-        const oldEndCode = stack.pop().end; // get rid of dangling for
-        const start = `${varName}=true; ${oldEndCode} if (!${varName}) {`;
-        const end = `}${varName} = false;`;
-        return {start, end, close: 'endfor'};
-    },
-};
-
-// TODO: 
-//  - Then, re-implement [component.key] and [component.ignore] as TagLoad
-//  - Possibly: Use this to then do granular patches (directiveMount etc)
-modulo.register('engine', class DOMCursor {
-    constructor(parentNode, parentRival) {
-        this.initialize(parentNode, parentRival);
-        this.instanceStack = [];
-    }
-
-    initialize(parentNode, parentRival) {
-        this.parentNode = parentNode;
-        this.nextChild = parentNode.firstChild;
-        this.nextRival = parentRival.firstChild;
-        this.keyedChildren = {};
-        this.keyedRivals = {};
-        this.keyedChildrenArr = null;
-        this.keyedRivalsArr = null;
-    }
-
-    saveToStack() {
-        // TODO: Once we finalize this class, write "_.pick" helper
-        const { nextChild, nextRival, keyedChildren, keyedRivals,
-                parentNode, keyedChildrenArr, keyedRivalsArr } = this;
-        const instance = { nextChild, nextRival, keyedChildren, keyedRivals,
-                parentNode, keyedChildrenArr, keyedRivalsArr };
-        this.instanceStack.push(instance);
-    }
-
-    loadFromStack() {
-        const stack = this.instanceStack;
-        return stack.length > 0 && Object.assign(this, stack.pop());
-    }
-
-    hasNext() {
-        if (this.nextChild || this.nextRival) {
-            return true; // Is pointing at another node
-        }
-
-        // Convert objects into arrays so we can pop
-        if (!this.keyedChildrenArr) {
-            this.keyedChildrenArr = Object.values(this.keyedChildren);
-        }
-        if (!this.keyedRivalsArr) {
-            this.keyedRivalsArr = Object.values(this.keyedRivals);
-        }
-
-        if (this.keyedRivalsArr.length || this.keyedChildrenArr.length) {
-            return true; // We have queued up nodes from keyed values
-        }
-
-        return this.loadFromStack() && this.hasNext();
-    }
-
-    next() {
-        let child = this.nextChild;
-        let rival = this.nextRival;
-        if (!child && !rival) { // reached the end
-            if (!this.keyedRivalsArr) {
-                return [null, null];
-            }
-            // There were excess keyed rivals OR children, pop()
-            return this.keyedRivalsArr.length ?
-                  [ null, this.keyedRivalsArr.pop() ] :
-                  [ this.keyedChildrenArr.pop(), null ];
-        }
-
-        // Handle keys
-        this.nextChild = child ? child.nextSibling : null;
-        this.nextRival = rival ? rival.nextSibling : null;
-
-        let matchedRival = this.getMatchedNode(child, this.keyedChildren, this.keyedRivals);
-        let matchedChild = this.getMatchedNode(rival, this.keyedRivals, this.keyedChildren);
-        // TODO refactor this
-        if (matchedRival === false) {
-            // Child has a key, but does not match rival, so SKIP on child
-            child = this.nextChild;
-            this.nextChild = child ? child.nextSibling : null;
-        } else if (matchedChild === false) {
-            // Rival has a key, but does not match child, so SKIP on rival
-            rival = this.nextRival;
-            this.nextRival = rival ? rival.nextSibling : null;
-        }
-        const keyWasFound = matchedRival !== null || matchedChild !== null;
-        const matchFound = matchedChild !== child && keyWasFound;
-        if (matchFound && matchedChild) {
-            // Rival matches, but not with child. Swap in child.
-            this.nextChild = child;
-            child = matchedChild;
-        }
-
-        if (matchFound && matchedRival) {
-            // Child matches, but not with rival. Swap in rival.
-            this.modulo.assert(matchedRival !== rival, 'Dupe!'); // (We know this due to ordering)
-            this.nextRival = rival;
-            rival = matchedRival;
-        }
-
-        return [ child, rival ];
-    }
-
-    getMatchedNode(elem, keyedElems, keyedOthers) {
-        // IDEA: Rewrite keying elements with this trick: - Use LoadTag
-        // directive, removed keyed rival from DOM
-        /// - Issue: Cursor is scoped per "layer", and non-recursive reconcile
-        //    not created yet, so reconciler will need to keep keyed elements
-        /// - Solution: Finish non-recursive reconciler
-        const key = elem && elem.getAttribute && elem.getAttribute('key');
-        if (!key) {
-            return null;
-        }
-        if (key in keyedOthers) {
-            const matched = keyedOthers[key];
-            delete keyedOthers[key];
-            return matched;
-        } else {
-            if (key in keyedElems) {
-                console.error('MODULO WARNING: Duplicate key:', key);
-            }
-            keyedElems[key] = elem;
-            return false;
-        }
-    }
-});
-
-modulo.register('engine', class Reconciler {
-    constructor(modulo, conf) {
-        this.constructor_old(conf);
-    }
-    constructor_old(opts) {
-        opts = opts || {};
-        this.shouldNotDescend = !!opts.doNotDescend;
-        this.directives = opts.directives || {};
-        this.tagTransforms = opts.tagTransforms;
-        this.directiveShortcuts = opts.directiveShortcuts || [];
-        if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            LEGACY.push('this.directiveShortcuts.length === 0')
-            this.directiveShortcuts = [
-                [ /^@/, 'component.event' ],
-                [ /:$/, 'component.dataProp' ],
-            ];
-        }
-        this.patch = this.pushPatch;
-        this.patches = [];
-    }
-
-    parseDirectives(rawName, directiveShortcuts) { //, foundDirectives) {
-        if (/^[a-z0-9-]$/i.test(rawName)) {
-            return null; // if alpha-only, stop right away
-            // TODO: If we ever support key= as a shortcut, this will break
-        }
-
-        // "Expand" shortcuts into their full versions
-        let name = rawName;
-        for (const [regexp, directive] of directiveShortcuts) {
-            if (rawName.match(regexp)) {
-                name = `[${directive}]` + name.replace(regexp, '');
-            }
-        }
-        if (!name.startsWith('[')) {
-            return null; // There are no directives, regular attribute, skip
-        }
-
-        // There are directives... time to resolve them
-        const { cleanWord, stripWord } = modulo.registry.utils; // TODO global modulo
-        const arr = [];
-        const attrName = stripWord((name.match(/\][^\]]+$/) || [ '' ])[0]);
-        for (const directiveName of name.split(']').map(cleanWord)) {
-            // Skip the bare name itself, and filter for valid directives
-            if (directiveName !== attrName) {// && directiveName in directives) {
-                arr.push({ attrName, rawName, directiveName, name })
-            }
-        }
-        return arr;
-    }
-
-    loadString(rivalHTML, tagTransforms) {
-        this.patches = [];
-        const rival = modulo.registry.utils.makeDiv(rivalHTML);
-        const transforms = Object.assign({}, this.tagTransforms, tagTransforms);
-        this.applyLoadDirectives(rival, transforms);
-        return rival;
-    }
-
-    reconcile(node, rival, tagTransforms) {
-        // TODO: should normalize <!DOCTYPE html>
-        if (typeof rival === 'string') {
-            rival = this.loadString(rival, tagTransforms);
-        }
-        this.reconcileChildren(node, rival);
-        this.cleanRecDirectiveMarks(node);
-        return this.patches;
-    }
-
-    applyLoadDirectives(elem, tagTransforms) {
-        this.patch = this.applyPatch; // Apply patches immediately
-        for (const node of elem.querySelectorAll('*')) {
-            // legacy -v, TODO rm
-            const newTag = tagTransforms[node.tagName.toLowerCase()];
-            //console.log('this is tagTransforms', tagTransforms);
-            if (newTag) {
-                modulo.registry.utils.transformTag(node, newTag);
-            }
-            ///////
-
-            const lowerName = node.tagName.toLowerCase();
-            if (lowerName in this.directives) {
-                this.patchDirectives(node, `[${lowerName}]`, 'TagLoad');
-            }
-
-            for (const rawName of node.getAttributeNames()) {
-                // Apply load-time directive patches
-                this.patchDirectives(node, rawName, 'Load');
-            }
-        }
-        this.markRecDirectives(elem); // TODO rm
-        this.patch = this.pushPatch;
-    }
-
-    markRecDirectives(elem) {
-        // TODO remove this after we reimplement [component.ignore]
-        // Mark all children of modulo-ignore with mm-ignore
-        for (const node of elem.querySelectorAll('[modulo-ignore] *')) {
-            // TODO: Very important: also mark to ignore children that are
-            // custom!
-            node.setAttribute('mm-ignore', 'mm-ignore');
-        }
-
-        // TODO: hacky / leaky solution to attach like this
-        //for (const rivalChild of elem.querySelectorAll('*')) {
-        //    rivalChild.moduloDirectiveContext = this.directives;
-        //}
-    }
-
-    cleanRecDirectiveMarks(elem) {
-        // Remove all mm-ignores
-        for (const node of elem.querySelectorAll('[mm-ignore]')) {
-            node.removeAttribute('mm-ignore');
-        }
-    }
-
-    applyPatches(patches) {
-        patches.forEach(patch => this.applyPatch.apply(this, patch));
-    }
-
-    reconcileChildren(childParent, rivalParent) {
-        // Nonstandard nomenclature: "The rival" is the node we wish to match
-        const cursor = new modulo.registry.engines.DOMCursor(childParent, rivalParent);
-
-        //console.log('Reconciling (1):', childParent.outerHTML);
-        //console.log('Reconciling (2):', rivalParent.outerHTML);
-
-        while (cursor.hasNext()) {
-            const [ child, rival ] = cursor.next();
-
-            //console.log('NEXT', child, rival, cursor.hasNext());
-            // Does this node to be swapped out? Swap if exist but mismatched
-            const needReplace = child && rival && (
-                child.nodeType !== rival.nodeType ||
-                child.nodeName !== rival.nodeName
-            );
-
-            if ((child && !rival) || needReplace) { // we have more rival, delete child
-                this.patchAndDescendants(child, 'Unmount');
-                this.patch(cursor.parentNode, 'removeChild', child);
-            }
-
-            if (needReplace) { // do swap with insertBefore
-                this.patch(cursor.parentNode, 'insertBefore', rival, child.nextSibling);
-                this.patchAndDescendants(rival, 'Mount');
-            }
-
-            if (!child && rival) { // we have less than rival, take rival
-                this.patch(cursor.parentNode, 'appendChild', rival);
-                this.patchAndDescendants(rival, 'Mount');
-            }
-
-            if (child && rival && !needReplace) {
-                // Both exist and are of same type, let's reconcile nodes
-
-                //console.log('NODE', child.isEqualNode(rival), child.innerHTML, rival.innerHTML);
-                if (child.nodeType !== 1) { // text or comment node
-                    if (child.nodeValue !== rival.nodeValue) { // update
-                        this.patch(child, 'node-value', rival.nodeValue);
-                    }
-                } else if (!child.isEqualNode(rival)) { // sync if not equal
-                    //console.log('NOT EQUAL', child, rival);
-                    this.reconcileAttributes(child, rival);
-
-                    if (rival.hasAttribute('modulo-ignore')) {
-                        //console.log('Skipping ignored node');
-                    } else if (child.isModulo) { // is a Modulo component
-                        // TODO: Instead of having one big "rerender" patch,
-                        // maybe run a "rerender" right away, but collect
-                        // patches, then insert in the patch list here?
-                        // Could have renderObj = { component: renderContextRenderObj ... }
-                        // And maybe even then dataProps resolve like:
-                        // renderObj.component.renderContextRenderObj || renderObj;
-                        // OR: Maybe even a simple way to reuse renderObj?
-                        this.patch(child, 'rerender', rival);
-                    } else if (!this.shouldNotDescend) {
-                        cursor.saveToStack();
-                        cursor.initialize(child, rival);
-                    }
-                }
-            }
-        }
-    }
-
-    pushPatch(node, method, arg, arg2 = null) {
-        this.patches.push([ node, method, arg, arg2 ]);
-    }
-
-    applyPatch(node, method, arg, arg2) { // take that, rule of 3!
-        //if (!node || !node[method]) { console.error('NO NODE:', node, method, arg, arg2) } // XXX
-        if (method === 'node-value') {
-            node.nodeValue = arg;
-        } else if (method === 'insertBefore') {
-            node.insertBefore(arg, arg2); // Needs 2 arguments
-        } else if (method.startsWith('directive-')) {
-            // TODO: Possibly, remove 'directive-' prefix
-            method = method.substr('directive-'.length);
-            node[method].call(node, arg); // invoke method
-        } else {
-            node[method].call(node, arg); // invoke method
-        }
-    }
-
-    patchDirectives(el, rawName, suffix, copyFromEl = null) {
-        const foundDirectives = this.parseDirectives(rawName, this.directiveShortcuts);
-        if (!foundDirectives || foundDirectives.length === 0) {
-            return;
-        }
-
-        const value = (copyFromEl || el).getAttribute(rawName); // Get value
-        for (const directive of foundDirectives) {
-            const dName = directive.directiveName; // e.g. "state.bind", "link"
-            const fullName = dName + suffix; // e.g. "state.bindMount"
-
-            // Hacky: Check if this elem has a different moduloDirectiveContext than expected
-            //const directives = (copyFromEl || el).moduloDirectiveContext || this.directives;
-            //if (el.moduloDirectiveContext) {
-            //    console.log('el.moduloDirectiveContext', el.moduloDirectiveContext);
-            //}
-            const { directives } = this;
-
-            const thisContext = directives[dName] || directives[fullName];
-            if (thisContext) { // If a directive matches...
-                const methodName = fullName.split('.')[1] || fullName;
-                Object.assign(directive, { value, el });
-                this.patch(thisContext, 'directive-' + methodName, directive);
-            }
-        }
-    }
-
-    reconcileAttributes(node, rival) {
-        const myAttrs = new Set(node ? node.getAttributeNames() : []);
-        const rivalAttributes = new Set(rival.getAttributeNames());
-
-        // Check for new and changed attributes
-        for (const rawName of rivalAttributes) {
-            const attr = rival.getAttributeNode(rawName);
-            if (myAttrs.has(rawName) && node.getAttribute(rawName) === attr.value) {
-                continue; // Already matches, on to next
-            }
-
-            if (myAttrs.has(rawName)) { // If exists, trigger Unmount first
-                this.patchDirectives(node, rawName, 'Unmount');
-            }
-            // Set attribute node, and then Mount based on rival value
-            this.patch(node, 'setAttributeNode', attr.cloneNode(true));
-            this.patchDirectives(node, rawName, 'Mount', rival);
-        }
-
-        // Check for old attributes that were removed
-        for (const rawName of myAttrs) {
-            if (!rivalAttributes.has(rawName)) {
-                this.patchDirectives(node, rawName, 'Unmount');
-                this.patch(node, 'removeAttribute', rawName);
-            }
-        }
-    }
-
-    patchAndDescendants(parentNode, actionSuffix) {
-        if (parentNode.nodeType !== 1) { // cannot have descendants
-            return;
-        }
-        let nodes = [ parentNode ]; // also, patch self (but last)
-        if (!this.shouldNotDescend) {
-            nodes = Array.from(parentNode.querySelectorAll('*')).concat(nodes);
-        }
-        for (let rival of nodes) { // loop through nodes to patch
-            if (rival.hasAttribute('mm-ignore')) {
-                // Skip any marked to ignore
-                continue;
-            }
-
-            for (const rawName of rival.getAttributeNames()) {
-                // Loop through each attribute patching foundDirectives as necessary
-                this.patchDirectives(rival, rawName, actionSuffix);
-            }
-        }
-    }
-});
-
-
-modulo.register('util', function fetchBundleData(modulo, callback) {
-    const query = 'script[src],link[rel=stylesheet]';
-    const data = [];
-    const elems = Array.from(modulo.globals.document.querySelectorAll(query));
-    for (const elem of elems) {
-        const dataItem = {
-            src: elem.src || elem.href,
-            type: elem.tagName === 'SCRIPT' ? 'js' : 'css',
-            content: null,
-        };
-        // TODO: Add support for inline script tags..?
-        data.push(dataItem);
-        modulo.fetchQueue.enqueue(dataItem.src, text => {
-            delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-            dataItem.content = text;
-        });
-        elem.remove();
-    }
-    //console.log('this is dataItems', data);
-    modulo.fetchQueue.enqueueAll(() => callback(data));
-});
-
-
-modulo.register('command', function build (modulo, opts = {}) {
-    const { buildhtml } = modulo.registry.commands;
-    opts.type = opts.bundle ? 'bundle' : 'build';
-    const pre = { js: [], css: [] }; // Prefixed content
-    for (const bundle of (opts.bundle || [])) { // Loop through bundle data
-        pre[bundle.type].push(bundle.content);
-    }
-    pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
-    // TODO: Clean this up:
-    if (opts.bundle) {
-        // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('currentModulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('currentModulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
-    } else {
-        // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
-                    JSON.stringify(modulo.fetchQueue.data) + ';');
-    }
-    opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
-    opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
-    opts.jsInlineText = modulo.assets.getInlineJS(opts);
-    opts.htmlFilePath = buildhtml(modulo, opts);
-    setTimeout(() => {
-        document.body.innerHTML = `<h1><a href="?mod-cmd=${opts.type}">&#10227;
-            ${ opts.type }</a>: ${ opts.htmlFilePath }</h1>`;
-        if (opts.callback) {
-            opts.callback();
-        }
-    }, 0);
-});
-
-modulo.register('command', function bundle (modulo, opts = {}) {
-    const { build } = modulo.registry.commands;
-    const { fetchBundleData } = modulo.registry.utils;
-    fetchBundleData(modulo, bundle => build(modulo, Object.assign({ bundle }, opts)));
-});
-
-modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
-    // Scan document for modulo elements, attaching modulo-original-html=""
-    // as needed, and clearing link / script tags that have been bundled
-    const doc = modulo.globals.document;
-    const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
-    for (const elem of doc.querySelectorAll('*')) {
-        // TODO: As we are bundling together, create a src/href/etc collection
-        // to the compare against instead?
-        if (elem.tagName.toLowerCase() in bundledTags) {
-            if (elem.hasAttribute('modulo-asset') || opts.bundle) {
-                elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
-            }
-        } else if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-            elem.setAttribute('modulo-original-html', elem.originalHTML);
-        }
-    }
-    // TODO: Generate in a template of some sort instead!
-    const linkProps = { rel: 'stylesheet', href: opts.cssFilePath };
-    doc.head.append(Object.assign(doc.createElement('link'), linkProps));
-    const scriptProps = { src: opts.jsFilePath };
-    doc.body.append(Object.assign(doc.createElement('script'), scriptProps));
-    const inlineProps = { textContent: opts.jsInlineText };
-    doc.body.append(Object.assign(doc.createElement('script'), inlineProps));
-    //let inlineExtra = '<script>\n' + (opts.jsInlineText || '') + '\n</script>';
-    return '<!DOCTYPE HTML><html>' + doc.documentElement.innerHTML + '</html>';
-});
-
-modulo.register('command', function buildhtml(modulo, opts = {}) {
-    const { saveFileAs, getBuiltHTML } = modulo.registry.utils;
-    const filename = window.location.pathname.split('/').pop() || 'index.html';
-    return saveFileAs(filename, getBuiltHTML(modulo, opts));
-});
-
-
-if (typeof document !== 'undefined' && document.head) { // Browser environ
-    Modulo.globals = window; // TODO, remove?
-    modulo.globals = window;
-    window.hackCoreModulo = new Modulo(modulo); // XXX
-    window.hackRunBlocking = (document.querySelectorAll('script[modulo]')).length === 1;
-    if (window.hackRunBlocking) {
-        // TODO - Cleanup this logic, need to determine advantages of running
-        // preprocess blocking vs not, and make more consistent / documented
-        modulo.loadFromDOM(document.head, null, true);
-        modulo.preprocessAndDefine();
-    } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            modulo.loadFromDOM(document.head, null, true);
-            modulo.preprocessAndDefine();
-        });
-    }
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
-}
-
-if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        // TODO: Better way to know if in built-version browser environ
-        const isProduction = document.querySelector(
-            'script[src*="modulo-build"],script[src*="modulo-bundle"]');
-        if (isProduction) {
-            return;
-        }
-        const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-        // TODO: disable commands for built version somehow, as a safety
-        // precaution -- maybe another if statement down here, so this is
-        // "dev-mode", and there's "node-mode" and finally "build-mode"?
-        if (cmd) {
-            modulo.registry.commands[cmd](modulo);
-        } else {
-            // TODO: Make these link to ?mod-cmd=...
-            // and maybe a-tag / button to "force-refresh" after every command
-            // (e.g. [ build ] ./start.html)
-            const font = 'font-size: 30px; line-height: 0.7; padding: 5px; border: 3px solid black;';
-            console.log('%c%', font, (new (class COMMANDS {
-                get test() { window.location.href += '?mod-cmd=test' }
-                get build() { window.location.href += '?mod-cmd=build' }
-                get bundle() { window.location.href += '?mod-cmd=bundle' }
-            })));
-            //})).__proto__); // TODO: .__proto__ is better in firefox, saves one click, without is better in chrome
-            /*
-            const cmds = Object.keys(modulo.registry.commands);
-            new Function(`console.log('%c%', '${ font }, (new (class COMMANDS {
-                ${ cmds.map(cmd => `get ${ cmd } () {
-                    return modulo.registry.commands.test(modulo)
-                }
-            `)
-            */
-        }
-    }));
-}
-
-
-var currentModulo = new Modulo(modulo);
-currentModulo.defs = {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /js/Modulo.js</pre>
+</body>
+</html>
+
+var currentModulo = modulo;
+modulo.defs = {
  "x": [
   {
    "Type": "Modulo",
@@ -2280,54 +24,17 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x",
-   "Hash": "s34uku",
-   "cachedComponentDefs": {
-    "/libraries/eg.html": {
-     "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-     "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-     "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-     "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-     "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-     "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-     "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-     "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-     "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-     "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-     "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-     "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-     "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-     "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-     "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-     "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-     "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-     "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-     "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-    }
-   }
+   "Hash": "x1o0cb7u"
   }
  ],
  "x_x": [
   {
-   "Type": "Script",
-   "RenderObj": "script",
+   "Type": "Configuration",
+   "RenderObj": "configuration",
    "Parent": "x_x",
    "DefName": null,
    "Name": "x",
-   "FullName": "x_x_x",
-   "localVars": [
-    "component",
-    "modulo",
-    "library",
-    "props",
-    "style",
-    "template",
-    "staticdata",
-    "configuration",
-    "script",
-    "state",
-    "element",
-    "cparts"
-   ]
+   "FullName": "x_x_x"
   },
   {
    "Type": "Library",
@@ -3413,7 +1120,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Page_x",
-   "Hash": "3n0giq"
+   "Hash": "x7vad96"
   },
   {
    "Type": "Script",
@@ -3648,7 +1355,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Demo_x",
-   "Hash": "x44d8e6",
+   "Hash": "xnob7me",
    "localVars": [
     "component",
     "modulo",
@@ -4138,7 +1845,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_JSON_x",
-   "Hash": "xcterp7"
+   "Hash": "ftn6om"
   }
  ],
  "x_x_eg_JSONArray": [
@@ -4795,7 +2502,7 @@ currentModulo.defs = {
   }
  ]
 };
-currentModulo.parentDefs = {
+modulo.parentDefs = {
  "x_x": {
   "Type": "Modulo",
   "ConfPreprocessors": [
@@ -4808,30 +2515,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x",
-  "Hash": "s34uku",
-  "cachedComponentDefs": {
-   "/libraries/eg.html": {
-    "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-    "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-    "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-    "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-    "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-    "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-    "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-    "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-    "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-    "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-    "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-    "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-    "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-    "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-    "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-    "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-    "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   }
-  }
+  "Hash": "x1o0cb7u"
  },
  "x_x_x": {
   "Type": "Library",
@@ -5938,7 +3622,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_JSON_x",
-  "Hash": "xcterp7"
+  "Hash": "ftn6om"
  },
  "x_x_eg_JSONArray_x": {
   "Type": "StaticData",
@@ -6141,7 +3825,7 @@ currentModulo.parentDefs = {
   "Name": "x",
   "FullName": "x_x_eg_ConwayGameOfLife_x"
  }
-};currentModulo.assets.functions["1a5ar2m"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+};currentModulo.assets.functions["xg5of9b"]= function (modulo){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; }
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -18820,7 +16504,9 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     // Expose a global utility, which creates an object containing the contents
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
-    function getComponentDefs(path) {
+    function getComponentDefs(path, modulo) {
+        // TODO: Fix the modulo dependency injection here, once currentModulo
+        // is fixed (refs #11)
         if (modulo.parentDefs.x_x.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this
@@ -18860,7 +16546,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
         return componentTexts;
     }
     modulo.register('util', getComponentDefs);
-
+    window.getComponentDefs = getComponentDefs; //  TODO: Fix after currentModulo bug s (refs #11)
 
     // https://stackoverflow.com/questions/400212/
     function fallbackCopyTextToClipboard(text) {
@@ -18902,6 +16588,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     }
     modulo.register('util', copyTextToClipboard);
 
+    window.copyTextToClipboard = copyTextToClipboard ; //  TODO: Fix after currentModulo bugs (refs #11)
 return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "removeChildren": typeof removeChildren !== "undefined" ? removeChildren : undefined,
 "removeChildrenAndAdd": typeof removeChildrenAndAdd !== "undefined" ? removeChildrenAndAdd : undefined,
@@ -19481,1102 +17168,6 @@ return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "getComponentDefs": typeof getComponentDefs !== "undefined" ? getComponentDefs : undefined,
 "fallbackCopyTextToClipboard": typeof fallbackCopyTextToClipboard !== "undefined" ? fallbackCopyTextToClipboard : undefined,
 "copyTextToClipboard": typeof copyTextToClipboard !== "undefined" ? copyTextToClipboard : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function show() {
-            state.visible = true;
-        }
-        function hide() {
-            state.visible = false;
-        }
-    
-return { "show": typeof show !== "undefined" ? show : undefined,
-"hide": typeof hide !== "undefined" ? hide : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            const data = props.data || [];
-            const max = Math.max(...data);
-            const min = 0;// Math.min(...props.data),
-            return {
-                percent: data.map(item => ((item - min) / max) * 100),
-                width: Math.floor(100 / data.length),
-            }
-        }
-    
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            state.value = element.value;
-        }
-        function setValue(val) {
-            state.value = val;
-            element.value = val;
-            element.dispatchEvent(new Event('change'));
-        }
-    
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
-"setValue": typeof setValue !== "undefined" ? setValue : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        //console.log('mws-Page/Script is running', modulo);
-    
-return {  setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-function initializedCallback() {
-    const { path, showall } = props;
-    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
-    for (const groupObj of state.menu) {
-        if (showall) {
-            groupObj.active = true;
-        }
-        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
-            groupObj.active = true;
-        }
-    }
-}
-
-function _child(label, hash, keywords=[], filepath=null) {
-    if (!hash) {
-        hash = label.toLowerCase()
-    }
-    if (hash.endsWith('.html') && filepath === null) {
-        filepath = hash;
-    }
-    return {label, hash, keywords, filepath};
-}
-
-let componentTexts = {};
-try {
-    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
-} catch {
-    console.log('couldnt get componentTexts');
-}
-
-script.exports.menu = [
-    {
-        label: 'Table of Contents',
-        filename: '/docs/',
-    },
-
-    {
-        label: 'Tutorial',
-        filename: '/docs/tutorial_part1.html',
-        children: [
-            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
-            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
-            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
-        ],
-    },
-
-    {
-        label: 'Templating',
-        filename: '/docs/templating.html',
-        children: [
-            _child('Templates', null, ['templating philosophy', 'templating overview']),
-            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
-            _child('Filters', null, ['filter syntax', 'example filters']),
-            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
-            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
-            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
-            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
-        ],
-    },
-
-    {
-        label: 'Template Reference',
-        filename: '/docs/templating-reference.html',
-        children: [
-            _child('Built-in Template Tags', 'templatetags', [
-                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
-                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
-                'comparison', 'control-flow',
-            ]),
-            _child('Built-in Filters', 'filters', [
-                'add', 'allow', 'capfirst', 'concat', 'default',
-                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
-                'length', 'lower', 'number', 'pluralize', 'subtract',
-                'truncate', 'renderas', 'reversed', 'upper',
-            ]),
-        ],
-    },
-
-    {
-        label: 'CParts',
-        filename: '/docs/cparts.html',
-        children: [
-            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
-                                'rendering mode', 'manual rerender', 'shadow',
-                                'vanish', 'vanish-into-document', 'component.event',
-                                'component.slot', 'component.dataProp']),
-            _child('Props', 'props', ['accessing props', 'defining props',
-                                'setting props', 'using props']),
-            _child('Script', 'script', ['javascript', 'events', 'computed properties',
-                            'static execution', 'custom lifecycle methods',
-                                'script callback execution context', 'script exports']),
-            _child('State', 'state', ['state definition', 'state data types',
-                            'json', 'state variables', 'state.bind directive']),
-            _child('StaticData', 'staticdata', ['loading API', 'loading json',
-                            'transform function', 'bundling data']),
-            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
-            _child('Template', 'template', ['custom template', 'templating engine']),
-        ],
-    },
-
-    {
-        label: 'Lifecycle',
-        filename: '/docs/lifecycle.html',
-        children: [
-            _child('Global lifecycle', 'global',
-                ['lifestyle phases', 'prebuild', 'define', 'factory']),
-            _child('Component lifecycle', 'global',
-                ['consturctor', 'initialized', 'prepare', 'render',
-                'reconcile', 'update', 'event', 'eventCleanup']),
-            _child('Lifecycle callbacks', 'callbacks',
-                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
-                'renderobj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),
-        ],
-    },
-
-            /*_child('Factory lifecycle', 'factory',
-                ['renderObj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),*/
-    {
-        label: 'Directives',
-        filename: '/docs/directives.html',
-        children: [
-            _child('Directives', 'directives',
-                ['built-in directives', 'directive shortcuts',
-                'custom directives']),
-            _child('Built-in directives', 'builtin', [
-                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
-                    'data-prop', 'assignment',
-                    '[component.event]', '@click', '@...:=',
-                    '[component.slot]', '[state.bind]',
-                ]),
-            _child('Custom directives', 'custom', [
-                'refs', 'accessing dom', 'escape hatch',
-                'Mount callbacks', 'Unmount callbacks',
-                'template variables vs directives',
-                'script-tag custom directives',
-                'custom shortcuts',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'API & Extension',
-        filename: '/docs/api.html',
-        children: [
-            _child('Custom CParts', 'cparts'),
-            _child('CPart Spares', 'spares'),
-            _child('Custom Templating', 'template'),
-            _child('Custom Filters', 'customfilters'),
-            _child('Custom Template Tags', 'customtags'),
-            _child('Custom Template Syntax', 'customtags'),
-            _child('ModRec', 'modrec'),
-            _child('DOMCursor', 'cursor'),
-        ],
-    },
-    */
-
-    {
-        label: 'Examples',
-        filename: '/demos/',
-        children: [
-            _child('Starter Files', 'starter', [ 'snippets',
-                'component libraries', 'bootstrap', 'download', 'zip',
-                'page layouts', 'using vanish' ]),
-            _child('Example Library', 'library', Object.keys(componentTexts)),
-            _child('Experiments', 'experiments', [
-                'TestSuite', 'unit testing',
-                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
-                'FetchState cpart', 'jsx templating', 'babel.js',
-                'transpiling', 'cparts for apis',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'Project Info',
-        filename: '/docs/project-info.html',
-        children: [
-            _child('FAQ', 'faq'),
-            _child('Framework Design Philosophy', 'philosophy'),
-        ],
-    },
-    */
-];
-
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"_child": typeof _child !== "undefined" ? _child : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x44d8e6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-let componentTexts = null;
-let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
-
-function _setupGlobalVariables() {
-    const { getComponentDefs } = modulo.registry.utils;
-    if (!getComponentDefs) {
-          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
-    }
-    const docseg = getComponentDefs('/libraries/docseg.html');
-    const eg = getComponentDefs('/libraries/eg.html');
-    componentTexts = Object.assign({}, docseg, eg);
-}
-
-function tmpGetDirectives() {
-    console.count('DEPRECATED: Demo.js - tmpGetDirectives');
-    return [ 'script.codemirror' ];
-}
-
-function codemirrorMount({ el }) {
-    el.innerHTML = ''; // clear inner HTML before mounting
-    const demoType = props.demotype || 'snippet';
-    _setupCodemirrorSync(el, demoType, element, state);
-    const myElement = element;
-    setTimeout(() => {
-        myElement.codeMirrorEditor.refresh()
-        setTimeout(() => {
-            myElement.codeMirrorEditor.refresh()
-        }, 0); // Ensure refreshes after the first reflow
-    }, 0); // Ensure refreshes after the first reflow
-}
-
-function _setupCodemirrorSync(el, demoType, myElement, myState) {
-      let readOnly = false;
-      let lineNumbers = true;
-      if (demoType === 'snippet') {
-          readOnly = true;
-          lineNumbers = false;
-      }
-
-      const conf = {
-          value: myState.text,
-          mode: 'django',
-          theme: 'eclipse',
-          indentUnit: 4,
-          readOnly,
-          lineNumbers,
-      };
-
-      if (demoType === 'snippet') {
-          myState.showclipboard = true;
-      } else if (demoType === 'minipreview') {
-          myState.showpreview = true;
-          myState.showcomponentcopy = true;
-      }
-
-      if (!myElement.codeMirrorEditor) {
-          const { CodeMirror } = modulo.registry.utils;
-          if (typeof CodeMirror === 'undefined' || !CodeMirror) {
-              throw new Error('Have not loaded CodeMirror yet');
-          }
-          myElement.codeMirrorEditor = CodeMirror(el, conf);
-      }
-      myElement.codeMirrorEditor.refresh()
-}
-
-function selectTab(newTitle) {
-    //console.log('tab getting selected!', newTitle);
-    if (!element.codeMirrorEditor) {
-        return; // not ready yet
-    }
-    const currentTitle = state.selected;
-    state.selected = newTitle;
-    for (const tab of state.tabs) {
-        if (tab.title === currentTitle) { // save text back to state
-            tab.text = element.codeMirrorEditor.getValue();
-        } else if (tab.title === newTitle) {
-            state.text = tab.text;
-        }
-    }
-    element.codeMirrorEditor.setValue(state.text);
-    doRun();
-}
-
-function toEmbedScript(text, selected) {
-    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
-
-    // Escape all "script" tags, so it's safe according to HTML syntax:
-    const safeText = indentText.replace(/<script/gi, '<cpart Script')
-                            .replace(/<\/script\s*>/gi, '</cpart>');
-    const componentName = selected || 'Demo';
-    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
-    // Generate pastable snippet
-    const fullText = '<script Modulo src="https://unpkg.com/mdu.js">\n' +
-                      `  <Component name="${ componentName }">` + safeText + '\n' +
-                      '  </Component>\n' +
-                      '</script>' + '\n' + usage;
-    return fullText;
-}
-
-function toEmbedTemplate(text, selected) {
-    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
-
-    /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
-                            .replace(/<\/script\s*>/gi, '</cpart>');*/
-    const componentName = selected || 'Demo';
-    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
-    // Generate pastable snippet
-    const fullText = '<template Modulo>\n' +
-                      `  <Component name="${ componentName }">` + indentText + '\n' +
-                      '  </Component>\n' +
-                      '</template>\n' +
-                      '<script src="https://unpkg.com/mdu.js"></script>\n' + usage;
-    return fullText;
-}
-
-function doCopy(componentCopy = false) {
-    const { copyTextToClipboard } = modulo.registry.utils;
-    if (componentCopy) {
-        const fullText = toEmbedTemplate(state.text, state.selected);
-        state.showtoast = true;
-        state.toasttext = fullText;
-        copyTextToClipboard(fullText);
-    } else {
-        copyTextToClipboard(state.text);
-    }
-}
-
-function hideToast() {
-    state.showtoast = false;
-    state.toasttext = '';
-}
-
-function initializedCallback() {
-    if (componentTexts === null) {
-        _setupGlobalVariables();
-    }
-    //console.log('these are componentTexts', componentTexts);
-
-    let text;
-    let firstPreviewTag = null;
-    state.tabs = [];
-    if (props.fromlibrary) {
-        if (!componentTexts) {
-            componentTexts = false;
-            console.error('Couldnt load:', props.fromlibrary)
-            return;
-        }
-
-        const componentNames = props.fromlibrary.split(',');
-        for (const title of componentNames) {
-            if (firstPreviewTag === null) {
-                // XXX HACK, fix this once we have more dependable namespacing
-                for (const component of Object.values(modulo.parentDefs)) {
-                    if (component.Name === title) {
-                        firstPreviewTag = component.TagName;
-                        break;
-                    }
-                }
-            }
-            if (title in componentTexts) {
-                text = componentTexts[title].trim();
-                text = text.replace(/&#39;/g, "'"); // correct double escape
-                state.tabs.push({ text, title });
-            } else {
-                console.error('invalid fromlibrary:', title);
-                console.log(componentTexts);
-                return;
-            }
-        }
-    } else if (props.text) {
-        let title = props.ttitle || 'Example';
-        text = props.text.trim();
-        state.tabs.push({ title, text });
-        // XXX Hack, refactor -v
-        if (props.text2) {
-            title = props.ttitle2 || 'Example';
-            text = props.text2.trim();
-            state.tabs.push({ title, text });
-        }
-        if (props.text3) {
-            title = props.ttitle3 || 'Example';
-            text = props.text3.trim();
-            state.tabs.push({ title, text });
-        }
-        //console.log('this is props', props);
-    }
-
-    const demoType = props.demotype || 'snippet';
-    if (demoType === 'snippet') {
-        state.showclipboard = true;
-    } else if (demoType === 'minipreview') {
-        state.showpreview = true;
-        state.showcomponentcopy = true;
-    }
-
-    state.text = state.tabs[0].text; // load first
-
-    state.selected = state.tabs[0].title; // set first as tab title
-    //setupShaChecksum();
-    if (demoType === 'minipreview') {
-        if (firstPreviewTag) {
-            state.preview = `<${ firstPreviewTag }></${ firstPreviewTag }>`;
-        } else {
-            doRun();
-        }
-    }
-}
-
-function rerenderFirstTime() {
-    // This is required as a workaround for a side-effect of prerendering the
-    // firstPreviewTag. While it results in a faster initial page loading time,
-    // and no flicker, it will double attache events due to the
-    // patchAndDescendants in the first mount
-    if (state.nscounter < 2) {
-        const demoType = props.demotype || 'snippet';
-        if (demoType === 'minipreview') {
-            doRun();
-        }
-    }
-}
-
-function _newModulo() {
-    const mod = new Modulo(window.hackCoreModulo);
-    // Refresh queue & asset manager
-    mod.register('core', modulo.registry.core.FetchQueue);
-    mod.register('core', modulo.registry.core.AssetManager);
-    return mod;
-}
-
-function runModuloText(componentDef) {
-    const defDiv = document.createElement('div');
-    defDiv.innerHTML = componentDef;
-    const mod = _newModulo();
-    mod.loadFromDOM(defDiv);
-    mod.preprocessAndDefine();
-}
-
-function doRun() {
-    window._modExCounter = ++exCounter;
-    //console.log('There are ', exCounter, ' examples on this page. Gee!')
-    const namespace = `e${exCounter}g${state.nscounter}`; // TODO: later do hot reloading using same loader
-    state.nscounter++;
-    const tagName = 'DemoComponent';
-
-    if (element.codeMirrorEditor) {
-        state.text = element.codeMirrorEditor.getValue(); // make sure most up-to-date
-    }
-    runModuloText(`<Component namespace="${namespace}" name="${tagName}">` +
-                  `\n${state.text}\n</Component>`);
-
-    // Create a new modulo instance 
-    const fullname = `${namespace}-${tagName}`;
-    state.preview = `<${fullname}></${fullname}>`;
-    setTimeout(() => {
-        const div = element.querySelector('.editor-minipreview > div');
-        if (div) {
-            div.innerHTML = state.preview;
-            //console.log('assigned to', div.innerHTML);
-        } else {
-            console.log('warning, cant update minipreview', div);
-        }
-    }, 0);
-
-}
-
-function countUp() {
-    // TODO: Remove this when resolution context bug is fixed so that children
-    // no longer can reference parents
-    console.count('PROBLEM: Child event bubbling to parent!');
-}
-
-function doFullscreen() {
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-    if (state.fullscreen) {
-        state.fullscreen = false;
-        document.querySelector('html').style.overflow = "auto";
-        if (element.codeMirrorEditor) {
-            element.codeMirrorEditor.refresh()
-        }
-    } else {
-        state.fullscreen = true;
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-
-        // TODO: way to share variables in CSS
-        if (vw > 768) {
-              document.querySelector('html').style.overflow = "hidden";
-              if (element.codeMirrorEditor) {
-                  element.codeMirrorEditor.refresh()
-              }
-        }
-    }
-    if (element.codeMirrorEditor) {
-        //element.codeMirrorEditor.refresh()
-    }
-}
-
-/*
-function previewspotMount({ el }) {
-    element.previewSpot = el;
-    if (!element.isMounted) {
-        doRun(); // mount after first render
-    }
-}
-
-
-function setupShaChecksum() {
-    console.log('setupShaChecksum DISABLED'); return; ///////////////////
-
-    let mod = Modulo.factoryInstances['x-x'].baseRenderObj;
-    if (Modulo.isBackend && state && state.text.includes('$modulojs_sha384_checksum$')) {
-        if (!mod || !mod.script || !mod.script.getVersionInfo) {
-            console.log('no mod!');
-        } else {
-            const info = mod.script.getVersionInfo();
-            const checksum = info.checksum || '';
-            state.text = state.text.replace('$modulojs_sha384_checksum$', checksum)
-            element.setAttribute('text', state.text);
-        }
-    }
-}
-*/
-
-/*
-const component = factory.createTestElement();
-component.remove()
-console.log(component);
-element.previewSpot.innerHTML = '';
-element.previewSpot.appendChild(component);
-*/
-
-
-/*
-// Use a new asset manager when loading, to prevent it from getting into the main bundle
-let componentDef = state.text;
-componentDef = `<component name="${tagName}">\n${componentDef}\n</component>`;
-const loader = new Modulo.Loader(null, { attrs } );
-const oldAssetMgr = Modulo.assets;
-Modulo.assets = new Modulo.AssetManager();
-loader.loadString(componentDef);
-Modulo.assets = oldAssetMgr;
-
-const fullname = `${namespace}-${tagName}`;
-const factory = Modulo.factoryInstances[fullname];
-state.preview = `<${fullname}></${fullname}>`;
-
-// Hacky way to mount, required due to buggy dom resolver
-const {isBackend} = Modulo;
-if (!isBackend) {
-    setTimeout(() => {
-        const div = element.querySelector('.editor-minipreview > div');
-        if (div) {
-            div.innerHTML = state.preview;
-        } else {
-            console.log('warning, cant update minipreview', div);
-        }
-    }, 0);
-}
-*/
-
-
-/*
-function _setupCodemirror(el, demoType, myElement, myState) {
-    console.log('_setupCodemirror DISABLED'); return; ///////////////////
-    let expBackoff = 10;
-    //console.log('this is codemirror', Modulo.globals.CodeMirror);
-    const mountCM = () => {
-        // TODO: hack, allow JS deps or figure out loader or something
-        if (!Modulo.globals.CodeMirror) {
-            expBackoff *= 2;
-            setTimeout(mountCM, expBackoff); // poll again
-            return;
-        }
-
-        let readOnly = false;
-        let lineNumbers = true;
-        if (demoType === 'snippet') {
-            readOnly = true;
-            lineNumbers = false;
-        }
-
-        const conf = {
-            value: myState.text,
-            mode: 'django',
-            theme: 'eclipse',
-            indentUnit: 4,
-            readOnly,
-            lineNumbers,
-        };
-
-        if (demoType === 'snippet') {
-            myState.showclipboard = true;
-        } else if (demoType === 'minipreview') {
-            myState.showpreview = true;
-        }
-
-        if (!myElement.codeMirrorEditor) {
-            console.log('dead code?');
-            myElement.codeMirrorEditor = Modulo.globals.CodeMirror(el, conf);
-        }
-        myElement.codeMirrorEditor.refresh()
-        //myElement.rerender();
-    };
-    mountCM();
-    return;
-    const {isBackend} = Modulo;
-    if (!isBackend) {
-        // TODO: Ugly hack, need better tools for working with legacy
-        setTimeout(mountCM, expBackoff);
-    }
-
-    const myElem = element;
-    const myState = state;
-    const {isBackend} = Modulo;
-    return;
-    if (!isBackend) {
-        setTimeout(() => {
-            const div = myElem.querySelector('.editor-wrapper > div');
-            _setupCodemirror(div, demoType, myElem, myState);
-        }, 0); // put on queue
-    }
-
-}
-
-*/
-
-return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ? _setupGlobalVariables : undefined,
-"tmpGetDirectives": typeof tmpGetDirectives !== "undefined" ? tmpGetDirectives : undefined,
-"codemirrorMount": typeof codemirrorMount !== "undefined" ? codemirrorMount : undefined,
-"_setupCodemirrorSync": typeof _setupCodemirrorSync !== "undefined" ? _setupCodemirrorSync : undefined,
-"selectTab": typeof selectTab !== "undefined" ? selectTab : undefined,
-"toEmbedScript": typeof toEmbedScript !== "undefined" ? toEmbedScript : undefined,
-"toEmbedTemplate": typeof toEmbedTemplate !== "undefined" ? toEmbedTemplate : undefined,
-"doCopy": typeof doCopy !== "undefined" ? doCopy : undefined,
-"hideToast": typeof hideToast !== "undefined" ? hideToast : undefined,
-"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"rerenderFirstTime": typeof rerenderFirstTime !== "undefined" ? rerenderFirstTime : undefined,
-"_newModulo": typeof _newModulo !== "undefined" ? _newModulo : undefined,
-"runModuloText": typeof runModuloText !== "undefined" ? runModuloText : undefined,
-"doRun": typeof doRun !== "undefined" ? doRun : undefined,
-"countUp": typeof countUp !== "undefined" ? countUp : undefined,
-"doFullscreen": typeof doFullscreen !== "undefined" ? doFullscreen : undefined,
-"previewspotMount": typeof previewspotMount !== "undefined" ? previewspotMount : undefined,
-"setupShaChecksum": typeof setupShaChecksum !== "undefined" ? setupShaChecksum : undefined,
-"_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-function toggleExample(payload) {
-    if (state.selected === payload) {
-        state.selected = '';
-    } else {
-        state.selected = payload;
-    }
-}
-
-function initializedCallback() {
-    const { getComponentDefs } = modulo.registry.utils;
-    if (!getComponentDefs) {
-          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
-    }
-    const eg = getComponentDefs('/libraries/eg.html');
-    state.examples = [];
-    for (const [ name, content ] of Object.entries(eg)) {
-        state.examples.push({ name, content });
-    }
-    element.rerender();
-}
-
- 
-return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined,
-"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    script.exports.title = "ModuloNews";
-
-return {  setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function prepareCallback() {
-        const calcResult = (state.perc / 100) * state.total;
-        return { calcResult };
-    }
-
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function countUp() {
-        state.num++;
-    }
-
-return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function addItem() {
-        state.list.push(state.text); // add to list
-        state.text = ""; // clear input
-    }
-
-return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function fetchGitHub() {
-        fetch(`https://api.github.com/users/${state.search}`)
-            .then(response => response.json())
-            .then(githubCallback);
-    }
-    function githubCallback(apiData) {
-        state.name = apiData.name;
-        state.location = apiData.location;
-        state.bio = apiData.bio;
-        element.rerender();
-    }
-
-return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
-"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function isValid({ year, month, day }) {
-        month--; // Months are zero indexed
-        const d = new Date(year, month, day);
-        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
-    }
-    function next(part) {
-        state[part]++;
-        if (!isValid(state)) { // undo if not valid
-            state[part]--;
-        }
-    }
-    function previous(part) {
-        state[part]--;
-        if (!isValid(state)) { // undo if not valid
-            state[part]++;
-        }
-    }
-
-return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
-"next": typeof next !== "undefined" ? next : undefined,
-"previous": typeof previous !== "undefined" ? previous : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    // Getting big a range of numbers in JS. Use "script.exports"
-    // to export this as a one-time global constant.
-    // (Hint: Curious how it calculates prime? See CSS!)
-    script.exports.range = 
-        Array.from({length: 63}, (x, i) => i + 2);
-    function setNum(payload, ev) {
-        state.number = Number(ev.target.textContent);
-    }
-
-return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    const URL = 'https://jsonplaceholder.typicode.com/posts';
-    const fakedPosts = [];
-    const headers = [];
-
-    function initializedCallback() {
-        refresh(); // Refresh on first load
-    }
-
-    function refresh() {
-        fetch(URL).then(r => r.json()).then(data => {
-            // Since Typicode API doesn't save it's POST
-            // data, we'll have manually fake it here
-            state.posts = data.concat(fakedPosts);
-            element.rerender();
-        });
-    }
-
-    function submit() {
-        // Rename the state variables to be what the API suggests
-        const postData = {
-              userId: state.user,
-              title: state.topic,
-              body: state.comment,
-        };
-        state.topic = ''; // clear the comment & topic text
-        state.comment = '';
-        fakedPosts.push(postData); // Required for refresh()
-
-        // Send the POST request with fetch, then refresh after
-        const opts = {
-            method: 'POST',
-            body: JSON.stringify(postData),
-            headers: { 'Content-type': 'application/json; charset=UTF-8' },
-        };
-        fetch(URL, opts).then(r => r.json()).then(refresh);
-    }
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"refresh": typeof refresh !== "undefined" ? refresh : undefined,
-"submit": typeof submit !== "undefined" ? submit : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    let timeout = null;
-    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
-    function play() {
-        state.playing = true;
-        nextTick();
-    }
-    function pause() {
-        state.playing = false;
-    }
-    function setEasing(payload) {
-        state.easing = payload;
-    }
-
-    function nextTick() {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        const el = element;
-        timeout = setTimeout(() => {
-            el.rerender();
-        }, 2000 / state.speed);
-    }
-
-    function updateCallback() {
-        if (state.playing) {
-            while (state.data.length <= state.width) {
-                state.tick++;
-                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
-            }
-            state.data.shift(); // remove one from left
-            nextTick();
-        }
-    }
-
-return { "play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
-"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
-"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    const OPTS = '&limit=6&fields=title,author_name,cover_i';
-    const COVER ='https://covers.openlibrary.org/b/id/';
-    const API = 'https://openlibrary.org/search.json?q=';
-    function doSearch() {
-        const url = API + '?q=' + state.search + OPTS;
-        state.loading = true;
-        fetch(url)
-            .then(response => response.json())
-            .then(dataBackCallback);
-    }
-
-    function dataBackCallback(data) {
-        for (const item of data.docs) {
-            // For convenience, we prepare the cover URL
-            item.cover = COVER + item.cover_i + '-S.jpg';
-        }
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
-"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function typingCallback() {
-        state.loading = true;
-        const search = `q=${state.search}`;
-        const opts = 'limit=6&fields=title,author_name,cover_i';
-        const url = `${staticdata.apiBase}?${search}&${opts}`;
-        _globalDebounce(() => {
-            fetch(url)
-                .then(response => response.json())
-                .then(dataBackCallback);
-        });
-    }
-
-    function dataBackCallback(data) {
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-    let _globalDebounceTimeout = null;
-    function _globalDebounce(func) {
-        if (_globalDebounceTimeout) {
-            clearTimeout(_globalDebounceTimeout);
-        }
-        _globalDebounceTimeout = setTimeout(func, 500);
-    }
-
-return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined,
-"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
-"_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
-function setup(payload) {
-    const count = Number(payload);
-    let symbols = symbolsStr.substr(0, count/2).split("");
-    symbols = symbols.concat(symbols); // duplicate cards
-    let id = 0;
-    while (id < count) {
-        const index = Math.floor(Math.random()
-                                    * symbols.length);
-        const symbol = symbols.splice(index, 1)[0];
-        state.cards.push({symbol, id});
-        id++;
-    }
-}
-
-function failedFlipCallback() {
-    // Remove both from revealed array & set to null
-    state.revealed = state.revealed.filter(
-            id => id !== state.failedflip
-                    && id !== state.lastflipped);
-    state.failedflip = null;
-    state.lastflipped = null;
-    state.message = "";
-    element.rerender();
-}
-
-function flip(id) {
-    if (state.failedflip !== null) {
-        return;
-    }
-    id = Number(id);
-    if (state.revealed.includes(id)) {
-        return; // double click
-    } else if (state.lastflipped === null) {
-        state.lastflipped = id;
-        state.revealed.push(id);
-    } else {
-        state.revealed.push(id);
-        const {symbol} = state.cards[id];
-        const lastCard = state.cards[state.lastflipped];
-        if (symbol === lastCard.symbol) {
-            // Successful match! Check for win.
-            const {revealed, cards} = state;
-            if (revealed.length === cards.length) {
-                state.message = "You win!";
-                state.win = true;
-            } else {
-                state.message = "Nice match!";
-            }
-            state.lastflipped = null;
-        } else {
-            state.message = "No match.";
-            state.failedflip = id;
-            setTimeout(failedFlipCallback, 1000);
-        }
-    }
-}
-
-return { "setup": typeof setup !== "undefined" ? setup : undefined,
-"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
-"flip": typeof flip !== "undefined" ? flip : undefined,
- setLocalVariable: __set, exports: script.exports}
-};
-currentModulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function toggle([ i, j ]) {
-        if (!state.cells[i]) {
-            state.cells[i] = {};
-        }
-        state.cells[i][j] = !state.cells[i][j];
-    }
-
-    function play() {
-        state.playing = true;
-        setTimeout(() => {
-            if (state.playing) {
-                updateNextFrame();
-                element.rerender(); // manually rerender
-                play(); // cue next frame
-            }
-        }, 2000 / state.speed);
-    }
-
-    function pause() {
-        state.playing = false;
-    }
-
-    function clear() {
-        state.cells = {};
-    }
-
-    function randomize() {
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!state.cells[i]) {
-                    state.cells[i] = {};
-                }
-                state.cells[i][j] = (Math.random() > 0.5);
-            }
-        }
-    }
-
-    // Helper function for getting a cell from data
-    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
-    function updateNextFrame() {
-        const nextData = {};
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!nextData[i]) {
-                    nextData[i] = {};
-                }
-                const count = countNeighbors(i, j);
-                nextData[i][j] = get(i, j) ?
-                    (count === 2 || count === 3) : // stays alive
-                    (count === 3); // comes alive
-            }
-        }
-        state.cells = nextData;
-    }
-
-    function countNeighbors(i, j) {
-        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
-                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
-                get(i + 1, j - 1), get(i - 1, j + 1)];
-        return neighbors.filter(v => v).length;
-    }
-    script.exports.range = Array.from({length: 24}, (x, i) => i);
-
-return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
-"play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"clear": typeof clear !== "undefined" ? clear : undefined,
-"randomize": typeof randomize !== "undefined" ? randomize : undefined,
-"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
-"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
 currentModulo.assets.functions["xqf9b9l"]= function (tagName, modulo){
@@ -21679,7 +18270,7 @@ var OUT=[];
 
 return OUT.join("");
 };
-currentModulo.assets.functions["3n0giq"]= function (CTX, G){
+currentModulo.assets.functions["x7vad96"]= function (CTX, G){
 var OUT=[];
   OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
   OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
@@ -21713,7 +18304,7 @@ var OUT=[];
   } else { // "else"
   OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
   } // "endif"
-  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0 </main></footer></body></html>"
+  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1 </main></footer></body></html>"
 
 return OUT.join("");
 };
@@ -22477,6 +19068,1102 @@ var OUT=[];
 
 return OUT.join("");
 };
+currentModulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function show() {
+            state.visible = true;
+        }
+        function hide() {
+            state.visible = false;
+        }
+    
+return { "show": typeof show !== "undefined" ? show : undefined,
+"hide": typeof hide !== "undefined" ? hide : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            const data = props.data || [];
+            const max = Math.max(...data);
+            const min = 0;// Math.min(...props.data),
+            return {
+                percent: data.map(item => ((item - min) / max) * 100),
+                width: Math.floor(100 / data.length),
+            }
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            state.value = element.value;
+        }
+        function setValue(val) {
+            state.value = val;
+            element.value = val;
+            element.dispatchEvent(new Event('change'));
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+"setValue": typeof setValue !== "undefined" ? setValue : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        //console.log('mws-Page/Script is running', modulo);
+    
+return {  setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+function initializedCallback() {
+    const { path, showall } = props;
+    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
+    for (const groupObj of state.menu) {
+        if (showall) {
+            groupObj.active = true;
+        }
+        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
+            groupObj.active = true;
+        }
+    }
+}
+
+function _child(label, hash, keywords=[], filepath=null) {
+    if (!hash) {
+        hash = label.toLowerCase()
+    }
+    if (hash.endsWith('.html') && filepath === null) {
+        filepath = hash;
+    }
+    return {label, hash, keywords, filepath};
+}
+
+let componentTexts = {};
+try {
+    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
+} catch {
+    console.log('couldnt get componentTexts');
+}
+
+script.exports.menu = [
+    {
+        label: 'Table of Contents',
+        filename: '/docs/',
+    },
+
+    {
+        label: 'Tutorial',
+        filename: '/docs/tutorial_part1.html',
+        children: [
+            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
+            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
+            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
+        ],
+    },
+
+    {
+        label: 'Templating',
+        filename: '/docs/templating.html',
+        children: [
+            _child('Templates', null, ['templating philosophy', 'templating overview']),
+            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
+            _child('Filters', null, ['filter syntax', 'example filters']),
+            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
+            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
+            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
+            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
+        ],
+    },
+
+    {
+        label: 'Template Reference',
+        filename: '/docs/templating-reference.html',
+        children: [
+            _child('Built-in Template Tags', 'templatetags', [
+                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
+                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
+                'comparison', 'control-flow',
+            ]),
+            _child('Built-in Filters', 'filters', [
+                'add', 'allow', 'capfirst', 'concat', 'default',
+                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
+                'length', 'lower', 'number', 'pluralize', 'subtract',
+                'truncate', 'renderas', 'reversed', 'upper',
+            ]),
+        ],
+    },
+
+    {
+        label: 'CParts',
+        filename: '/docs/cparts.html',
+        children: [
+            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
+                                'rendering mode', 'manual rerender', 'shadow',
+                                'vanish', 'vanish-into-document', 'component.event',
+                                'component.slot', 'component.dataProp']),
+            _child('Props', 'props', ['accessing props', 'defining props',
+                                'setting props', 'using props']),
+            _child('Script', 'script', ['javascript', 'events', 'computed properties',
+                            'static execution', 'custom lifecycle methods',
+                                'script callback execution context', 'script exports']),
+            _child('State', 'state', ['state definition', 'state data types',
+                            'json', 'state variables', 'state.bind directive']),
+            _child('StaticData', 'staticdata', ['loading API', 'loading json',
+                            'transform function', 'bundling data']),
+            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
+            _child('Template', 'template', ['custom template', 'templating engine']),
+        ],
+    },
+
+    {
+        label: 'Lifecycle',
+        filename: '/docs/lifecycle.html',
+        children: [
+            _child('Global lifecycle', 'global',
+                ['lifestyle phases', 'prebuild', 'define', 'factory']),
+            _child('Component lifecycle', 'global',
+                ['consturctor', 'initialized', 'prepare', 'render',
+                'reconcile', 'update', 'event', 'eventCleanup']),
+            _child('Lifecycle callbacks', 'callbacks',
+                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
+                'renderobj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),
+        ],
+    },
+
+            /*_child('Factory lifecycle', 'factory',
+                ['renderObj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),*/
+    {
+        label: 'Directives',
+        filename: '/docs/directives.html',
+        children: [
+            _child('Directives', 'directives',
+                ['built-in directives', 'directive shortcuts',
+                'custom directives']),
+            _child('Built-in directives', 'builtin', [
+                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
+                    'data-prop', 'assignment',
+                    '[component.event]', '@click', '@...:=',
+                    '[component.slot]', '[state.bind]',
+                ]),
+            _child('Custom directives', 'custom', [
+                'refs', 'accessing dom', 'escape hatch',
+                'Mount callbacks', 'Unmount callbacks',
+                'template variables vs directives',
+                'script-tag custom directives',
+                'custom shortcuts',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'API & Extension',
+        filename: '/docs/api.html',
+        children: [
+            _child('Custom CParts', 'cparts'),
+            _child('CPart Spares', 'spares'),
+            _child('Custom Templating', 'template'),
+            _child('Custom Filters', 'customfilters'),
+            _child('Custom Template Tags', 'customtags'),
+            _child('Custom Template Syntax', 'customtags'),
+            _child('ModRec', 'modrec'),
+            _child('DOMCursor', 'cursor'),
+        ],
+    },
+    */
+
+    {
+        label: 'Examples',
+        filename: '/demos/',
+        children: [
+            _child('Starter Files', 'starter', [ 'snippets',
+                'component libraries', 'bootstrap', 'download', 'zip',
+                'page layouts', 'using vanish' ]),
+            _child('Example Library', 'library', Object.keys(componentTexts)),
+            _child('Experiments', 'experiments', [
+                'TestSuite', 'unit testing',
+                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
+                'FetchState cpart', 'jsx templating', 'babel.js',
+                'transpiling', 'cparts for apis',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'Project Info',
+        filename: '/docs/project-info.html',
+        children: [
+            _child('FAQ', 'faq'),
+            _child('Framework Design Philosophy', 'philosophy'),
+        ],
+    },
+    */
+];
+
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"_child": typeof _child !== "undefined" ? _child : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["xnob7me"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+let componentTexts = null;
+let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
+
+function _setupGlobalVariables() {
+    let { getComponentDefs } = modulo.registry.utils;
+    if (!getComponentDefs) {
+          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
+    }
+    const docseg = getComponentDefs('/libraries/docseg.html');
+    const eg = getComponentDefs('/libraries/eg.html');
+    componentTexts = Object.assign({}, docseg, eg);
+}
+
+function tmpGetDirectives() {
+    console.count('DEPRECATED: Demo.js - tmpGetDirectives');
+    return [ 'script.codemirror' ];
+}
+
+function codemirrorMount({ el }) {
+    el.innerHTML = ''; // clear inner HTML before mounting
+    const demoType = props.demotype || 'snippet';
+    _setupCodemirrorSync(el, demoType, element, state);
+    const myElement = element;
+    setTimeout(() => {
+        myElement.codeMirrorEditor.refresh()
+        setTimeout(() => {
+            myElement.codeMirrorEditor.refresh()
+        }, 0); // Ensure refreshes after the first reflow
+    }, 0); // Ensure refreshes after the first reflow
+}
+
+function _setupCodemirrorSync(el, demoType, myElement, myState) {
+      let readOnly = false;
+      let lineNumbers = true;
+      if (demoType === 'snippet') {
+          readOnly = true;
+          lineNumbers = false;
+      }
+
+      const conf = {
+          value: myState.text,
+          mode: 'django',
+          theme: 'eclipse',
+          indentUnit: 4,
+          readOnly,
+          lineNumbers,
+      };
+
+      if (demoType === 'snippet') {
+          myState.showclipboard = true;
+      } else if (demoType === 'minipreview') {
+          myState.showpreview = true;
+          myState.showcomponentcopy = true;
+      }
+
+      if (!myElement.codeMirrorEditor) {
+          const { CodeMirror } = modulo.registry.utils;
+          if (typeof CodeMirror === 'undefined' || !CodeMirror) {
+              throw new Error('Have not loaded CodeMirror yet');
+          }
+          myElement.codeMirrorEditor = CodeMirror(el, conf);
+      }
+      myElement.codeMirrorEditor.refresh()
+}
+
+function selectTab(newTitle) {
+    //console.log('tab getting selected!', newTitle);
+    if (!element.codeMirrorEditor) {
+        return; // not ready yet
+    }
+    const currentTitle = state.selected;
+    state.selected = newTitle;
+    for (const tab of state.tabs) {
+        if (tab.title === currentTitle) { // save text back to state
+            tab.text = element.codeMirrorEditor.getValue();
+        } else if (tab.title === newTitle) {
+            state.text = tab.text;
+        }
+    }
+    element.codeMirrorEditor.setValue(state.text);
+    doRun();
+}
+
+function toEmbedScript(text, selected) {
+    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
+
+    // Escape all "script" tags, so it's safe according to HTML syntax:
+    const safeText = indentText.replace(/<script/gi, '<cpart Script')
+                            .replace(/<\/script\s*>/gi, '</cpart>');
+    const componentName = selected || 'Demo';
+    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
+    // Generate pastable snippet
+    const fullText = '<script Modulo src="https://unpkg.com/mdu.js">\n' +
+                      `  <Component name="${ componentName }">` + safeText + '\n' +
+                      '  </Component>\n' +
+                      '</script>' + '\n' + usage;
+    return fullText;
+}
+
+function toEmbedTemplate(text, selected) {
+    const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
+
+    /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
+                            .replace(/<\/script\s*>/gi, '</cpart>');*/
+    const componentName = selected || 'Demo';
+    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
+    // Generate pastable snippet
+    const fullText = '<template Modulo>\n' +
+                      `  <Component name="${ componentName }">` + indentText + '\n' +
+                      '  </Component>\n' +
+                      '</template>\n' +
+                      '<script src="https://unpkg.com/mdu.js"></script>\n' + usage;
+    return fullText;
+}
+
+function doCopy(componentCopy = false) {
+    const { copyTextToClipboard } = modulo.registry.utils;
+    if (componentCopy) {
+        const fullText = toEmbedTemplate(state.text, state.selected);
+        state.showtoast = true;
+        state.toasttext = fullText;
+        copyTextToClipboard(fullText);
+    } else {
+        copyTextToClipboard(state.text);
+    }
+}
+
+function hideToast() {
+    state.showtoast = false;
+    state.toasttext = '';
+}
+
+function initializedCallback() {
+    if (componentTexts === null) {
+        _setupGlobalVariables();
+    }
+    //console.log('these are componentTexts', componentTexts);
+
+    let text;
+    let firstPreviewTag = null;
+    state.tabs = [];
+    if (props.fromlibrary) {
+        if (!componentTexts) {
+            componentTexts = false;
+            console.error('Couldnt load:', props.fromlibrary)
+            return;
+        }
+
+        const componentNames = props.fromlibrary.split(',');
+        for (const title of componentNames) {
+            if (firstPreviewTag === null) {
+                // XXX HACK, fix this once we have more dependable namespacing
+                for (const component of Object.values(modulo.parentDefs)) {
+                    if (component.Name === title) {
+                        firstPreviewTag = component.TagName;
+                        break;
+                    }
+                }
+            }
+            if (title in componentTexts) {
+                text = componentTexts[title].trim();
+                text = text.replace(/&#39;/g, "'"); // correct double escape
+                state.tabs.push({ text, title });
+            } else {
+                console.error('invalid fromlibrary:', title);
+                console.log(componentTexts);
+                return;
+            }
+        }
+    } else if (props.text) {
+        let title = props.ttitle || 'Example';
+        text = props.text.trim();
+        state.tabs.push({ title, text });
+        // XXX Hack, refactor -v
+        if (props.text2) {
+            title = props.ttitle2 || 'Example';
+            text = props.text2.trim();
+            state.tabs.push({ title, text });
+        }
+        if (props.text3) {
+            title = props.ttitle3 || 'Example';
+            text = props.text3.trim();
+            state.tabs.push({ title, text });
+        }
+        //console.log('this is props', props);
+    }
+
+    const demoType = props.demotype || 'snippet';
+    if (demoType === 'snippet') {
+        state.showclipboard = true;
+    } else if (demoType === 'minipreview') {
+        state.showpreview = true;
+        state.showcomponentcopy = true;
+    }
+
+    state.text = state.tabs[0].text; // load first
+
+    state.selected = state.tabs[0].title; // set first as tab title
+    //setupShaChecksum();
+    if (demoType === 'minipreview') {
+        if (firstPreviewTag) {
+            state.preview = `<${ firstPreviewTag }></${ firstPreviewTag }>`;
+        } else {
+            doRun();
+        }
+    }
+}
+
+function rerenderFirstTime() {
+    // This is required as a workaround for a side-effect of prerendering the
+    // firstPreviewTag. While it results in a faster initial page loading time,
+    // and no flicker, it will double attache events due to the
+    // patchAndDescendants in the first mount
+    if (state.nscounter < 2) {
+        const demoType = props.demotype || 'snippet';
+        if (demoType === 'minipreview') {
+            doRun();
+        }
+    }
+}
+
+function _newModulo() {
+    const mod = new Modulo(window.hackCoreModulo);
+    // Refresh queue & asset manager
+    mod.register('core', modulo.registry.core.FetchQueue);
+    mod.register('core', modulo.registry.core.AssetManager);
+    return mod;
+}
+
+function runModuloText(componentDef) {
+    const defDiv = document.createElement('div');
+    defDiv.innerHTML = componentDef;
+    const mod = _newModulo();
+    mod.loadFromDOM(defDiv);
+    mod.preprocessAndDefine();
+}
+
+function doRun() {
+    window._modExCounter = ++exCounter;
+    //console.log('There are ', exCounter, ' examples on this page. Gee!')
+    const namespace = `e${exCounter}g${state.nscounter}`; // TODO: later do hot reloading using same loader
+    state.nscounter++;
+    const tagName = 'DemoComponent';
+
+    if (element.codeMirrorEditor) {
+        state.text = element.codeMirrorEditor.getValue(); // make sure most up-to-date
+    }
+    runModuloText(`<Component namespace="${namespace}" name="${tagName}">` +
+                  `\n${state.text}\n</Component>`);
+
+    // Create a new modulo instance 
+    const fullname = `${namespace}-${tagName}`;
+    state.preview = `<${fullname}></${fullname}>`;
+    setTimeout(() => {
+        const div = element.querySelector('.editor-minipreview > div');
+        if (div) {
+            div.innerHTML = state.preview;
+            //console.log('assigned to', div.innerHTML);
+        } else {
+            console.log('warning, cant update minipreview', div);
+        }
+    }, 0);
+
+}
+
+function countUp() {
+    // TODO: Remove this when resolution context bug is fixed so that children
+    // no longer can reference parents
+    console.count('PROBLEM: Child event bubbling to parent!');
+}
+
+function doFullscreen() {
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
+    if (state.fullscreen) {
+        state.fullscreen = false;
+        document.querySelector('html').style.overflow = "auto";
+        if (element.codeMirrorEditor) {
+            element.codeMirrorEditor.refresh()
+        }
+    } else {
+        state.fullscreen = true;
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+        // TODO: way to share variables in CSS
+        if (vw > 768) {
+              document.querySelector('html').style.overflow = "hidden";
+              if (element.codeMirrorEditor) {
+                  element.codeMirrorEditor.refresh()
+              }
+        }
+    }
+    if (element.codeMirrorEditor) {
+        //element.codeMirrorEditor.refresh()
+    }
+}
+
+/*
+function previewspotMount({ el }) {
+    element.previewSpot = el;
+    if (!element.isMounted) {
+        doRun(); // mount after first render
+    }
+}
+
+
+function setupShaChecksum() {
+    console.log('setupShaChecksum DISABLED'); return; ///////////////////
+
+    let mod = Modulo.factoryInstances['x-x'].baseRenderObj;
+    if (Modulo.isBackend && state && state.text.includes('$modulojs_sha384_checksum$')) {
+        if (!mod || !mod.script || !mod.script.getVersionInfo) {
+            console.log('no mod!');
+        } else {
+            const info = mod.script.getVersionInfo();
+            const checksum = info.checksum || '';
+            state.text = state.text.replace('$modulojs_sha384_checksum$', checksum)
+            element.setAttribute('text', state.text);
+        }
+    }
+}
+*/
+
+/*
+const component = factory.createTestElement();
+component.remove()
+console.log(component);
+element.previewSpot.innerHTML = '';
+element.previewSpot.appendChild(component);
+*/
+
+
+/*
+// Use a new asset manager when loading, to prevent it from getting into the main bundle
+let componentDef = state.text;
+componentDef = `<component name="${tagName}">\n${componentDef}\n</component>`;
+const loader = new Modulo.Loader(null, { attrs } );
+const oldAssetMgr = Modulo.assets;
+Modulo.assets = new Modulo.AssetManager();
+loader.loadString(componentDef);
+Modulo.assets = oldAssetMgr;
+
+const fullname = `${namespace}-${tagName}`;
+const factory = Modulo.factoryInstances[fullname];
+state.preview = `<${fullname}></${fullname}>`;
+
+// Hacky way to mount, required due to buggy dom resolver
+const {isBackend} = Modulo;
+if (!isBackend) {
+    setTimeout(() => {
+        const div = element.querySelector('.editor-minipreview > div');
+        if (div) {
+            div.innerHTML = state.preview;
+        } else {
+            console.log('warning, cant update minipreview', div);
+        }
+    }, 0);
+}
+*/
+
+
+/*
+function _setupCodemirror(el, demoType, myElement, myState) {
+    console.log('_setupCodemirror DISABLED'); return; ///////////////////
+    let expBackoff = 10;
+    //console.log('this is codemirror', Modulo.globals.CodeMirror);
+    const mountCM = () => {
+        // TODO: hack, allow JS deps or figure out loader or something
+        if (!Modulo.globals.CodeMirror) {
+            expBackoff *= 2;
+            setTimeout(mountCM, expBackoff); // poll again
+            return;
+        }
+
+        let readOnly = false;
+        let lineNumbers = true;
+        if (demoType === 'snippet') {
+            readOnly = true;
+            lineNumbers = false;
+        }
+
+        const conf = {
+            value: myState.text,
+            mode: 'django',
+            theme: 'eclipse',
+            indentUnit: 4,
+            readOnly,
+            lineNumbers,
+        };
+
+        if (demoType === 'snippet') {
+            myState.showclipboard = true;
+        } else if (demoType === 'minipreview') {
+            myState.showpreview = true;
+        }
+
+        if (!myElement.codeMirrorEditor) {
+            console.log('dead code?');
+            myElement.codeMirrorEditor = Modulo.globals.CodeMirror(el, conf);
+        }
+        myElement.codeMirrorEditor.refresh()
+        //myElement.rerender();
+    };
+    mountCM();
+    return;
+    const {isBackend} = Modulo;
+    if (!isBackend) {
+        // TODO: Ugly hack, need better tools for working with legacy
+        setTimeout(mountCM, expBackoff);
+    }
+
+    const myElem = element;
+    const myState = state;
+    const {isBackend} = Modulo;
+    return;
+    if (!isBackend) {
+        setTimeout(() => {
+            const div = myElem.querySelector('.editor-wrapper > div');
+            _setupCodemirror(div, demoType, myElem, myState);
+        }, 0); // put on queue
+    }
+
+}
+
+*/
+
+return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ? _setupGlobalVariables : undefined,
+"tmpGetDirectives": typeof tmpGetDirectives !== "undefined" ? tmpGetDirectives : undefined,
+"codemirrorMount": typeof codemirrorMount !== "undefined" ? codemirrorMount : undefined,
+"_setupCodemirrorSync": typeof _setupCodemirrorSync !== "undefined" ? _setupCodemirrorSync : undefined,
+"selectTab": typeof selectTab !== "undefined" ? selectTab : undefined,
+"toEmbedScript": typeof toEmbedScript !== "undefined" ? toEmbedScript : undefined,
+"toEmbedTemplate": typeof toEmbedTemplate !== "undefined" ? toEmbedTemplate : undefined,
+"doCopy": typeof doCopy !== "undefined" ? doCopy : undefined,
+"hideToast": typeof hideToast !== "undefined" ? hideToast : undefined,
+"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"rerenderFirstTime": typeof rerenderFirstTime !== "undefined" ? rerenderFirstTime : undefined,
+"_newModulo": typeof _newModulo !== "undefined" ? _newModulo : undefined,
+"runModuloText": typeof runModuloText !== "undefined" ? runModuloText : undefined,
+"doRun": typeof doRun !== "undefined" ? doRun : undefined,
+"countUp": typeof countUp !== "undefined" ? countUp : undefined,
+"doFullscreen": typeof doFullscreen !== "undefined" ? doFullscreen : undefined,
+"previewspotMount": typeof previewspotMount !== "undefined" ? previewspotMount : undefined,
+"setupShaChecksum": typeof setupShaChecksum !== "undefined" ? setupShaChecksum : undefined,
+"_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+function toggleExample(payload) {
+    if (state.selected === payload) {
+        state.selected = '';
+    } else {
+        state.selected = payload;
+    }
+}
+
+function initializedCallback() {
+    const { getComponentDefs } = modulo.registry.utils;
+    if (!getComponentDefs) {
+          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
+    }
+    const eg = getComponentDefs('/libraries/eg.html');
+    state.examples = [];
+    for (const [ name, content ] of Object.entries(eg)) {
+        state.examples.push({ name, content });
+    }
+    element.rerender();
+}
+
+ 
+return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined,
+"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    script.exports.title = "ModuloNews";
+
+return {  setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function prepareCallback() {
+        const calcResult = (state.perc / 100) * state.total;
+        return { calcResult };
+    }
+
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function countUp() {
+        state.num++;
+    }
+
+return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function addItem() {
+        state.list.push(state.text); // add to list
+        state.text = ""; // clear input
+    }
+
+return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function fetchGitHub() {
+        fetch(`https://api.github.com/users/${state.search}`)
+            .then(response => response.json())
+            .then(githubCallback);
+    }
+    function githubCallback(apiData) {
+        state.name = apiData.name;
+        state.location = apiData.location;
+        state.bio = apiData.bio;
+        element.rerender();
+    }
+
+return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
+"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function isValid({ year, month, day }) {
+        month--; // Months are zero indexed
+        const d = new Date(year, month, day);
+        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
+    }
+    function next(part) {
+        state[part]++;
+        if (!isValid(state)) { // undo if not valid
+            state[part]--;
+        }
+    }
+    function previous(part) {
+        state[part]--;
+        if (!isValid(state)) { // undo if not valid
+            state[part]++;
+        }
+    }
+
+return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
+"next": typeof next !== "undefined" ? next : undefined,
+"previous": typeof previous !== "undefined" ? previous : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    // Getting big a range of numbers in JS. Use "script.exports"
+    // to export this as a one-time global constant.
+    // (Hint: Curious how it calculates prime? See CSS!)
+    script.exports.range = 
+        Array.from({length: 63}, (x, i) => i + 2);
+    function setNum(payload, ev) {
+        state.number = Number(ev.target.textContent);
+    }
+
+return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    const URL = 'https://jsonplaceholder.typicode.com/posts';
+    const fakedPosts = [];
+    const headers = [];
+
+    function initializedCallback() {
+        refresh(); // Refresh on first load
+    }
+
+    function refresh() {
+        fetch(URL).then(r => r.json()).then(data => {
+            // Since Typicode API doesn't save it's POST
+            // data, we'll have manually fake it here
+            state.posts = data.concat(fakedPosts);
+            element.rerender();
+        });
+    }
+
+    function submit() {
+        // Rename the state variables to be what the API suggests
+        const postData = {
+              userId: state.user,
+              title: state.topic,
+              body: state.comment,
+        };
+        state.topic = ''; // clear the comment & topic text
+        state.comment = '';
+        fakedPosts.push(postData); // Required for refresh()
+
+        // Send the POST request with fetch, then refresh after
+        const opts = {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        };
+        fetch(URL, opts).then(r => r.json()).then(refresh);
+    }
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"refresh": typeof refresh !== "undefined" ? refresh : undefined,
+"submit": typeof submit !== "undefined" ? submit : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    let timeout = null;
+    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
+    function play() {
+        state.playing = true;
+        nextTick();
+    }
+    function pause() {
+        state.playing = false;
+    }
+    function setEasing(payload) {
+        state.easing = payload;
+    }
+
+    function nextTick() {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        const el = element;
+        timeout = setTimeout(() => {
+            el.rerender();
+        }, 2000 / state.speed);
+    }
+
+    function updateCallback() {
+        if (state.playing) {
+            while (state.data.length <= state.width) {
+                state.tick++;
+                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
+            }
+            state.data.shift(); // remove one from left
+            nextTick();
+        }
+    }
+
+return { "play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
+"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
+"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    const OPTS = '&limit=6&fields=title,author_name,cover_i';
+    const COVER ='https://covers.openlibrary.org/b/id/';
+    const API = 'https://openlibrary.org/search.json?q=';
+    function doSearch() {
+        const url = API + '?q=' + state.search + OPTS;
+        state.loading = true;
+        fetch(url)
+            .then(response => response.json())
+            .then(dataBackCallback);
+    }
+
+    function dataBackCallback(data) {
+        for (const item of data.docs) {
+            // For convenience, we prepare the cover URL
+            item.cover = COVER + item.cover_i + '-S.jpg';
+        }
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
+"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function typingCallback() {
+        state.loading = true;
+        const search = `q=${state.search}`;
+        const opts = 'limit=6&fields=title,author_name,cover_i';
+        const url = `${staticdata.apiBase}?${search}&${opts}`;
+        _globalDebounce(() => {
+            fetch(url)
+                .then(response => response.json())
+                .then(dataBackCallback);
+        });
+    }
+
+    function dataBackCallback(data) {
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+    let _globalDebounceTimeout = null;
+    function _globalDebounce(func) {
+        if (_globalDebounceTimeout) {
+            clearTimeout(_globalDebounceTimeout);
+        }
+        _globalDebounceTimeout = setTimeout(func, 500);
+    }
+
+return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined,
+"dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
+"_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+function setup(payload) {
+    const count = Number(payload);
+    let symbols = symbolsStr.substr(0, count/2).split("");
+    symbols = symbols.concat(symbols); // duplicate cards
+    let id = 0;
+    while (id < count) {
+        const index = Math.floor(Math.random()
+                                    * symbols.length);
+        const symbol = symbols.splice(index, 1)[0];
+        state.cards.push({symbol, id});
+        id++;
+    }
+}
+
+function failedFlipCallback() {
+    // Remove both from revealed array & set to null
+    state.revealed = state.revealed.filter(
+            id => id !== state.failedflip
+                    && id !== state.lastflipped);
+    state.failedflip = null;
+    state.lastflipped = null;
+    state.message = "";
+    element.rerender();
+}
+
+function flip(id) {
+    if (state.failedflip !== null) {
+        return;
+    }
+    id = Number(id);
+    if (state.revealed.includes(id)) {
+        return; // double click
+    } else if (state.lastflipped === null) {
+        state.lastflipped = id;
+        state.revealed.push(id);
+    } else {
+        state.revealed.push(id);
+        const {symbol} = state.cards[id];
+        const lastCard = state.cards[state.lastflipped];
+        if (symbol === lastCard.symbol) {
+            // Successful match! Check for win.
+            const {revealed, cards} = state;
+            if (revealed.length === cards.length) {
+                state.message = "You win!";
+                state.win = true;
+            } else {
+                state.message = "Nice match!";
+            }
+            state.lastflipped = null;
+        } else {
+            state.message = "No match.";
+            state.failedflip = id;
+            setTimeout(failedFlipCallback, 1000);
+        }
+    }
+}
+
+return { "setup": typeof setup !== "undefined" ? setup : undefined,
+"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
+"flip": typeof flip !== "undefined" ? flip : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
+currentModulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function toggle([ i, j ]) {
+        if (!state.cells[i]) {
+            state.cells[i] = {};
+        }
+        state.cells[i][j] = !state.cells[i][j];
+    }
+
+    function play() {
+        state.playing = true;
+        setTimeout(() => {
+            if (state.playing) {
+                updateNextFrame();
+                element.rerender(); // manually rerender
+                play(); // cue next frame
+            }
+        }, 2000 / state.speed);
+    }
+
+    function pause() {
+        state.playing = false;
+    }
+
+    function clear() {
+        state.cells = {};
+    }
+
+    function randomize() {
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!state.cells[i]) {
+                    state.cells[i] = {};
+                }
+                state.cells[i][j] = (Math.random() > 0.5);
+            }
+        }
+    }
+
+    // Helper function for getting a cell from data
+    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
+    function updateNextFrame() {
+        const nextData = {};
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!nextData[i]) {
+                    nextData[i] = {};
+                }
+                const count = countNeighbors(i, j);
+                nextData[i][j] = get(i, j) ?
+                    (count === 2 || count === 3) : // stays alive
+                    (count === 3); // comes alive
+            }
+        }
+        state.cells = nextData;
+    }
+
+    function countNeighbors(i, j) {
+        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
+                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
+                get(i + 1, j - 1), get(i - 1, j + 1)];
+        return neighbors.filter(v => v).length;
+    }
+    script.exports.range = Array.from({length: 24}, (x, i) => i);
+
+return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
+"play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"clear": typeof clear !== "undefined" ? clear : undefined,
+"randomize": typeof randomize !== "undefined" ? randomize : undefined,
+"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
+"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
+ setLocalVariable: __set, exports: script.exports}
+};
 currentModulo.assets.functions["xv9bp4g"]= function (){
 return {
   "name": "mdu.js",
@@ -22538,137 +20225,8 @@ return {
   }
 };
 };
-currentModulo.assets.functions["xcterp7"]= function (){
-return {
-  "id": 542682907,
-  "node_id": "R_kgDOIFivGw",
-  "name": "modulo",
-  "full_name": "modulojs/modulo",
-  "private": false,
-  "owner": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "html_url": "https://github.com/modulojs/modulo",
-  "description": "A drop-in JavaScript framework for modular web components, kept to about 2000 lines",
-  "fork": false,
-  "url": "https://api.github.com/repos/modulojs/modulo",
-  "forks_url": "https://api.github.com/repos/modulojs/modulo/forks",
-  "keys_url": "https://api.github.com/repos/modulojs/modulo/keys{/key_id}",
-  "collaborators_url": "https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}",
-  "teams_url": "https://api.github.com/repos/modulojs/modulo/teams",
-  "hooks_url": "https://api.github.com/repos/modulojs/modulo/hooks",
-  "issue_events_url": "https://api.github.com/repos/modulojs/modulo/issues/events{/number}",
-  "events_url": "https://api.github.com/repos/modulojs/modulo/events",
-  "assignees_url": "https://api.github.com/repos/modulojs/modulo/assignees{/user}",
-  "branches_url": "https://api.github.com/repos/modulojs/modulo/branches{/branch}",
-  "tags_url": "https://api.github.com/repos/modulojs/modulo/tags",
-  "blobs_url": "https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}",
-  "git_tags_url": "https://api.github.com/repos/modulojs/modulo/git/tags{/sha}",
-  "git_refs_url": "https://api.github.com/repos/modulojs/modulo/git/refs{/sha}",
-  "trees_url": "https://api.github.com/repos/modulojs/modulo/git/trees{/sha}",
-  "statuses_url": "https://api.github.com/repos/modulojs/modulo/statuses/{sha}",
-  "languages_url": "https://api.github.com/repos/modulojs/modulo/languages",
-  "stargazers_url": "https://api.github.com/repos/modulojs/modulo/stargazers",
-  "contributors_url": "https://api.github.com/repos/modulojs/modulo/contributors",
-  "subscribers_url": "https://api.github.com/repos/modulojs/modulo/subscribers",
-  "subscription_url": "https://api.github.com/repos/modulojs/modulo/subscription",
-  "commits_url": "https://api.github.com/repos/modulojs/modulo/commits{/sha}",
-  "git_commits_url": "https://api.github.com/repos/modulojs/modulo/git/commits{/sha}",
-  "comments_url": "https://api.github.com/repos/modulojs/modulo/comments{/number}",
-  "issue_comment_url": "https://api.github.com/repos/modulojs/modulo/issues/comments{/number}",
-  "contents_url": "https://api.github.com/repos/modulojs/modulo/contents/{+path}",
-  "compare_url": "https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}",
-  "merges_url": "https://api.github.com/repos/modulojs/modulo/merges",
-  "archive_url": "https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}",
-  "downloads_url": "https://api.github.com/repos/modulojs/modulo/downloads",
-  "issues_url": "https://api.github.com/repos/modulojs/modulo/issues{/number}",
-  "pulls_url": "https://api.github.com/repos/modulojs/modulo/pulls{/number}",
-  "milestones_url": "https://api.github.com/repos/modulojs/modulo/milestones{/number}",
-  "notifications_url": "https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}",
-  "labels_url": "https://api.github.com/repos/modulojs/modulo/labels{/name}",
-  "releases_url": "https://api.github.com/repos/modulojs/modulo/releases{/id}",
-  "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
-  "created_at": "2022-09-28T16:20:49Z",
-  "updated_at": "2022-09-28T17:43:52Z",
-  "pushed_at": "2022-09-28T17:43:26Z",
-  "git_url": "git://github.com/modulojs/modulo.git",
-  "ssh_url": "git@github.com:modulojs/modulo.git",
-  "clone_url": "https://github.com/modulojs/modulo.git",
-  "svn_url": "https://github.com/modulojs/modulo",
-  "homepage": null,
-  "size": 11,
-  "stargazers_count": 1,
-  "watchers_count": 1,
-  "language": "JavaScript",
-  "has_issues": true,
-  "has_projects": true,
-  "has_downloads": true,
-  "has_wiki": true,
-  "has_pages": true,
-  "forks_count": 0,
-  "mirror_url": null,
-  "archived": false,
-  "disabled": false,
-  "open_issues_count": 0,
-  "license": {
-    "key": "lgpl-2.1",
-    "name": "GNU Lesser General Public License v2.1",
-    "spdx_id": "LGPL-2.1",
-    "url": "https://api.github.com/licenses/lgpl-2.1",
-    "node_id": "MDc6TGljZW5zZTEx"
-  },
-  "allow_forking": true,
-  "is_template": false,
-  "web_commit_signoff_required": false,
-  "topics": [
-
-  ],
-  "visibility": "public",
-  "forks": 0,
-  "open_issues": 0,
-  "watchers": 1,
-  "default_branch": "main",
-  "temp_clone_token": null,
-  "organization": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "network_count": 0,
-  "subscribers_count": 1
-};
+currentModulo.assets.functions["ftn6om"]= function (){
+return {"message":"API rate limit exceeded for 173.195.77.203. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"};
 };
 currentModulo.assets.functions["16lf05u"]= function (){
 return [

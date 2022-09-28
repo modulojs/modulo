@@ -295,7 +295,7 @@ modulo.register('cpart', class Component {
         const cpartNameString = Array.from(cpartTypes).join(', ');
 
         const code = (`
-            modulo = currentModulo;// HAX XXX
+            //modulo = currentModulo;// HAX XXX (refs #11)
             const { ${ cpartNameString } } = modulo.registry.cparts;
             const confArray = modulo.defs['${ FullName }'];
 
@@ -328,13 +328,14 @@ modulo.register('cpart', class Component {
         const { library } = modulo.config;
         //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
         //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
-        //modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
+        //const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
+        const exCode = `modulo.assets.functions['${ FuncDefHash }']`;
+        modulo.assets.runInline(`${ exCode }('${ conf.TagName }');\n`);
         if (!FuncDefHash) {
             console.warn('Empty component specified:', FullName);
             return;
         }
-        modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
+        //modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
     }
 
     /*
@@ -907,8 +908,9 @@ modulo.register('core', class AssetManager {
     }
 
     getInlineJS(opts) {
-        // TODO: XXX Fix currentModulo -> modulo
-        let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        // TODO: XXX Fix currentModulo -> modulo (refs #11)
+        //let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
+        let text = 'var _X = modulo.assets.invoke.bind(modulo.assets);\n';
         for (const [ hash, argStr ] of this.invocations) {
             //text += `try { _X('${ hash }', ${ argStr }); } catch (e) { console.log('${ hash } - ERROR:', e); }\n`;
             text += `_X('${ hash }', ${ argStr });\n`;
@@ -941,7 +943,8 @@ modulo.register('core', class AssetManager {
     wrapFunctionText(params, text, opts = {}, hash = null) {
         // TODO: e.g. change public API to this, make opts & hash required
         //let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
+        //let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
+        let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`; // #11
         prefix += `= function ${ opts.funcName || ''}(${ params.join(', ') }){`;
         let suffix = '};'
         if (opts.exports) {
@@ -1230,7 +1233,7 @@ modulo.register('cpart', class Script {
     static defineCallback(modulo, conf) {
         // XXX -- HAX
         if (!conf.Parent || (conf.Parent === 'x_x' && conf.Hash)) {
-            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
+            const exCode = `modulo.assets.functions['${ conf.Hash }']`
             // TODO: Refactor:
             // NOTE: Uses "window" as "this." context for better compat
             //modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
@@ -2143,15 +2146,16 @@ modulo.register('command', function build (modulo, opts = {}) {
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
-    pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
-    // TODO: Clean this up:
+    //pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
+    // TODO: Clean this up (refs #11)
+    pre.js.push('var currentModulo = modulo;'); // Ensure modulo has both aliases
     if (opts.bundle) {
         // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('currentModulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('currentModulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
+        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
+        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
     } else {
         // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
+        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
                     JSON.stringify(modulo.fetchQueue.data) + ';');
     }
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
@@ -2211,6 +2215,7 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
     Modulo.globals = window; // TODO, remove?
     modulo.globals = window;
     window.hackCoreModulo = new Modulo(modulo); // XXX
+    window.currentModulo = modulo; // XXX refs #11
     window.hackRunBlocking = (document.querySelectorAll('script[modulo]')).length === 1;
     if (window.hackRunBlocking) {
         // TODO - Cleanup this logic, need to determine advantages of running
@@ -2265,8 +2270,8 @@ if (typeof document !== 'undefined') {
 }
 
 
-var currentModulo = new Modulo(modulo);
-currentModulo.defs = {
+var currentModulo = modulo;
+modulo.defs = {
  "x": [
   {
    "Type": "Modulo",
@@ -2280,65 +2285,17 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x",
-   "Hash": "s34uku",
-   "cachedComponentDefs": {
-    "/libraries/eg.html": {
-     "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-     "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-     "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-     "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-     "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-     "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-     "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-     "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-     "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-     "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-     "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-     "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-     "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-     "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-     "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-     "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-     "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-     "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-     "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-    },
-    "/libraries/docseg.html": {
-     "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-     "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-     "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-     "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-     "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-     "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-     "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-     "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-     "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
-    }
-   }
+   "Hash": "x1o0cb7u"
   }
  ],
  "x_x": [
   {
-   "Type": "Script",
-   "RenderObj": "script",
+   "Type": "Configuration",
+   "RenderObj": "configuration",
    "Parent": "x_x",
    "DefName": null,
    "Name": "x",
-   "FullName": "x_x_x",
-   "localVars": [
-    "component",
-    "modulo",
-    "library",
-    "props",
-    "style",
-    "template",
-    "staticdata",
-    "configuration",
-    "script",
-    "state",
-    "element",
-    "cparts"
-   ]
+   "FullName": "x_x_x"
   },
   {
    "Type": "Library",
@@ -2412,7 +2369,7 @@ currentModulo.defs = {
    "FullName": "x_x_x_DemoModal",
    "Hash": "1rpq1pk",
    "TagName": "x-demomodal",
-   "FuncDefHash": "xqf9b9l"
+   "FuncDefHash": "xhi0r1"
   },
   {
    "Type": "Component",
@@ -2432,7 +2389,7 @@ currentModulo.defs = {
    "FullName": "x_x_x_DemoChart",
    "Hash": "x1sgecs4",
    "TagName": "x-demochart",
-   "FuncDefHash": "sg83u6"
+   "FuncDefHash": "lt9vbi"
   },
   {
    "Type": "Component",
@@ -2452,7 +2409,7 @@ currentModulo.defs = {
    "FullName": "x_x_x_ExampleBtn",
    "Hash": "i2kvpp",
    "TagName": "x-examplebtn",
-   "FuncDefHash": "x1da3243"
+   "FuncDefHash": "x2qd8lf"
   },
   {
    "Type": "Component",
@@ -2472,7 +2429,7 @@ currentModulo.defs = {
    "FullName": "x_x_x_DemoSelector",
    "Hash": "ripjvb",
    "TagName": "x-demoselector",
-   "FuncDefHash": "x33s3q"
+   "FuncDefHash": "ged1qq"
   }
  ],
  "x_x_mws": [
@@ -2494,7 +2451,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_Page",
    "Hash": "x1ekhkl1",
    "TagName": "mws-page",
-   "FuncDefHash": "433vtt"
+   "FuncDefHash": "df65sh"
   },
   {
    "Type": "Component",
@@ -2514,7 +2471,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_ProjectInfo",
    "Hash": "14p1s0v",
    "TagName": "mws-projectinfo",
-   "FuncDefHash": "x1i275kj"
+   "FuncDefHash": "1k80u21"
   },
   {
    "Type": "Component",
@@ -2534,7 +2491,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_DevLogNav",
    "Hash": "x1vdla5b",
    "TagName": "mws-devlognav",
-   "FuncDefHash": "x1aqc8h6"
+   "FuncDefHash": "mac446"
   },
   {
    "Type": "Component",
@@ -2554,7 +2511,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_DocSidebar",
    "Hash": "15strma",
    "TagName": "mws-docsidebar",
-   "FuncDefHash": "x1juvmkg"
+   "FuncDefHash": "x1em4c74"
   },
   {
    "Type": "Component",
@@ -2574,7 +2531,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_Demo",
    "Hash": "x1l0sjo3",
    "TagName": "mws-demo",
-   "FuncDefHash": "x6nt2r0"
+   "FuncDefHash": "x103rdkc"
   },
   {
    "Type": "Component",
@@ -2594,7 +2551,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_AllExamples",
    "Hash": "x3m56c2",
    "TagName": "mws-allexamples",
-   "FuncDefHash": "xtg6cqb"
+   "FuncDefHash": "x9nh4rn"
   },
   {
    "Type": "Component",
@@ -2614,7 +2571,7 @@ currentModulo.defs = {
    "FullName": "x_x_mws_Section",
    "Hash": "x1d1j0ca",
    "TagName": "mws-section",
-   "FuncDefHash": "l1gr4i"
+   "FuncDefHash": "18j269u"
   }
  ],
  "x_x_docseg": [
@@ -2636,7 +2593,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Templating_1",
    "Hash": "g1ev96",
    "TagName": "docseg-templating_1",
-   "FuncDefHash": "17sct8m"
+   "FuncDefHash": "x2a21gm"
   },
   {
    "Type": "Component",
@@ -2656,7 +2613,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Templating_PrepareCallback",
    "Hash": "x1u7tsfu",
    "TagName": "docseg-templating_preparecallback",
-   "FuncDefHash": "1mvqm2k"
+   "FuncDefHash": "dvho18"
   },
   {
    "Type": "Component",
@@ -2676,7 +2633,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Templating_Comments",
    "Hash": "l7svrm",
    "TagName": "docseg-templating_comments",
-   "FuncDefHash": "x4kk41c"
+   "FuncDefHash": "x3l73c0"
   },
   {
    "Type": "Component",
@@ -2696,7 +2653,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Templating_Escaping",
    "Hash": "x1ehsatd",
    "TagName": "docseg-templating_escaping",
-   "FuncDefHash": "x14uqs09"
+   "FuncDefHash": "x1c5voit"
   },
   {
    "Type": "Component",
@@ -2716,7 +2673,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Tutorial_P1",
    "Hash": "x51qst3",
    "TagName": "docseg-tutorial_p1",
-   "FuncDefHash": "xif6qno"
+   "FuncDefHash": "xr4f3p4"
   },
   {
    "Type": "Component",
@@ -2736,7 +2693,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Tutorial_P2",
    "Hash": "1uj7p64",
    "TagName": "docseg-tutorial_p2",
-   "FuncDefHash": "x1c4jlk3"
+   "FuncDefHash": "xklattf"
   },
   {
    "Type": "Component",
@@ -2756,7 +2713,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Tutorial_P2_filters_demo",
    "Hash": "t0upt6",
    "TagName": "docseg-tutorial_p2_filters_demo",
-   "FuncDefHash": "x1gqlqhr"
+   "FuncDefHash": "1ericsp"
   },
   {
    "Type": "Component",
@@ -2776,7 +2733,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Tutorial_P3_state_demo",
    "Hash": "1oig15e",
    "TagName": "docseg-tutorial_p3_state_demo",
-   "FuncDefHash": "xpmn7oi"
+   "FuncDefHash": "lpso4q"
   },
   {
    "Type": "Component",
@@ -2796,7 +2753,7 @@ currentModulo.defs = {
    "FullName": "x_x_docseg_Tutorial_P3_state_bind",
    "Hash": "ngpccm",
    "TagName": "docseg-tutorial_p3_state_bind",
-   "FuncDefHash": "1sc0e93"
+   "FuncDefHash": "s28lnn"
   }
  ],
  "x_x_eg": [
@@ -2818,7 +2775,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Hello",
    "Hash": "1icoagp",
    "TagName": "eg-hello",
-   "FuncDefHash": "14n8egj"
+   "FuncDefHash": "x1hhld8p"
   },
   {
    "Type": "Component",
@@ -2838,7 +2795,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Simple",
    "Hash": "xlo7cf3",
    "TagName": "eg-simple",
-   "FuncDefHash": "r5jke9"
+   "FuncDefHash": "1gctgjl"
   },
   {
    "Type": "Component",
@@ -2858,7 +2815,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_ToDo",
    "Hash": "1k33iqb",
    "TagName": "eg-todo",
-   "FuncDefHash": "18e8a6j"
+   "FuncDefHash": "x1720oc1"
   },
   {
    "Type": "Component",
@@ -2878,7 +2835,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_JSON",
    "Hash": "pribqq",
    "TagName": "eg-json",
-   "FuncDefHash": "cf1msk"
+   "FuncDefHash": "14bmbr8"
   },
   {
    "Type": "Component",
@@ -2898,7 +2855,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_JSONArray",
    "Hash": "xcql4f2",
    "TagName": "eg-jsonarray",
-   "FuncDefHash": "x2b520g"
+   "FuncDefHash": "vaase4"
   },
   {
    "Type": "Component",
@@ -2918,7 +2875,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_GitHubAPI",
    "Hash": "x1at59fc",
    "TagName": "eg-githubapi",
-   "FuncDefHash": "cd55r1"
+   "FuncDefHash": "xvkcm7j"
   },
   {
    "Type": "Component",
@@ -2938,7 +2895,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_ColorSelector",
    "Hash": "6riop6",
    "TagName": "eg-colorselector",
-   "FuncDefHash": "x1ii4dc3"
+   "FuncDefHash": "v2ccp9"
   },
   {
    "Type": "Component",
@@ -2958,7 +2915,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_DateNumberPicker",
    "Hash": "1i6hhtf",
    "TagName": "eg-datenumberpicker",
-   "FuncDefHash": "f4cpaa"
+   "FuncDefHash": "xbebs0a"
   },
   {
    "Type": "Component",
@@ -2978,7 +2935,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_PrimeSieve",
    "Hash": "1b9a0ql",
    "TagName": "eg-primesieve",
-   "FuncDefHash": "x1g4uuhi"
+   "FuncDefHash": "x12c1u46"
   },
   {
    "Type": "Component",
@@ -2998,7 +2955,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Scatter",
    "Hash": "x137bsev",
    "TagName": "eg-scatter",
-   "FuncDefHash": "1vfteg8"
+   "FuncDefHash": "x1clk1ac"
   },
   {
    "Type": "Component",
@@ -3018,7 +2975,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_FlexibleForm",
    "Hash": "x4vivet",
    "TagName": "eg-flexibleform",
-   "FuncDefHash": "1ns7ff4"
+   "FuncDefHash": "x1bfpq3g"
   },
   {
    "Type": "Component",
@@ -3038,7 +2995,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_FlexibleFormWithAPI",
    "Hash": "x1sg84mj",
    "TagName": "eg-flexibleformwithapi",
-   "FuncDefHash": "x1m1b3bs"
+   "FuncDefHash": "xa92jmg"
   },
   {
    "Type": "Component",
@@ -3058,7 +3015,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Components",
    "Hash": "xeg9s6i",
    "TagName": "eg-components",
-   "FuncDefHash": "8bv8j2"
+   "FuncDefHash": "x6c82fi"
   },
   {
    "Type": "Component",
@@ -3078,7 +3035,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_OscillatingGraph",
    "Hash": "ugu6po",
    "TagName": "eg-oscillatinggraph",
-   "FuncDefHash": "x7jhpv4"
+   "FuncDefHash": "x1dk560g"
   },
   {
    "Type": "Component",
@@ -3098,7 +3055,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Search",
    "Hash": "10mu0ht",
    "TagName": "eg-search",
-   "FuncDefHash": "xlrsjv0"
+   "FuncDefHash": "4ffi6c"
   },
   {
    "Type": "Component",
@@ -3118,7 +3075,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_SearchBox",
    "Hash": "ljc2i4",
    "TagName": "eg-searchbox",
-   "FuncDefHash": "x1jlcjv6"
+   "FuncDefHash": "x1ech9hq"
   },
   {
    "Type": "Component",
@@ -3138,7 +3095,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_WorldMap",
    "Hash": "xn1lri6",
    "TagName": "eg-worldmap",
-   "FuncDefHash": "x14gac81"
+   "FuncDefHash": "1fe3nlb"
   },
   {
    "Type": "Component",
@@ -3158,7 +3115,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_Memory",
    "Hash": "14schu5",
    "TagName": "eg-memory",
-   "FuncDefHash": "4ita9"
+   "FuncDefHash": "x181u3ob"
   },
   {
    "Type": "Component",
@@ -3178,7 +3135,7 @@ currentModulo.defs = {
    "FullName": "x_x_eg_ConwayGameOfLife",
    "Hash": "x1ketdcf",
    "TagName": "eg-conwaygameoflife",
-   "FuncDefHash": "xao68n1"
+   "FuncDefHash": "1t1t1vj"
   }
  ],
  "x_x_x_DemoModal": [
@@ -3424,7 +3381,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Page_x",
-   "Hash": "3n0giq"
+   "Hash": "x7vad96"
   },
   {
    "Type": "Script",
@@ -3659,7 +3616,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Demo_x",
-   "Hash": "x44d8e6",
+   "Hash": "xnob7me",
    "localVars": [
     "component",
     "modulo",
@@ -4149,7 +4106,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_JSON_x",
-   "Hash": "xcterp7"
+   "Hash": "ftn6om"
   }
  ],
  "x_x_eg_JSONArray": [
@@ -4806,7 +4763,7 @@ currentModulo.defs = {
   }
  ]
 };
-currentModulo.parentDefs = {
+modulo.parentDefs = {
  "x_x": {
   "Type": "Modulo",
   "ConfPreprocessors": [
@@ -4819,41 +4776,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x",
-  "Hash": "s34uku",
-  "cachedComponentDefs": {
-   "/libraries/eg.html": {
-    "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-    "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-    "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-    "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-    "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-    "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-    "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-    "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-    "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-    "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-    "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-    "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-    "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-    "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData>\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-    "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-    "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-    "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   },
-   "/libraries/docseg.html": {
-    "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-    "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-    "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-    "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-    "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-    "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-    "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-    "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-    "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
-   }
-  }
+  "Hash": "x1o0cb7u"
  },
  "x_x_x": {
   "Type": "Library",
@@ -4925,7 +4848,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_x_DemoModal",
   "Hash": "1rpq1pk",
   "TagName": "x-demomodal",
-  "FuncDefHash": "xqf9b9l"
+  "FuncDefHash": "xhi0r1"
  },
  "x_x_x_DemoChart": {
   "Type": "Component",
@@ -4945,7 +4868,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_x_DemoChart",
   "Hash": "x1sgecs4",
   "TagName": "x-demochart",
-  "FuncDefHash": "sg83u6"
+  "FuncDefHash": "lt9vbi"
  },
  "x_x_x_ExampleBtn": {
   "Type": "Component",
@@ -4965,7 +4888,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_x_ExampleBtn",
   "Hash": "i2kvpp",
   "TagName": "x-examplebtn",
-  "FuncDefHash": "x1da3243"
+  "FuncDefHash": "x2qd8lf"
  },
  "x_x_x_DemoSelector": {
   "Type": "Component",
@@ -4985,7 +4908,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_x_DemoSelector",
   "Hash": "ripjvb",
   "TagName": "x-demoselector",
-  "FuncDefHash": "x33s3q"
+  "FuncDefHash": "ged1qq"
  },
  "x_x_mws_Page": {
   "Type": "Component",
@@ -5005,7 +4928,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_Page",
   "Hash": "x1ekhkl1",
   "TagName": "mws-page",
-  "FuncDefHash": "433vtt"
+  "FuncDefHash": "df65sh"
  },
  "x_x_mws_ProjectInfo": {
   "Type": "Component",
@@ -5025,7 +4948,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_ProjectInfo",
   "Hash": "14p1s0v",
   "TagName": "mws-projectinfo",
-  "FuncDefHash": "x1i275kj"
+  "FuncDefHash": "1k80u21"
  },
  "x_x_mws_DevLogNav": {
   "Type": "Component",
@@ -5045,7 +4968,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_DevLogNav",
   "Hash": "x1vdla5b",
   "TagName": "mws-devlognav",
-  "FuncDefHash": "x1aqc8h6"
+  "FuncDefHash": "mac446"
  },
  "x_x_mws_DocSidebar": {
   "Type": "Component",
@@ -5065,7 +4988,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_DocSidebar",
   "Hash": "15strma",
   "TagName": "mws-docsidebar",
-  "FuncDefHash": "x1juvmkg"
+  "FuncDefHash": "x1em4c74"
  },
  "x_x_mws_Demo": {
   "Type": "Component",
@@ -5085,7 +5008,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_Demo",
   "Hash": "x1l0sjo3",
   "TagName": "mws-demo",
-  "FuncDefHash": "x6nt2r0"
+  "FuncDefHash": "x103rdkc"
  },
  "x_x_mws_AllExamples": {
   "Type": "Component",
@@ -5105,7 +5028,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_AllExamples",
   "Hash": "x3m56c2",
   "TagName": "mws-allexamples",
-  "FuncDefHash": "xtg6cqb"
+  "FuncDefHash": "x9nh4rn"
  },
  "x_x_mws_Section": {
   "Type": "Component",
@@ -5125,7 +5048,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_mws_Section",
   "Hash": "x1d1j0ca",
   "TagName": "mws-section",
-  "FuncDefHash": "l1gr4i"
+  "FuncDefHash": "18j269u"
  },
  "x_x_docseg_Templating_1": {
   "Type": "Component",
@@ -5145,7 +5068,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Templating_1",
   "Hash": "g1ev96",
   "TagName": "docseg-templating_1",
-  "FuncDefHash": "17sct8m"
+  "FuncDefHash": "x2a21gm"
  },
  "x_x_docseg_Templating_PrepareCallback": {
   "Type": "Component",
@@ -5165,7 +5088,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Templating_PrepareCallback",
   "Hash": "x1u7tsfu",
   "TagName": "docseg-templating_preparecallback",
-  "FuncDefHash": "1mvqm2k"
+  "FuncDefHash": "dvho18"
  },
  "x_x_docseg_Templating_Comments": {
   "Type": "Component",
@@ -5185,7 +5108,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Templating_Comments",
   "Hash": "l7svrm",
   "TagName": "docseg-templating_comments",
-  "FuncDefHash": "x4kk41c"
+  "FuncDefHash": "x3l73c0"
  },
  "x_x_docseg_Templating_Escaping": {
   "Type": "Component",
@@ -5205,7 +5128,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Templating_Escaping",
   "Hash": "x1ehsatd",
   "TagName": "docseg-templating_escaping",
-  "FuncDefHash": "x14uqs09"
+  "FuncDefHash": "x1c5voit"
  },
  "x_x_docseg_Tutorial_P1": {
   "Type": "Component",
@@ -5225,7 +5148,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Tutorial_P1",
   "Hash": "x51qst3",
   "TagName": "docseg-tutorial_p1",
-  "FuncDefHash": "xif6qno"
+  "FuncDefHash": "xr4f3p4"
  },
  "x_x_docseg_Tutorial_P2": {
   "Type": "Component",
@@ -5245,7 +5168,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Tutorial_P2",
   "Hash": "1uj7p64",
   "TagName": "docseg-tutorial_p2",
-  "FuncDefHash": "x1c4jlk3"
+  "FuncDefHash": "xklattf"
  },
  "x_x_docseg_Tutorial_P2_filters_demo": {
   "Type": "Component",
@@ -5265,7 +5188,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Tutorial_P2_filters_demo",
   "Hash": "t0upt6",
   "TagName": "docseg-tutorial_p2_filters_demo",
-  "FuncDefHash": "x1gqlqhr"
+  "FuncDefHash": "1ericsp"
  },
  "x_x_docseg_Tutorial_P3_state_demo": {
   "Type": "Component",
@@ -5285,7 +5208,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Tutorial_P3_state_demo",
   "Hash": "1oig15e",
   "TagName": "docseg-tutorial_p3_state_demo",
-  "FuncDefHash": "xpmn7oi"
+  "FuncDefHash": "lpso4q"
  },
  "x_x_docseg_Tutorial_P3_state_bind": {
   "Type": "Component",
@@ -5305,7 +5228,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_docseg_Tutorial_P3_state_bind",
   "Hash": "ngpccm",
   "TagName": "docseg-tutorial_p3_state_bind",
-  "FuncDefHash": "1sc0e93"
+  "FuncDefHash": "s28lnn"
  },
  "x_x_eg_Hello": {
   "Type": "Component",
@@ -5325,7 +5248,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Hello",
   "Hash": "1icoagp",
   "TagName": "eg-hello",
-  "FuncDefHash": "14n8egj"
+  "FuncDefHash": "x1hhld8p"
  },
  "x_x_eg_Simple": {
   "Type": "Component",
@@ -5345,7 +5268,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Simple",
   "Hash": "xlo7cf3",
   "TagName": "eg-simple",
-  "FuncDefHash": "r5jke9"
+  "FuncDefHash": "1gctgjl"
  },
  "x_x_eg_ToDo": {
   "Type": "Component",
@@ -5365,7 +5288,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_ToDo",
   "Hash": "1k33iqb",
   "TagName": "eg-todo",
-  "FuncDefHash": "18e8a6j"
+  "FuncDefHash": "x1720oc1"
  },
  "x_x_eg_JSON": {
   "Type": "Component",
@@ -5385,7 +5308,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_JSON",
   "Hash": "pribqq",
   "TagName": "eg-json",
-  "FuncDefHash": "cf1msk"
+  "FuncDefHash": "14bmbr8"
  },
  "x_x_eg_JSONArray": {
   "Type": "Component",
@@ -5405,7 +5328,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_JSONArray",
   "Hash": "xcql4f2",
   "TagName": "eg-jsonarray",
-  "FuncDefHash": "x2b520g"
+  "FuncDefHash": "vaase4"
  },
  "x_x_eg_GitHubAPI": {
   "Type": "Component",
@@ -5425,7 +5348,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_GitHubAPI",
   "Hash": "x1at59fc",
   "TagName": "eg-githubapi",
-  "FuncDefHash": "cd55r1"
+  "FuncDefHash": "xvkcm7j"
  },
  "x_x_eg_ColorSelector": {
   "Type": "Component",
@@ -5445,7 +5368,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_ColorSelector",
   "Hash": "6riop6",
   "TagName": "eg-colorselector",
-  "FuncDefHash": "x1ii4dc3"
+  "FuncDefHash": "v2ccp9"
  },
  "x_x_eg_DateNumberPicker": {
   "Type": "Component",
@@ -5465,7 +5388,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_DateNumberPicker",
   "Hash": "1i6hhtf",
   "TagName": "eg-datenumberpicker",
-  "FuncDefHash": "f4cpaa"
+  "FuncDefHash": "xbebs0a"
  },
  "x_x_eg_PrimeSieve": {
   "Type": "Component",
@@ -5485,7 +5408,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_PrimeSieve",
   "Hash": "1b9a0ql",
   "TagName": "eg-primesieve",
-  "FuncDefHash": "x1g4uuhi"
+  "FuncDefHash": "x12c1u46"
  },
  "x_x_eg_Scatter": {
   "Type": "Component",
@@ -5505,7 +5428,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Scatter",
   "Hash": "x137bsev",
   "TagName": "eg-scatter",
-  "FuncDefHash": "1vfteg8"
+  "FuncDefHash": "x1clk1ac"
  },
  "x_x_eg_FlexibleForm": {
   "Type": "Component",
@@ -5525,7 +5448,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_FlexibleForm",
   "Hash": "x4vivet",
   "TagName": "eg-flexibleform",
-  "FuncDefHash": "1ns7ff4"
+  "FuncDefHash": "x1bfpq3g"
  },
  "x_x_eg_FlexibleFormWithAPI": {
   "Type": "Component",
@@ -5545,7 +5468,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_FlexibleFormWithAPI",
   "Hash": "x1sg84mj",
   "TagName": "eg-flexibleformwithapi",
-  "FuncDefHash": "x1m1b3bs"
+  "FuncDefHash": "xa92jmg"
  },
  "x_x_eg_Components": {
   "Type": "Component",
@@ -5565,7 +5488,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Components",
   "Hash": "xeg9s6i",
   "TagName": "eg-components",
-  "FuncDefHash": "8bv8j2"
+  "FuncDefHash": "x6c82fi"
  },
  "x_x_eg_OscillatingGraph": {
   "Type": "Component",
@@ -5585,7 +5508,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_OscillatingGraph",
   "Hash": "ugu6po",
   "TagName": "eg-oscillatinggraph",
-  "FuncDefHash": "x7jhpv4"
+  "FuncDefHash": "x1dk560g"
  },
  "x_x_eg_Search": {
   "Type": "Component",
@@ -5605,7 +5528,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Search",
   "Hash": "10mu0ht",
   "TagName": "eg-search",
-  "FuncDefHash": "xlrsjv0"
+  "FuncDefHash": "4ffi6c"
  },
  "x_x_eg_SearchBox": {
   "Type": "Component",
@@ -5625,7 +5548,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_SearchBox",
   "Hash": "ljc2i4",
   "TagName": "eg-searchbox",
-  "FuncDefHash": "x1jlcjv6"
+  "FuncDefHash": "x1ech9hq"
  },
  "x_x_eg_WorldMap": {
   "Type": "Component",
@@ -5645,7 +5568,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_WorldMap",
   "Hash": "xn1lri6",
   "TagName": "eg-worldmap",
-  "FuncDefHash": "x14gac81"
+  "FuncDefHash": "1fe3nlb"
  },
  "x_x_eg_Memory": {
   "Type": "Component",
@@ -5665,7 +5588,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_Memory",
   "Hash": "14schu5",
   "TagName": "eg-memory",
-  "FuncDefHash": "4ita9"
+  "FuncDefHash": "x181u3ob"
  },
  "x_x_eg_ConwayGameOfLife": {
   "Type": "Component",
@@ -5685,7 +5608,7 @@ currentModulo.parentDefs = {
   "FullName": "x_x_eg_ConwayGameOfLife",
   "Hash": "x1ketdcf",
   "TagName": "eg-conwaygameoflife",
-  "FuncDefHash": "xao68n1"
+  "FuncDefHash": "1t1t1vj"
  },
  "x_x_x_DemoModal_x": {
   "Type": "Style",
@@ -5960,7 +5883,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_JSON_x",
-  "Hash": "xcterp7"
+  "Hash": "ftn6om"
  },
  "x_x_eg_JSONArray_x": {
   "Type": "StaticData",
@@ -6163,7 +6086,7 @@ currentModulo.parentDefs = {
   "Name": "x",
   "FullName": "x_x_eg_ConwayGameOfLife_x"
  }
-};currentModulo.assets.functions["1a5ar2m"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+};modulo.assets.functions["xg5of9b"]= function (modulo){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; }
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -18842,7 +18765,9 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     // Expose a global utility, which creates an object containing the contents
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
-    function getComponentDefs(path) {
+    function getComponentDefs(path, modulo) {
+        // TODO: Fix the modulo dependency injection here, once currentModulo
+        // is fixed (refs #11)
         if (modulo.parentDefs.x_x.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this
@@ -18882,7 +18807,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
         return componentTexts;
     }
     modulo.register('util', getComponentDefs);
-
+    window.getComponentDefs = getComponentDefs; //  TODO: Fix after currentModulo bug s (refs #11)
 
     // https://stackoverflow.com/questions/400212/
     function fallbackCopyTextToClipboard(text) {
@@ -18924,6 +18849,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     }
     modulo.register('util', copyTextToClipboard);
 
+    window.copyTextToClipboard = copyTextToClipboard ; //  TODO: Fix after currentModulo bugs (refs #11)
 return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "removeChildren": typeof removeChildren !== "undefined" ? removeChildren : undefined,
 "removeChildrenAndAdd": typeof removeChildrenAndAdd !== "undefined" ? removeChildrenAndAdd : undefined,
@@ -19505,7 +19431,1905 @@ return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
 "copyTextToClipboard": typeof copyTextToClipboard !== "undefined" ? copyTextToClipboard : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["xhi0r1"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_x_DemoModal'];
+
+    const cpartClasses = { Props, Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DemoModal extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1rpq1pk';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoModal'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DemoModal };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DemoModal);
+    //console.log("Registered: DemoModal as " + tagName);
+    return DemoModal;
+
+};
+modulo.assets.functions["lt9vbi"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_x_DemoChart'];
+
+    const cpartClasses = { Props, Template, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DemoChart extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1sgecs4';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoChart'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DemoChart };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DemoChart);
+    //console.log("Registered: DemoChart as " + tagName);
+    return DemoChart;
+
+};
+modulo.assets.functions["x2qd8lf"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_x_ExampleBtn'];
+
+    const cpartClasses = { Props, Template, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class ExampleBtn extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'i2kvpp';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_x_ExampleBtn'];
+        }
+    }
+
+    const initRenderObj = { elementClass: ExampleBtn };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, ExampleBtn);
+    //console.log("Registered: ExampleBtn as " + tagName);
+    return ExampleBtn;
+
+};
+modulo.assets.functions["ged1qq"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_x_DemoSelector'];
+
+    const cpartClasses = { Props, Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DemoSelector extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'ripjvb';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoSelector'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DemoSelector };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DemoSelector);
+    //console.log("Registered: DemoSelector as " + tagName);
+    return DemoSelector;
+
+};
+modulo.assets.functions["df65sh"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Style, Template, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_Page'];
+
+    const cpartClasses = { Props, Style, Template, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Page extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1ekhkl1';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Page'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Page };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Page);
+    //console.log("Registered: Page as " + tagName);
+    return Page;
+
+};
+modulo.assets.functions["1k80u21"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, StaticData, Template } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_ProjectInfo'];
+
+    const cpartClasses = { Props, StaticData, Template };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class ProjectInfo extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '14p1s0v';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_ProjectInfo'];
+        }
+    }
+
+    const initRenderObj = { elementClass: ProjectInfo };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, ProjectInfo);
+    //console.log("Registered: ProjectInfo as " + tagName);
+    return ProjectInfo;
+
+};
+modulo.assets.functions["mac446"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, State, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_DevLogNav'];
+
+    const cpartClasses = { Props, Template, State, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DevLogNav extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1vdla5b';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_DevLogNav'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DevLogNav };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DevLogNav);
+    //console.log("Registered: DevLogNav as " + tagName);
+    return DevLogNav;
+
+};
+modulo.assets.functions["x1em4c74"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_DocSidebar'];
+
+    const cpartClasses = { Props, Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DocSidebar extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '15strma';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_DocSidebar'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DocSidebar };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DocSidebar);
+    //console.log("Registered: DocSidebar as " + tagName);
+    return DocSidebar;
+
+};
+modulo.assets.functions["x103rdkc"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_Demo'];
+
+    const cpartClasses = { Props, Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Demo extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1l0sjo3';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Demo'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Demo };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Demo);
+    //console.log("Registered: Demo as " + tagName);
+    return Demo;
+
+};
+modulo.assets.functions["x9nh4rn"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_AllExamples'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class AllExamples extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x3m56c2';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_AllExamples'];
+        }
+    }
+
+    const initRenderObj = { elementClass: AllExamples };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, AllExamples);
+    //console.log("Registered: AllExamples as " + tagName);
+    return AllExamples;
+
+};
+modulo.assets.functions["18j269u"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Props, Template, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_mws_Section'];
+
+    const cpartClasses = { Props, Template, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Section extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1d1j0ca';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Section'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Section };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Section);
+    //console.log("Registered: Section as " + tagName);
+    return Section;
+
+};
+modulo.assets.functions["x2a21gm"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Templating_1'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Templating_1 extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'g1ev96';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_1'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Templating_1 };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Templating_1);
+    //console.log("Registered: Templating_1 as " + tagName);
+    return Templating_1;
+
+};
+modulo.assets.functions["dvho18"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Templating_PrepareCallback'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Templating_PrepareCallback extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1u7tsfu';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_PrepareCallback'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Templating_PrepareCallback };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Templating_PrepareCallback);
+    //console.log("Registered: Templating_PrepareCallback as " + tagName);
+    return Templating_PrepareCallback;
+
+};
+modulo.assets.functions["x3l73c0"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Templating_Comments'];
+
+    const cpartClasses = { Template };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Templating_Comments extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'l7svrm';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_Comments'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Templating_Comments };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Templating_Comments);
+    //console.log("Registered: Templating_Comments as " + tagName);
+    return Templating_Comments;
+
+};
+modulo.assets.functions["x1c5voit"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Templating_Escaping'];
+
+    const cpartClasses = { Template, State, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Templating_Escaping extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1ehsatd';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_Escaping'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Templating_Escaping };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Templating_Escaping);
+    //console.log("Registered: Templating_Escaping as " + tagName);
+    return Templating_Escaping;
+
+};
+modulo.assets.functions["xr4f3p4"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Tutorial_P1'];
+
+    const cpartClasses = { Template, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Tutorial_P1 extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x51qst3';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P1'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Tutorial_P1 };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Tutorial_P1);
+    //console.log("Registered: Tutorial_P1 as " + tagName);
+    return Tutorial_P1;
+
+};
+modulo.assets.functions["xklattf"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Tutorial_P2'];
+
+    const cpartClasses = { Template };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Tutorial_P2 extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1uj7p64';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P2'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Tutorial_P2 };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Tutorial_P2);
+    //console.log("Registered: Tutorial_P2 as " + tagName);
+    return Tutorial_P2;
+
+};
+modulo.assets.functions["1ericsp"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Tutorial_P2_filters_demo'];
+
+    const cpartClasses = { Template };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Tutorial_P2_filters_demo extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 't0upt6';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P2_filters_demo'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Tutorial_P2_filters_demo };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Tutorial_P2_filters_demo);
+    //console.log("Registered: Tutorial_P2_filters_demo as " + tagName);
+    return Tutorial_P2_filters_demo;
+
+};
+modulo.assets.functions["lpso4q"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Tutorial_P3_state_demo'];
+
+    const cpartClasses = { Template, State, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Tutorial_P3_state_demo extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1oig15e';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P3_state_demo'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Tutorial_P3_state_demo };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Tutorial_P3_state_demo);
+    //console.log("Registered: Tutorial_P3_state_demo as " + tagName);
+    return Tutorial_P3_state_demo;
+
+};
+modulo.assets.functions["s28lnn"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_docseg_Tutorial_P3_state_bind'];
+
+    const cpartClasses = { Template, State };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Tutorial_P3_state_bind extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'ngpccm';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P3_state_bind'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Tutorial_P3_state_bind };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Tutorial_P3_state_bind);
+    //console.log("Registered: Tutorial_P3_state_bind as " + tagName);
+    return Tutorial_P3_state_bind;
+
+};
+modulo.assets.functions["x1hhld8p"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Hello'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Hello extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1icoagp';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Hello'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Hello };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Hello);
+    //console.log("Registered: Hello as " + tagName);
+    return Hello;
+
+};
+modulo.assets.functions["1gctgjl"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Simple'];
+
+    const cpartClasses = { Template, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Simple extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'xlo7cf3';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Simple'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Simple };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Simple);
+    //console.log("Registered: Simple as " + tagName);
+    return Simple;
+
+};
+modulo.assets.functions["x1720oc1"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_ToDo'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class ToDo extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1k33iqb';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ToDo'];
+        }
+    }
+
+    const initRenderObj = { elementClass: ToDo };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, ToDo);
+    //console.log("Registered: ToDo as " + tagName);
+    return ToDo;
+
+};
+modulo.assets.functions["14bmbr8"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, StaticData } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_JSON'];
+
+    const cpartClasses = { Template, StaticData };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class JSON extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'pribqq';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_JSON'];
+        }
+    }
+
+    const initRenderObj = { elementClass: JSON };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, JSON);
+    //console.log("Registered: JSON as " + tagName);
+    return JSON;
+
+};
+modulo.assets.functions["vaase4"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, StaticData } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_JSONArray'];
+
+    const cpartClasses = { Template, StaticData };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class JSONArray extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'xcql4f2';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_JSONArray'];
+        }
+    }
+
+    const initRenderObj = { elementClass: JSONArray };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, JSONArray);
+    //console.log("Registered: JSONArray as " + tagName);
+    return JSONArray;
+
+};
+modulo.assets.functions["xvkcm7j"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_GitHubAPI'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class GitHubAPI extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1at59fc';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_GitHubAPI'];
+        }
+    }
+
+    const initRenderObj = { elementClass: GitHubAPI };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, GitHubAPI);
+    //console.log("Registered: GitHubAPI as " + tagName);
+    return GitHubAPI;
+
+};
+modulo.assets.functions["v2ccp9"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_ColorSelector'];
+
+    const cpartClasses = { Template, State };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class ColorSelector extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '6riop6';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ColorSelector'];
+        }
+    }
+
+    const initRenderObj = { elementClass: ColorSelector };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, ColorSelector);
+    //console.log("Registered: ColorSelector as " + tagName);
+    return ColorSelector;
+
+};
+modulo.assets.functions["xbebs0a"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_DateNumberPicker'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class DateNumberPicker extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1i6hhtf';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_DateNumberPicker'];
+        }
+    }
+
+    const initRenderObj = { elementClass: DateNumberPicker };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, DateNumberPicker);
+    //console.log("Registered: DateNumberPicker as " + tagName);
+    return DateNumberPicker;
+
+};
+modulo.assets.functions["x12c1u46"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_PrimeSieve'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class PrimeSieve extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '1b9a0ql';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_PrimeSieve'];
+        }
+    }
+
+    const initRenderObj = { elementClass: PrimeSieve };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, PrimeSieve);
+    //console.log("Registered: PrimeSieve as " + tagName);
+    return PrimeSieve;
+
+};
+modulo.assets.functions["x1clk1ac"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, StaticData, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Scatter'];
+
+    const cpartClasses = { Template, StaticData, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Scatter extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x137bsev';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Scatter'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Scatter };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Scatter);
+    //console.log("Registered: Scatter as " + tagName);
+    return Scatter;
+
+};
+modulo.assets.functions["x1bfpq3g"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_FlexibleForm'];
+
+    const cpartClasses = { Template, State };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class FlexibleForm extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x4vivet';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_FlexibleForm'];
+        }
+    }
+
+    const initRenderObj = { elementClass: FlexibleForm };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, FlexibleForm);
+    //console.log("Registered: FlexibleForm as " + tagName);
+    return FlexibleForm;
+
+};
+modulo.assets.functions["xa92jmg"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_FlexibleFormWithAPI'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class FlexibleFormWithAPI extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1sg84mj';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_FlexibleFormWithAPI'];
+        }
+    }
+
+    const initRenderObj = { elementClass: FlexibleFormWithAPI };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, FlexibleFormWithAPI);
+    //console.log("Registered: FlexibleFormWithAPI as " + tagName);
+    return FlexibleFormWithAPI;
+
+};
+modulo.assets.functions["x6c82fi"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Components'];
+
+    const cpartClasses = { Template };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Components extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'xeg9s6i';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Components'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Components };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Components);
+    //console.log("Registered: Components as " + tagName);
+    return Components;
+
+};
+modulo.assets.functions["x1dk560g"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_OscillatingGraph'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class OscillatingGraph extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'ugu6po';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_OscillatingGraph'];
+        }
+    }
+
+    const initRenderObj = { elementClass: OscillatingGraph };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, OscillatingGraph);
+    //console.log("Registered: OscillatingGraph as " + tagName);
+    return OscillatingGraph;
+
+};
+modulo.assets.functions["4ffi6c"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Search'];
+
+    const cpartClasses = { Template, State, Script };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Search extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '10mu0ht';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Search'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Search };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Search);
+    //console.log("Registered: Search as " + tagName);
+    return Search;
+
+};
+modulo.assets.functions["x1ech9hq"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, StaticData, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_SearchBox'];
+
+    const cpartClasses = { Template, State, StaticData, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class SearchBox extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'ljc2i4';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_SearchBox'];
+        }
+    }
+
+    const initRenderObj = { elementClass: SearchBox };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, SearchBox);
+    //console.log("Registered: SearchBox as " + tagName);
+    return SearchBox;
+
+};
+modulo.assets.functions["1fe3nlb"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, StaticData, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_WorldMap'];
+
+    const cpartClasses = { Template, StaticData, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class WorldMap extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'xn1lri6';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_WorldMap'];
+        }
+    }
+
+    const initRenderObj = { elementClass: WorldMap };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, WorldMap);
+    //console.log("Registered: WorldMap as " + tagName);
+    return WorldMap;
+
+};
+modulo.assets.functions["x181u3ob"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_Memory'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class Memory extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = '14schu5';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Memory'];
+        }
+    }
+
+    const initRenderObj = { elementClass: Memory };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, Memory);
+    //console.log("Registered: Memory as " + tagName);
+    return Memory;
+
+};
+modulo.assets.functions["1t1t1vj"]= function (tagName, modulo){
+
+    //modulo = currentModulo;// HAX XXX (refs #11)
+    const { Template, State, Script, Style } = modulo.registry.cparts;
+    const confArray = modulo.defs['x_x_eg_ConwayGameOfLife'];
+
+    const cpartClasses = { Template, State, Script, Style };
+    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+    class ConwayGameOfLife extends modulo.registry.utils.BaseElement {
+        constructor() {
+            super();
+            this.modulo = modulo;
+            this.defHash = 'x1ketdcf';
+            this.initRenderObj = initRenderObj;
+            this.moduloChildrenData = confArray;
+            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ConwayGameOfLife'];
+        }
+    }
+
+    const initRenderObj = { elementClass: ConwayGameOfLife };
+    modulo.applyPatches(factoryPatches, initRenderObj);
+    modulo.globals.customElements.define(tagName, ConwayGameOfLife);
+    //console.log("Registered: ConwayGameOfLife as " + tagName);
+    return ConwayGameOfLife;
+
+};
+modulo.assets.functions["1pdamd5"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
+  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
+  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push("block"); // "block"
+  } else { // "else"
+  OUT.push("none"); // "none"
+  } // "endif"
+  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push(" top: 100px; "); // "top: 100px;"
+  } else { // "else"
+  OUT.push(" top: -500px; "); // "top: -500px;"
+  } // "endif"
+  OUT.push("\">\n            <h2>"); // "\"><h2>"
+  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
+  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["1k78eap"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        <div class=\"chart-container\n        "); // "<div class=\"chart-container"
+  if (CTX.props.animated) { // "if props.animated"
+  OUT.push("animated"); // "animated"
+  } // "endif"
+  OUT.push("\">\n            "); // "\">"
+  var ARR0=CTX.script.percent;for (var KEY in ARR0) {CTX. percent=ARR0[KEY]; // "for percent in script.percent"
+  OUT.push("\n                <div style=\"height: "); // "<div style=\"height:"
+  OUT.push(G.escapeText(CTX.percent)); // "percent"
+  OUT.push("px; width: "); // "px; width:"
+  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
+  OUT.push("px\">\n                </div>\n            "); // "px\"></div>"
+  } // "endfor"
+  OUT.push("\n        </div>\n        "); // "</div>"
+  if (!(CTX.props.animated)) { // "if not props.animated"
+  OUT.push("\n            "); // ""
+  var ARR1=CTX.props.data;for (var KEY in ARR1) {CTX. value=ARR1[KEY]; // "for value in props.data"
+  OUT.push("\n                <label style=\"width: "); // "<label style=\"width:"
+  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
+  OUT.push("px\">"); // "px\">"
+  OUT.push(G.escapeText(CTX.value)); // "value"
+  OUT.push("</label>\n            "); // "</label>"
+  } // "endfor"
+  OUT.push("\n        "); // ""
+  } // "endif"
+  OUT.push("\n    "); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["xdq8aqd"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
+  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
+  OUT.push("\">\n            "); // "\">"
+  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
+  OUT.push("\n        </button>\n    "); // "</button>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xaqkmi6"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        "); // ""
+  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
+  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" payload=\""); // "\" payload=\""
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("</label>\n        "); // "</label>"
+  } // "endfor"
+  OUT.push("\n    "); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["x7vad96"]= function (CTX, G){
+var OUT=[];
+  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
+  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
+  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
+  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
+  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
+  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
+  if (CTX.script.exports.version) { // "if script.exports.version"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
+  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
+  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
+  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
+  } else { // "else"
+  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
+  } // "endif"
+  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
+  if (CTX.props.docbarselected) { // "if props.docbarselected"
+  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
+  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
+  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
+  } else { // "else"
+  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
+  } // "endif"
+  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 2.1 </main></footer></body></html>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xei76ei"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        "); // ""
+  if (CTX.props.version) { // "if props.version"
+  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("</a>\n        "); // "</a>"
+  } else { // "else"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
+  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
+  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("\">npm "); // "\">npm"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("</a>\n        "); // "</a>"
+  } // "endif"
+  OUT.push("\n    "); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["nmpst5"]= function (CTX, G){
+var OUT=[];
+  OUT.push("<nav style=\""); // "<nav style=\""
+  if (CTX.props.fn) { // "if props.fn"
+  OUT.push("border-bottom: none"); // "border-bottom: none"
+  } // "endif"
+  OUT.push("\">\n    <h4>DEV LOG</h4>\n\n    <ul>\n        "); // "\"><h4>DEV LOG</h4><ul>"
+  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
+  OUT.push("\n            <li>\n                "); // "<li>"
+  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
+  OUT.push("\n                    <span style=\"text-decoration: overline underline;\">\n                        "); // "<span style=\"text-decoration: overline underline;\">"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push("&nbsp;("); // "&nbsp;("
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push(")\n                    </span>\n                "); // ") </span>"
+  } else { // "else"
+  OUT.push("\n                    <a href=\"/devlog/"); // "<a href=\"/devlog/"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push(".html\">\n                        "); // ".html\">"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push("&nbsp;("); // "&nbsp;("
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push(")\n                    </a>\n                "); // ") </a>"
+  } // "endif"
+  OUT.push("\n            </li>\n        "); // "</li>"
+  } // "endfor"
+  OUT.push("\n    </ul>\n</nav>\n\n"); // "</ul></nav>"
+  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
+  OUT.push("\n    "); // ""
+  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
+  OUT.push("\n        <h1>"); // "<h1>"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push("</h1>\n    "); // "</h1>"
+  } // "endif"
+  OUT.push("\n"); // ""
+  } // "endfor"
+  OUT.push("\n\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["15rm5nh"]= function (CTX, G){
+var OUT=[];
+  OUT.push("<ul>\n    "); // "<ul>"
+  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
+  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("gactive"); // "gactive"
+  } else { // "else"
+  OUT.push("ginactive"); // "ginactive"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
+  OUT.push("</a>\n            "); // "</a>"
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                    <ul>\n                    "); // "<ul>"
+  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
+  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
+  if (CTX.childLink.filepath) { // "if childLink.filepath"
+  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
+  } else { // "else"
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("#"); // "#"
+  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
+  } // "endif"
+  OUT.push("\"\n                            >"); // "\" >"
+  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
+  OUT.push("</a>\n                        "); // "</a>"
+  if (CTX.props.showall) { // "if props.showall"
+  OUT.push("\n                            "); // ""
+  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
+  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
+  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
+  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
+  } // "endif"
+  OUT.push("\n                        "); // ""
+  } // "endif"
+  OUT.push("\n                        </li>\n                    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n                    </ul>\n                "); // "</ul>"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
+
+return OUT.join("");
+};
+modulo.assets.functions["senbah"]= function (CTX, G){
+var OUT=[];
+  OUT.push("<div \n    @mouseenter:=script.rerenderFirstTime\n    class=\"demo-wrapper\n        "); // "<div @mouseenter:=script.rerenderFirstTime class=\"demo-wrapper"
+  if (CTX.state.showpreview) { // "if state.showpreview"
+  OUT.push("     demo-wrapper__minipreview"); // "demo-wrapper__minipreview"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  if (CTX.state.showclipboard) { // "if state.showclipboard"
+  OUT.push("   demo-wrapper__clipboard  "); // "demo-wrapper__clipboard"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  if (CTX.state.fullscreen) { // "if state.fullscreen"
+  OUT.push("      demo-wrapper__fullscreen "); // "demo-wrapper__fullscreen"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  if (CTX.state.tabs.length === 1) { // "if state.tabs.length == 1"
+  OUT.push("demo-wrapper__notabs     "); // "demo-wrapper__notabs"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  if (CTX.state.tabs.length > 1) { // "if state.tabs.length gt 1"
+  OUT.push("demo-wrapper__tabs       "); // "demo-wrapper__tabs"
+  } // "endif"
+  OUT.push("\n    \">\n    "); // "\">"
+  if (CTX.state.tabs.length > 1) { // "if state.tabs.length gt 1"
+  OUT.push("\n        <nav class=\"TabNav\">\n            <ul>\n                "); // "<nav class=\"TabNav\"><ul>"
+  var ARR1=CTX.state.tabs;for (var KEY in ARR1) {CTX. tab=ARR1[KEY]; // "for tab in state.tabs"
+  OUT.push("\n                    <li class=\"TabNav-title\n                        "); // "<li class=\"TabNav-title"
+  if (CTX.tab.title === CTX.state.selected) { // "if tab.title == state.selected"
+  OUT.push("\n                            TabNav-title--selected\n                        "); // "TabNav-title--selected"
+  } // "endif"
+  OUT.push("\n                    \"><a @click:=script.selectTab\n                            payload=\""); // "\"><a @click:=script.selectTab payload=\""
+  OUT.push(G.escapeText(CTX.tab.title)); // "tab.title"
+  OUT.push("\"\n                        >"); // "\" >"
+  OUT.push(G.escapeText(CTX.tab.title)); // "tab.title"
+  OUT.push("</a></li>\n                "); // "</a></li>"
+  } // "endfor"
+  OUT.push("\n            </ul>\n        </nav>\n    "); // "</ul></nav>"
+  } // "endif"
+  OUT.push("\n\n    <div class=\"editor-toolbar\">\n        <p style=\"font-size: 11px; width: 120px; margin-right: 10px; text-align: right;\n                    "); // "<div class=\"editor-toolbar\"><p style=\"font-size: 11px; width: 120px; margin-right: 10px; text-align: right;"
+  if (!(CTX.state.fullscreen)) { // "if not state.fullscreen"
+  OUT.push(" display: none; "); // "display: none;"
+  } // "endif"
+  OUT.push("\">\n            <em>Note: This is meant for exploring features. Your work will not be saved.</em>\n        </p>\n\n        "); // "\"><em>Note: This is meant for exploring features. Your work will not be saved.</em></p>"
+  if (CTX.state.showclipboard) { // "if state.showclipboard"
+  OUT.push("\n            <button class=\"m-Btn m-Btn--sm m-Btn--faded\"\n                    title=\"Copy this code\" @click:=script.doCopy>\n                Copy <span alt=\"Clipboard\">&#128203;</span>\n            </button>\n        "); // "<button class=\"m-Btn m-Btn--sm m-Btn--faded\" title=\"Copy this code\" @click:=script.doCopy> Copy <span alt=\"Clipboard\">&#128203;</span></button>"
+  } // "endif"
+  OUT.push("\n\n        "); // ""
+  if (CTX.state.showcomponentcopy) { // "if state.showcomponentcopy"
+  OUT.push("\n            <button class=\"m-Btn\"\n                    title=\"Copy the code to make this component\" @click:=script.doCopy payload:=true>\n                <span alt=\"Copy component symbol\">&lsaquo;&#11041;&rsaquo;</span>\n            </button>&nbsp;\n        "); // "<button class=\"m-Btn\" title=\"Copy the code to make this component\" @click:=script.doCopy payload:=true><span alt=\"Copy component symbol\">&lsaquo;&#11041;&rsaquo;</span></button>&nbsp;"
+  } // "endif"
+  OUT.push("\n\n        "); // ""
+  if (CTX.state.showpreview) { // "if state.showpreview"
+  OUT.push("\n            <!--\n            <button class=\"m-Btn demo-fs-button\"\n                    title=\"Toggle full screen view of code\" @click:=script.doFullscreen>\n                "); // "<!-- <button class=\"m-Btn demo-fs-button\" title=\"Toggle full screen view of code\" @click:=script.doFullscreen>"
+  if (CTX.state.fullscreen) { // "if state.fullscreen"
+  OUT.push("\n                    <span alt=\"Shrink\">&swarr;</span>\n                "); // "<span alt=\"Shrink\">&swarr;</span>"
+  } else { // "else"
+  OUT.push("\n                    <span alt=\"Go Full Screen\">&nearr;</span>\n                "); // "<span alt=\"Go Full Screen\">&nearr;</span>"
+  } // "endif"
+  OUT.push("\n            </button>\n            &nbsp;\n            -->\n            <button class=\"m-Btn\"\n                    title=\"Run a preview of this code\" @click:=script.doRun>\n                Run <span alt=\"Refresh\">&#10227;</span>\n            </button>\n        "); // "</button> &nbsp; --><button class=\"m-Btn\" title=\"Run a preview of this code\" @click:=script.doRun> Run <span alt=\"Refresh\">&#10227;</span></button>"
+  } // "endif"
+  OUT.push("\n\n    </div>\n\n    <div class=\"side-by-side-panes\">\n        <div class=\"editor-wrapper\">\n            <div [script.codemirror] modulo-ignore>\n            </div>\n        </div>\n\n        "); // "</div><div class=\"side-by-side-panes\"><div class=\"editor-wrapper\"><div [script.codemirror] modulo-ignore></div></div>"
+  if (CTX.state.showpreview) { // "if state.showpreview"
+  OUT.push("\n            <div class=\"editor-minipreview\">\n                <div modulo-ignore>\n                    "); // "<div class=\"editor-minipreview\"><div modulo-ignore>"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.state.preview))); // "state.preview|safe"
+  OUT.push("\n                </div>\n            </div>\n        "); // "</div></div>"
+  } // "endif"
+  OUT.push("\n\n    </div>\n</div>\n\n"); // "</div></div>"
+  if (CTX.state.showtoast) { // "if state.showtoast"
+  OUT.push("\n    <!--<div class=\"Demo-toastBackdrop\"></div>-->\n    <div class=\"Demo-toast\">\n        <h2>Continue this example locally</h2>\n            <a\n                class=\"Demo-toastButton\"\n                href=\"#\"\n                @click:=\"script.hideToast\"\n            >X</a></h2>\n        <ol>\n            <li>Paste the text into your text editor</li>\n            <li>Save to new \".html\" file and/or add to an existing web\n            project</li>\n            <li>View file in your web browser</li>\n            <li>Continue work where you left off!</li>\n        </ol>\n        <span style=\"float: right\" title=\"The text has already been copied to your clipboard, and is ready to be pasted.\">\n            &nbsp;☑ Copied to clipboard!\n        </span>\n        <div style=\"width: 40%\"><textarea>"); // "<!--<div class=\"Demo-toastBackdrop\"></div>--><div class=\"Demo-toast\"><h2>Continue this example locally</h2><a class=\"Demo-toastButton\" href=\"#\" @click:=\"script.hideToast\" >X</a></h2><ol><li>Paste the text into your text editor</li><li>Save to new \".html\" file and/or add to an existing web project</li><li>View file in your web browser</li><li>Continue work where you left off!</li></ol><span style=\"float: right\" title=\"The text has already been copied to your clipboard, and is ready to be pasted.\"> &nbsp;☑ Copied to clipboard! </span><div style=\"width: 40%\"><textarea>"
+  OUT.push(G.escapeText(CTX.state.toasttext)); // "state.toasttext"
+  OUT.push("</textarea></div>\n    </div>\n"); // "</textarea></div></div>"
+  } // "endif"
+  OUT.push("\n\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["x1c705ik"]= function (CTX, G){
+var OUT=[];
+  var ARR0=CTX.state.examples;for (var KEY in ARR0) {CTX. example=ARR0[KEY]; // "for example in state.examples"
+  OUT.push("\n    "); // ""
+  if (CTX.example.name === CTX.state.selected) { // "if example.name == state.selected"
+  OUT.push("\n        <div class=\"Example expanded\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example expanded\"><button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\" @click:=script.toggleExample payload=\""
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\">\n                "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n                &times;\n            </button>\n            <mws-Demo\n                demotype=\"minipreview\"\n                fromlibrary='"); // "&times; </button><mws-Demo demotype=\"minipreview\" fromlibrary='"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("'\n            ></mws-Demo>\n        </div>\n    "); // "' ></mws-Demo></div>"
+  } else { // "else"
+  OUT.push("\n        <div class=\"Example\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example\"><button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\" @click:=script.toggleExample payload=\""
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\">\n                "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n                ✎\n            </button>\n            <div class=\"Example-wrapper\">\n                <eg-"); // "✎ </button><div class=\"Example-wrapper\"><eg-"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("></eg-"); // "></eg-"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push(">\n            </div>\n        </div>\n    "); // "></div></div>"
+  } // "endif"
+  OUT.push("\n"); // ""
+  } // "endfor"
+  OUT.push("\n\n<!--\n<mws-Section name=\""); // "<!-- <mws-Section name=\""
+  OUT.push(G.escapeText(G.filters["lower"](CTX.example.name))); // "example.name|lower"
+  OUT.push("\">\n    "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n</mws-Section>\n<mws-Demo\n    demotype=\"minipreview\"\n    fromlibrary='"); // "</mws-Section><mws-Demo demotype=\"minipreview\" fromlibrary='"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("'\n></mws-Demo>\n-->\n\n"); // "' ></mws-Demo> -->"
+
+return OUT.join("");
+};
+modulo.assets.functions["1cod1g0"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n        <a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""); // "<a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" href=\"#"); // "\" href=\"#"
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\">#</a>\n        <h2>"); // "\">#</a><h2>"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.component.originalHTML))); // "component.originalHTML|safe"
+  OUT.push("</h2>\n    "); // "</h2>"
+
+return OUT.join("");
+};
+modulo.assets.functions["x1g66lrh"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push("\n  "); // ""
+  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
+  OUT.push("</em>\n  on "); // "</em> on"
+  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
+  OUT.push(".</p>\n\n"); // ".</p>"
+  OUT.push("\n"); // ""
+  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
+  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
+  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
+  OUT.push("</h4>\n    "); // "</h4>"
+  if (CTX.article.tease) { // "if article.tease"
+  OUT.push("\n      <p>"); // "<p>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
+  OUT.push("</p>\n    "); // "</p>"
+  } // "endif"
+  OUT.push("\n"); // ""
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["1ccdre"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
+  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["1gic6ht"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <h1>hello "); // "<h1>hello"
+  OUT.push("</h1>\n    "); // "</h1>"
+  /* // "comment"
+  OUT.push("\n      "); // ""
+  if (CTX.a) { // "if a"
+  OUT.push("<div>"); // "<div>"
+  OUT.push(G.escapeText(CTX.b)); // "b"
+  OUT.push("</div>"); // "</div>"
+  } // "endif"
+  OUT.push("\n      <h3>"); // "<h3>"
+  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
+  OUT.push("</h3>\n    "); // "</h3>"
+  */ // "endcomment"
+  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xmc3bve"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
+  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
+  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
+  OUT.push("\n</div>\n"); // "</div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["9cf1vf"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n"); // "Hello <strong>Modulo</strong> World! <p class=\"neat\">Any HTML can be here!</p>"
+
+return OUT.join("");
+};
+modulo.assets.functions["x35mjmh"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
+
+return OUT.join("");
+};
+modulo.assets.functions["9cmo7s"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
+  OUT.push(" who\n"); // "who"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ed a "); // "ed a"
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push(",\ntaught "); // ", taught"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ing in\nthe City of "); // "ing in the City of"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
+  OUT.push(",\nto "); // ", to"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push(" "); // ""
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push("s.\n</pre>\n"); // "s. </pre>"
+
+return OUT.join("");
+};
+modulo.assets.functions["x1qjabln"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
+  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
+  OUT.push(";\n            color: "); // "; color:"
+  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
+  OUT.push(";\n        \">\n        "); // "; \">"
+  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
+  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["16vtia4"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
+  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
+  OUT.push("</button>\n"); // "</button>"
+
+return OUT.join("");
+};
+modulo.assets.functions["gq8383"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
+
+return OUT.join("");
+};
+modulo.assets.functions["x14e0noe"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
+  OUT.push("\n        <li>"); // "<li>"
+  OUT.push(G.escapeText(CTX.item)); // "item"
+  OUT.push("</li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xa6nq8n"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
+  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
+  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["xmphgsn"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n  "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
+  OUT.push("\n    <p>"); // "<p>"
+  if (CTX.post.completed) { // "if post.completed"
+  OUT.push("★"); // "★"
+  } else { // "else"
+  OUT.push("☆"); // "☆"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</p>\n  "); // "</p>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["xoos95m"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<p>"); // "<p>"
+  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
+  OUT.push(" | "); // "|"
+  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
+  OUT.push("</p>\n<p>"); // "</p><p>"
+  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
+  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
+  if (CTX.state.search) { // "if state.search"
+  OUT.push("github.com/"); // "github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/"); // "/"
+  } // "endif"
+  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
+
+return OUT.join("");
+};
+modulo.assets.functions["1op6kq6"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
+  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
+  OUT.push("%, "); // "%,"
+  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
+  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["1u62nuj"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
+  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
+  OUT.push("</tt></p>\n    "); // "</tt></p>"
+  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
+  OUT.push("\n        <label>\n            "); // "<label>"
+  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
+  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["f34ecp"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
+  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
+  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
+  OUT.push("\n            "); // ""
+  if (CTX.state.number === CTX.i) { // "if state.number == i"
+  OUT.push("number"); // "number"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  if (CTX.state.number < CTX.i) { // "if state.number lt i"
+  OUT.push("hidden"); // "hidden"
+  } else { // "else"
+  OUT.push("\n              "); // ""
+  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
+  OUT.push("whole"); // "whole"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        \">"); // "\">"
+  OUT.push(G.escapeText(CTX.i)); // "i"
+  OUT.push("</div>\n    "); // "</div>"
+  } // "endfor"
+  OUT.push("\n  </div>\n"); // "</div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["75l0c5"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
+  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
+  OUT.push("px;\n                    --y: "); // "px; --y:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
+  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
+  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
+  OUT.push(" ("); // "("
+  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
+  OUT.push(")</label>\n    "); // ")</label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["1ssp5sa"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <form>\n        "); // "<form>"
+  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
+  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n                    <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
+  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
+  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === "string") { // "if state|get:field|type == 'string'"
+  OUT.push("text"); // "text"
+  } else { // "else"
+  OUT.push("checkbox"); // "checkbox"
+  } // "endif"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("\" id=\""); // "\" id=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n            </div>\n        "); // "\"></div>"
+  } // "endfor"
+  OUT.push("\n    </form>\n"); // "</form>"
+
+return OUT.join("");
+};
+modulo.assets.functions["x110d077"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    <form>\n        "); // "<form>"
+  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
+  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n                    <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
+  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
+  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
+  OUT.push("number"); // "number"
+  } else { // "else"
+  OUT.push("text"); // "text"
+  } // "endif"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("\" id=\""); // "\" id=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n            </div>\n        "); // "\"></div>"
+  } // "endfor"
+  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
+  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
+  OUT.push("\n            <p>\n                "); // "<p>"
+  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
+  OUT.push(":\n                <strong>"); // ": <strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</strong>\n                "); // "</strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
+  OUT.push("\n            </p>\n        "); // "</p>"
+  } // "endfor"
+  OUT.push("\n    </form>\n"); // "</form>"
+
+return OUT.join("");
+};
+modulo.assets.functions["gukocp"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xe5l02u"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
+  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
+  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
+  if (!(CTX.state.playing)) { // "if not state.playing"
+  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
+  } else { // "else"
+  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
+  } // "endif"
+  OUT.push("\n    </p>\n\n    "); // "</p>"
+  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
+  OUT.push("\n        <label>"); // "<label>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
+  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
+  OUT.push(G.escapeText(CTX.name)); // "name"
+  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["a7qcs5"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
+  } // "endif"
+  OUT.push("\n  <ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
+  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
+  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
+  OUT.push("\">\n        <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
+  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
+  } // "endfor"
+  OUT.push("\n  </ol>\n"); // "</ol>"
+
+return OUT.join("");
+};
+modulo.assets.functions["e3c95l"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
+  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
+  OUT.push("\n                      visible "); // "visible"
+  } // "endif"
+  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("\n      <img src=\""); // "<img src=\""
+  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
+  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
+  } else { // "else"
+  OUT.push("\n      "); // ""
+  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
+  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
+  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
+  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
+  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
+  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
+  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
+  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
+  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
+  OUT.push("\n    "); // ""
+  } // "endif"
+  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["x1as5m87"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n    "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
+  OUT.push("\n        <div style=\"top: "); // "<div style=\"top:"
+  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lng),180),100),360))); // "user.address.geo.lng|number|add:180|multiply:100|dividedinto:360"
+  OUT.push("%;\n                    left: "); // "%; left:"
+  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lat),90),100),180))); // "user.address.geo.lat|number|add:90|multiply:100|dividedinto:180"
+  OUT.push("%;\">\n            <x-demomodal button=\""); // "%;\"><x-demomodal button=\""
+  OUT.push(G.escapeText(CTX.user.id)); // "user.id"
+  OUT.push("\" title=\""); // "\" title=\""
+  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
+  OUT.push("\">\n                "); // "\">"
+  var ARR1=CTX.user;for (var KEY in ARR1) {CTX.key=KEY;CTX.value=ARR1[KEY]; // "for key, value in user"
+  OUT.push("\n                    <dl>\n                        <dt>"); // "<dl><dt>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.key))); // "key|capfirst"
+  OUT.push("</dt>\n                        <dd>"); // "</dt><dd>"
+  if (G.filters["type"](CTX.value) === "object") { // "if value|type == \"object\""
+  OUT.push(G.escapeText(G.filters["json"](CTX.value))); // "value|json"
+  } else { // "else"
+  OUT.push(G.escapeText(CTX.value)); // "value"
+  } // "endif"
+  OUT.push("</dd>\n                    </dl>\n                "); // "</dd></dl>"
+  } // "endfor"
+  OUT.push("\n            </x-demomodal>\n        </div>\n    "); // "</x-demomodal></div>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["x1qhooen"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n"); // ""
+  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
+  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
+  } else { // "else"
+  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
+  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
+  OUT.push("hard"); // "hard"
+  } // "endif"
+  OUT.push("\">\n    "); // "\">"
+  OUT.push("\n    "); // ""
+  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
+  OUT.push("\n        "); // ""
+  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                flipped\n            "); // "flipped"
+  } // "endif"
+  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
+  if (CTX.state.win) { // "if state.win"
+  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("."); // "."
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("s;\n            "); // "s;"
+  } // "endif"
+  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\">\n            "); // "\">"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                "); // ""
+  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </div>\n    "); // "</div>"
+  } // "endfor"
+  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
+  if (CTX.state.failedflip) { // "if state.failedflip"
+  OUT.push("\n                color: red"); // "color: red"
+  } // "endif"
+  OUT.push("\">\n        "); // "\">"
+  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
+  OUT.push("</p>\n"); // "</p>"
+  } // "endif"
+  OUT.push("\n"); // ""
+
+return OUT.join("");
+};
+modulo.assets.functions["xic9cvd"]= function (CTX, G){
+var OUT=[];
+  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
+  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
+  OUT.push("\n        "); // ""
+  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
+  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
+  OUT.push(G.escapeText(CTX.i)); // "i"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.j)); // "j"
+  OUT.push(" ]\" style=\""); // "]\" style=\""
+  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
+  OUT.push("\n                "); // ""
+  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
+  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\"></div>\n        "); // "\"></div>"
+  } // "endfor"
+  OUT.push("\n    "); // ""
+  } // "endfor"
+  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
+  if (!(CTX.state.playing)) { // "if not state.playing"
+  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
+  } else { // "else"
+  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
+  } // "endif"
+  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
+
+return OUT.join("");
+};
+modulo.assets.functions["xoprl6v"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
         function show() {
             state.visible = true;
@@ -19518,7 +21342,7 @@ return { "show": typeof show !== "undefined" ? show : undefined,
 "hide": typeof hide !== "undefined" ? hide : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["lf5m32"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
         function prepareCallback() {
             const data = props.data || [];
@@ -19533,7 +21357,7 @@ currentModulo.assets.functions["lf5m32"]= function (modulo, require, component, 
 return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1dpt1g8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
         function prepareCallback() {
             state.value = element.value;
@@ -19548,13 +21372,13 @@ return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCall
 "setValue": typeof setValue !== "undefined" ? setValue : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x1rrs2im"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
         //console.log('mws-Page/Script is running', modulo);
     
 return {  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x1jsvfqb"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 function initializedCallback() {
     const { path, showall } = props;
     state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
@@ -19748,12 +21572,12 @@ return { "initializedCallback": typeof initializedCallback !== "undefined" ? ini
 "_child": typeof _child !== "undefined" ? _child : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x44d8e6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["xnob7me"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 let componentTexts = null;
 let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
 
 function _setupGlobalVariables() {
-    const { getComponentDefs } = modulo.registry.utils;
+    let { getComponentDefs } = modulo.registry.utils;
     if (!getComponentDefs) {
           throw new Error('Uh oh, getComponentDefs isnt getting defined!');
     }
@@ -20196,7 +22020,7 @@ return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ?
 "_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1c5p7jh"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 function toggleExample(payload) {
     if (state.selected === payload) {
         state.selected = '';
@@ -20223,13 +22047,13 @@ return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample :
 "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["xaokhr8"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     script.exports.title = "ModuloNews";
 
 return {  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x1q765vj"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function prepareCallback() {
         const calcResult = (state.perc / 100) * state.total;
@@ -20239,7 +22063,7 @@ currentModulo.assets.functions["x1q765vj"]= function (modulo, require, component
 return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x1kfqlis"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function countUp() {
         state.num++;
@@ -20248,7 +22072,7 @@ currentModulo.assets.functions["x1kfqlis"]= function (modulo, require, component
 return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x4opaha"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function addItem() {
         state.list.push(state.text); // add to list
@@ -20258,7 +22082,7 @@ currentModulo.assets.functions["x4opaha"]= function (modulo, require, component,
 return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["mqhngq"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function fetchGitHub() {
         fetch(`https://api.github.com/users/${state.search}`)
@@ -20276,7 +22100,7 @@ return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undef
 "githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1acuh41"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function isValid({ year, month, day }) {
         month--; // Months are zero indexed
@@ -20301,7 +22125,7 @@ return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
 "previous": typeof previous !== "undefined" ? previous : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["mruq5c"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     // Getting big a range of numbers in JS. Use "script.exports"
     // to export this as a one-time global constant.
@@ -20315,7 +22139,7 @@ currentModulo.assets.functions["mruq5c"]= function (modulo, require, component, 
 return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["on4dt0"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     const URL = 'https://jsonplaceholder.typicode.com/posts';
     const fakedPosts = [];
@@ -20359,7 +22183,7 @@ return { "initializedCallback": typeof initializedCallback !== "undefined" ? ini
 "submit": typeof submit !== "undefined" ? submit : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1qnvo3q"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     let timeout = null;
     script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
@@ -20402,7 +22226,7 @@ return { "play": typeof play !== "undefined" ? play : undefined,
 "updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["14424g2"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     const OPTS = '&limit=6&fields=title,author_name,cover_i';
     const COVER ='https://covers.openlibrary.org/b/id/';
@@ -20429,7 +22253,7 @@ return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
 "dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1cup4j5"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function typingCallback() {
         state.loading = true;
@@ -20462,7 +22286,7 @@ return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallbac
 "_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["x6bets6"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
 const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
 function setup(payload) {
@@ -20527,7 +22351,7 @@ return { "setup": typeof setup !== "undefined" ? setup : undefined,
 "flip": typeof flip !== "undefined" ? flip : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+modulo.assets.functions["1cal67g"]= function (modulo, require, component, library, props, style, template, staticdata, configuration, script, state, element, cparts){var script = { exports: {} };  function __set(name, value) { if (name === 'modulo') modulo = value; if (name === 'require') require = value; if (name === 'component') component = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function toggle([ i, j ]) {
         if (!state.cells[i]) {
@@ -20601,1905 +22425,7 @@ return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
 "countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
  setLocalVariable: __set, exports: script.exports}
 };
-currentModulo.assets.functions["xqf9b9l"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_x_DemoModal'];
-
-    const cpartClasses = { Props, Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DemoModal extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1rpq1pk';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoModal'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DemoModal };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DemoModal);
-    //console.log("Registered: DemoModal as " + tagName);
-    return DemoModal;
-
-};
-currentModulo.assets.functions["sg83u6"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_x_DemoChart'];
-
-    const cpartClasses = { Props, Template, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DemoChart extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1sgecs4';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoChart'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DemoChart };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DemoChart);
-    //console.log("Registered: DemoChart as " + tagName);
-    return DemoChart;
-
-};
-currentModulo.assets.functions["x1da3243"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_x_ExampleBtn'];
-
-    const cpartClasses = { Props, Template, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class ExampleBtn extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'i2kvpp';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_x_ExampleBtn'];
-        }
-    }
-
-    const initRenderObj = { elementClass: ExampleBtn };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, ExampleBtn);
-    //console.log("Registered: ExampleBtn as " + tagName);
-    return ExampleBtn;
-
-};
-currentModulo.assets.functions["x33s3q"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_x_DemoSelector'];
-
-    const cpartClasses = { Props, Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DemoSelector extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'ripjvb';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_x_DemoSelector'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DemoSelector };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DemoSelector);
-    //console.log("Registered: DemoSelector as " + tagName);
-    return DemoSelector;
-
-};
-currentModulo.assets.functions["433vtt"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Style, Template, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_Page'];
-
-    const cpartClasses = { Props, Style, Template, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Page extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1ekhkl1';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Page'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Page };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Page);
-    //console.log("Registered: Page as " + tagName);
-    return Page;
-
-};
-currentModulo.assets.functions["x1i275kj"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, StaticData, Template } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_ProjectInfo'];
-
-    const cpartClasses = { Props, StaticData, Template };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class ProjectInfo extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '14p1s0v';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_ProjectInfo'];
-        }
-    }
-
-    const initRenderObj = { elementClass: ProjectInfo };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, ProjectInfo);
-    //console.log("Registered: ProjectInfo as " + tagName);
-    return ProjectInfo;
-
-};
-currentModulo.assets.functions["x1aqc8h6"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, State, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_DevLogNav'];
-
-    const cpartClasses = { Props, Template, State, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DevLogNav extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1vdla5b';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_DevLogNav'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DevLogNav };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DevLogNav);
-    //console.log("Registered: DevLogNav as " + tagName);
-    return DevLogNav;
-
-};
-currentModulo.assets.functions["x1juvmkg"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_DocSidebar'];
-
-    const cpartClasses = { Props, Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DocSidebar extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '15strma';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_DocSidebar'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DocSidebar };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DocSidebar);
-    //console.log("Registered: DocSidebar as " + tagName);
-    return DocSidebar;
-
-};
-currentModulo.assets.functions["x6nt2r0"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_Demo'];
-
-    const cpartClasses = { Props, Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Demo extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1l0sjo3';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Demo'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Demo };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Demo);
-    //console.log("Registered: Demo as " + tagName);
-    return Demo;
-
-};
-currentModulo.assets.functions["xtg6cqb"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_AllExamples'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class AllExamples extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x3m56c2';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_AllExamples'];
-        }
-    }
-
-    const initRenderObj = { elementClass: AllExamples };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, AllExamples);
-    //console.log("Registered: AllExamples as " + tagName);
-    return AllExamples;
-
-};
-currentModulo.assets.functions["l1gr4i"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Props, Template, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_mws_Section'];
-
-    const cpartClasses = { Props, Template, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Section extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1d1j0ca';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_mws_Section'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Section };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Section);
-    //console.log("Registered: Section as " + tagName);
-    return Section;
-
-};
-currentModulo.assets.functions["17sct8m"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Templating_1'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Templating_1 extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'g1ev96';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_1'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Templating_1 };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Templating_1);
-    //console.log("Registered: Templating_1 as " + tagName);
-    return Templating_1;
-
-};
-currentModulo.assets.functions["1mvqm2k"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Templating_PrepareCallback'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Templating_PrepareCallback extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1u7tsfu';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_PrepareCallback'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Templating_PrepareCallback };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Templating_PrepareCallback);
-    //console.log("Registered: Templating_PrepareCallback as " + tagName);
-    return Templating_PrepareCallback;
-
-};
-currentModulo.assets.functions["x4kk41c"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Templating_Comments'];
-
-    const cpartClasses = { Template };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Templating_Comments extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'l7svrm';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_Comments'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Templating_Comments };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Templating_Comments);
-    //console.log("Registered: Templating_Comments as " + tagName);
-    return Templating_Comments;
-
-};
-currentModulo.assets.functions["x14uqs09"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Templating_Escaping'];
-
-    const cpartClasses = { Template, State, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Templating_Escaping extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1ehsatd';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Templating_Escaping'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Templating_Escaping };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Templating_Escaping);
-    //console.log("Registered: Templating_Escaping as " + tagName);
-    return Templating_Escaping;
-
-};
-currentModulo.assets.functions["xif6qno"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Tutorial_P1'];
-
-    const cpartClasses = { Template, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Tutorial_P1 extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x51qst3';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P1'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Tutorial_P1 };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Tutorial_P1);
-    //console.log("Registered: Tutorial_P1 as " + tagName);
-    return Tutorial_P1;
-
-};
-currentModulo.assets.functions["x1c4jlk3"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Tutorial_P2'];
-
-    const cpartClasses = { Template };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Tutorial_P2 extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1uj7p64';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P2'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Tutorial_P2 };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Tutorial_P2);
-    //console.log("Registered: Tutorial_P2 as " + tagName);
-    return Tutorial_P2;
-
-};
-currentModulo.assets.functions["x1gqlqhr"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Tutorial_P2_filters_demo'];
-
-    const cpartClasses = { Template };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Tutorial_P2_filters_demo extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 't0upt6';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P2_filters_demo'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Tutorial_P2_filters_demo };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Tutorial_P2_filters_demo);
-    //console.log("Registered: Tutorial_P2_filters_demo as " + tagName);
-    return Tutorial_P2_filters_demo;
-
-};
-currentModulo.assets.functions["xpmn7oi"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Tutorial_P3_state_demo'];
-
-    const cpartClasses = { Template, State, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Tutorial_P3_state_demo extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1oig15e';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P3_state_demo'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Tutorial_P3_state_demo };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Tutorial_P3_state_demo);
-    //console.log("Registered: Tutorial_P3_state_demo as " + tagName);
-    return Tutorial_P3_state_demo;
-
-};
-currentModulo.assets.functions["1sc0e93"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_docseg_Tutorial_P3_state_bind'];
-
-    const cpartClasses = { Template, State };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Tutorial_P3_state_bind extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'ngpccm';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_docseg_Tutorial_P3_state_bind'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Tutorial_P3_state_bind };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Tutorial_P3_state_bind);
-    //console.log("Registered: Tutorial_P3_state_bind as " + tagName);
-    return Tutorial_P3_state_bind;
-
-};
-currentModulo.assets.functions["14n8egj"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Hello'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Hello extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1icoagp';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Hello'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Hello };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Hello);
-    //console.log("Registered: Hello as " + tagName);
-    return Hello;
-
-};
-currentModulo.assets.functions["r5jke9"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Simple'];
-
-    const cpartClasses = { Template, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Simple extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'xlo7cf3';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Simple'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Simple };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Simple);
-    //console.log("Registered: Simple as " + tagName);
-    return Simple;
-
-};
-currentModulo.assets.functions["18e8a6j"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_ToDo'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class ToDo extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1k33iqb';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ToDo'];
-        }
-    }
-
-    const initRenderObj = { elementClass: ToDo };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, ToDo);
-    //console.log("Registered: ToDo as " + tagName);
-    return ToDo;
-
-};
-currentModulo.assets.functions["cf1msk"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, StaticData } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_JSON'];
-
-    const cpartClasses = { Template, StaticData };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class JSON extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'pribqq';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_JSON'];
-        }
-    }
-
-    const initRenderObj = { elementClass: JSON };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, JSON);
-    //console.log("Registered: JSON as " + tagName);
-    return JSON;
-
-};
-currentModulo.assets.functions["x2b520g"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, StaticData } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_JSONArray'];
-
-    const cpartClasses = { Template, StaticData };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class JSONArray extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'xcql4f2';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_JSONArray'];
-        }
-    }
-
-    const initRenderObj = { elementClass: JSONArray };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, JSONArray);
-    //console.log("Registered: JSONArray as " + tagName);
-    return JSONArray;
-
-};
-currentModulo.assets.functions["cd55r1"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_GitHubAPI'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class GitHubAPI extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1at59fc';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_GitHubAPI'];
-        }
-    }
-
-    const initRenderObj = { elementClass: GitHubAPI };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, GitHubAPI);
-    //console.log("Registered: GitHubAPI as " + tagName);
-    return GitHubAPI;
-
-};
-currentModulo.assets.functions["x1ii4dc3"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_ColorSelector'];
-
-    const cpartClasses = { Template, State };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class ColorSelector extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '6riop6';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ColorSelector'];
-        }
-    }
-
-    const initRenderObj = { elementClass: ColorSelector };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, ColorSelector);
-    //console.log("Registered: ColorSelector as " + tagName);
-    return ColorSelector;
-
-};
-currentModulo.assets.functions["f4cpaa"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_DateNumberPicker'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class DateNumberPicker extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1i6hhtf';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_DateNumberPicker'];
-        }
-    }
-
-    const initRenderObj = { elementClass: DateNumberPicker };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, DateNumberPicker);
-    //console.log("Registered: DateNumberPicker as " + tagName);
-    return DateNumberPicker;
-
-};
-currentModulo.assets.functions["x1g4uuhi"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_PrimeSieve'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class PrimeSieve extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '1b9a0ql';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_PrimeSieve'];
-        }
-    }
-
-    const initRenderObj = { elementClass: PrimeSieve };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, PrimeSieve);
-    //console.log("Registered: PrimeSieve as " + tagName);
-    return PrimeSieve;
-
-};
-currentModulo.assets.functions["1vfteg8"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, StaticData, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Scatter'];
-
-    const cpartClasses = { Template, StaticData, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Scatter extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x137bsev';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Scatter'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Scatter };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Scatter);
-    //console.log("Registered: Scatter as " + tagName);
-    return Scatter;
-
-};
-currentModulo.assets.functions["1ns7ff4"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_FlexibleForm'];
-
-    const cpartClasses = { Template, State };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class FlexibleForm extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x4vivet';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_FlexibleForm'];
-        }
-    }
-
-    const initRenderObj = { elementClass: FlexibleForm };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, FlexibleForm);
-    //console.log("Registered: FlexibleForm as " + tagName);
-    return FlexibleForm;
-
-};
-currentModulo.assets.functions["x1m1b3bs"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_FlexibleFormWithAPI'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class FlexibleFormWithAPI extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1sg84mj';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_FlexibleFormWithAPI'];
-        }
-    }
-
-    const initRenderObj = { elementClass: FlexibleFormWithAPI };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, FlexibleFormWithAPI);
-    //console.log("Registered: FlexibleFormWithAPI as " + tagName);
-    return FlexibleFormWithAPI;
-
-};
-currentModulo.assets.functions["8bv8j2"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Components'];
-
-    const cpartClasses = { Template };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Components extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'xeg9s6i';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Components'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Components };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Components);
-    //console.log("Registered: Components as " + tagName);
-    return Components;
-
-};
-currentModulo.assets.functions["x7jhpv4"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_OscillatingGraph'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class OscillatingGraph extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'ugu6po';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_OscillatingGraph'];
-        }
-    }
-
-    const initRenderObj = { elementClass: OscillatingGraph };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, OscillatingGraph);
-    //console.log("Registered: OscillatingGraph as " + tagName);
-    return OscillatingGraph;
-
-};
-currentModulo.assets.functions["xlrsjv0"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Search'];
-
-    const cpartClasses = { Template, State, Script };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Search extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '10mu0ht';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Search'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Search };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Search);
-    //console.log("Registered: Search as " + tagName);
-    return Search;
-
-};
-currentModulo.assets.functions["x1jlcjv6"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, StaticData, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_SearchBox'];
-
-    const cpartClasses = { Template, State, StaticData, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class SearchBox extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'ljc2i4';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_SearchBox'];
-        }
-    }
-
-    const initRenderObj = { elementClass: SearchBox };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, SearchBox);
-    //console.log("Registered: SearchBox as " + tagName);
-    return SearchBox;
-
-};
-currentModulo.assets.functions["x14gac81"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, StaticData, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_WorldMap'];
-
-    const cpartClasses = { Template, StaticData, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class WorldMap extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'xn1lri6';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_WorldMap'];
-        }
-    }
-
-    const initRenderObj = { elementClass: WorldMap };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, WorldMap);
-    //console.log("Registered: WorldMap as " + tagName);
-    return WorldMap;
-
-};
-currentModulo.assets.functions["4ita9"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_Memory'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class Memory extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = '14schu5';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_Memory'];
-        }
-    }
-
-    const initRenderObj = { elementClass: Memory };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, Memory);
-    //console.log("Registered: Memory as " + tagName);
-    return Memory;
-
-};
-currentModulo.assets.functions["xao68n1"]= function (tagName, modulo){
-
-    modulo = currentModulo;// HAX XXX
-    const { Template, State, Script, Style } = modulo.registry.cparts;
-    const confArray = modulo.defs['x_x_eg_ConwayGameOfLife'];
-
-    const cpartClasses = { Template, State, Script, Style };
-    const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-    class ConwayGameOfLife extends modulo.registry.utils.BaseElement {
-        constructor() {
-            super();
-            this.modulo = modulo;
-            this.defHash = 'x1ketdcf';
-            this.initRenderObj = initRenderObj;
-            this.moduloChildrenData = confArray;
-            this.moduloComponentConf = modulo.parentDefs['x_x_eg_ConwayGameOfLife'];
-        }
-    }
-
-    const initRenderObj = { elementClass: ConwayGameOfLife };
-    modulo.applyPatches(factoryPatches, initRenderObj);
-    modulo.globals.customElements.define(tagName, ConwayGameOfLife);
-    //console.log("Registered: ConwayGameOfLife as " + tagName);
-    return ConwayGameOfLife;
-
-};
-currentModulo.assets.functions["1pdamd5"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
-  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
-  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push("block"); // "block"
-  } else { // "else"
-  OUT.push("none"); // "none"
-  } // "endif"
-  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push(" top: 100px; "); // "top: 100px;"
-  } else { // "else"
-  OUT.push(" top: -500px; "); // "top: -500px;"
-  } // "endif"
-  OUT.push("\">\n            <h2>"); // "\"><h2>"
-  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
-  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1k78eap"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        <div class=\"chart-container\n        "); // "<div class=\"chart-container"
-  if (CTX.props.animated) { // "if props.animated"
-  OUT.push("animated"); // "animated"
-  } // "endif"
-  OUT.push("\">\n            "); // "\">"
-  var ARR0=CTX.script.percent;for (var KEY in ARR0) {CTX. percent=ARR0[KEY]; // "for percent in script.percent"
-  OUT.push("\n                <div style=\"height: "); // "<div style=\"height:"
-  OUT.push(G.escapeText(CTX.percent)); // "percent"
-  OUT.push("px; width: "); // "px; width:"
-  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
-  OUT.push("px\">\n                </div>\n            "); // "px\"></div>"
-  } // "endfor"
-  OUT.push("\n        </div>\n        "); // "</div>"
-  if (!(CTX.props.animated)) { // "if not props.animated"
-  OUT.push("\n            "); // ""
-  var ARR1=CTX.props.data;for (var KEY in ARR1) {CTX. value=ARR1[KEY]; // "for value in props.data"
-  OUT.push("\n                <label style=\"width: "); // "<label style=\"width:"
-  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
-  OUT.push("px\">"); // "px\">"
-  OUT.push(G.escapeText(CTX.value)); // "value"
-  OUT.push("</label>\n            "); // "</label>"
-  } // "endfor"
-  OUT.push("\n        "); // ""
-  } // "endif"
-  OUT.push("\n    "); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xdq8aqd"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
-  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
-  OUT.push("\">\n            "); // "\">"
-  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
-  OUT.push("\n        </button>\n    "); // "</button>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xaqkmi6"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        "); // ""
-  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
-  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" payload=\""); // "\" payload=\""
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("</label>\n        "); // "</label>"
-  } // "endfor"
-  OUT.push("\n    "); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["3n0giq"]= function (CTX, G){
-var OUT=[];
-  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
-  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
-  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
-  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
-  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
-  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
-  if (CTX.script.exports.version) { // "if script.exports.version"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
-  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
-  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
-  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
-  } else { // "else"
-  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
-  } // "endif"
-  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
-  if (CTX.props.docbarselected) { // "if props.docbarselected"
-  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
-  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
-  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
-  } else { // "else"
-  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
-  } // "endif"
-  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0 </main></footer></body></html>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xei76ei"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        "); // ""
-  if (CTX.props.version) { // "if props.version"
-  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("</a>\n        "); // "</a>"
-  } else { // "else"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
-  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
-  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("\">npm "); // "\">npm"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("</a>\n        "); // "</a>"
-  } // "endif"
-  OUT.push("\n    "); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["nmpst5"]= function (CTX, G){
-var OUT=[];
-  OUT.push("<nav style=\""); // "<nav style=\""
-  if (CTX.props.fn) { // "if props.fn"
-  OUT.push("border-bottom: none"); // "border-bottom: none"
-  } // "endif"
-  OUT.push("\">\n    <h4>DEV LOG</h4>\n\n    <ul>\n        "); // "\"><h4>DEV LOG</h4><ul>"
-  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
-  OUT.push("\n            <li>\n                "); // "<li>"
-  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
-  OUT.push("\n                    <span style=\"text-decoration: overline underline;\">\n                        "); // "<span style=\"text-decoration: overline underline;\">"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push("&nbsp;("); // "&nbsp;("
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push(")\n                    </span>\n                "); // ") </span>"
-  } else { // "else"
-  OUT.push("\n                    <a href=\"/devlog/"); // "<a href=\"/devlog/"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push(".html\">\n                        "); // ".html\">"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push("&nbsp;("); // "&nbsp;("
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push(")\n                    </a>\n                "); // ") </a>"
-  } // "endif"
-  OUT.push("\n            </li>\n        "); // "</li>"
-  } // "endfor"
-  OUT.push("\n    </ul>\n</nav>\n\n"); // "</ul></nav>"
-  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
-  OUT.push("\n    "); // ""
-  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
-  OUT.push("\n        <h1>"); // "<h1>"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push("</h1>\n    "); // "</h1>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
-  OUT.push("\n\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["15rm5nh"]= function (CTX, G){
-var OUT=[];
-  OUT.push("<ul>\n    "); // "<ul>"
-  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
-  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("gactive"); // "gactive"
-  } else { // "else"
-  OUT.push("ginactive"); // "ginactive"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
-  OUT.push("</a>\n            "); // "</a>"
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                    <ul>\n                    "); // "<ul>"
-  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
-  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
-  if (CTX.childLink.filepath) { // "if childLink.filepath"
-  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
-  } else { // "else"
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("#"); // "#"
-  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
-  } // "endif"
-  OUT.push("\"\n                            >"); // "\" >"
-  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
-  OUT.push("</a>\n                        "); // "</a>"
-  if (CTX.props.showall) { // "if props.showall"
-  OUT.push("\n                            "); // ""
-  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
-  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
-  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
-  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
-  } // "endif"
-  OUT.push("\n                        "); // ""
-  } // "endif"
-  OUT.push("\n                        </li>\n                    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n                    </ul>\n                "); // "</ul>"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["senbah"]= function (CTX, G){
-var OUT=[];
-  OUT.push("<div \n    @mouseenter:=script.rerenderFirstTime\n    class=\"demo-wrapper\n        "); // "<div @mouseenter:=script.rerenderFirstTime class=\"demo-wrapper"
-  if (CTX.state.showpreview) { // "if state.showpreview"
-  OUT.push("     demo-wrapper__minipreview"); // "demo-wrapper__minipreview"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  if (CTX.state.showclipboard) { // "if state.showclipboard"
-  OUT.push("   demo-wrapper__clipboard  "); // "demo-wrapper__clipboard"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  if (CTX.state.fullscreen) { // "if state.fullscreen"
-  OUT.push("      demo-wrapper__fullscreen "); // "demo-wrapper__fullscreen"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  if (CTX.state.tabs.length === 1) { // "if state.tabs.length == 1"
-  OUT.push("demo-wrapper__notabs     "); // "demo-wrapper__notabs"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  if (CTX.state.tabs.length > 1) { // "if state.tabs.length gt 1"
-  OUT.push("demo-wrapper__tabs       "); // "demo-wrapper__tabs"
-  } // "endif"
-  OUT.push("\n    \">\n    "); // "\">"
-  if (CTX.state.tabs.length > 1) { // "if state.tabs.length gt 1"
-  OUT.push("\n        <nav class=\"TabNav\">\n            <ul>\n                "); // "<nav class=\"TabNav\"><ul>"
-  var ARR1=CTX.state.tabs;for (var KEY in ARR1) {CTX. tab=ARR1[KEY]; // "for tab in state.tabs"
-  OUT.push("\n                    <li class=\"TabNav-title\n                        "); // "<li class=\"TabNav-title"
-  if (CTX.tab.title === CTX.state.selected) { // "if tab.title == state.selected"
-  OUT.push("\n                            TabNav-title--selected\n                        "); // "TabNav-title--selected"
-  } // "endif"
-  OUT.push("\n                    \"><a @click:=script.selectTab\n                            payload=\""); // "\"><a @click:=script.selectTab payload=\""
-  OUT.push(G.escapeText(CTX.tab.title)); // "tab.title"
-  OUT.push("\"\n                        >"); // "\" >"
-  OUT.push(G.escapeText(CTX.tab.title)); // "tab.title"
-  OUT.push("</a></li>\n                "); // "</a></li>"
-  } // "endfor"
-  OUT.push("\n            </ul>\n        </nav>\n    "); // "</ul></nav>"
-  } // "endif"
-  OUT.push("\n\n    <div class=\"editor-toolbar\">\n        <p style=\"font-size: 11px; width: 120px; margin-right: 10px; text-align: right;\n                    "); // "<div class=\"editor-toolbar\"><p style=\"font-size: 11px; width: 120px; margin-right: 10px; text-align: right;"
-  if (!(CTX.state.fullscreen)) { // "if not state.fullscreen"
-  OUT.push(" display: none; "); // "display: none;"
-  } // "endif"
-  OUT.push("\">\n            <em>Note: This is meant for exploring features. Your work will not be saved.</em>\n        </p>\n\n        "); // "\"><em>Note: This is meant for exploring features. Your work will not be saved.</em></p>"
-  if (CTX.state.showclipboard) { // "if state.showclipboard"
-  OUT.push("\n            <button class=\"m-Btn m-Btn--sm m-Btn--faded\"\n                    title=\"Copy this code\" @click:=script.doCopy>\n                Copy <span alt=\"Clipboard\">&#128203;</span>\n            </button>\n        "); // "<button class=\"m-Btn m-Btn--sm m-Btn--faded\" title=\"Copy this code\" @click:=script.doCopy> Copy <span alt=\"Clipboard\">&#128203;</span></button>"
-  } // "endif"
-  OUT.push("\n\n        "); // ""
-  if (CTX.state.showcomponentcopy) { // "if state.showcomponentcopy"
-  OUT.push("\n            <button class=\"m-Btn\"\n                    title=\"Copy the code to make this component\" @click:=script.doCopy payload:=true>\n                <span alt=\"Copy component symbol\">&lsaquo;&#11041;&rsaquo;</span>\n            </button>&nbsp;\n        "); // "<button class=\"m-Btn\" title=\"Copy the code to make this component\" @click:=script.doCopy payload:=true><span alt=\"Copy component symbol\">&lsaquo;&#11041;&rsaquo;</span></button>&nbsp;"
-  } // "endif"
-  OUT.push("\n\n        "); // ""
-  if (CTX.state.showpreview) { // "if state.showpreview"
-  OUT.push("\n            <!--\n            <button class=\"m-Btn demo-fs-button\"\n                    title=\"Toggle full screen view of code\" @click:=script.doFullscreen>\n                "); // "<!-- <button class=\"m-Btn demo-fs-button\" title=\"Toggle full screen view of code\" @click:=script.doFullscreen>"
-  if (CTX.state.fullscreen) { // "if state.fullscreen"
-  OUT.push("\n                    <span alt=\"Shrink\">&swarr;</span>\n                "); // "<span alt=\"Shrink\">&swarr;</span>"
-  } else { // "else"
-  OUT.push("\n                    <span alt=\"Go Full Screen\">&nearr;</span>\n                "); // "<span alt=\"Go Full Screen\">&nearr;</span>"
-  } // "endif"
-  OUT.push("\n            </button>\n            &nbsp;\n            -->\n            <button class=\"m-Btn\"\n                    title=\"Run a preview of this code\" @click:=script.doRun>\n                Run <span alt=\"Refresh\">&#10227;</span>\n            </button>\n        "); // "</button> &nbsp; --><button class=\"m-Btn\" title=\"Run a preview of this code\" @click:=script.doRun> Run <span alt=\"Refresh\">&#10227;</span></button>"
-  } // "endif"
-  OUT.push("\n\n    </div>\n\n    <div class=\"side-by-side-panes\">\n        <div class=\"editor-wrapper\">\n            <div [script.codemirror] modulo-ignore>\n            </div>\n        </div>\n\n        "); // "</div><div class=\"side-by-side-panes\"><div class=\"editor-wrapper\"><div [script.codemirror] modulo-ignore></div></div>"
-  if (CTX.state.showpreview) { // "if state.showpreview"
-  OUT.push("\n            <div class=\"editor-minipreview\">\n                <div modulo-ignore>\n                    "); // "<div class=\"editor-minipreview\"><div modulo-ignore>"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.state.preview))); // "state.preview|safe"
-  OUT.push("\n                </div>\n            </div>\n        "); // "</div></div>"
-  } // "endif"
-  OUT.push("\n\n    </div>\n</div>\n\n"); // "</div></div>"
-  if (CTX.state.showtoast) { // "if state.showtoast"
-  OUT.push("\n    <!--<div class=\"Demo-toastBackdrop\"></div>-->\n    <div class=\"Demo-toast\">\n        <h2>Continue this example locally</h2>\n            <a\n                class=\"Demo-toastButton\"\n                href=\"#\"\n                @click:=\"script.hideToast\"\n            >X</a></h2>\n        <ol>\n            <li>Paste the text into your text editor</li>\n            <li>Save to new \".html\" file and/or add to an existing web\n            project</li>\n            <li>View file in your web browser</li>\n            <li>Continue work where you left off!</li>\n        </ol>\n        <span style=\"float: right\" title=\"The text has already been copied to your clipboard, and is ready to be pasted.\">\n            &nbsp;☑ Copied to clipboard!\n        </span>\n        <div style=\"width: 40%\"><textarea>"); // "<!--<div class=\"Demo-toastBackdrop\"></div>--><div class=\"Demo-toast\"><h2>Continue this example locally</h2><a class=\"Demo-toastButton\" href=\"#\" @click:=\"script.hideToast\" >X</a></h2><ol><li>Paste the text into your text editor</li><li>Save to new \".html\" file and/or add to an existing web project</li><li>View file in your web browser</li><li>Continue work where you left off!</li></ol><span style=\"float: right\" title=\"The text has already been copied to your clipboard, and is ready to be pasted.\"> &nbsp;☑ Copied to clipboard! </span><div style=\"width: 40%\"><textarea>"
-  OUT.push(G.escapeText(CTX.state.toasttext)); // "state.toasttext"
-  OUT.push("</textarea></div>\n    </div>\n"); // "</textarea></div></div>"
-  } // "endif"
-  OUT.push("\n\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x1c705ik"]= function (CTX, G){
-var OUT=[];
-  var ARR0=CTX.state.examples;for (var KEY in ARR0) {CTX. example=ARR0[KEY]; // "for example in state.examples"
-  OUT.push("\n    "); // ""
-  if (CTX.example.name === CTX.state.selected) { // "if example.name == state.selected"
-  OUT.push("\n        <div class=\"Example expanded\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example expanded\"><button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\" @click:=script.toggleExample payload=\""
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\">\n                "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n                &times;\n            </button>\n            <mws-Demo\n                demotype=\"minipreview\"\n                fromlibrary='"); // "&times; </button><mws-Demo demotype=\"minipreview\" fromlibrary='"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("'\n            ></mws-Demo>\n        </div>\n    "); // "' ></mws-Demo></div>"
-  } else { // "else"
-  OUT.push("\n        <div class=\"Example\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example\"><button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\" @click:=script.toggleExample payload=\""
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\">\n                "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n                ✎\n            </button>\n            <div class=\"Example-wrapper\">\n                <eg-"); // "✎ </button><div class=\"Example-wrapper\"><eg-"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("></eg-"); // "></eg-"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push(">\n            </div>\n        </div>\n    "); // "></div></div>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
-  OUT.push("\n\n<!--\n<mws-Section name=\""); // "<!-- <mws-Section name=\""
-  OUT.push(G.escapeText(G.filters["lower"](CTX.example.name))); // "example.name|lower"
-  OUT.push("\">\n    "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n</mws-Section>\n<mws-Demo\n    demotype=\"minipreview\"\n    fromlibrary='"); // "</mws-Section><mws-Demo demotype=\"minipreview\" fromlibrary='"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("'\n></mws-Demo>\n-->\n\n"); // "' ></mws-Demo> -->"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1cod1g0"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n        <a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""); // "<a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" href=\"#"); // "\" href=\"#"
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\">#</a>\n        <h2>"); // "\">#</a><h2>"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.component.originalHTML))); // "component.originalHTML|safe"
-  OUT.push("</h2>\n    "); // "</h2>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x1g66lrh"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push("\n  "); // ""
-  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
-  OUT.push("</em>\n  on "); // "</em> on"
-  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
-  OUT.push(".</p>\n\n"); // ".</p>"
-  OUT.push("\n"); // ""
-  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
-  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
-  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
-  OUT.push("</h4>\n    "); // "</h4>"
-  if (CTX.article.tease) { // "if article.tease"
-  OUT.push("\n      <p>"); // "<p>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
-  OUT.push("</p>\n    "); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1ccdre"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
-  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1gic6ht"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <h1>hello "); // "<h1>hello"
-  OUT.push("</h1>\n    "); // "</h1>"
-  /* // "comment"
-  OUT.push("\n      "); // ""
-  if (CTX.a) { // "if a"
-  OUT.push("<div>"); // "<div>"
-  OUT.push(G.escapeText(CTX.b)); // "b"
-  OUT.push("</div>"); // "</div>"
-  } // "endif"
-  OUT.push("\n      <h3>"); // "<h3>"
-  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
-  OUT.push("</h3>\n    "); // "</h3>"
-  */ // "endcomment"
-  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xmc3bve"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
-  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
-  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
-  OUT.push("\n</div>\n"); // "</div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["9cf1vf"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n"); // "Hello <strong>Modulo</strong> World! <p class=\"neat\">Any HTML can be here!</p>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x35mjmh"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["9cmo7s"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
-  OUT.push(" who\n"); // "who"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ed a "); // "ed a"
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push(",\ntaught "); // ", taught"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ing in\nthe City of "); // "ing in the City of"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
-  OUT.push(",\nto "); // ", to"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push(" "); // ""
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push("s.\n</pre>\n"); // "s. </pre>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x1qjabln"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
-  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
-  OUT.push(";\n            color: "); // "; color:"
-  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
-  OUT.push(";\n        \">\n        "); // "; \">"
-  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
-  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["16vtia4"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
-  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
-  OUT.push("</button>\n"); // "</button>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["gq8383"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x14e0noe"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
-  OUT.push("\n        <li>"); // "<li>"
-  OUT.push(G.escapeText(CTX.item)); // "item"
-  OUT.push("</li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xa6nq8n"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
-  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
-  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xmphgsn"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n  "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
-  OUT.push("\n    <p>"); // "<p>"
-  if (CTX.post.completed) { // "if post.completed"
-  OUT.push("★"); // "★"
-  } else { // "else"
-  OUT.push("☆"); // "☆"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</p>\n  "); // "</p>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xoos95m"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<p>"); // "<p>"
-  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
-  OUT.push(" | "); // "|"
-  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
-  OUT.push("</p>\n<p>"); // "</p><p>"
-  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
-  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
-  if (CTX.state.search) { // "if state.search"
-  OUT.push("github.com/"); // "github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/"); // "/"
-  } // "endif"
-  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1op6kq6"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
-  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
-  OUT.push("%, "); // "%,"
-  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
-  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1u62nuj"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
-  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
-  OUT.push("</tt></p>\n    "); // "</tt></p>"
-  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
-  OUT.push("\n        <label>\n            "); // "<label>"
-  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
-  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["f34ecp"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
-  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
-  OUT.push("\n            "); // ""
-  if (CTX.state.number === CTX.i) { // "if state.number == i"
-  OUT.push("number"); // "number"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  if (CTX.state.number < CTX.i) { // "if state.number lt i"
-  OUT.push("hidden"); // "hidden"
-  } else { // "else"
-  OUT.push("\n              "); // ""
-  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
-  OUT.push("whole"); // "whole"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        \">"); // "\">"
-  OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push("</div>\n    "); // "</div>"
-  } // "endfor"
-  OUT.push("\n  </div>\n"); // "</div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["75l0c5"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
-  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
-  OUT.push("px;\n                    --y: "); // "px; --y:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
-  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
-  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
-  OUT.push(" ("); // "("
-  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
-  OUT.push(")</label>\n    "); // ")</label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["1ssp5sa"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <form>\n        "); // "<form>"
-  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
-  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n                    <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
-  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
-  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === "string") { // "if state|get:field|type == 'string'"
-  OUT.push("text"); // "text"
-  } else { // "else"
-  OUT.push("checkbox"); // "checkbox"
-  } // "endif"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("\" id=\""); // "\" id=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n            </div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n    </form>\n"); // "</form>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x110d077"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <form>\n        "); // "<form>"
-  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
-  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n                    <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
-  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
-  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
-  OUT.push("number"); // "number"
-  } else { // "else"
-  OUT.push("text"); // "text"
-  } // "endif"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("\" id=\""); // "\" id=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n            </div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
-  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
-  OUT.push("\n            <p>\n                "); // "<p>"
-  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
-  OUT.push(":\n                <strong>"); // ": <strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</strong>\n                "); // "</strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
-  OUT.push("\n            </p>\n        "); // "</p>"
-  } // "endfor"
-  OUT.push("\n    </form>\n"); // "</form>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["gukocp"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xe5l02u"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
-  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
-  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
-  if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
-  } else { // "else"
-  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
-  } // "endif"
-  OUT.push("\n    </p>\n\n    "); // "</p>"
-  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
-  OUT.push("\n        <label>"); // "<label>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
-  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
-  OUT.push(G.escapeText(CTX.name)); // "name"
-  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["a7qcs5"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
-  } // "endif"
-  OUT.push("\n  <ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
-  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
-  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
-  OUT.push("\">\n        <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
-  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
-  } // "endfor"
-  OUT.push("\n  </ol>\n"); // "</ol>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["e3c95l"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
-  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
-  OUT.push("\n                      visible "); // "visible"
-  } // "endif"
-  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("\n      <img src=\""); // "<img src=\""
-  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
-  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
-  } else { // "else"
-  OUT.push("\n      "); // ""
-  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
-  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
-  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
-  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
-  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
-  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
-  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
-  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
-  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endif"
-  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x1as5m87"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
-  OUT.push("\n        <div style=\"top: "); // "<div style=\"top:"
-  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lng),180),100),360))); // "user.address.geo.lng|number|add:180|multiply:100|dividedinto:360"
-  OUT.push("%;\n                    left: "); // "%; left:"
-  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lat),90),100),180))); // "user.address.geo.lat|number|add:90|multiply:100|dividedinto:180"
-  OUT.push("%;\">\n            <x-demomodal button=\""); // "%;\"><x-demomodal button=\""
-  OUT.push(G.escapeText(CTX.user.id)); // "user.id"
-  OUT.push("\" title=\""); // "\" title=\""
-  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
-  OUT.push("\">\n                "); // "\">"
-  var ARR1=CTX.user;for (var KEY in ARR1) {CTX.key=KEY;CTX.value=ARR1[KEY]; // "for key, value in user"
-  OUT.push("\n                    <dl>\n                        <dt>"); // "<dl><dt>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.key))); // "key|capfirst"
-  OUT.push("</dt>\n                        <dd>"); // "</dt><dd>"
-  if (G.filters["type"](CTX.value) === "object") { // "if value|type == \"object\""
-  OUT.push(G.escapeText(G.filters["json"](CTX.value))); // "value|json"
-  } else { // "else"
-  OUT.push(G.escapeText(CTX.value)); // "value"
-  } // "endif"
-  OUT.push("</dd>\n                    </dl>\n                "); // "</dd></dl>"
-  } // "endfor"
-  OUT.push("\n            </x-demomodal>\n        </div>\n    "); // "</x-demomodal></div>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["x1qhooen"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n"); // ""
-  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
-  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
-  } else { // "else"
-  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
-  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
-  OUT.push("hard"); // "hard"
-  } // "endif"
-  OUT.push("\">\n    "); // "\">"
-  OUT.push("\n    "); // ""
-  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
-  OUT.push("\n        "); // ""
-  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                flipped\n            "); // "flipped"
-  } // "endif"
-  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
-  if (CTX.state.win) { // "if state.win"
-  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("."); // "."
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("s;\n            "); // "s;"
-  } // "endif"
-  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\">\n            "); // "\">"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                "); // ""
-  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </div>\n    "); // "</div>"
-  } // "endfor"
-  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
-  if (CTX.state.failedflip) { // "if state.failedflip"
-  OUT.push("\n                color: red"); // "color: red"
-  } // "endif"
-  OUT.push("\">\n        "); // "\">"
-  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
-  OUT.push("</p>\n"); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xic9cvd"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
-  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n        "); // ""
-  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
-  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
-  OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.j)); // "j"
-  OUT.push(" ]\" style=\""); // "]\" style=\""
-  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
-  OUT.push("\n                "); // ""
-  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
-  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\"></div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endfor"
-  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
-  if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
-  } else { // "else"
-  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
-  } // "endif"
-  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
-
-return OUT.join("");
-};
-currentModulo.assets.functions["xv9bp4g"]= function (){
+modulo.assets.functions["xv9bp4g"]= function (){
 return {
   "name": "mdu.js",
   "author": "michaelb",
@@ -22560,139 +22486,10 @@ return {
   }
 };
 };
-currentModulo.assets.functions["xcterp7"]= function (){
-return {
-  "id": 542682907,
-  "node_id": "R_kgDOIFivGw",
-  "name": "modulo",
-  "full_name": "modulojs/modulo",
-  "private": false,
-  "owner": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "html_url": "https://github.com/modulojs/modulo",
-  "description": "A drop-in JavaScript framework for modular web components, kept to about 2000 lines",
-  "fork": false,
-  "url": "https://api.github.com/repos/modulojs/modulo",
-  "forks_url": "https://api.github.com/repos/modulojs/modulo/forks",
-  "keys_url": "https://api.github.com/repos/modulojs/modulo/keys{/key_id}",
-  "collaborators_url": "https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}",
-  "teams_url": "https://api.github.com/repos/modulojs/modulo/teams",
-  "hooks_url": "https://api.github.com/repos/modulojs/modulo/hooks",
-  "issue_events_url": "https://api.github.com/repos/modulojs/modulo/issues/events{/number}",
-  "events_url": "https://api.github.com/repos/modulojs/modulo/events",
-  "assignees_url": "https://api.github.com/repos/modulojs/modulo/assignees{/user}",
-  "branches_url": "https://api.github.com/repos/modulojs/modulo/branches{/branch}",
-  "tags_url": "https://api.github.com/repos/modulojs/modulo/tags",
-  "blobs_url": "https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}",
-  "git_tags_url": "https://api.github.com/repos/modulojs/modulo/git/tags{/sha}",
-  "git_refs_url": "https://api.github.com/repos/modulojs/modulo/git/refs{/sha}",
-  "trees_url": "https://api.github.com/repos/modulojs/modulo/git/trees{/sha}",
-  "statuses_url": "https://api.github.com/repos/modulojs/modulo/statuses/{sha}",
-  "languages_url": "https://api.github.com/repos/modulojs/modulo/languages",
-  "stargazers_url": "https://api.github.com/repos/modulojs/modulo/stargazers",
-  "contributors_url": "https://api.github.com/repos/modulojs/modulo/contributors",
-  "subscribers_url": "https://api.github.com/repos/modulojs/modulo/subscribers",
-  "subscription_url": "https://api.github.com/repos/modulojs/modulo/subscription",
-  "commits_url": "https://api.github.com/repos/modulojs/modulo/commits{/sha}",
-  "git_commits_url": "https://api.github.com/repos/modulojs/modulo/git/commits{/sha}",
-  "comments_url": "https://api.github.com/repos/modulojs/modulo/comments{/number}",
-  "issue_comment_url": "https://api.github.com/repos/modulojs/modulo/issues/comments{/number}",
-  "contents_url": "https://api.github.com/repos/modulojs/modulo/contents/{+path}",
-  "compare_url": "https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}",
-  "merges_url": "https://api.github.com/repos/modulojs/modulo/merges",
-  "archive_url": "https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}",
-  "downloads_url": "https://api.github.com/repos/modulojs/modulo/downloads",
-  "issues_url": "https://api.github.com/repos/modulojs/modulo/issues{/number}",
-  "pulls_url": "https://api.github.com/repos/modulojs/modulo/pulls{/number}",
-  "milestones_url": "https://api.github.com/repos/modulojs/modulo/milestones{/number}",
-  "notifications_url": "https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}",
-  "labels_url": "https://api.github.com/repos/modulojs/modulo/labels{/name}",
-  "releases_url": "https://api.github.com/repos/modulojs/modulo/releases{/id}",
-  "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
-  "created_at": "2022-09-28T16:20:49Z",
-  "updated_at": "2022-09-28T17:43:52Z",
-  "pushed_at": "2022-09-28T17:43:26Z",
-  "git_url": "git://github.com/modulojs/modulo.git",
-  "ssh_url": "git@github.com:modulojs/modulo.git",
-  "clone_url": "https://github.com/modulojs/modulo.git",
-  "svn_url": "https://github.com/modulojs/modulo",
-  "homepage": null,
-  "size": 11,
-  "stargazers_count": 1,
-  "watchers_count": 1,
-  "language": "JavaScript",
-  "has_issues": true,
-  "has_projects": true,
-  "has_downloads": true,
-  "has_wiki": true,
-  "has_pages": true,
-  "forks_count": 0,
-  "mirror_url": null,
-  "archived": false,
-  "disabled": false,
-  "open_issues_count": 0,
-  "license": {
-    "key": "lgpl-2.1",
-    "name": "GNU Lesser General Public License v2.1",
-    "spdx_id": "LGPL-2.1",
-    "url": "https://api.github.com/licenses/lgpl-2.1",
-    "node_id": "MDc6TGljZW5zZTEx"
-  },
-  "allow_forking": true,
-  "is_template": false,
-  "web_commit_signoff_required": false,
-  "topics": [
-
-  ],
-  "visibility": "public",
-  "forks": 0,
-  "open_issues": 0,
-  "watchers": 1,
-  "default_branch": "main",
-  "temp_clone_token": null,
-  "organization": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-  },
-  "network_count": 0,
-  "subscribers_count": 1
+modulo.assets.functions["ftn6om"]= function (){
+return {"message":"API rate limit exceeded for 173.195.77.203. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"};
 };
-};
-currentModulo.assets.functions["16lf05u"]= function (){
+modulo.assets.functions["16lf05u"]= function (){
 return [
   {
     "userId": 1,
@@ -23896,7 +23693,7 @@ return [
   }
 ];
 };
-currentModulo.assets.functions["1mtk3os"]= function (){
+modulo.assets.functions["1mtk3os"]= function (){
 return [
   {
     "id": 1,
@@ -24130,7 +23927,7 @@ return [
   }
 ];
 };
-currentModulo.assets.functions["4amukg"]= function (){
+modulo.assets.functions["4amukg"]= function (){
 return {
   apiBase: 'https://openlibrary.org/search.json',
   cover: 'https://covers.openlibrary.org/b/id/',
@@ -24138,35 +23935,80 @@ return {
     'semantic-ui/0.16.1/images/loader-large.gif'
 };
 };
-currentModulo.assets.functions["x1leb5ue"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    API data: <pre>"); // "API data: <pre>"
-  OUT.push(G.escapeText(G.filters["truncate"](G.filters["json"](CTX.state.data),80))); // "state.data|json|truncate:80"
-  OUT.push("</pre>\n    <button @click:=\"script.fetchMe\">Get API data</button>\n"); // "</pre><button @click:=\"script.fetchMe\">Get API data</button>"
+modulo.assets.functions['xhi0r1']('x-demomodal');
 
-return OUT.join("");
-};
-currentModulo.assets.functions["xpuvhr2"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    <p>"); // "<p>"
-  var ARR0=CTX.script.exports.bigArray;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in script.exports.bigArray"
-  OUT.push("\n        "); // ""
-  OUT.push(G.escapeText(CTX.item)); // "item"
-  OUT.push(",\n    "); // ","
-  } // "endfor"
-  OUT.push("</p>\n"); // "</p>"
+modulo.assets.functions['lt9vbi']('x-demochart');
 
-return OUT.join("");
-};
-currentModulo.assets.functions["emgqio"]= function (CTX, G){
-var OUT=[];
-  OUT.push("\n    "); // ""
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push(" v"); // "v"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("\n    (by "); // "(by"
-  OUT.push(G.escapeText(CTX.staticdata.author)); // "staticdata.author"
-  OUT.push(")\n"); // ")"
+modulo.assets.functions['x2qd8lf']('x-examplebtn');
 
-return OUT.join("");
-};
+modulo.assets.functions['ged1qq']('x-demoselector');
+
+modulo.assets.functions['df65sh']('mws-page');
+
+modulo.assets.functions['1k80u21']('mws-projectinfo');
+
+modulo.assets.functions['mac446']('mws-devlognav');
+
+modulo.assets.functions['x1em4c74']('mws-docsidebar');
+
+modulo.assets.functions['x103rdkc']('mws-demo');
+
+modulo.assets.functions['x9nh4rn']('mws-allexamples');
+
+modulo.assets.functions['18j269u']('mws-section');
+
+modulo.assets.functions['x2a21gm']('docseg-templating_1');
+
+modulo.assets.functions['dvho18']('docseg-templating_preparecallback');
+
+modulo.assets.functions['x3l73c0']('docseg-templating_comments');
+
+modulo.assets.functions['x1c5voit']('docseg-templating_escaping');
+
+modulo.assets.functions['xr4f3p4']('docseg-tutorial_p1');
+
+modulo.assets.functions['xklattf']('docseg-tutorial_p2');
+
+modulo.assets.functions['1ericsp']('docseg-tutorial_p2_filters_demo');
+
+modulo.assets.functions['lpso4q']('docseg-tutorial_p3_state_demo');
+
+modulo.assets.functions['s28lnn']('docseg-tutorial_p3_state_bind');
+
+modulo.assets.functions['x1hhld8p']('eg-hello');
+
+modulo.assets.functions['1gctgjl']('eg-simple');
+
+modulo.assets.functions['x1720oc1']('eg-todo');
+
+modulo.assets.functions['14bmbr8']('eg-json');
+
+modulo.assets.functions['vaase4']('eg-jsonarray');
+
+modulo.assets.functions['xvkcm7j']('eg-githubapi');
+
+modulo.assets.functions['v2ccp9']('eg-colorselector');
+
+modulo.assets.functions['xbebs0a']('eg-datenumberpicker');
+
+modulo.assets.functions['x12c1u46']('eg-primesieve');
+
+modulo.assets.functions['x1clk1ac']('eg-scatter');
+
+modulo.assets.functions['x1bfpq3g']('eg-flexibleform');
+
+modulo.assets.functions['xa92jmg']('eg-flexibleformwithapi');
+
+modulo.assets.functions['x6c82fi']('eg-components');
+
+modulo.assets.functions['x1dk560g']('eg-oscillatinggraph');
+
+modulo.assets.functions['4ffi6c']('eg-search');
+
+modulo.assets.functions['x1ech9hq']('eg-searchbox');
+
+modulo.assets.functions['1fe3nlb']('eg-worldmap');
+
+modulo.assets.functions['x181u3ob']('eg-memory');
+
+modulo.assets.functions['1t1t1vj']('eg-conwaygameoflife');

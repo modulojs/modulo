@@ -2,7 +2,7 @@ let componentTexts = null;
 let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
 
 function _setupGlobalVariables() {
-    const { getComponentDefs } = modulo.registry.utils;
+    let { getComponentDefs } = modulo.registry.utils;
     if (!getComponentDefs) {
           throw new Error('Uh oh, getComponentDefs isnt getting defined!');
     }

@@ -60,44 +60,59 @@ might be already useful, despite it's early stage of development.</p>
     work". Here are known bugs &amp; API changes as of September 2022:</p>
 
     <ul>
-        <li><em>BUGS!</em> - I bet you'll find a bug or two!</li>
+        <li><em>Unknown Bugs</em> - While developing the Modulo website, I
+        often encounter bugs and/or confusing or unclear behavior the further I
+        stray from simple, well-tested components. If you are building anything
+        that strays from the beaten path yourself, you might discover a few as
+        well!</li>
 
-        <li><em>Undocumented CPart API</em> - Most of the custom Component Part
-        extension API is undocumented, and some of it is subject to change.
-        This means that a big feature of Modulo (developing custom Component
-        Parts) is still a bit in flux. However, as of this first alpha, it's
-        unlikely to change <em>too</em> much from the API demonstrated in the
-        <a href="/demos/#experiments">"Experiments" examples in the Demo
-        page</a>, in case you wanted to jump the gun.</li>
+        <li><em>Undocumented CPart API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/3">#3</a>
+        Most of the custom Component Part extension API is undocumented, and
+        some of it is subject to change.  This means that a big feature of
+        Modulo (developing custom Component Parts) is still a bit in flux.
+        However, as of this first alpha, it's unlikely to change <em>too</em>
+        much from the API demonstrated in the <a
+        href="/demos/#experiments">"Experiments" examples in the Demo page</a>,
+        in case you wanted to jump the gun.</li>
 
-        <li><em>Undocumented engine API</em> - Similarly, extending or
-        substituting various "engine" classes in Modulo is undocumented (e.g.
-        Reconcile, DOMCursor, AssetManager). The eventual goal is full
-        customization of these as well, so that you can incorporate
-        image-packing or transformations during the build-step, for example, or
-        a more clever DOM resolver that better guesses element changes. The
-        Templater has an example in the Experiments page.</li>
+        <li><em>Undocumented engine API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/3">#3</a>
+        Similarly, extending or substituting various "engine" classes in Modulo
+        is undocumented (e.g.  Reconcile, DOMCursor, AssetManager). The
+        eventual goal is full customization of these as well, so that you can
+        incorporate image-packing or transformations during the build-step, for
+        example, or a more clever DOM resolver that better guesses element
+        changes. The Templater has an example in the Experiments page.</li>
 
-        <li><em>Undocumented CLI</em> - The CLI is mostly complete, but may
-        undergo UI changes, and is mostly undocumented.</li>
+        <li><em>Undocumented CLI</em> -
+        <a href="https://github.com/modulojs/modulo/issues/4">#4</a>
+        The CLI is mostly complete, but may undergo UI changes, and is mostly
+        undocumented.</li>
 
-        <li><em>Browser compatibility</em> - While it's tested on recent-ish
-        versions of the most popular browsers (e.g. Chrom(ium), Firefox, etc),
-        there is no automated browser compatibility testing or browser "matrix"
-        or anything. The eventual goal is something like the (now legacy)
-        Polymer system of shims: Clearly show which browsers are it's core
-        target for compatibility (e.g. shim-free), which ones require shims,
-        and which ones will not be targeted at all.</li>
+        <li><em>Browser compatibility</em> -
+        <a href="https://github.com/modulojs/modulo/issues/5">#5</a>
+        While it's tested on recent-ish versions of the most popular browsers
+        (e.g. Chrom(ium), Firefox, etc), there is no automated browser
+        compatibility testing or browser "matrix" or anything. The eventual
+        goal is something like the (now legacy) Polymer system of shims:
+        Clearly show which browsers are it's core target for compatibility
+        (e.g. shim-free), which ones require shims, and which ones will not be
+        targeted at all.</li>
 
-        <li><em>Nested components</em> - There are some bugs and unexpected
-        behavior around nested components and dataProps referencing the context
-        of parent components in "slotted" DOM elements.</li>
+        <li><em>Nested components</em> -
+        <a href="https://github.com/modulojs/modulo/issues/6">#6</a>
+        There are some bugs and unexpected behavior around nested components
+        and dataProps referencing the context of parent components in "slotted"
+        DOM elements.</li>
 
-        <li><em>Unstable builds</em> - Builds are unpredictable and
-        inconsistent.  The same boilerplate sometimes generates different
-        hashes.</li>
+        <li><em>Unstable builds</em> -
+        <a href="https://github.com/modulojs/modulo/issues/7">#7</a>
+        Builds are unpredictable and inconsistent.  The same boilerplate
+        sometimes generates different hashes.</li>
 
         <li><em>Poorly documented Library, namespace, and loading logic</em> -
+        <a href="https://github.com/modulojs/modulo/issues/8">#8</a>
         The <code>&lt;Library&gt;</code> CPart tag is intended to make it easier
         to keep your library files encapsulated and redistributable. Currently,
         the behavior is non-ideal and will likely be changed, especially around
@@ -105,19 +120,22 @@ might be already useful, despite it's early stage of development.</p>
         unique "definition names" that CParts get, and so on. The documentation
         will need updates on this as well.</li>
 
-        <li><em>Undocumented and config logic and changing API</em> - Modulo
-        has an undocumented configuration system, intended to be leveraged both
-        internally and by CPart developers for a consistent way to configure
-        third party middleware as it gets integrated. The API for this is
-        likely to change, and thus is mostly undocumented.</li>
+        <li><em>Undocumented and config logic and changing API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/9">#9</a>
+        Modulo has an undocumented configuration system, intended to be
+        leveraged both internally and by CPart developers for a consistent way
+        to configure third party middleware as it gets integrated. The API for
+        this is likely to change, and thus is mostly undocumented.</li>
 
-        <li><em>Poor code quality</em> - Not only has the code base (slightly!)
-        exceeded 2000 lines of code, which is pushing the envelope in terms of
-        complexity and framework "heaviness", but it is also filled with
-        commented out code, repeated code, hacked-together messes just to get
-        tests running, and so on. As of writing this post, there are 93
-        instances of <code>TODO</code> and 19 instances of <code>XXX</code> in
-        the Modulo.js file, so clearly some work to be done there!</li>
+        <li><em>Poor code quality</em> -
+        <a href="https://github.com/modulojs/modulo/issues/10">#10</a>
+        Not only has the code base (slightly!) exceeded 2000 lines of code,
+        which is pushing the envelope in terms of complexity and framework
+        "heaviness", but it is also filled with commented out code, repeated
+        code, hacked-together messes just to get tests running, and so on. As
+        of writing this post, there are 93 instances of <code>TODO</code> and
+        19 instances of <code>XXX</code> in the Modulo.js file, so clearly some
+        work to be done there!</li>
     </ul>
 </section>
 
