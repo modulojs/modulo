@@ -1,0 +1,128 @@
+<!doctype html>
+<template Modulo>
+    <Component name="ExampleChild">
+        <Props
+            stuff
+        ></Props>
+        <script JSXTemplate>
+            <div>Example prop: {props.stuff}</div>
+        </script>
+    </Component>
+
+    <Component name="ExampleJSXComponent">
+        <Props
+            txt
+        ></Props>
+        <script JSXTemplate>
+            <div>
+                {/* With JSX, we can switch to JS syntax using {} */}
+                <h3>Parent "props" example: {props.txt}</h3>
+
+
+                {/* Local / privately imported components can be instantiated
+                    using CamelCase, just like in React  */}
+                <h3>Passing props to child component example:</h3>
+                <hr />
+                <ExampleChild stuff="Hello world, from child!"></ExampleChild>
+                <hr />
+
+
+                <h3>Attaching events examples:</h3>
+                {/* onClick= is the JSX / React way to attach events, and we
+                    can attach CPart methods in a similar way to regular Modulo
+                    templating */}
+                <button onClick={script.getClicked}>
+                    Increment #1 (with Script CPart): {state.count}
+                </button> <br />
+
+                {/* Unlike regular Modulo Templating, we can also embed real
+                    JS, or anonymous JS events */}
+                <button onClick={() => { state.num++; }}>
+                    Increment #2 (with anonymous function in template): {state.num}
+                </button> <br />
+
+                <h3>Using array and style attribute:</h3>
+                {/* Just like in JSX / React "style" attributes get converted
+                    to CSS syntax, so you can compute styles more easily */}
+                {
+                    state.alphabet.map((val, i) => 
+                        <div style={{ background: 'orange', width: 50 * (i + 1) }}
+                            onMouseOver={() => {
+                                state.message = val + ' has value ' + (i + 1);
+                            }}>{ val.toUpperCase() }</div>
+                    )
+                }
+                {
+                    state.message ?  <h3>Message: { state.message }</h3> : ''
+                }
+            </div>
+        </script>
+
+        <State
+            count:=5
+            num:=42
+            message=""
+            alphabet:='["abc", "def", "ghi", "jkl", "mno"]'
+        ></State>
+
+        <Script>
+            // Just like with components that use the regular Template CPart,
+            // we can add callbacks functions in the Script
+            function initializedCallback() {
+                console.log('JSX-based Modulo element loaded:', element);
+            }
+
+            // Also, we can define functions that get attached to events
+            function getClicked() {
+                state.count++;
+            }
+        </Script>
+
+        <Style>
+            button {
+                border: 3px solid orange;
+                font-size: 30px;
+            }
+        </Style>
+    </Component>
+
+</template>
+
+
+<script src="https://unpkg.com/mdu.js"></script>
+
+<!-- Load Babel & Modulo's Babel compatibility extension. The modulo-asset=y is
+     to prevent it from being included in a final bundle. -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" modulo-asset=y></script>
+<script src="https://unpkg.com/mdu.js@latest/mdu/extensions/asset-manager-babel.js" modulo-asset=y></script>
+
+<!-- Load JSXTemplate CPart, which uses Babel to compile JSX-style templates -->
+<script src="https://unpkg.com/mdu.js@latest/mdu/cparts/JSXTemplate.js"></script>
+
+
+<h1>Custom CPart: JSXTemplate Demo</h1>
+<h3>&ldquo;Modulo + Babel transpiling + React-style JSX&rdquo;</h3>
+<p>In this example, we load the Babel.js standalone script
+(browser-compatible), along with a custom JS file that "patches" the Modulo
+AssetManager to transpile JS assets using Babel before including or bundling.</p>
+<p>This enables us to include the custom JSXTemplate CPart, that lets you use
+JSX syntax to mix HTML-templating with embedded JavaScript. It also allows
+attachment of embedded or arbitrary JavaScript code.</p>
+
+<hr />
+<!-- Finally, instantiate our JSX-based component -->
+<x-ExampleJSXComponent txt="Hello"></x-ExampleJSXComponent>
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text);
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

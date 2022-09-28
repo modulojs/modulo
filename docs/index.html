@@ -1,0 +1,408 @@
+<!DOCTYPE HTML><html><head>
+
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Modulo - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-bundle-xj5723r.css"></head><body>
+
+
+    
+    
+    
+    
+
+    <!-- Some global CSS that is not tied to any component: -->
+    
+
+
+
+<slot name="above-navbar"><div class="IndexWrapper" slot="above-navbar">
+    <div class="Tagline">
+        <!--<h1 class="Tagline-logo"><span alt="Modulo operator">%</span></h1>-->
+        <div class="Tagline-logo">
+            <img src="/img/mono_logo_percent_only.png" class="Tagline-logoimg">
+        </div>
+        <h1 class="Tagline-title">modulo<span>.js</span></h1>
+
+        
+        
+            <a href="/devlog/2022-09.html" title="This product is still under heavy development. Click to learn more.">alpha&nbsp;v0.0.13</a>
+        
+    
+        <h2>A small, modular JavaScript Web Component framework</h2>
+        <ul>
+            <li>Component system inspired by React, Svelte, and Polymer</li>
+            <li>Only 2000 lines of dependency-free, self-building JavaScript</li>
+            <li>A "no fuss" drop-in for existing web apps or static sites</li>
+        <ul>
+        <!--
+        Fewer than 2000 lines of simple, commented code
+        Component system inspired by React, Svelte, and Polymer
+        A dependency-free, "no fuss" drop-in for existing web apps
+        Declarative, synchronous, modular, ease of learning
+        -->
+    </ul></ul></div>
+
+    <main style="margin-top: 30px">
+        <mws-demo fromlibrary="Hello,Simple,ToDo,JSON,Scatter,Search,Components,Memory" demotype="minipreview" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
+             demo-wrapper__minipreview
+        
+        
+        
+        demo-wrapper__tabs       
+    ">
+    
+        <nav class="TabNav">
+            <ul>
+                
+                    <li class="TabNav-title
+                        
+                            TabNav-title--selected
+                        
+                    "><a @click:="script.selectTab" payload="Hello">Hello</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="Simple">Simple</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="ToDo">ToDo</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="JSON">JSON</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="Scatter">Scatter</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="Search">Search</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="Components">Components</a></li>
+                
+                    <li class="TabNav-title
+                        
+                    "><a @click:="script.selectTab" payload="Memory">Memory</a></li>
+                
+            </ul>
+        </nav>
+    
+
+    <div class="editor-toolbar">
+        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
+                     display: none; ">
+            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
+        </p>
+
+        
+
+        
+            <button class="m-Btn" title="Copy the code to make this component" @click:="script.doCopy" payload:="true">
+                <span alt="Copy component symbol">‹⬡›</span>
+            </button>&nbsp;
+        
+
+        
+            <!--
+            <button class="m-Btn demo-fs-button"
+                    title="Toggle full screen view of code" @click:=script.doFullscreen>
+                
+                    <span alt="Go Full Screen">&nearr;</span>
+                
+            </button>
+            &nbsp;
+            -->
+            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
+                Run <span alt="Refresh">⟳</span>
+            </button>
+        
+
+    </div>
+
+    <div class="side-by-side-panes">
+        <div class="editor-wrapper">
+            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; display: block; bottom: 0px;"><div style="min-width: 1px; height: 239px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="right: 0px; left: 622px; height: 18px; pointer-events: auto;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 239px; min-width: 553.234px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>11</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">button</span> <span class="cm-attribute">@click:</span>=<span class="cm-string">script.countUp</span><span class="cm-tag cm-bracket">&gt;</span>Hello <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">num</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">num:</span>=<span class="cm-string">42</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">State</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">countUp</span>() {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-variable">state</span>.<span class="cm-property">num</span><span class="cm-operator">++</span>;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 239px;"></div><div class="CodeMirror-gutters" style="height: 289px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
+        </div>
+
+        
+            <div class="editor-minipreview">
+                <div modulo-ignore="">
+                    <eg-hello modulo-original-html="">
+    <button @click:="script.countUp">Hello 42</button>
+</eg-hello>
+                </div>
+            </div>
+        
+
+    </div>
+</div>
+
+
+
+</mws-demo>
+        <!--fromlibrary="Hello,Simple,ToDo,JSON,API,PrimeSieve,Memory"-->
+    </main>
+</div><span id="about" slot="above-navbar"></span></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] Modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about" class="Navbar--selected">About</a>
+        </li>
+        <li>
+            <a href="/start.html">Start</a>
+        </li>
+        <li>
+            <a href="/docs/">Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        
+        
+            v: 0.0.13<br>
+            <!--SLOC: undefined lines<br />-->
+            <a href="https://github.com/michaelpb/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
+        
+    
+        <!--
+        
+            <a href="https://github.com/michaelpb/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        
+        -->
+    </div>
+</nav>
+
+
+    <main class="Main">
+        <slot>
+
+
+
+<mws-devlognav modulo-original-html=""><nav style="">
+    <h4>DEV LOG</h4>
+
+    <ul>
+        
+            <li>
+                
+                    <a href="/devlog/2022-09.html">
+                        2022-09&nbsp;(Alpha release)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-07.html">
+                        2022-07&nbsp;(HTML-first)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-03.html">
+                        2022-03&nbsp;(Prealpha)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-09.html">
+                        2021-09&nbsp;(Thoughts on framework design)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-01.html">
+                        2021-01&nbsp;(FAQ)
+                    </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+</mws-devlognav>
+
+
+
+
+
+
+<section class="SideBySide">
+    <aside class="TitleAside">
+        <h3><span alt="Null set">∅</span></h3>
+        <h3>Fewer</h3>
+        <h3>assumptions</h3>
+        <p><a href="start.html">Get started now »</a></p>
+    </aside>
+    <aside>
+        <p><strong>Zero set-up</strong> - Like the "golden age" of jQuery,
+        just drop it into any HTML file.  Unlike jQuery, that 1 file packs
+        in many of the creature-comforts of a modern component framework,
+        without any dependencies or new syntax to learn. You can even compile
+        to a single JS file, directly from your browser!</p>
+        <!--
+        a modern component system, a swappable templating language based on
+        Liquid-syntax, DOM resolution, and more.  , a tiny build system to pack
+        your CSS and JS for production, and even debug tools.</p>-->
+
+        <p><strong>A gentler learning curve</strong> - Modulo's declarative,
+        synchronous HTML-first approach was designed to be easier for coding
+        newbies to pick-up—in fact, useful components can be developed
+        without writing any JavaScript code!</p>
+
+        <p><strong><strike style="color: gray">Progressive Web Apps</strike>
+        Progressive Enhancement</strong> - Modulo makes few assumptions, and
+        renders components mixed with plain HTML for easier integration into
+        backend apps. SPA's and PWA's are fine and all, and Modulo could be
+        used for these as well, but what about all our existing server-side
+        apps in Ruby on Rails, Python, Go, or that one home-grown PHP monster
+        that will never go away? Sprinkle in some Modulo components to make
+        your "traditional" web apps
+        <em>shine</em>.</p>
+        <!--
+        <abbr title="In fact, Modulo templating language uses a backend-inspired 'Djangolike' or Liquid-style syntax templating language, e.g. {{ example|filter }}">
+        </abbr>
+        -->
+    </aside>
+</section>
+
+<section class="SideBySide">
+    <aside>
+        <p><strong>Component Parts</strong> - Modular "Lego blocks" for
+        your components! Combine Script, Style, State, Props, and Templates to
+        make components that with these features.<!--
+        Reusing CParts between components provides a powerful system
+        of "composition-based" inheritance.--></p>
+
+        <p><strong>Everything is transparent and swappable</strong> -
+        Component Parts (CParts) are a flexible form of component middleware:
+        You can create custom CParts to support your backend APIs, "mix and
+        match" your favorite JS templating languages (e.g., <a href="/demos/jsx_template.html">JSX</a> or <a href="/demos/handlebars_templater.html">Handlebars</a>), or fine-tune
+        DOM-resolution behavior, either globally, or on a per-component basis.
+        Lifecycle callbacks are especially powerful, allowing you to hook your
+        own code into the DOM or any steps of the rendering process.</p>
+
+        <p><strong>A novel approach to component development</strong> -
+        Modulo's separation of CPart development from component development
+        allows JavaScript developers to write <a title="Click for a demonstration of a custom CPart that wraps an API" href="/demos/custom_cpart_for_api.html">pure JS to wrap APIs</a>, and
+        component developers to tie it all together with "low-code".</p>
+    </aside>
+    <aside>
+        <h3><span alt="Sigma">Σ</span></h3>
+        <h3>More<br>modular</h3>
+        <p><a href="/docs/">Read the docs »</a></p>
+    </aside>
+</section>
+
+<section class="SideBySide">
+    <aside class="TitleAside">
+        <h3><span alt="Modulo operator">%</span></h3>
+        <h3>Similar<br>(but&nbsp;simpler)</h3>
+        <!--<p><a href="https://github.com/michaelpb/modulo/blob/main/src/Modulo.js">Read the source</a></p>-->
+        <p><a href="/demos/">Play around with some examples »</a></p>
+    </aside>
+
+    <aside>
+        <p><strong>"It's like React"</strong> - Modulo is "batteries-included"
+        to function like React.js or Vue.js. You get encapsulated components
+        with state management, two-way data binding, props, computed values,
+        smart DOM resolution, event directives, and more. You even get a simple
+        importing and namespacing system, which can "self-pack" your components
+        into a single JS file!</p>
+
+        <p><strong>Clean &amp; concise</strong> - The code-base of Modulo itself is
+        intentionally kept short &amp; sweet: It's roughly 1500
+        <abbr title="Source Lines of Code - This counts 'physical lines' and thus does not include comments, documentation, blanks, etc">SLOC</abbr>,
+        80 char line limit, 4 spaces of
+        indent, and a <abbr title="Try to keep cyclomatic complexity of functions to 3 or lower">low-complexity</abbr>
+        imperative style. When something goes wrong (which it
+        probably will since it's new), it's easier to "<tt>git blame</tt>"
+        Modulo.</p>
+
+        <p><strong>A basis for whatever comes next</strong> - Writing your own
+        framework? Modulo's core for loading &amp; mounting CParts is only ~500
+        SLOC. Read the source code, fork away, and swap the
+        "batteries-included" for your own!</p>
+    </aside>
+</section>
+
+</slot>
+    </main>
+
+
+<footer>
+    <main>
+        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0
+    </main>
+</footer>
+
+
+
+<script src="/_modulo/modulo-bundle-7dj3l8.js"></script><script>var _X = currentModulo.assets.invoke.bind(currentModulo.assets);
+_X('xqf9b9l', ["x-demomodal"]);
+_X('sg83u6', ["x-demochart"]);
+_X('x1da3243', ["x-examplebtn"]);
+_X('x33s3q', ["x-demoselector"]);
+_X('433vtt', ["mws-page"]);
+_X('4mpqrn', ["mws-projectinfo"]);
+_X('x1aqc8h6', ["mws-devlognav"]);
+_X('x1juvmkg', ["mws-docsidebar"]);
+_X('x6nt2r0', ["mws-demo"]);
+_X('xtg6cqb', ["mws-allexamples"]);
+_X('l1gr4i', ["mws-section"]);
+_X('17sct8m', ["docseg-templating_1"]);
+_X('1mvqm2k', ["docseg-templating_preparecallback"]);
+_X('x4kk41c', ["docseg-templating_comments"]);
+_X('x14uqs09', ["docseg-templating_escaping"]);
+_X('xif6qno', ["docseg-tutorial_p1"]);
+_X('x1c4jlk3', ["docseg-tutorial_p2"]);
+_X('x1gqlqhr', ["docseg-tutorial_p2_filters_demo"]);
+_X('xpmn7oi', ["docseg-tutorial_p3_state_demo"]);
+_X('1sc0e93', ["docseg-tutorial_p3_state_bind"]);
+_X('14n8egj', ["eg-hello"]);
+_X('r5jke9', ["eg-simple"]);
+_X('18e8a6j', ["eg-todo"]);
+_X('x1b5e73p', ["eg-json"]);
+_X('x2b520g', ["eg-jsonarray"]);
+_X('cd55r1', ["eg-githubapi"]);
+_X('x1ii4dc3', ["eg-colorselector"]);
+_X('f4cpaa', ["eg-datenumberpicker"]);
+_X('x1g4uuhi', ["eg-primesieve"]);
+_X('1vfteg8', ["eg-scatter"]);
+_X('1ns7ff4', ["eg-flexibleform"]);
+_X('x1m1b3bs', ["eg-flexibleformwithapi"]);
+_X('8bv8j2', ["eg-components"]);
+_X('x7jhpv4', ["eg-oscillatinggraph"]);
+_X('xlrsjv0', ["eg-search"]);
+_X('x1jlcjv6', ["eg-searchbox"]);
+_X('x14gac81', ["eg-worldmap"]);
+_X('4ita9', ["eg-memory"]);
+_X('xao68n1', ["eg-conwaygameoflife"]);
+</script></body></html>

@@ -1,0 +1,97 @@
+<!--
+    This is a starter component which shows off common features and tasks, so
+    you can copy & paste it into your project to get started (and remember
+    syntax!). By itself, it doesn't do anything useful (it counts, and adds
+    nonsense to an array when buttons are clicked), but instead is intended to
+    be used as a reference to demonstrate common usage patterns.
+-->
+<script Modulo src="https://unpkg.com/mdu.js">
+  <Component name="HelloWorld">
+    <Props
+        label
+    ></Props>
+
+    <!-- (Hint: Use https://modulojs.org/docs/templating-reference.html ) -->
+    <Template>
+
+        <!-- (Hint: "|upper" is a "template filter" which modifies text) -->
+        <h2>{{ props.label|upper }}</h2>
+
+        <button @click:=script.increment>COUNT: {{ state.num }}</button>
+
+        <!-- (Hint: Use "payload" to specify arguments to JS funcs) -->
+        <button payload="ABC" @click:=script.addToList>Add "ABC"</button>
+        <button payload="XYZ" @click:=script.addToList>Add "XYZ"</button>
+
+        <!-- (Hint: "for" is a "template tag", which repeats HTML) -->
+        {% for item in state.items %}
+            <span>{{ item }}</span>
+        {% endfor %}
+    </Template>
+
+    <!-- (Hint: The ="" syntax is for strings, while :='' is for other types) -->
+    <State
+        message="Hello world"
+        num:=1
+        items:=[]
+        json:='{"more": "data"}'
+    ></State>
+
+    <cpart Script>
+        // (Hint: All named functions defined at the top level will be exported)
+        function addToList(payload) {
+            state.items.push(payload);
+        }
+        function increment() {
+            state.num++;
+        }
+    </cpart>
+
+    <!-- (Note: "cpart Script" and "/cpart" is necessary while embedded. When
+    you move to a seprate file, use simply "Script" and "/Script") -->
+
+    <Style>
+        /* (Hint: Use :host to reference the component itself) */
+        :host, button, span {
+            background-color: #B90183;
+            color: white;
+            margin: 20px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        /* (Hint: All selectors are automatically prefixed) */
+        button {
+            padding: 5px;
+            border: 3px solid white;
+        }
+    </Style>
+  </Component>
+</script>
+
+
+<!-- Use it anywhere, each instance is isolated: -->
+<hr />
+<x-HelloWorld label="Click to count:"></x-HelloWorld>
+<hr />
+<x-HelloWorld label="Another one:"></x-HelloWorld>
+<hr />
+
+<!-- Remember - Move Component definitions to a library file later:
+<script Modulo
+    src="https://unpkg.com/mdu.js"
+    -src="/static/libraries/all.html"
+></script> -->
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

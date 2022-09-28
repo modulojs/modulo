@@ -1,0 +1,58 @@
+<component name="ComponentCPart_TestWithoutTemplate">
+    <state
+        testing="lol"
+    ></state>
+
+    <testsuite>
+
+        <test name="Testing empty render">
+            <template name="Nothing rendered"></template>
+            <script name="State works">
+                assert: state.testing === 'lol'
+            </script>
+        </test>
+
+        <test name="Testing innerHTML interface">
+            <script name="Ensure component exists and innerHTML starts as null">
+                const { innerHTML } = component
+                component.innerHTML = '<div id="test"><p>Abc</p></div>'
+                // Note: Need to change this if we ever change lc methods
+                element.lifecycle([ 'render', 'reconcile', 'update' ])
+                assert: innerHTML === null
+            </script>
+
+            <template skip-rerender name="Ensure setting innerHTML causes reconcile">
+                <div id="test"><p>Abc</p></div>
+            </template>
+        </test>
+
+    </testsuite>
+</component>
+
+
+<component name="ComponentCPart_TestDataPropDirective">
+    <Template><div testprop:='{}' testprop.val:='"abc"'></div>
+    </Template>
+
+    <testsuite>
+
+        <test name="Testing data prop">
+
+            <script name="Was defined">
+                assert: element.firstChild.dataProps
+            </script>
+
+            <script name="Has parsed prop">
+                assert: element.firstChild.dataProps.testprop
+            </script>
+
+            <script name="Parsed prop has exp value">
+                const expected = JSON.stringify({ val: 'abc' });
+                const actual = JSON.stringify(element.firstChild.dataProps.testprop);
+                assert: actual === expected
+            </script>
+        </test>
+
+    </testsuite>
+</component>
+

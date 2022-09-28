@@ -1,0 +1,206 @@
+<component name="UtilTester"><testsuite>
+
+<test name="utils.parseDirectives">
+    <script name="Ensure defined">
+        // TODO: Move from utils to a new Reconciler unit test
+        const directiveShortcuts = [ [ /^@/, 'component.event' ],
+                                     [ /:$/, 'component.dataProp' ] ];
+        const rec = modulo.create('engine', 'Reconciler', { directiveShortcuts });
+        // helper utility function:
+        element.parseDir = function parseDir (rawName, value) {
+            // TODO: not sure why value gets passed in here
+            return JSON.stringify(rec.parseDirectives(rawName, directiveShortcuts), null, 2);
+        }
+
+        assert: rec && rec.parseDirectives
+    </script>
+
+    <script name="Can parse shortcuts">
+        const { parseDir } = element;
+        // <a b="valb" c:="valc" @d="vald"></a>
+        const result = parseDir('c:', 'valc');
+        const expected = JSON.stringify([{
+            attrName: 'c',
+            rawName: 'c:',
+            directiveName: 'component.dataProp',
+            name: '[component.dataProp]c',
+        }], null, 2);
+        assert: result === expected
+    </script>
+
+    <script name="Can parse multiple shortcuts">
+        const { parseDir } = element;
+        const result = parseDir('@abc:', 'def');
+        const expected = JSON.stringify([
+                {
+                    attrName: 'abc',
+                    rawName: '@abc:',
+                    directiveName: 'component.dataProp',
+                    name: '[component.dataProp][component.event]abc',
+                },
+                {
+                    attrName: 'abc',
+                    rawName: '@abc:',
+                    directiveName: 'component.event',
+                    name: '[component.dataProp][component.event]abc',
+                },
+            ], null, 2);
+        assert: result === expected
+    </script>
+
+    <script name="Can parse multiple directives">
+        const { parseDir } = element;
+        // <a b="valb" c:="valc" @d="vald"></a>
+        const result = parseDir('[a][b][c][d]e', 'vale');
+        const expected = JSON.stringify([
+                { attrName: 'e', rawName: '[a][b][c][d]e',
+                    directiveName: 'a', name: '[a][b][c][d]e', },
+                { attrName: 'e', rawName: '[a][b][c][d]e',
+                    directiveName: 'b', name: '[a][b][c][d]e', },
+                { attrName: 'e', rawName: '[a][b][c][d]e',
+                    directiveName: 'c', name: '[a][b][c][d]e', },
+                { attrName: 'e', rawName: '[a][b][c][d]e',
+                    directiveName: 'd', name: '[a][b][c][d]e', },
+            ], null, 2);
+        assert: result === expected
+    </script>
+
+    <script name="Can parse bare directives">
+        const { parseDir } = element;
+        // <a b="valb" c:="valc" @d="vald"></a>
+        const result = parseDir('[testing]', '');
+        const expected = JSON.stringify([
+                { attrName: '', rawName: '[testing]',
+                    directiveName: 'testing', name: '[testing]', },
+            ], null, 2);
+        assert: result === expected
+    </script>
+
+    <script name="Can detect when no directives">
+        const { parseDir } = element;
+        const result = parseDir('just-a-normal-attribute-folks', []);
+        const expected = 'null';
+        assert: result === expected
+    </script>
+
+
+    <script name="Can detect when no directives or shortcuts">
+        const { parseDir } = element;
+        const result = parseDir('just-a$no.b.c:a---i??te-folks', []);
+        const expected = 'null';
+        assert: result === expected
+    </script>
+
+</test>
+
+<test name="utils.resolvePath">
+
+
+    <script name="Can resolve relativep paths">
+        const { resolvePath } = modulo.registry.utils;
+        /*
+        basesDir /home/michaelb/projects/modulo/tests/
+        relDir 
+        */
+        const baseDir = '/app/modulo/tests/';
+        const relPath = '../www-src/components/embeddedexampleslib.html';
+        const expected = '/app/modulo/www-src/components/embeddedexampleslib.html';
+        const result = resolvePath(baseDir, relPath);
+        assert: result === expected
+    </script>
+
+</test>
+
+
+
+<test name="utils.get and utils.set">
+    <script name="Ensure defined">
+        const { set, get } = modulo.registry.utils;
+        assert: set && get
+    </script>
+
+    <script name="Ensure get works">
+        const { get } = modulo.registry.utils;
+        const expected = 'hij';
+        const result = get({ abc: { def: "hij" }}, 'abc.def');
+        assert: result === expected
+    </script>
+
+    <script name="Ensure set works for plain assignment">
+        const { set } = modulo.registry.utils;
+        const obj = { abc: { def: "hij" }};
+        set(obj, 'klm', 'nop');
+        const expected = JSON.stringify({ abc: { def: "hij" }, klm: 'nop' })
+        const result = JSON.stringify(obj);
+        assert: result === expected
+    </script>
+
+    <script name="Ensure set works for path">
+        const { set } = modulo.registry.utils;
+        const obj = { abc: { def: "hij" }};
+        set(obj, 'abc.def', 'nop');
+        const expected = JSON.stringify({ abc: { def: "nop" } })
+        const result = JSON.stringify(obj);
+        assert: result === expected
+    </script>
+
+</test>
+
+<!-- Right now, transformTag is removed -->
+<!--
+<test name="utils.transformTag">
+    <script name="Ensure defined">
+        const { transformTag } = modulo.registry.utils;
+        assert: transformTag
+    </script>
+
+    <script name="Can transform simple tag">
+        const { transformTag } = modulo.registry.utils;
+        const doc = Modulo.globals.document;
+        element.innerHTML = '<p>Abc</p>';
+        transformTag(element.querySelector('p'), 'span');
+        assert: element.innerHTML === '<span>Abc</span>'
+    </script>
+
+    <script name="Can transform complicated tag">
+        const { transformTag } = modulo.registry.utils;
+        const doc = Modulo.globals.document;
+        element.innerHTML = `<div><span></span>
+            <p id="para" class="Test" [b][c]d="DEFhij"></p>
+        </div>`;
+        transformTag(element.querySelector('p'), 'span');
+
+        const expectedHTML = `<div><span></span>
+            <span id="para" class="Test" [b][c]d="DEFhij"></span>
+        </div>`;
+
+        assert: element.innerHTML === expectedHTML
+    </script>
+
+
+    <script name="Can transform complicated tag with chilren">
+        const { transformTag } = modulo.registry.utils;
+        const doc = Modulo.globals.document;
+
+        const children = `<span>item
+        </span>
+        <abbr>abc<b>i<i>t</i>em</b></abbr>
+        <span>st<a>u</a>ff
+        </span>`;
+
+        element.innerHTML = `<div><span></span>
+            <p id="para" class="Test" [b][c]d="DEFhij">${children}</p>
+        </div>`;
+        transformTag(element.querySelector('p'), 'div');
+
+        const expectedHTML = `<div><span></span>
+            <div id="para" class="Test" [b][c]d="DEFhij">${children}</div>
+        </div>`;
+
+        assert: element.innerHTML === expectedHTML
+    </script>
+
+</test>
+-->
+
+</testsuite></component>

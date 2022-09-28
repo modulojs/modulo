@@ -1,0 +1,92 @@
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/FetchState.js"></script>
+
+<template modulo-embed>
+
+    <Component name="OpenBookAPIExample">
+        <script type="modulo/Template">
+            <input [state.bind] name="search" />
+            <button @click:=fetchstate.refresh>GO</button>
+            {% if not fetchstate.isReady %}
+                Loading...
+            {% else %}
+                ({{ fetchstate.openlibrary.numFound }}  total results found)
+
+                <p><label>Page #
+                    <input [state.bind] name="page" min="0"
+                        max="{{ fetchstate.openlibrary.numFound|dividedinto:state.limit }}"
+                        type="number" @change:=fetchstate.refresh />
+                        of {{ fetchstate.openlibrary.numFound|dividedinto:state.limit }}
+                </label></p>
+                <ol start="{{ fetchstate.openlibrary.start }}">
+                    {% if fetchstate.isLoading %}
+                        <em>Loading page #{{ state.page }} of "{{ state.search }}"...</em>
+                    {% else %}
+                        {% for result in fetchstate.openlibrary.docs %}
+                            <li>
+                                <img src="http://covers.openlibrary.org/b/id/{{ result.cover_i }}-S.jpg" />
+                                {{ result.title }}
+                                {% if result.author_name %} ({{ result.author_name|join }}) {% endif %}
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                </ol>
+            {% endif %}
+        </script>
+
+        <State
+            search="the lord of the rings"
+            limit:=6
+            page:=0
+            fields:='["title", "author_name", "cover_i" ]'
+        ></State>
+
+        <FetchState
+            openlibrary="
+                https://openlibrary.org/search.json?
+                    q = {{ state.search }}
+                    &offset = {{ state.page|multiply:state.limit }}
+                    &limit = {{ state.limit }}
+                    &fields = {{ state.fields|join }}
+            "
+        ></FetchState>
+        <Style> /* Increase font size, show spinner in Chrome */
+            label, input, button { font-size: 20px; }
+            input[type=number] { width: 60px; }
+            input[type=number]::-webkit-inner-spin-button { opacity: 1 }
+        </Style>
+    </Component>
+
+</template>
+
+<script> Modulo.defineAll() </script>
+
+
+<h1>Custom CPart: FetchState Demo</h1>
+<h3>&ldquo;Look ma, no JavaScript!&rdquo;</h3>
+<p>The following component does not have a <em>Script</em> CPart or any custom
+JavaScript. Instead, it uses the custom <em>FetchState</em> CPart to fetch the
+API data.  The <em>FetchState</em> CPart uses templating to generate URLs based
+on state, fetches those URLs and populates it's state with it, and will
+"refresh" when state (e.g. inputs) change, to get the newer data. This is how
+the component appears to "react" to the input, rerendering whenever the state
+changes, but without having to specify any custom JavaScript.</p>
+
+<hr />
+<x-OpenBookAPIExample></x-OpenBookAPIExample>
+
+
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    Modulo.fetchQ.enqueue('.', text => {
+        this.nextSibling.textContent = text;
+        navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

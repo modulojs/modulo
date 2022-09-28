@@ -1,0 +1,323 @@
+<Component namespace="docseg" name="Templating_1">
+<Template>
+<p>There are <em>{{ state.count }}
+  {{ state.count|pluralize:"articles,article" }}</em>
+  on {{ script.exports.title }}.</p>
+
+{# Show the articles #}
+{% for article in state.articles %}
+    <h4 style="color: blue">{{ article.headline|upper }}</h4>
+    {% if article.tease %}
+      <p>{{ article.tease|truncate:30 }}</p>
+    {% endif %}
+{% endfor %}
+</Template>
+
+<!-- The data below was used to render the template above -->
+<State
+    count:=42
+    articles:='[
+      {"headline": "Modulo released!",
+       "tease": "The most exciting news of the century."},
+      {"headline": "Can JS be fun again?"},
+      {"headline": "MTL considered harmful",
+       "tease": "Why constructing JS is risky business."}
+    ]'
+></State>
+<Script>
+    script.exports.title = "ModuloNews";
+</Script>
+
+<TestSuite
+    -src="./examplelib-tests/Templating_1-tests.html"
+></TestSuite>
+
+</Component>
+
+
+<Component namespace="docseg" name="Templating_PrepareCallback">
+<Template>
+    <input name="perc" [state.bind] />% of
+    <input name="total" [state.bind] />
+    is: {{ script.calcResult }}
+</Template>
+
+<State
+    perc:=50
+    total:=30
+></State>
+
+<Script>
+    function prepareCallback() {
+        const calcResult = (state.perc / 100) * state.total;
+        return { calcResult };
+    }
+</Script>
+
+<Style>
+    input { display: inline; width: 25px }
+</Style>
+
+<TestSuite>
+    <test name="renders with computed value as expected">
+        <template test-values name="initial render">
+          <input name="perc" value="50" [state.bind] />% of
+          <input name="total" value="30" [state.bind] />
+          is: 15
+        </template>
+
+        <state
+            perc:=55
+        ></state>
+
+        <template test-values name="rerenders correctly if changed">
+          <input name="perc" value="55" [state.bind] />% of
+          <input name="total" value="30" [state.bind] />
+          is: 16.5
+        </template>
+    </test>
+</TestSuite>
+
+</Component>
+
+
+
+<Component namespace="docseg" name="Templating_Comments">
+<Template>
+    <h1>hello {# greeting #}</h1>
+    {% comment %}
+      {% if a %}<div>{{ b }}</div>{% endif %}
+      <h3>{{ state.items|first }}</h3>
+    {% endcomment %}
+    <p>Below the greeting...</p>
+</Template>
+
+<TestSuite>
+    <test name="Hides comments">
+        <template>
+            <h1>hello </h1>
+            <p>Below the greeting...</p>
+        </template>
+    </test>
+</TestSuite>
+
+</Component>
+
+
+
+<Component namespace="docseg" name="Templating_Escaping">
+<Template>
+<p>User "<em>{{ state.username }}</em>" sent a message:</p>
+<div class="msgcontent">
+    {{ state.content|safe }}
+</div>
+</Template>
+
+<State
+    username="Little <Bobby> <Drop> &tables"
+    content='
+        I <i>love</i> the classic <a target="_blank"
+        href="https://xkcd.com/327/">xkcd #327</a> on
+        the risk of trusting <b>user inputted data</b>
+    '
+></State>
+<Style>
+    .msgcontent {
+        background: #999;
+        padding: 10px;
+        margin: 10px;
+    }
+</Style>
+
+<TestSuite>
+    <test name="Escapes HTML, safe works">
+        <template>
+            <p>User "<em>Little &lt;Bobby&gt; &lt;Drop&gt;
+            &amp;tables</em>" sent a message:</p>
+            <div class="msgcontent"> I <i>love</i> the classic <a
+            target="_blank" href="https://xkcd.com/327/">xkcd #327</a> on
+            the risk of trusting <b>user inputted data</b></div>
+        </template>
+    </test>
+</TestSuite>
+
+</Component>
+
+
+
+<Component namespace="docseg" name="Tutorial_P1">
+<Template>
+Hello <strong>Modulo</strong> World!
+<p class="neat">Any HTML can be here!</p>
+</Template>
+<Style>
+/* ...and any CSS here! */
+strong {
+    color: blue;
+}
+.neat {
+    font-variant: small-caps;
+}
+:host { /* styles the entire component */
+    display: inline-block;
+    background-color: cornsilk;
+    padding: 5px;
+    box-shadow: 10px 10px 0 0 turquoise;
+}
+</Style>
+
+<testsuite>
+    <test name="renders as expected">
+        <template>
+            Hello <strong>Modulo</strong> World!
+            <p class="neat">Any HTML can be here!</p>
+        </template>
+    </test>
+</testsuite>
+
+
+</component>
+
+
+<Component namespace="docseg" name="Tutorial_P2">
+<Template>
+    <p>Trying out the button...</p>
+    <x-ExampleBtn
+        label="Button Example"
+        shape="square"
+    ></x-ExampleBtn>
+
+    <p>Another button...</p>
+    <x-ExampleBtn
+        label="Example 2: Rounded"
+        shape="round"
+    ></x-ExampleBtn>
+</Template>
+
+<TestSuite>
+    <test name="renders as expected">
+        <template string-count=1>
+            <p>Trying out the button...</p>
+        </template>
+        <!-- Unfortunately can't test the following... -->
+        <!--
+        <template>
+            <button class="my-btn my-btn__square">
+                Button Example
+            </button>
+        </template>
+        <template>
+            <button class="my-btn my-btn__round">
+                Rounded is Great Too
+            </button>
+        </template>
+        -->
+    </test>
+</TestSuite>
+</Component>
+
+
+<Component namespace="docseg" name="Tutorial_P2_filters_demo">
+<Template>
+    <p>Trying out the button...</p>
+    <x-ExampleBtn
+        label="Button Example"
+        shape="square"
+    ></x-ExampleBtn>
+
+    <p>Another button...</p>
+    <x-ExampleBtn
+        label="Example 2: Rounded"
+        shape="round"
+    ></x-ExampleBtn>
+</Template>
+
+<TestSuite>
+    <test name="renders as expected">
+        <template string-count=1>
+            <p>Trying out the button...</p>
+        </template>
+    </test>
+</TestSuite>
+
+
+</Component>
+
+
+
+<!-- ................................ -->
+<!-- . Tutorial - Part 3 ............ -->
+<!-- ................................ -->
+
+<Component namespace="docseg" name="Tutorial_P3_state_demo">
+<Template>
+<p>Nonsense poem:</p> <pre>
+Professor {{ state.verb|capfirst }} who
+{{ state.verb }}ed a {{ state.noun }},
+taught {{ state.verb }}ing in
+the City of {{ state.noun|capfirst }},
+to {{ state.count }} {{ state.noun }}s.
+</pre>
+</Template>
+
+<State
+    verb="toot"
+    noun="kazoo"
+    count="two"
+></State>
+
+<Style>
+    :host {
+        font-size: 0.8rem;
+    }
+</Style>
+
+<testsuite>
+    <test>
+        <template>
+            <p>Nonsense poem:</p>
+            <pre>Professor Toot who tooted a kazoo, taught tooting in the City
+            of Kazoo, to two kazoos. </pre>
+        </template>
+    </test>
+</testsuite>
+
+</component>
+
+
+<Component namespace="docseg" name="Tutorial_P3_state_bind">
+<Template>
+
+<div>
+    <label>Username:
+        <input [state.bind] name="username" /></label>
+    <label>Color ("green" or "blue"):
+        <input [state.bind] name="color" /></label>
+    <label>Opacity: <input [state.bind]
+        name="opacity"
+        type="number" min="0" max="1" step="0.1" /></label>
+
+    <h5 style="
+            opacity: {{ state.opacity }};
+            color: {{ state.color|allow:'green,blue'|default:'red' }};
+        ">
+        {{ state.username|lower }}
+    </h5>
+</div>
+
+</Template>
+
+<State
+    opacity="0.5"
+    color="blue"
+    username="Testing_Username"
+></State>
+
+<TestSuite
+    -src="./examplelib-tests/Tutorial_P3_state_bind-tests.html"
+></TestSuite>
+
+</Component>
+
+
+

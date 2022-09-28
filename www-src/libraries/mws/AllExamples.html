@@ -1,0 +1,37 @@
+{% for example in state.examples %}
+    {% if example.name == state.selected %}
+        <div class="Example expanded">
+            <button class="tool-button" alt="Edit" title="Hide source code & editor"
+                @click:=script.toggleExample payload="{{ example.name }}">
+                {{ example.name }}
+                &times;
+            </button>
+            <mws-Demo
+                demotype="minipreview"
+                fromlibrary='{{ example.name }}'
+            ></mws-Demo>
+        </div>
+    {% else %}
+        <div class="Example">
+            <button class="tool-button" alt="Edit" title="See source code & edit example"
+                @click:=script.toggleExample payload="{{ example.name }}">
+                {{ example.name }}
+                ✎
+            </button>
+            <div class="Example-wrapper">
+                <eg-{{ example.name }}></eg-{{ example.name }}>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<!--
+<mws-Section name="{{ example.name|lower }}">
+    {{ example.name }}
+</mws-Section>
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary='{{ example.name }}'
+></mws-Demo>
+-->
+

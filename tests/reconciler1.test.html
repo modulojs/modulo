@@ -1,0 +1,585 @@
+<!--
+    Tests of core reconciler functionality
+-->
+<component name="ReconcilerTester1">
+
+<!-- Load a helper util -->
+<script src="./reconciler-testing-utils.js"></script>
+
+<testsuite>
+
+<test name="Ensure testing utils are loaded">
+    <script>
+        const { patchStringify, transformDOMCheck } = Modulo.utils;
+        assert: patchStringify !== undefined && transformDOMCheck !== undefined
+    </script>
+</test>
+
+<test name="Patches get generated as expected">
+    <script name="Text node is updated correctly">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p>Test2</p>');
+        const expected = '<3 #text> node-value("Test2") </3>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Text node is appending correctly">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p>Test</p> Stuff');
+        const expected = '<1 DIV> appendChild("[object Text]") </1>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Adds single attribute">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p id="stuff">Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Changes a single attribute">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p id="stuff">Test</p>', '<p id="s t u f f">Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Deletes a single attribute">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p id="stuff">Test</p>', '<p>Test</p>');
+        const expected = '<1 P> removeAttribute("id") </1>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Appends an element">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p>Test</p><p>Test 2</p>');
+        const expected = '<1 DIV> appendChild("[object HTMLParagraphElement]") </1>';
+        assert: patches.length === 1 && patchStringify(patches[0]) === expected;
+    </script>
+
+    <script name="Mounts a directive">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p [test.dir]a=b>Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>\n' +
+                         '<1 DIV> directiveMount("[object Object]") </1>';
+        const actual = pToString(patches);
+        assert: patches.length === 2 && actual === expected;
+    </script>
+
+    <script name="Mounts multiple directives">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p [my.dir][test.dir]a=b>Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>\n' +
+                            '<1 DIV> directiveMount("[object Object]") </1>\n' +
+                            '<1 DIV> directiveMount("[object Object]") </1>';
+        const actual = pToString(patches);
+        assert: patches.length === 3 && actual === expected;
+    </script>
+
+    <script name="Supports a directive shortcut">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p @click=clickytarget>Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>\n' +
+                          '<1 DIV> directiveMount("[object Object]") </1>';
+        assert: patches.length === 2 && pToString(patches) === expected;
+    </script>
+
+    <script name="Supports multiple directive shortcuts">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p @click:=clickytarget>Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>\n' + 
+                        '<1 DIV> directiveMount("[object Object]") </1>\n' +
+                        '<1 DIV> directiveMount("[object Object]") </1>';
+        assert: patches.length === 3 && pToString(patches) === expected;
+    </script>
+
+    <script name="Ignores spurious directive shortcuts">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches('<p>Test</p>', '<p %%%click=notarealclick>Test</p>');
+        const expected = '<1 P> setAttributeNode("[object Attr]") </1>'; 
+        assert: patches.length === 1 && pToString(patches) === expected;
+    </script>
+
+    <script name="Correctly generates no patches (1)">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+        const patches = getRecPatches('<P   >Test</p >', '<p>Test</p>');
+        assert: patches.length === 0
+    </script>
+
+
+    <script name="Correctly generates no patches (2)">
+        const {getRecPatches, patchStringify} = Modulo.utils;
+
+        // TODO: Think of ways to "fuzz" test it by running large HTML
+        // files through it to themselves, and forcing it to descend (not
+        // use isSameNode).
+        const str = `
+            <div>abc<!-- hm --></div> <!--<p></p>--> <div a="asdf">def</div>
+            <div v="asdf">hij<p></p><p></p>nm</div> <div>jkl</div> zxcvb
+            <p>bnm</p> &amp; <!-- okay --><li>i<li>ii<li>iii
+        `;
+        const patches = getRecPatches(str, str);
+        assert: patches.length === 0
+    </script>
+
+    <script name="Correctly generates no patches (3)">
+        const {getRecPatches, patchStringify, anchorInTheDeep} = Modulo.utils;
+        const str = anchorInTheDeep('  <I  a=b c=d>o\nk</i> ');
+        const patches = getRecPatches(str, str);
+        assert: patches.length === 0
+    </script>
+
+    <script name="Generates no patches when fuzz testing against loaded files">
+        const {getRecPatches, pToString} = Modulo.utils;
+        let msg = '';
+        let inequalCount = 0;
+        for (const [key, value] of Object.entries(Modulo.fetchQ.data)) {
+            msg += `Doing ${key} ---\n`;
+            let patches = getRecPatches(value, value);
+
+            /*
+            // NOTE: It will / should generate directives patches since this is first mount
+            // Should uncomment and ensure correct logic
+            if (value.includes(':=') || /\s@\w+/.test(value)) {
+                if (patches.length < 1) {
+                    inequalCount++;
+                    msg += `${key} FAILURE Expected directive mounts: --- ${pToString(patches)}\n`;
+                }
+            }
+            */
+            patches = patches.filter(patch => !patch[1].startsWith('directive'));
+            if (patches.length > 0) {
+                inequalCount++;
+                msg += `${key} FAILURE --- ${pToString(patches)}\n`;
+            }
+        }
+        //console.log(msg);
+        assert: inequalCount === 0
+    </script>
+</test>
+
+<test name="Patches generated in DOM contexts">
+    <script name="Finds deep patchs as well as shallow patches">
+        const {getRecPatches, patchStringify, anchorInTheDeep} = Modulo.utils;
+        const str1 = '<main></main>';
+        const str2 = '<main class="test">stuff</main><div novalue>other</div>';
+        const str1deep = anchorInTheDeep(str1);
+        const str2deep = anchorInTheDeep(str2);
+        const patches1 = getRecPatches(str1, str2);
+        const patches2 = getRecPatches(str1deep, str2deep);
+        const patches3 = getRecPatches(anchorInTheDeep(''), str2deep);
+        const patches4 = getRecPatches('', str2);
+        element.patches1 = patches1.map(patchStringify).join('\n');
+        element.patches2 = patches2.map(patchStringify).join('\n');
+        element.patches3 = patches3.map(patchStringify).join('\n');
+        element.patches4 = patches4.map(patchStringify).join('\n');
+        assert: element.patches1 && element.patches2
+                  && element.patches3 && element.patches4;
+    </script>
+
+    <script name="which generated different patches due to A vs DIV">
+        const {patches1, patches2} = element;
+        assert: patches1 !== patches2
+    </script>
+
+    <script name="but if A vs DIV is corrected then it generates same">
+        const {patches1, patches2} = element;
+        const correctedPatches2 = patches2.replace('A>', 'DIV>')
+        //console.log(patches1, '\n\n\n--\n\n\n----\n\n\n',correctedPatches2);
+        assert: patches1 === correctedPatches2 
+    </script>
+
+    <script name="and nothing to something is same no matter dom ctx (1)">
+        const {patches3, patches4} = element;
+        //console.log(patches3, '\n\n\n--\n\n\n----\n\n\n', patches4);
+        assert: patches3 !== patches4 // because of A vs DIV
+    </script>
+
+    <script name="and nothing to something is same no matter dom ctx (2)">
+        const {patches3, patches4} = element;
+        //console.log(patches3, '\n\n\n--\n\n\n----\n\n\n', patches4);
+        assert: patches3.replace(/A>/g, 'DIV>') === patches4;
+    </script>
+
+</test>
+
+
+<test name="Applying patches">
+    <script name="Generates single patch for single-rooted tree (1)">
+        const {getRecPatches, pToString} = Modulo.utils;
+        element.targetStr = `<div><p id="example1">Hello patching world!</p>
+                    <p class="example2">Testing <em>nested</em> levels</p></div>`;
+        // Should be length 1 since it's 1 node and has no directives
+        element.patches = getRecPatches('', element.targetStr);
+        //console.log('this is element', element.patches[0][0], element.patches[0][0].innerHTML);
+        assert: element.patches
+                && element.patches.length === 1
+                && element.patches[0][0].tagName === 'DIV'
+    </script>
+
+    <script name="Patches apply (1)">
+        const {makeMockElement, pToString} = Modulo.utils;
+        const {ModRec} = Modulo.reconcilers;
+        const {patches, targetStr} = element;
+        const mr = new ModRec({makePatchSet: true});
+        const elem = patches[0][0]; // get element out of 0th
+        patches.map(patch => mr.applyPatch.apply(mr, patch))
+        const results = elem.innerHTML.trim();
+        assert: results === targetStr.trim();
+    </script>
+
+    <script name="Generates single patch for single-rooted tree (2)">
+        const {ModRec} = Modulo.reconcilers;
+        const {makeDiv, makeMockElement, pToString, anchorInTheDeep} = Modulo.utils;
+        element.targetStr2 = anchorInTheDeep(
+                    `<div><p id="example1">Hello patching world!</p>
+                    <p class="example2">Testing <em>nested</em> levels</p></div>`);
+
+        const mockElement = makeMockElement(anchorInTheDeep(''));
+        const modRec = new ModRec({makePatchSet: true});
+        modRec.reconcile(mockElement, element.targetStr2);
+        element.patches2 = modRec.patches;
+        element.mockElement = mockElement; // ensure has element interface
+        // Should be length 1 since it's 1 node and has no directives
+        assert: element.patches2
+                && element.patches2.length === 1
+                && element.patches2[0][0].tagName === 'A'
+    </script>
+
+    <script name="Patches apply (2)">
+        const {makeMockElement, pToString} = Modulo.utils;
+        const {ModRec} = Modulo.reconcilers;
+        const {patches2, targetStr2, mockElement} = element;
+        const mr = new ModRec({makePatchSet: true});
+        patches2.map(patch => mr.applyPatch.apply(mr, patch))
+
+        // Ensure results are the same (normalized by wrapping in DOM element)
+        let results = mockElement.innerHTML;
+        const target = makeMockElement(targetStr2).innerHTML;
+        assert: results === target
+    </script>
+
+</test>
+
+<test name="Applying patches for accurate DOM">
+    <script name="Works on adjacent items">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck('<p>Adjacent</p><p>Items</p>');
+    </script>
+
+    <script name="Works on nested items">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck('<div>Nested<div>Items</div></div>');
+    </script>
+
+    <script name="Adds attribute">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div>Text</div>',
+            '<div stuff="true">Text</div>',
+        );
+    </script>
+
+    <script name="Deletes attribute">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div stuff="true">Text</div>',
+            '<div>Text</div>',
+        );
+    </script>
+
+    <script name="Changes value of attribute">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div stuff="true">Text</div>',
+            '<div stuff="false">Text</div>',
+        );
+    </script>
+
+    <script name="Adds attribute with others">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div stuff="true">Text</div>',
+            '<div stuff="true" id="false">Text</div>',
+        );
+    </script>
+
+    <script name="Handles nested elements">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div>Text<div>Nested</div></div>',
+            '<div>Nested<div>Text</div></div>',
+        );
+    </script>
+
+    <script name="Handles nested elements (with P-tags behavior)">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<p>Text<p>Nested</p></p>',
+            '<p>Nested<p>Text</p></p>',
+        );
+    </script>
+
+    <script name="Updates nested elements">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<p>Text<!--test comment --></p>',
+            '<p>Nested<p>Text</p></p>',
+        );
+    </script>
+
+    <script name="Does complicated attribute and child manipulations">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div stuff="true">Text<div stuff="false">Nested</div></div>',
+            '<div stuff="verdad" id="nope">Nested<div stuff="mentira" id="falsa">Text</div></div>',
+        );
+    </script>
+
+    <script name="Collects new directives">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div>txt</div>',
+            '<div [my.dir]>txt</div>',
+            1,
+        );
+    </script>
+
+    <script name="Removes old directives">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div [my.dir]>txt</div>',
+            '<div>txt</div>',
+            1,
+        );
+    </script>
+
+    <script name="Modifies existing directive">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div [my.dir]test=3>txt</div>',
+            '<div [my.dir]test=4>txt</div>',
+            2,
+        );
+    </script>
+
+    <script name="Handles directive removal and change">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+            '<div [my.dir]test=4>txt<p [test.dir]=okay>p</p></div>',
+            '<div [my.dir]test=5>txt<p >p</p></div>',
+            3,
+        );
+    </script>
+
+    <script name="Registers multiple directives">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck('', `
+            <button @click:="script.countUp">Hello 101</button>
+        `,  2);
+    </script>
+
+    <script name="Ignores untouched directives">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(`
+                <button @click:="script.countUp">Hello 101</button>
+            `,`
+                <button @click:="script.countUp">Hello 102</button>
+            `,  0);
+    </script>
+
+    <script name="Simple complete replacement (1)">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+              '<h3>Abc</h3><p>cdef</p><abc-Fake></abc-Fake>',
+              '<div></div><p style=""></p>',
+              0,
+        );
+    </script>
+
+    <script name="Simple complete replacement (2)">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(
+              '<h3>Abc</h3><p [test.thing]style="">cdef</p><abc-Fake></abc-Fake>',
+              '<div>jkl;</div><p [test.thing]style=""></p><def-Fake></def-Fake>',
+              0,
+        );
+    </script>
+
+    <script name="Complicated complete replacement (from memory demo)">
+        const {transformDOMCheck} = Modulo.utils;
+        assert: transformDOMCheck(`
+                <h3>The Symbolic Memory Game</h3>
+                <p>Choose your difficulty:</p>
+                <button @click:="script.setup" click.payload="8">2x4</button>
+                <button @click:="script.setup" click.payload="16">4x4</button>
+                <button @click:="script.setup" click.payload="36">6x6</button>
+            `,`
+            <div class="board ">
+                <div key="c0" class="card " style=" " @click:="script.flip" click.payload="0"></div>
+                <div key="c1" class="card " style=" " @click:="script.flip" click.payload="1"></div>
+                <div key="c2" class="card " style=" " @click:="script.flip" click.payload="2"></div>
+                <div key="c3" class="card " style=" " @click:="script.flip" click.payload="3"></div>
+                <div key="c4" class="card " style=" " @click:="script.flip" click.payload="4"></div>
+                <div key="c5" class="card " style=" " @click:="script.flip" click.payload="5"></div>
+                <div key="c6" class="card " style=" " @click:="script.flip" click.payload="6"></div>
+                <div key="c7" class="card " style=" " @click:="script.flip" click.payload="7"></div>
+            </div>
+            <p style=""> Good luck!</p>
+            `,  22); // (8 * 2 = 16 mounts) + (3 * 2 = 6 unmounts)
+    </script>
+</test>
+
+<test name="Supporting interactions with directives">
+
+    <script name="Complete page replacement with slot">
+        const { transformDOMCheck } = Modulo.utils;
+        const componentIH = `<!DOCTYPE html>
+            <html>
+            <head><title></title></head>
+            <body>
+                <main class="Main">
+                    <aside class="TitleAside" >
+                    </aside>
+                    <aside style="border: none" [component.slot]>
+                    </aside>
+                </main>
+            </body>
+            </html>
+        `;
+        const elementIH = `
+            <h1>A</h1> <p>A</p> <p>A</p> <p>B</p> <p>B</p> <p>A</p> <h1>A</h1>
+            <p>C</p> <p>A</p> <div>A</div> <p>A</p> <p>A</p> <p>A</p> <p>A</p>
+            <h1>A</h1> <p>A</p> <p>A</p> <p>A</p> <p>A</p> <p>123</p> <p>B</p>
+            <p>A</p> <p>B</p> <p>123</p> <p>A</p> <p>B</p> <p>B</p> <p>A</p>
+            <p>A</p> <p>B</p> <p>A</p> <p>123</p> <p>B</p> <p>B</p>
+        `;
+        assert: transformDOMCheck(componentIH, elementIH);
+    </script>
+</test>
+
+<test name="Supports modulo-ignore">
+
+    <script name="Support modifying other items">
+        const { transformDOMCheck } = Modulo.utils;
+        assert: transformDOMCheck(`
+                <div></div>
+                <div modulo-ignore><p>Ignore</p></div>
+                <div [test.thing]>DEF</div>
+            `,`
+                <div>ABC</div>
+                <div modulo-ignore><p>Ignore</p></div>
+                <div [test.thing]>HIJ</div>
+            `,  0);
+    </script>
+
+    <script name="Support modifying attributes on ignored">
+        const { transformDOMCheck } = Modulo.utils;
+        assert: transformDOMCheck(`
+                <div>ABC</div>
+                <div what="ever" modulo-ignore><p>Ignore</p></div>
+                <div [test.thing]>DEF</div>
+            `,`
+                <div>ABC</div>
+                <div modulo-ignore test="thing"><p>Ignore</p></div>
+                <div [test.thing]>HIJ</div>
+            `,  0);
+    </script>
+
+    <script name="Will not make match in ignored item">
+        const { transformDOMCheck } = Modulo.utils;
+        assert: transformDOMCheck(`
+                <div></div>
+                <div modulo-ignore><p>Ignore</p></div>
+                <div [test.thing]>DEF</div>
+            `,`
+                <div>ABC</div>
+                <div modulo-ignore><p>should not match</p></div>
+                <div [test.thing]>HIJ</div>
+            `,  0, true);
+        //          ^- NOTE: It's inverted!
+    </script>
+
+    <script name="Correctly ignores children of modulo-ignore (1)">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const patches = getRecPatches(
+            '<div modulo-ignore><p>ignore me</p><p>ignore me 2</p></div>',
+            '<div modulo-ignore><a>ignore me 3</a></div>',
+        );
+        assert: patches && patches.length === 0
+    </script>
+
+    <script name="Correctly ignores children of modulo-ignore (2)">
+        const {getRecPatches, anchorInTheDeep} = Modulo.utils;
+        const str1 = anchorInTheDeep('<span modulo-ignore><abbr>ignore me</abbr><abbr>ignore me 2</abbr></span>');
+        const str2 = anchorInTheDeep('<span modulo-ignore><code>ignore me 3</code></span>');
+
+        const patches = getRecPatches(str1, str2);
+
+        assert: patches && patches.length === 0
+    </script>
+
+    <script name="Correctly ignores children of modulo-ignore (3)">
+        const {getRecPatches, pToString} = Modulo.utils;
+        const str1 = `
+            <h1>A</h1>
+            <div>A <p>A</p> <p modulo-ignore>B</p> <p>B</p> <p>A</p> A</div>
+            <div>ABC</div>
+            <div modulo-ignore>DEF</div>
+            <div>HIJ</div>
+        `;
+        // 5 changes: h1 B, p B, p C, div DEF, div JKL
+        const str2 = `
+            <h1>B</h1>
+            <div>A <p>B</p> <p modulo-ignore>D</p> <p>C</p> <p>A</p> A</div>
+            <div>DEF</div>
+            <div modulo-ignore>EFG <p ok="3">more stuff</p></div>
+            <div>JKL</div>
+        `;
+
+        const patches = pToString(getRecPatches(str1, str2));
+        const expected = [
+            '<3 #text> node-value("B") </3>',
+            '<3 #text> node-value("B") </3>',
+            '<3 #text> node-value("C") </3>',
+            '<3 #text> node-value("DEF") </3>',
+            '<3 #text> node-value("JKL") </3>',
+        ].join('\n');
+
+        assert: patches === expected
+    </script>
+
+
+    <script name="Copies modulo-ignore with children when first encountered, but ignores directives in children">
+        const { getRecPatches, pToString } = Modulo.utils;
+        const str1 = `
+            <h1>A</h1>
+            <div>A <p>A</p> <p modulo-ignore>B</p> <p>B</p> <p>A</p> A</div>
+            <div>ABC</div>
+        `.trim()
+        // 4 changes: h1 B, p B, p C, div DEF
+        // Then 1 big insertion, but directive gets ignored
+        const str2 = `
+            <h1>B</h1>
+            <div>A <p>B</p> <p modulo-ignore>D</p> <p>C</p> <p>A</p> A</div>
+            <div>DEF</div><div modulo-ignore>EFG <p [my.directive]>more stuff</p></div>
+        `.trim()
+
+        const patches = pToString(getRecPatches(str1, str2));
+        const expected = [
+            '<3 #text> node-value("B") </3>',
+            '<3 #text> node-value("B") </3>',
+            '<3 #text> node-value("C") </3>',
+            '<3 #text> node-value("DEF") </3>',
+            '<1 DIV> appendChild("[object HTMLDivElement]") </1>',
+        ].join('\n');
+
+        assert: patches === expected
+    </script>
+
+
+</test>
+
+
+</testsuite></component>

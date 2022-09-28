@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <title>{{ props.pagetitle }} - modulojs.org</title>
+    <link rel="icon" type="image/png" href="/img/mono_logo.png" />
+
+    <!-- Some global CSS that is not tied to any component: -->
+    <link rel="stylesheet" href="/js/codemirror_5.63.0/codemirror_bundled.css" />
+</head>
+<body>
+
+<slot name="above-navbar"></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo" /></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] Modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about" {% if props.navbar == "about" %}class="Navbar--selected"{% endif %}>About</a>
+        </li>
+        <li>
+            <a href="/start.html" {% if props.navbar == "start" %}class="Navbar--selected"{% endif %}>Start</a>
+        </li>
+        <li>
+            <a href="/docs/" {% if props.navbar == "docs" %}class="Navbar--selected"{% endif %}>Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        <mws-ProjectInfo></mws-ProjectInfo>
+        <!--
+        {% if script.exports.version %}
+            v: {{ script.exports.version }}<br />
+            SLOC: {{ script.exports.sloc }} lines<br />
+            <a href="https://github.com/michaelpb/modulo/">github</a> | 
+            <a href="https://npmjs.com/https://www.npmjs.com/package/mdu.js">npm (mdu.js)</a> 
+        {% else %}
+            <a href="https://github.com/michaelpb/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        {% endif %}
+        -->
+    </div>
+</nav>
+
+{% if props.docbarselected %}
+    <main class="Main Main--fluid Main--withSidebar">
+        <aside class="TitleAside TitleAside--navBar" >
+            <h3><span alt="Lower-case delta">%</span></h3>
+            <nav class="TitleAside-navigation">
+                <h3>Documentation</h3>
+                <mws-DocSidebar path="{{ props.docbarselected }}"></mws-DocSidebar>
+            </nav>
+        </aside>
+        <aside style="border:none">
+            <slot></slot>
+        </aside>
+    </main>
+{% else %}
+    <main class="Main">
+        <slot></slot>
+    </main>
+{% endif %}
+
+<footer>
+    <main>
+        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0
+    </main>
+</footer>
+
+</body>
+</html>

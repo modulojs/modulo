@@ -1,0 +1,119 @@
+<Component name="ExpandingMarkdownEditorWidget">
+    <Props
+        value
+        name
+    ></Props>
+    <Template src="./editor/ExpandingMarkdownEditorWidget.html"></Template>
+    <State
+        expanded:=false
+        value=""
+    ></State>
+    <Script src="./editor/ExpandingMarkdownEditorWidget.js"></Script>
+    <Style src="./editor/ExpandingMarkdownEditorWidget.css"></Style>
+</Component>
+
+
+
+<Component name="MirrorEditor" rerender="manual">
+    <Props
+        value
+        name
+        spellcheck
+        component
+        debounce-time
+    ></Props>
+    <Template src="./editor/MirrorEditor.html"></Template>
+    <State
+        selection-start:=0
+        scroll-top:=0
+        width:=0
+        height:=0
+        value=""
+    ></State>
+    <Script src="./editor/MirrorEditor.js"></Script>
+    <Style src="./editor/MirrorEditor.css"></Style>
+</Component>
+
+<Component name="SyntaxHighlighter">
+    <Props
+        value
+        number
+    ></Props>
+
+    <Script>
+        const { escapeText } = Modulo.templating.MTL.prototype;
+        const { safe } = Modulo.templating.defaultOptions.filters;
+        function syntaxHighlight(text) {
+            text = escapeText(text);
+            //text = text.replace(/&quot;.*?&quot;/g, '<span class="syn-string">$&</span>');
+            //text = text.replace(/&gt;.*?&lt;/g, '<span class="syn-tag">$&</span>');
+            text = text.replace(/\*.*?\*/g, '<span class="syn-bold">$&</span>');
+            text = text.replace(/_.*?_/g, '<span class="syn-italic">$&</span>');
+            text = text.replace(/^#+.*?$/gm, '<span class="syn-header">$&</span>');
+            text = text.replace(/^\s*[+*-] /gm, '<span class="syn-ul">$&</span>');
+            text = text.replace(/^\s*\d+[\.:]? /gm, '<span class="syn-ol">$&</span>');
+            text = text.replace(/^---+$/gm, '<span class="syn-hr">$&</span>');
+            text = text.replace(/`.*?`/g, '<span class="syn-code">$&</span>');
+            text = text.replace(/\!?\[.*?\]\(.*?\)/g, '<span class="syn-link">$&</span>');
+
+            if (props.number && props.number !== 'false') {
+                const newlineSplit = text.split(/[\r\n]+/g);
+                let i = 1;
+                let results = '';
+                for (const line of newlineSplit) {
+                    results += `<span class="x-num">${ i }</span>` + line + "\n";
+                    i++;
+                }
+            }
+ 
+            return text;
+        }
+
+        function updateCallback(renderObj) {
+            element.innerHTML = syntaxHighlight(props.value || element.originalHTML);
+        }
+    </Script>
+
+    <Style>
+        :host {
+            font-size: 16px;
+            min-height:  200px;
+            font-family: monospace;
+            text-align: start;
+            resize: none;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+        }
+
+        .syn-bold { font-weight: bold; }
+        .syn-italic { font-style: italic; }
+        .syn-header {
+            font-weight: bold;
+            background: black;
+            color: white;
+        }
+        .syn-code {
+            border-bottom: 1px dotted green;
+            color: green;
+        }
+        .syn-link {
+            text-decoration: underline;
+            color: blue;
+        }
+        .syn-ol,
+        .syn-ul,
+        .syn-hr {
+            color: green;
+            background: rgba(127, 127, 127, 0.1);
+            font-weight: bold;
+        }
+        .x-num {
+            display: inline-block;
+            position: absolute;
+            left: 10px;
+        }
+    </Style>
+
+</Component>
+

@@ -1,0 +1,284 @@
+<!-- Used by demos (components demo) -->
+<Component namespace="x" name="DemoModal">
+    <Props
+        button
+        title
+    ></Props>
+
+    <Template>
+        <button @click:=script.show>{{ props.button }} ⬇☐&nbsp;</button>
+        <div class="modal-backdrop"
+            @click:=script.hide
+            style="display: {% if state.visible %}block{% else %}none{% endif %}">
+        </div>
+        <div class="modal-body" style="
+        {% if state.visible %} top: 100px; {% else %} top: -500px; {% endif %}">
+            <h2>{{ props.title }} <button @click:=script.hide>&times;</button></h2>
+            <slot></slot>
+        </div>
+    </Template>
+
+    <State
+        visible:=false
+    ></State>
+
+
+    <Script>
+        function show() {
+            state.visible = true;
+        }
+        function hide() {
+            state.visible = false;
+        }
+    </Script>
+
+    <Style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 11;
+        }
+        .modal-body {
+            --w: 400px;
+            width: var(--w);
+            position: fixed;
+            z-index: 12;
+            left: calc(50vw - (var(--w) / 2));
+            display: block;
+            background: white;
+            border: 7px solid black;
+            border-radius: 7px;
+            padding: 50px;
+            transition: top 1s;
+        }
+        .modal-body > h2 {
+            border-bottom: 3px solid black;
+            color: black;
+            background-color: #b90183;
+            font-weight: bold;
+            padding: 10px;
+            border-top: 0;
+            margin: -50px;
+            margin-bottom: 50px;
+            color: white;
+            /* A perspective-style drop shadow, plus 1px outline */
+            text-shadow:
+                3px 3px 0 #000,
+                2px 2px 0 #000,
+              -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000;
+        }
+        .modal-body > h2 button {
+            font-size: 25px;
+            float: right;
+            width: 50px;
+        }
+
+        button {
+            font-size: 13px;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 1px 5px 1px 7px;
+            color: black;
+            border: 1px solid grey;
+            box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);
+            cursor: default;
+            margin-top: 0px;
+            padding-bottom: 3px;
+            background-color: white;
+            margin-bottom: 4px;
+            transition: margin 0.2s,
+                        padding 0.2s,
+                        background 0.3s,
+                        box-shadow 0.2s;
+        }
+        button:active {
+            box-shadow: inset 2px 3px 1px 1px hsla(0,0%,39.2%,.3);
+            margin-top: 3px;
+            padding-bottom: 0;
+        }
+        button:hover {
+            background-color: rgba(162, 228, 184);
+        }
+    </Style>
+</Component>
+
+
+<!-- Used by demos (osc graph, components) -->
+<Component namespace="x" name="DemoChart">
+    <Props
+        data
+        animated
+    ></Props>
+    <Template>
+        <div class="chart-container
+        {% if props.animated %}animated{% endif %}">
+            {% for percent in script.percent %}
+                <div style="height: {{ percent }}px; width: {{ script.width }}px">
+                </div>
+            {% endfor %}
+        </div>
+        {% if not props.animated %}
+            {% for value in props.data %}
+                <label style="width: {{ script.width }}px">{{ value }}</label>
+            {% endfor %}
+        {% endif %}
+    </Template>
+
+    <Script>
+        function prepareCallback() {
+            const data = props.data || [];
+            const max = Math.max(...data);
+            const min = 0;// Math.min(...props.data),
+            return {
+                percent: data.map(item => ((item - min) / max) * 100),
+                width: Math.floor(100 / data.length),
+            }
+        }
+    </Script>
+
+    <Style>
+        .chart-container {
+            border: 1px solid black;
+            height: 100px;
+            width: 100px;
+            display: flex;
+            align-items: flex-end;
+        }
+        .chart-container > div {
+            box-sizing: border-box;
+            background-color: #b90183;
+            background-color: white;
+            border: 1px solid grey;
+            width: 30px;
+            border-radius: 1px 5px 1px 5px;
+            box-shadow: inset -5px -5px 1px 1px hsla(0,0%,39.2%,.3);
+            margin-top: -5px;
+        }
+
+        .chart-container.animated > div {
+            transition: height calc(var(--speed, 10) * 0.1s) var(--easing, linear);
+        }
+        .chart-container > div:first-of-type {
+            margin-left: -4px;
+        }
+        .chart-container > div:hover {
+            background-color: #b90183;
+        }
+        label {
+            display: inline-block;
+        }
+    </Style>
+</Component>
+
+<!-- Used by tutorial_part2.html -->
+<Component namespace="x" name="ExampleBtn">
+    <Props
+        label
+        shape
+    ></Props>
+    <Template>
+        <button class="my-btn my-btn__{{ props.shape }}">
+            {{ props.label }}
+        </button>
+    </Template>
+    <Style>
+        .my-btn {
+            display: inline-block;
+            box-sizing: border-box;
+            font-family: sans-serif;
+            border: 1px solid gray;
+            transition: 0.1s;
+            box-shadow:
+                inset -3px -3px
+                1px 1px rgba(100, 100, 100, 0.3);
+            border-radius: 1px 8px 1px 8px;
+            cursor: default;
+            text-align: center;
+            padding: 3px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            height: 30px;
+            background: turquoise;
+            font-weight: bold;
+        }
+
+        .my-btn:active {
+            box-shadow: inset 3px 3px 1px 1px rgba(100, 100, 100, 0.3);
+        }
+        .my-btn__square {
+            border-radius: 1px 8px 1px 8px;
+        }
+        .my-btn__round {
+            border-radius: 150px;
+        }
+    </Style>
+</Component>
+
+
+<Component namespace="x" name="DemoSelector">
+    <!-- NOTE: Likely, currently dead code -->
+    <Props
+        onchange
+        options
+        name
+    ></Props>
+
+    <Template>
+        {% for option in props.options %}
+            <input
+                type="radio" 
+                id="{{ props.name }}_{{ option }}"
+                name="{{ props.name }}"
+                payload="{{ option }}"
+                @change:=script.setValue
+            /><label for="{{ props.name }}_{{ option }}">{{ option }}</label>
+        {% endfor %}
+    </Template>
+
+    <State
+        value=""
+    ></State>
+
+    <Script>
+        function prepareCallback() {
+            state.value = element.value;
+        }
+        function setValue(val) {
+            state.value = val;
+            element.value = val;
+            element.dispatchEvent(new Event('change'));
+        }
+    </Script>
+
+    <Style>
+        label {
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 1px 5px 1px 5px;
+            background:  #b90183;
+            color: black;
+            border: 1px solid grey;
+            box-shadow: inset -5px -5px 1px 1px hsla(0,0%,39.2%,.3);
+            cursor: default;
+            margin-top: 0px;
+            padding: 5px;
+            background-color: white;
+            margin-bottom: 4px;
+            margin-left: 3px;
+        }
+        input:checked + label {
+            box-shadow: inset 5px 5px 1px 1px hsla(0,0%,39.2%,.3);
+            margin-top: 5px;
+        }
+    </Style>
+</Component>
+

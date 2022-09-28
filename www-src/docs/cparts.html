@@ -1,0 +1,976 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="cparts.html"
+    pagetitle="CParts"
+    navbar="docs">
+
+<h1>CParts</h1>
+
+
+<blockquote>
+<p><strong>Custom CParts?</strong> Here we describe core CParts used by
+component developers, which are sufficient for most common use-cases.
+However, if you are instead looking to extend this core functionality with
+custom CParts written in JavaScript, refer to the
+<a href="/demos/#experiments">Custom Component Part examples on the demos
+page</a>, at least until more thorough CPart API documentation is
+developed.</p>
+</blockquote>
+
+<p>The central concept to Modulo is that of <em>Component Parts</em>. Because
+it is so central, saying <em>Component Parts</em> over and over gets tiresome,
+so in this documentation it will be typically shortened to <em>CParts</em>.
+Every component definition consists of configuring one or more CPart
+definitions. Modulo comes "batteries-included" with about 8 CParts, which
+provide the core functionality of building Modulo Components, and are
+documented here.</p>
+
+<p>Conventionally, when defining components, CParts are listed in the following
+order within a given <em>Component</em> definition:</p>
+
+<ol>
+    <li>Props</li>
+    <li>Template</li>
+    <li><em>(Any other CParts)</em></li>
+    <li>State</li>
+    <li>StaticData</li>
+    <li>Script</li>
+    <li>Style</li>
+</ol>
+
+<p>The rationale for this ordering is to put Props and Template first since
+they are often the first CParts that are important to read when trying to
+understand or debug the behavior of a Component, while putting Style last as
+it's typically the least important to read. Note that ordering makes a
+difference: They will be processed in the order given, and in the case of
+duplicate CParts, "whoever gets the last word in wins", or the final CPart is
+typically what takes precedence (although for custom CParts that may be
+different).</p>
+
+
+
+<mws-Section name="component">Component</mws-Section>
+
+<blockquote>
+<p><strong>Low-level interface</strong> - Component developers will typically
+only need to use the <code>name="..."</code> attribute on <em>Component</em>,
+and sometimes <code>mode="vanish-into-document"</code> for  page-level
+components. Similarly, none of the <code>renderObj.component</code> properties
+are typically useful for component developers. Instead, they are used
+internally by CParts (notably <em>Template</em>) in order to move along the
+rendering cycle.</p> </blockquote>
+
+<p>The <em>Component</em> CPart is the most central to Modulo. It's how we
+register components to be mounted on the page, and define the other CParts that
+go inside those Components. It's also what stitches together the "machinery"
+that makes reconciliation and rendering even possible. In other words, the
+<em>Component</em> CPart is what handles the "low-level" operations of
+mounting, reconciling to generate patches, and applying those patches to
+rerender, and the interface described here allows for low-level manipulation of
+this process for unusual circumstances when it's needed.</p>
+
+
+<h3>renderObj</h3>
+
+<p>The Component CPart reads several properties from the
+<code>renderObj</code>, at different lifecycle phases. Read below on how to
+interface with it.</p>
+
+<ul>
+    <li><code>component.originalHTML</code> - <strong>Read-only</strong> -
+    This contains the initial HTML that the element had when mounted on the
+    page.</li>
+
+    <li><code>component.innerHTML</code> - <strong>Write-only</strong> -
+    Assign to this to cause the <em>Component</em> CPart to attempt to
+    reconcile the current HTML with the target HTML provided.
+    It functions a little bit like HTML's built-in <em>"element.innerHTML"</em>:
+    Assign a string containing HTML code to this property to see the HTML
+    appear on the page. This is what the <em>Template</em> CPart does behind
+    the scenes. Unlike HTML's built-in <em>"element.innerHTML"</em>, assigning
+    to this renderObj property will not cause an full update, overwriting
+    everything that exists, but instead will cause the <em>Component</em> to
+    employ the "reconciler" specified to generate a patches list (see next). By
+    default, it will then also apply those patches in the <code>update</code>
+    lifecycle.</li>
+
+    <li><code>component.patches</code> - Between the <code>reconcile</code> and
+    <code>update</code> stages, the "patches" property is exposed to allow
+    access to or modification of the patches that the Component intends to
+    apply. This is an advanced feature that gives fine-grained control to how
+    rendering works, and is rarely useful. For example, you could use this
+    property to "intercept" the patches that are about to be applied to your
+    component while re-rendering, and, for an example, forbid the removal of
+    attributes by deleting all patches with <em>"removeAttribute"</em>.
+    all patches  This is in
+    the format of an Array. Each item in the Array is itself a 4-Array (Array
+    of length 4), in the following format:
+    <code>[element, method, arg1, arg2]</code>.
+    For example, to do a <em>"removeAttribute"</em> patch on an "id" attribute
+    for a given "target element" (a real DOM node on the page somewhere), it
+    might be
+    <code>[(ref to "target element"), "removeAttribute", "id", undefined]</code>
+    If the Array is empty, then no
+    patches will be applied. </li>
+</ul>
+
+
+<h3>attrs</h3>
+
+<p>Components CParts use their attributes to set several configuration options.
+They take the following attributes:</p>
+
+<ul>
+    <li><code>name</code> - <em>REQUIRED</em> - The "name" of the component.
+    Conventionally, it should be written in camel or dromedary case, like
+    how class names are written in JavaScript: <code>LikeThis</code>.
+    Technically, it's case insensitive, so a component named like
+    <code>LikeThis</code>, imported with an <code>x-</code> namespace, could
+    also be used like <code>x-likethis</code> or <code>X-LIKETHIS</code>.</li>
+
+    <li><code>engine</code> - <em>default is <code>engine="ModRec"</code></em> -
+    The Reconciler Engine selected. By default, ModRec, the built-in Modulo
+    Reconciler engine, is enabled. If you want to experiment with other
+    reconciliation engines, such as ones that might be faster or take into
+    account unusual scenarios, set this equal to another property of
+    <code>Modulo.reconcilers</code>.</li>
+
+    <li><code>rerender</code> - <em>default is
+    <code>rerender="event"</code></em>.  Specify mode to change the render mode
+    of this component.  A detailed discussion of valid options are below:
+        <ul>
+            <li><code>rerender="event"</code> - The default behavior, where the
+            the component will rerender after ever event it handles (e.g. after
+            every user interaction). This is typically desirable since usually
+            every user interaction will cause some visual change that needs to
+            be reflected.</li>
+
+            <li><code>rerender="manual"</code> - Modulo will not auto-rerender
+            in any situation. This
+            Note that if this is set, you will have to manually rerender, such
+            as in a <em>Script</em> CPart (<code>element.rerender()</code>), or
+            in a custom CPart (<code>this.element.rerender()</code>) is
+            invoked. This is useful if there are many events that don't cause
+            changes (e.g. mouse movement), but you have discovered that the
+            extra rerender invocations are impacting performance, even though
+            they aren't generating patches to modify the DOM.</li>
+        </ul>
+    </li>
+
+    <li><code>mode</code> - <em>default is <code>mode="regular"</code></em>.
+    Specify mode to change the DOM root render mode of this component. This
+    changes what is considered to be the root of the element, and thus where
+    the content of the Template goes during reconciliation. In "regular" and
+    "vanish", it's the custom component itself (which will be removed after
+    rendering with "vanish"), in "shadow", it uses an attached shadow DOM as
+    the root, and with "vanish-into-document" it replaces the entire page.
+    This allows you to isolate outside CSS from your component using "shadow",
+    do one-time renders only with "vanish", or make your component replace the
+    entire document with "vanish-into-document". A detailed discussion of valid
+    options are below:
+        <ul>
+            <li><code>mode="regular"</code> - The default behavior, where the
+            content generated by this the element will be attached to the
+            regular DOM, as the element itself. This means that CSS stylesheets
+            attached the normal way (e.g. with a "link" tag) will affect the
+            contents of this component. <em>Style</em> CParts are, however,
+            automatically scoped to the component, so a selector like
+            <code>p&nbsp;{...}</code> will get prefixed like
+            <code>x-MyComp&nbsp;p&nbsp;{...}</code> when CSS files are being
+            generated from <em>Style</em> CParts. Keep in mind the normal CSS
+            rules will still apply, meaning that auto-scoped "p" tag will also
+            affect children, grandchildren, etc of sub-components (unless those
+            are "shadow" based).</li>
+
+            <li><code>mode="shadow"</code> - Use the so-called "shadow DOM" to
+            render the content generated by this component. While the
+            <em>shadow DOM</em> may sound like a sci-fi villain, it's a
+            mechanism browsers provide for custom elements to isolate their
+            contents from CSS selectors or other JavaScript libraries. This
+            isolation means means that CSS stylesheets attached the normal way
+            (e.g. with a "link" tag) <em>will not</em> affect the contents of
+            this element. Note that other than the isolation provided, the
+            shadow mode should work exactly the same as regular. That said,
+            <em>Style</em> CParts will still be automatically scoped to the
+            component, but will use the shadowDOM feature to more strictly
+            enforce that scoping. For a component by itself, switching from
+            "shadow" to "regular" or vice-versa shouldn't change behavior at
+            all. It's only useful when CSS from one component or a third party
+            CSS library is "getting inside" your other components in an
+            undesirable way, and you want to isolate them.</li>
+
+            <li><code>mode="vanish"</code> - This less-used setting causes the
+            component to "vanish" after rendering, or replace itself with it's
+            children. Setting this will cause the component to remove itself
+            after the first time it renders, effectively using the component as
+            a simple template. All CParts will become useless after the first
+            rendering, so CParts like <em>Script</em> or <em>State</em> are
+            rarely useful in combination with this mode. This "one-time render"
+            feature is most useful for static pages when you don't want your
+            custom components to get in the way of the DOM that is generated,
+            and for creating static-site generators, when you just want to
+            generate plain HTML, with no Modulo JS or behavior in the end.</li>
+
+            <li><code>mode="vanish-into-document"</code> - This setting is
+            useful in one situation: When you want to create a "page" level
+            component that changes tags that belong in the document head, such
+            as <code>&lt;title&gt;</code>. Like with <code>mode="vanish"</code>
+            described above, setting this will cause the component to remove
+            itself after the first time it renders. However, with
+            vanish-into-document, it will instead replace the entire page.
+            It will also attempt to correctly insert all tags that belong in
+            the document head (meta, title, link, script to be specific),
+            causing link and script tags alike (e.g.
+            <code>&lt;script src=".."&gt;&lt;/script&gt;</code>) to load.
+            Finally, the document will be wiped, and anything else it finds
+            will be put directly into the document's body, for a clean DOM
+            structure that removes itself entirely during this "one-time
+            render".</li>
+
+            <li><code>mode="custom-root"</code> - This is rarely useful, but
+            allows for setting some other DOM element as the new root element
+            for the component to target for rendering it's content. This is
+            done by assigning a value to <code>renderObj.component.root</code>
+            before reconciliation. If no <code>.root</code> value is set, an
+            error will occur.</li>
+        </ul>
+    </li>
+</ul>
+
+
+<h3>Directives</h3>
+
+<p>The <em>Component</em> CPart defines 3 directives:</p>
+
+<ul>
+    <li><code>[component.event]</code> (<em>shortcut:</em> <code>@</code>) -
+    Attach event listeners to DOM elements, and remove them when the DOM
+    elements are removed. (For jQuery users, this is used for similar purposes
+    as "live" (delegated) events, but is faster.)</li>
+
+    <li><code>[component.dataProp]</code> (<em>shortcut:</em> <code>:</code>) -
+    Attach data to a DOM element's <code>.dataProp</code> object, which can be
+    used to directly pass <code>renderObj</code> values as <em>Props</em> or
+    events</li>
+
+    <li><code>[component.slot]</code> - Reattach the original child elements
+    that this component had when it was first mounted to a new DOM element.
+    (For React users, this is similar to doing
+    <code>{this.props.children}</code>.) This can be used in addition to or
+    instead of the <code>&lt;slot&gt;</code> interface. For more on the slot
+    interface, see Mozilla's <a
+    href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">"The
+    Web Component Slot element"</a>.  Note that Modulo uses this interface for
+    both <code>mode="shadow"</code> (e.g. using <code>shadowRoot</code> as the
+    root element for reconciliation) and all the other DOM rendering modes
+    (e.g. <code>mode="regular"</code>,
+    <code>mode="vanish-into-document"</code>). For Shadow DOM, it will
+    fall-back on Browser behavior. For everything else, it will detach any
+    nodes it finds and reattach the nodes just before the beginning of the
+    reconciliation process (it's DOM load-directive).</li>
+</ul>
+
+
+<mws-Section name="props">Props</mws-Section>
+
+<blockquote>
+<p><strong>Read-only</strong> Props are read-only within a component, and only
+be set by the parent component. If the values change, the component re-renders
+with the new values. They are only supposed to be information being <em>passed
+to</em> the component, which means they can't be changed internally.  For
+internal, mutable data, use <a href="#state">State</a> instead.</p>
+</blockquote>
+
+<p>Props allow components to receive data. You can think of Props as being like
+"function parameters": They allow you to pass down "arguments" (attributes) to
+component which can then modify it's appearance, behavior, or content based on
+the values of these parameters. For more discussion of Props, see
+<a href="/docs/tutorial_part2.html#props">Tutorial Part 2</a>.</p>
+
+<p>Props are set by the parent component (or HTML page).  For String values,
+use plain attributes (e.g. <code>&lt;x-Btn design="round"&gt;</code>).  For any
+non-String types, you can use <em>data props</em> set using a <code>:=</code>
+directive syntax for (e.g.
+<code>&lt;x-Chart data:='[1, 2, 3]'&gt;</code>).</p>
+
+
+
+<h3>renderObj</h3>
+
+<p>Props contributes it's received values to the renderObj. Examples:<p>
+
+<ol>
+    <li>Prop set like: <code>&lt;x-Btn design="round"&gt;</code> will be
+    accessible on the renderObj like <code>renderObj.props.design</code>, and
+    in the Script or Template CParts like <code>props.design</code>.</li>
+
+    <li>Prop set like: <code>&lt;x-Chart data:='["a", "b"]'&gt;</code> will be
+    accessible on the renderObj like <code>renderObj.props.data</code> (with
+    individual items accessed with code that ends with "<code>.data[0]</code>"),
+    and in the Script or Template CParts like <code>props.data</code>.</li>
+</ol>
+
+
+
+<!--
+
+NOTE: Moved the PropTypes documentation to API.html, for now
+
+<h3>Examples</h3>
+
+TODO: Need example here where you can control both "sides", both the prop
+definition and use of the component.
+
+-->
+
+
+<mws-Section name="script">Script</mws-Section>
+
+<blockquote><p><strong>Custom vs Script CPart</strong> - The general rule of
+thumb is that <em>Script</em> tags are for custom, component-specific behavior,
+or to fill in gaps in stitching together other CParts, while writing Custom
+CParts is for interfacing with async, APIs, or any time that a Script CPart
+gets too cumbersome.  Modulo's philosophy is to allow separation of work
+between <em>component development</em> (HTML, CSS, templating, and high-level
+behavior), and <em>CPart development</em> (complex JavaScript and
+APIs).</p></blockquote>
+
+<p><em>Script</em> CParts allow you to define custom behavior for components
+using the full power of JavaScript. The most common use of <em>Script</em> tags
+is to add more sophisticated interactive behavior. Instead of just relying on
+premade CParts, with a Script tag you can program any custom behavior into your
+component.</p>
+
+
+
+<h3>Definition</h3>
+
+<p><em>Script</em> is traditionally included in <em>Component</em> definitions
+below the <em>State</em> or <em>Template</em> tag. <em>Script</em> has no
+expected attributes, but instead only has a text-content.</p>
+
+<h4>Typical use</h4>
+
+<p>The most common use of a <em>Script</em> CPart is to specify custom JS code
+that is either run once after fulling loading all dependencies, or once each
+time the component renders. See below for a simple example:</p>
+
+<mws-Demo
+text='
+<Component name="ButtonExample">
+    <Template>...</Template>
+    <State>...</State>
+    <Script>
+        console.log("Will execute once after loading dependencies");
+        function initializedCallback() {
+            console.log("Executes every time an instance of ButtonExample is created");
+        }
+        function updateCallback() {
+            console.log("Executes after every rerender of the component");
+        }
+    </Script>
+</Component>
+'></mws-Demo>
+
+<h4>Using within embedded component definitions</h4>
+
+<p>Problems arise when attempting to include a <em>Script</em> CPart within an
+embedded Component definition, e.g. one that is being defined within the script
+tag of the same HTML file that it is being used on. This is because the
+<code>&lt;/Script&gt;</code> tag will end up closing off the outer
+<code>script</code> tag early, due to HTML syntax. The ideal solution is to
+simply move the component to a separate library file, included with
+<code>-src=</code> syntax, since that is preferred in general, and solves other
+issues as well (e.g. templating instructions in HTML tags). However, if you
+simply must include a <em>Script</em> tag in an embedded component definition
+you can write <code>&lt;cpart Script&gt;</code> as the opening tag, and
+<code>&lt;/cpart&gt;</code> as the closing tag.  See the following:</p>
+
+<mws-Demo
+text='
+<script Modulo src="https://modulojs.org/js/Modulo.js">
+    <Component name="ButtonExample">
+        <cpart Script>
+            console.log("Hello, world!");
+        </cpart>
+    </Component>
+</script>
+'></mws-Demo>
+
+
+
+<h3>Defining event callbacks</h3>
+
+<p>The most common purpose of a Script CPart is to add custom behavior when
+certain "events" occur to your component. Consider the following example:</p>
+
+<mws-Demo
+    fromlibrary="Hello"
+    demotype="minipreview"
+></mws-Demo>
+
+<p>In this, the <em>Script</em> CPart defines a function named
+<code>countUp</code>. The <code>@click:=</code> attribute on the button
+utilizes directives to attach a "click event" to the button, such that when a
+user clicks on that button it will invoke the <code>countUp</code>
+function.</p>
+
+<p>From within event callbacks, the <em>Script</em> CPart exposes the current
+renderObj as variables. So, <code>state</code> by itself is equivalent to
+<code>renderObj.state</code>. This enables us to directly modify the state by
+simply doing <code>state.count++</code>. By default, components rerender after
+every event, so after the event the component will rerender and visually
+reflect the state changes.</p>
+
+<p>This means that all renderObj variables will be available here, in a similar
+way to how <em>Template</em> exposes them: For example, you can use code like
+<code>props.XYZ</code> to access data from a <em>Props</em> CPart.</p>
+
+<p>You can also access the JavaScript Object instances of the CPart Class. To
+access those, you use the <code>cparts</code></p>
+
+<p>Finally, the variable <code>element</code> will refer to the HTML element of
+the current component. This is useful for direct DOM manipulation or
+interfacing with other frameworks or "vanilla" JavaScript. Generally, however,
+you should avoid direct DOM manipulation whenever you can, instead using a
+<em>Template</em> CPart to render the component (otherwise, the
+<em>Template</em> will override whatever direct manipulation you do!).</p>
+
+
+<h3>Static execution context</h3>
+
+<p>The contents of the script tag is executed <em>exactly once</em> during the
+"factory" phase. This means that that any loose variables defined will be
+"static", or shared between all instances of that component.</p>
+
+<mws-Demo
+text='
+<Template>
+    <button @click:=script.increment>Click me</button>
+</Template>
+<Script>
+    // "Static" execution context. We have access to 3 variables:
+    console.log("Modulo library instance:", Modulo);
+    console.log("Any modules defined above in this file, or null:", module);
+    console.log("My factory instance:", factory);
+
+    // (Note: CParts are processed top-to-bottom, meaning CParts defined after
+    // the <script> tag will not have been initialized.)
+
+    // Variables defined in this "static" context are shared:
+    let count = 0;
+    function increment() {
+        count++;
+        console.log("Shared count between buttons:", count);
+    }
+</Script>
+'></mws-Demo>
+
+
+
+<h3>Defining lifecycle or directive callbacks</h3>
+
+<p>By naming functions with certain names, you can "hook into" the component
+rendering lifecycle with callbacks. You can also create "custom directives"
+from within the Script tag. Read more about this in the section on <a
+href="/docs/directives.html">Lifecycle & Directives</a></p>
+
+<p>See below for an example of defining a custom <code>prepareCallback</code>
+in order to "hook into" the component rendering lifecycle to execute custom
+code. The return value of this function is available to the <em>Template</em>
+CPart when it renders during the <code>render</code> lifecycle.</p>
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Templating_PrepareCallback"
+></mws-Demo>
+
+<p>All "group 2" and "group 3" lifecycle phase can be specified. This means
+you can define a function with any of the following names and expect it to be
+invoked during it's namesake lifecycle phase:
+    <code>initializedCallback</code>, <code>prepareCallback</code>,
+    <code>renderCallback</code>, <code>reconcileCallback</code>, and finally
+    <code>updateCallback</code>.
+</p>
+
+<p>Note that there is no "factory" callback, since the <code>factory</code>
+phase is when the code in the script tag itself gets executed.</p>
+
+<h3>Callback execution context: The "callback wrapper"</h3>
+
+<blockquote>
+<p><strong>Implicit Script CPart</strong>
+Modulo has a rule: "Explicit is better than implicit". Modulo has another rule:
+"It's okay to break rules for good reasons". The <em>Script</em> CPart is one
+such case. It has an implicit or "magical" feature of setting up execution
+context for each callback function before that callback function is run.</p>
+</blockquote></p>
+
+<p>The Script CPart's "callback wrapper" is what enables us to write
+<code>state.count</code> in the <code>countUp</code> function.  Magically, the
+"state" variable here refers to the state of that specific button, not of a
+global state between all buttons.</p>
+
+<p>By default, all public functions get implicitly "wrapped" with this callback
+wrapper right before being executed from an event, lifecycle phase, or another
+CPart. If the Script tag had not set up the <code>state</code> variable to
+refer to the state of the current, individual button, it would be undefined or,
+worse yet, refer to the state of a <em>different</em> button, such as one
+elsewhere on the page. This can effectively cause <strong>events from one
+component to modify the state of another component</strong>, causing a nasty
+bug of mismatching events.</p>
+
+<p>This "magic" only occurs in public functions that are called as events by
+other CParts. Asynchronous coding is already discouraged in <em>Script</em>
+tags, which means that's the only "magic" necessary. However, if there are
+asynchronous functions, it won't always correctly apply the "magic" setup
+beforehand.</p>
+<p>This means that <strong>the <em>Script</em> tag discourages use of
+asynchronous coding.</strong> If you must, wrap any asynchronous callback using
+<code>cparts.script.cb()</code> in order to provide that execution context, and
+use <code>element.rerender</code> to manually rerender. See below for an
+example of this:</p>
+
+
+<mws-Demo
+demotype="minipreview"
+text='
+<Template>
+    API data: <pre>{{ state.data|json|truncate:80 }}</pre>
+    <button @click:=script.fetchMe>Get API data</button>
+</Template>
+
+<State
+    data:={}
+></State>
+
+<Script>
+    function fetchMe() {
+        fetch("https://api.github.com/users/michaelpb")
+            .then(response => response.json())
+            .then(cparts.script.cb(data => {
+                // Note that this callback is "wrapped" with
+                // "cparts.script.cb(  ...  )"
+                state.data = data; // update state
+                element.rerender(); // force rerender
+            }));
+    }
+</Script>
+'></mws-Demo>
+
+
+<p>Ideally, however, asynchronous coding should be written into the features of
+a custom CPart, that is then used in the script tag in a declarative,
+synchronous manner. The CPart API gives you low-level access, and makes no
+assumptions about using a synchronous or asynchronous coding style.</p>
+
+
+
+
+<h3>renderObj</h3>
+
+<p>The Script CPart "exports" a variety of properties to the
+<code>renderObj</code>, all of which should be considered "read-only".</p>
+
+
+<ul>
+    <li><code>script.someFunctionName</code> for functions declared like
+    <code>function&nbsp;someFunctionName</code> - In addition to "exports", the
+    script tag will also make available all functions that you have declared
+    using the "old-school" named-function style syntax. This is what allows
+    attaching events to be so simple: Simply define a named-function in your
+    script tag (e.g.
+    <code>function&nbsp;doStuff(payload,&nbsp;ev)&nbsp;{&nbsp;...</code>), and
+    then it can be referenced elsewhere (e.g. in the template with:
+    <code>@click:=script.doStuff</code> template with a click event like: It
+    will ignore any "arrow functions" (<code>()&nbsp;=&gt;&nbsp;{}</code>), or any other
+    anonymous functions (e.g. functions declared like
+    <code>const&nbsp;myFunc&nbsp;=&nbsp;function&nbsp;()&nbsp;{&nbsp;...</code>
+    will also be ignored). That's not to say you can't declare your functions
+    like this: However, you should only do so if you do not want them to be
+    automatically exported.</li>
+
+    <li><code>script.exports</code> - This gives you fine-grained control,
+    allowing you to export arbitrary static variables, functions, or data. This
+    is useful for building up static data structures to be shared between all
+    instances of this component, which can then be accessed in the template.
+    This <em>should not</em> be used as a store or state variable (use the
+    <em>Store</em> CPart for that). Also, it should not be used for simply
+    storing static data that requires no further code or manipulation (use the
+    <em>StaticData</em> CPart for this). For example:
+<mws-Demo
+demotype="minipreview"
+text='
+<Template>
+    <p>{% for item in script.exports.bigArray %}
+        {{ item }},
+    {% endfor %}</p>
+</Template>
+<Script>
+    script.exports.bigArray =
+        Array.from({ length: 100 })
+        .map((val, i) => `i liek ${i} turtles`);
+</Script>
+'></mws-Demo>
+   </li>
+
+</ul>
+
+
+<mws-Section name="state">State</mws-Section>
+
+<p>The <em>State</em> is for component instances to store changing data. This
+could include anything from text a user entered into a form, data received from
+an API, or data that represents UI flow changes, such as the visibility of a
+modal. For more discussion of State, see <a
+href="/docs/tutorial_part3.html#state">Tutorial Part 3</a>.</p>
+
+<p>State data is unique to every component instance, and components can never
+directly access each-others data. It is possible to indirectly reference it,
+however, by passing state data from a "parent" component to a "child"
+components within the parent by passing it via a <em>Props</em> attribute. In
+this case, the data should be considered read-only to the child component, like
+any other <em>Props</em> data. If you want to share data between components
+globally, such that any component can modify the data causing a re-render to
+all linked components, such as user log-in information or global state data,
+you should consider the <a href="#store">Store CPart (not yet implemented)</a>.</p>
+
+
+<h3>Definition</h3>
+
+<p>State is traditionally included in Component definitions below the
+<em>Template</em> tag, but above the <em>Script</em> tag. This makes sense
+because functions in the <em>Script</em> tag typically manipulate state in
+order to render new HTML in the <em>Template</em>, making <em>Script</em> a
+sort of mutable bridge between <em>Script</em> and <em>Template</em>. State is
+defined in a similar way to Props: Only defined with properties, but no
+contents.</p>
+
+<p>See below for an example of defining a <em>State</em> CPart:</p>
+
+<mws-Demo
+text='
+<!-- Example 1: Two variables specified -->
+<State
+    name="Luiz"
+    favenum:=13
+></State>
+
+<!-- Example 2: Many variables of different types -->
+<State
+    color="blue"      (String)
+    count:=1          (Number)
+    ready:=true       (Boolean)
+    speed:=null       (null value)
+    items:=&apos;[         (JSON Array)
+        "abc",
+        "def"
+    ]&apos;
+    data_obj:=&apos;{      (JSON Object)
+        "a": "b",
+        "c": "d"
+    }&apos;
+></State>
+'></mws-Demo>
+
+<p>Note that all "state variables" <em>must</em> have an initial value. It's
+okay to make the initial value be <code>null</code> (as in the "speed" example
+above), or other some placeholder that will later be replaced.</p>
+
+
+<h3>CPart properties</h3>
+
+<p>The actual data in a <em>State</em> CPart is stored on it's "data" property.
+This property is a regular JavaScript Object, and thus can store any JavaScript
+data type.  As an example, in a <em>Script</em> CPart, you can directly
+reference this property with the code <code>cparts.state.data</code>.</p>
+
+<p>When writing the <em>State</em> CPart definition, you must declare or
+pre-define each "state variable" or property of the "data" Object that you want
+to use. It is not permitted to create new state variables later on. In other
+words, if you only define <code>cparts.state.data</code> as having
+<code>.count</code> and <code>.title</code> as "state variables" (aka
+properties of the "data" Object), then an attempt like
+<code>cparts.state.data.newstuff = 10;</code> may result in an error.  If you
+are dealing with a situation where you have an unknown quantity of data, such
+as from an API, the correct approach is to store it all within a nested Object
+<em>inside</em> the state data Object, e.g. such as an
+<code>data.apiResults</code> Object or Array. Unlike top-level "state
+variables", it's okay to add properties, modify, or build upon nested
+Objects.</p>
+
+<p>While it's allowed to assign any arbitrary reference as a <em>State</em>
+variable, including complex, unserializable types such as function callbacks,
+it's highly recommended to try to keep it to primitive and serializable types
+as much as possible (e.g. String, Number, Boolean, Array, Object). The reason
+being that there may be future features or third-party add-ons for
+<em>State</em> which will only support primitive types (as an example, that
+would be required to save state to localStorage). If you want to store
+functions, consider using a <code>prepareCallback</code> to generate the
+functions within a Script context, and only store the data needed to "generate"
+the function in the state (as opposed to storing a direct reference to the
+function itself).</p>
+
+
+
+<h3>renderObj</h3>
+
+<p>State contributes it's current data values to the renderObj. Examples:<p>
+
+<ul>
+    <li>State initialized like: <code>&lt;State&nbsp;name="Luiz"&gt;</code> will be
+    accessible on the renderObj like <code>renderObj.state.name</code>, and in
+    the Script or Template CParts like <code>state.name</code>.</li>
+
+    <li>State initialized like: <code>&lt;State stuff:='["a", "b"]'&gt;</code>
+    will be accessible on the renderObj like <code>renderObj.state.info</code>
+    (with individual items accessed with code that ends with
+    "<code>.stuff[0]</code>"), and in the Script or Template CParts like
+    <code>state.info</code>.</li>
+</ul>
+
+
+
+<h3>Directives</h3>
+
+<p>State provides a single directive:</p>
+
+<ul>
+    <li><code>[state.bind]</code> - Two-way binding with State data, with the
+    key determined by the <code>name=</code> property of whatever it is
+    attached to.  You can attach a <code>[state.bind]</code> directive to any
+    HTML <code>&lt;input&gt;</code>, and the <em>State</em> CPart's two-way
+    binding will cause the input value to be updated if the state variable ever
+    changes, and if a user edits the input triggering a <code>"keyup"</code> or
+    <code>"change"</code> event, the state variable will be updated (along
+    with, typically, a re-render of the component).
+
+        <mws-Demo
+            demotype="minipreview"
+            fromlibrary="Tutorial_P3_state_bind"
+        ></mws-Demo>
+
+    </li>
+</ul>
+
+<!-- 
+    <h3>Example</h3>
+    TODO: Replace with simpler one
+-->
+
+
+<mws-Section name="staticdata">StaticData</mws-Section>
+
+<p>The <em>StaticData</em> CPart is useful for loading JSON files to use as a
+data source. StaticData has no "refresh" capability, meaning this should only
+consist data that you do not expect to change while running your program, such
+as type definitions or data from a API that does not change frequently.</p>
+
+<h3>Usage</h3>
+
+<p>The StaticData CPart can be used in two different ways. The most common is
+loading data from a JSON file or JSON API by specifying a <code>src=</code>
+attribute. During development, this will "fetch" when refreshing the page, but
+once you "build" the component using <code>build()</code> or
+<code>bundle()</code>, the JSON file or JSON-based API will no longer be
+fetched.  When using <code>build()</code> or <code>bundle()</code>, the
+specified content will be "frozen in time" during the build, and bundled in
+with the resulting JS file.</p>
+
+<p>The other usage is to simply "hardcode" the data in JSON syntax within the
+element itself. There is no functional difference of including data in JSON
+syntax in a StaticData CPart to simply adding a Script CPart that uses
+<code>script.exports</code> to expose data, other than it being slightly more
+convenience (e.g. less typing), and intentionally less flexible compared to a
+script CPart.</p>
+
+<p>Note: Currently, StaticData supports JavaScript Object syntax by default,
+NOT JSON syntax. This default might change in the future, to only strictly
+support JSON (e.g., require double-quotes, error on trailing commas), offering
+the looser structure.</p>
+
+<h3>attrs</h3>
+
+<ul>
+    <li><code>src</code> - Just like any other CParts, the <code>src=</code>
+    attribute lets you load the content from another URL.
+    This could be from an API (e.g. something like
+    <code>src="https://some.api.com/v1/getdata?p=3"</code>), or for loading
+    from a file (e.g.  <code>src="./data/weatherData.json"</code>), or for
+    loading from a file. If not specified, then the data must be specified
+    within the StaticData tag, or else it will be simply "undefined".</li>
+
+    <li><code>transform</code> - This optional attribute can be set to a
+    function (e.g.  using <code>:=</code> data-prop syntax) that takes a single
+    string as input (the original data) and outputs a single string (the
+    transformed data), which should be a valid JavaScript expression that will
+    result in the data format that you want. Generally, this JavaScript
+    expression should be JS primitives, such as in JSON format. This happens
+    before build() and bundle(), meaning it this JS expression will be what
+    gets included in the built JS file.  By default, no transformation is done,
+    and the input is expected to already be valid JSON to be inserted
+    verbatim.</li>
+</ul>
+
+
+<h3>renderObj</h3>
+
+<p>The StaticData CPart exposes it's data directly (e.g. so it can be accessed
+in Script, Template, etc).</p>
+
+
+<h3>Usage Example</h3>
+<p>Examine the following examples for ideas on how to use StaticData:</p>
+<br />
+<mws-Demo
+demotype="minipreview"
+ttitle="Package.json"
+text='
+<!-- Load package.json file directly from GitHub -->
+<Template>
+    {{ staticdata.name }} v{{ staticdata.version }}
+    (by {{ staticdata.author }})
+</Template>
+<StaticData
+    -src="https://raw.githubusercontent.com/michaelpb/modulo/main/package.json"
+></StaticData>
+'
+ttitle2="FromAPI"
+text2='
+<Template>
+    <table>
+    {% for item in staticdata %}
+        <tr>
+            <td>#{{ item.userId }}</td>
+            <td>{{ item.title|truncate:5 }}</td>
+            <td>{{ item.body|truncate:10 }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+</Template>
+<!-- Load 100 items of sample data from a
+     JSON placeholder website "typicode" -->
+<StaticData
+    -src="https://jsonplaceholder.typicode.com/posts"
+></StaticData>
+'
+ttitle3="EmbeddedData"
+text3='
+<Template>
+    {% for item in staticdata %}
+        <label>
+          <img src="{{ item.thumbnailUrl }}" />
+          <tt>#{{ item.id }}</tt>
+          {{ item.title|truncate }}
+        </label>
+    {% endfor %}
+</Template>
+<!-- Hardcode lorem ipsum / sample data -->
+<StaticData>
+[
+  {
+    "id": 1,
+    "title": "accusamus beatae ad facilis cum similique qui sunt",
+    "url": "https://via.placeholder.com/600/92c952",
+    "thumbnailUrl": "https://via.placeholder.com/150/92c952"
+  },
+  {
+    "id": 2,
+    "title": "reprehenderit est deserunt velit ipsam",
+    "url": "https://via.placeholder.com/600/771796",
+    "thumbnailUrl": "https://via.placeholder.com/150/771796"
+  }
+]
+</StaticData>
+'
+></mws-Demo>
+
+
+<mws-Section name="style">Style</mws-Section>
+
+<p>The <em>Style</em> CPart allows us to write CSS for our component. This
+allows us to group styles within our component, and keep them isolated from
+other components, without having to come up with long, confusing class names
+every time.  CSS written here will be automatically prefixed so that it will
+only apply to your component and/or any HTML that it generates, such as by the
+<em>Template</em> CPart. The <em>Style</em> CPart has no other features, other
+than prefixing or scoping CSS.</p>
+
+<h3>Usage</h3>
+
+<p>In general, you can freely write any number of CSS rules for your
+components. They will be prefixed based on a few regular expression replacement
+steps, such that they only apply to the elements within your component. For
+example, a rule like <code>a&nbsp;{&nbsp;color:&nbsp;blue&nbsp;}</code> in a
+component named <code>name="HelloBtn"</code> that has been imported with
+<code>namespace="mylib"</code> would result in the following, fully-prefixed
+rule: <code>mylib-HelloBtn&nbsp;a&nbsp;{&nbsp;color:&nbsp;blue&nbsp;}</code></p>
+
+<p>Further behavior explained below:</p>
+
+<ul>
+    <li><code>:host</code> - Use the ":host" pseudo-element to select the
+    component itself. This will work for both "regular" and "shadow" rendering
+    mode. For example, in regular rendering mode, if you have the CSS
+    <code>:host&nbsp;{&nbsp;color:&nbsp;red&nbsp;}</code> in a component named
+    <code>name="MyChart"</code> that has been imported with
+    <code>namespace="mylib"</code>, then it would create the following,
+    fully-prefixed CSS rule:
+    <code>mylib-MyChart&nbsp;{&nbsp;color:&nbsp;red&nbsp;}</code></li>
+
+    <li><strong>Shadow vs regular DOM</strong> - By default, components have
+    "regular" rendering mode. If you've configured your component to instead
+    use "Shadow DOM" rendering to protect it from getting outside CSS applied
+    to it, then the <em>Style</em> CPart's stylesheet will be "encapsulated" or
+    inserted in the "shadow root" of component instances, as opposed to the
+    document root.  (More on this here: <a
+    href="https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/styleSheets">MDN's
+    "ShadowRoot.styleSheets"</a>)</li>
+</ul>
+
+
+<h3>Usage Example</h3>
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Tutorial_P1"
+></mws-Demo>
+
+
+
+<mws-Section name="template">Template</mws-Section>
+
+<p>The <em>Template</em> CPart allow components to render their HTML content
+using a small domain-specific language, called the "templating engine". The
+default engine is the <em>Modulo templating language</em> (aka "MTL"), although
+that can be configured on a per-CPart basis.</p>
+
+<p>Without a <em>Template</em> CPart (or equivalent custom code), the default
+behavior of the <em>Component</em> CPart is to make no attempt to alter their
+contents. However, most components require complicated HTML structures within
+them. This is where Templates come into play: They generate the
+<code>innerHTML</code> of a component.</p>
+
+<p>Templates are not DOM-based, but instead render synchronously to a String
+during the <code>render</code> <a
+href="/docs/directives.html#lifecycle">lifecycle phase</a>, and store the
+results in <code>renderObj.component.innerHTML</code>. The <em>Component</em>
+CPart will read this HTML code during the <code>reconcile</code> phase and then
+"reconcile", modify it's contents to resemble the target innerHTML. (More on
+this is in <a href="#component">the Component CPart documentation
+above</a>.)</p>
+
+
+<p>Every time a Component renders, the Template will render using the
+<em>renderObj</em> as a "template context", or, in other words, using the
+various CPart's contributions to the <em>renderObj</em> as Template variables
+that can be inserted into the HTML.  For more discussion of Template, see
+<a href="/docs/tutorial_part2.html#templating">Tutorial Part 2</a>.</p>
+
+
+
+</mws-Page>

@@ -1,0 +1,96 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    pagetitle="2022-03"
+    navbar="about">
+
+<mws-DevLogNav fn="2022-03"></mws-DevLogNav>
+
+
+<p>After years of development as a side-project, Modulo is close to an "alpha"
+release. The plan for the alpha release is to get early feedback before we
+finalize the external API, or spend time optimizing for DOM performance or
+readability of source-code.</p>
+
+<h3>After alpha?</h3>
+
+<p>Once the API is more or less finalized, and the library itself has enjoyed
+some limited ("dogfooding") production usage, then it's time for the "beta"
+release. Finally, as it gets more production usage, it's time for the
+<code>v1.0</code> release, which is intended to be a highly stable release for
+the future, with few, if any new features.</p>
+
+<h3>Known bugs</h3>
+
+<p><strong>Directives nested in child components are broken</strong>: Directive
+resolution context for child components with non-shadow slots still has issues,
+resolving to the immediate parent (the child component) instead of the more
+expected parent (the parent doing the nesting).</p>
+
+<p><strong>m.bundle</strong>: Incomplete</p>
+
+
+<h3>Major incomplete aspects of API</h3>
+
+<p>Library / Load / Loader / Module / Config / Modulo configuration refactor:
+Currently, a variety of CParts do similar tasks. We want to condense them all
+into a new "Library" CPart, and abandon "Module" terminology, since it can
+easily be confused with the unrelated concept of JavaScript modules.</p>
+
+<p>Read below for a more complete project status summary or "roadmap"!</p>
+
+
+
+
+<div id="project_status" style="height: 120px; clear: both; display: block;"></div>
+
+<section class="Tutorial-tryit">
+    <h4>Project Status</h4>
+
+    <p><strong>Current status:</strong> <code>prealpha</code></p>
+    <p><em>Prealpha means... shhhhh! This site is not yet ready to be
+    released.</em></p>
+
+    <section class="SideBySide">
+        <aside>
+            <h4>Roadmap:</h4>
+
+            <p><code>alpha</code></p>
+            <p><strong>Completed:</strong> core functionality, under 2000 SLOC,
+            ssg to generate website via JSDOM, partial documentation, unit
+            tests for examples, directives, new DOM resolver, Script-tag
+            insertion,Browser builds, CSS bundling, basic SSG for site,
+            tutorial part 3, documentation (CParts and core API)</p>
+            <p><strong>Incomplete:</strong> "Modulo" object instantiation and
+            config system, module / Library refactor and documentation,
+            reconciliation directives refactor, some light performance
+            profiling &amp; improvement</p>
+            <br/>
+
+            <p><code>beta</code></p>
+            <p><strong>Incomplete:</strong> Nested namespaces, hot-reloading
+            server, under 1000 SLOC (?), fully literate source code, MDU
+            development and documentation, SSG refactor, full interactive
+            "cookbook" of recipes, React &amp; jQuery examples, deterministic
+            SSG builds, more performance profiling &amp; improvement</p>
+            <br/>
+
+            <p><code>v1.0</code></p>
+            <p><strong>Incomplete:</strong> Fully stabilized API, Full browser
+            testing matrix, generate .map files, several recommended minified
+            and shimmed versions, example rollup and webpack configs, split-off
+            SSG and MDU</p>
+
+        </aside>
+
+        <aside>
+            <h4>% % % % % % % % % % % %</h4>
+        </aside>
+    </section>
+
+</section>
+
+</mws-Page>

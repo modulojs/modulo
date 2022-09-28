@@ -1,0 +1,200 @@
+<Component name="StateCPart_TestSetting">
+    <Template>
+        {% if state.testdot %}
+            {# TODO Once key= syntax settles, replace with this for forced replace #}
+            <p>
+                <input [state.bind] name="obj2.prop2" />
+            </p>
+        {% elif state.testisolated %}
+            <main>
+                <input [state.bind] name="tststring" />
+                <input [state.bind] name="obj3.prop1" />
+                <input [state.bind] name="obj3.prop2" />
+                <input [state.bind] name="obj3.prop3" />
+            </main>
+        {% elif state.testmulti %}
+            <aside>
+                <input [state.bind] name="tststring" />
+                <input [state.bind] name="tststring" />
+                <input [state.bind] name="tststring" />
+            </aside>
+        {% else %}
+            <div>
+                <input [state.bind] name="tststring" />
+            </div>
+        {% endif %}
+    </Template>
+
+    <State
+        testdot:=false
+        testisolated:=false
+        testmulti:=false
+        tststring="abc"
+        obj:={}
+        obj.prop:=15
+        obj2:={}
+        obj2.prop2:='"def"'
+        obj3:='{}'
+        obj3.prop1:='"A"'
+        obj3.prop2:='"B"'
+        obj3.prop3:='"C"'
+    ></State>
+
+    <TestSuite>
+
+        <Test name="Testing state default values">
+            <script name="Basic state works">
+                assert: state.tststring === 'abc'
+            </script>
+
+            <script name="State dataProps work (1)">
+                const expected = JSON.stringify({ prop: 15 });
+                const actual = JSON.stringify(state.obj);
+                assert: actual === expected
+            </script>
+
+            <script name="State dataProps work (2)">
+                // Checking string
+                const expected = JSON.stringify({ prop2: "def" });
+                const actual = JSON.stringify(state.obj2);
+                assert: actual === expected
+            </script>
+
+            <script name="State dataProps work (3)">
+                // Checking multiple strings on one obj
+                const expected = JSON.stringify({ prop1: "A", prop2: "B", prop3: "C" });
+                const actual = JSON.stringify(state.obj3);
+                assert: actual === expected
+            </script>
+        </Test>
+
+
+        <Test name="Testing set method & state form binding">
+            <template name="Initial value worked" test-values>
+                <div><input [state.bind] name="tststring" value="abc" /></div>
+            </template>
+
+            <script name="Set can set values">
+                element.cparts.state.set('tststring', 'ok');
+                assert: state.tststring === 'ok'
+            </script>
+
+            <template name="And reflected in DOM" test-values>
+                <div><input [state.bind] name="tststring" value="ok" /></div>
+            </template>
+        </Test>
+
+        <Test name="Testing dot syntax set method & state form binding">
+            <state
+                testdot:=true
+            ></state>
+
+            <template name="Initial value worked" test-values>
+                <p><input [state.bind] name="obj2.prop2" value="def" /></p>
+            </template>
+
+            <script name="Set method can set nested values">
+                element.cparts.state.set('obj2.prop2', 'ok');
+                assert: state.obj2.prop2 === 'ok'
+            </script>
+
+            <template name="And reflected in DOM" test-values>
+                <p><input [state.bind] name="obj2.prop2" value="ok" /></p>
+            </template>
+        </Test>
+
+
+        <Test name="Testing isolation of state binding">
+            <state
+                testdot:=false
+                testisolated:=true
+            ></state>
+
+            <template name="Initial value worked" test-values>
+                <main>
+                    <input [state.bind] name="tststring" value="abc" />
+                    <input [state.bind] name="obj3.prop1" value="A" />
+                    <input [state.bind] name="obj3.prop2" value="B" />
+                    <input [state.bind] name="obj3.prop3" value="C" />
+                </main>
+            </template>
+
+            <script name="Set method can set single nested values">
+                element.cparts.state.set('obj3.prop2', 'ok');
+                assert: state.obj3.prop2 === 'ok'
+            </script>
+
+            <template name="And reflected in DOM" test-values>
+                <main>
+                    <input [state.bind] name="tststring" value="abc" />
+                    <input [state.bind] name="obj3.prop1" value="A" />
+                    <input [state.bind] name="obj3.prop2" value="ok" />
+                    <input [state.bind] name="obj3.prop3" value="C" />
+                </main>
+            </template>
+
+            <script name="Set method can set non-nested values">
+                element.cparts.state.set('tststring', 'ok2');
+                assert: state.tststring === 'ok2'
+            </script>
+
+            <template name="And non-nested reflected in DOM" test-values>
+                <main>
+                    <input [state.bind] name="tststring" value="ok2" />
+                    <input [state.bind] name="obj3.prop1" value="A" />
+                    <input [state.bind] name="obj3.prop2" value="ok" />
+                    <input [state.bind] name="obj3.prop3" value="C" />
+                </main>
+            </template>
+        </Test>
+
+
+        <Test name="Testing multiple state bindings">
+            <state
+                testdot:=false
+                testisolated:=false
+                testmulti:=true
+            ></state>
+
+            <template name="Initial value worked" test-values>
+                <aside>
+                    <input [state.bind] name="tststring" value="abc" />
+                    <input [state.bind] name="tststring" value="abc" />
+                    <input [state.bind] name="tststring" value="abc" />
+                </aside>
+            </template>
+
+            <script name="Set method can set string value">
+                element.cparts.state.set('tststring', 'ok3');
+                assert: state.tststring === 'ok3'
+            </script>
+
+            <template name="And non-nested reflected in DOM" test-values>
+                <aside>
+                    <input [state.bind] name="tststring" value="ok3" />
+                    <input [state.bind] name="tststring" value="ok3" />
+                    <input [state.bind] name="tststring" value="ok3" />
+                </aside>
+            </template>
+
+            <script name="Change event reflects in state">
+                element.querySelector('input:first-child').value = 'ok4';
+                const ev = new Modulo.globals.Event('keyup');
+                element.querySelector('input:first-child').dispatchEvent(ev);
+                assert: state.tststring === 'ok4'
+            </script>
+
+
+            <template name="And gets propagated in DOM" test-values>
+                <aside>
+                    <input [state.bind] name="tststring" value="ok4" />
+                    <input [state.bind] name="tststring" value="ok4" />
+                    <input [state.bind] name="tststring" value="ok4" />
+                </aside>
+            </template>
+
+        </Test>
+
+    </TestSuite>
+</Component>
+

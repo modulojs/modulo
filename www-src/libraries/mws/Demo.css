@@ -1,0 +1,373 @@
+.demo-wrapper.demo-wrapper__minipreview .CodeMirror {
+    height: 200px;
+}
+
+.demo-wrapper.demo-wrapper__clipboard .CodeMirror {
+    height: auto;
+}
+
+.demo-wrapper.demo-wrapper__clipboard .CodeMirror * {
+    font-family: monospace;
+    font-size: 1rem;
+}
+
+.demo-wrapper.demo-wrapper__minipreview .CodeMirror * {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.demo-wrapper.demo-wrapper__fullscreen .CodeMirror {
+    height: 87vh;
+}
+.demo-wrapper.demo-wrapper__fullscreen .CodeMirror * {
+    font-family: monospace;
+    font-size: 16px;
+}
+
+.CodeMirror span.cm-string-2 {
+    color: black !important;
+}
+
+.demo-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 100vw;
+}
+
+.Main--fluid  .demo-wrapper.demo-wrapper__minipreview   {
+    /* Make look better in Docs */
+    max-width: 900px;
+}
+.Main--fluid  .demo-wrapper.demo-wrapper__minipreview.demo-wrapper__fullscreen  {
+    /* ...except if full screen */
+    max-width: 100vw;
+}
+
+.demo-wrapper.demo-wrapper__fullscreen {
+    position: absolute;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    padding: 20px;
+    background: white;
+}
+
+/* No tabs sitch: */
+.demo-wrapper__notabs .editor-minipreview {
+    margin-top: 40px;
+    margin-left: 5px;
+    border: 1px solid #999;
+    height: 160px;
+}
+
+.demo-wrapper__fullscreen.demo-wrapper__notabs .editor-minipreview {
+    margin-top: 65px;
+}
+
+.editor-toolbar {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    width: auto;
+    /*right: -70px;*/
+    right: 30px;
+    top: 0;
+    height: 35px;
+    padding: 2px;
+    border: #ddd 1px solid;
+}
+
+
+
+.demo-wrapper__fullscreen .editor-toolbar {
+    height: 60px;
+    padding: 10px;
+}
+
+
+.demo-wrapper__minipreview  .editor-wrapper {
+    width: 78%;
+    border: 1px solid black;
+}
+.Main--fluid  .demo-wrapper__minipreview  .editor-wrapper {
+}
+
+.demo-wrapper.demo-wrapper__clipboard .editor-wrapper {
+    border: 1px dotted #ddd;
+    width: 100%;
+}
+
+.demo-wrapper__minipreview.demo-wrapper__fullscreen .editor-wrapper {
+    border: 5px solid black;
+    border-radius: 1px 8px 1px 8px;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+}
+
+.editor-minipreview {
+    border: 1px solid black;
+    border-radius: 1px;
+    background: #eee;
+    padding: 5px;
+    border-left: none;
+    width: 200px;
+    height: 200px;
+    overflow-y: auto;
+}
+.editor-minipreview > div > * > input {
+  max-width: 175px;
+}
+
+.demo-wrapper__fullscreen .editor-minipreview {
+    width: 30vw;
+    height: auto;
+    border: 1px solid black;
+    margin: 20px;
+    padding: 30px;
+    border: 5px solid black;
+    border-radius: 1px 8px 1px 8px;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+}
+
+.side-by-side-panes {
+    display: flex;
+    justify-content: space-between;
+}
+
+.TabNav {
+    /*border-bottom: 1px dotted var(--highlight-color);*/
+    width: 100%;
+}
+
+
+.TabNav > ul {
+    width: 100%;
+    display: flex;
+}
+
+.TabNav-title {
+    border: 2px solid black;
+    border-top-width: 4px;
+    /*border-bottom-width: 0;*/
+    margin-bottom: -2px;
+    border-radius: 8px 8px 0 0;
+    background: white;
+    min-width: 50px;
+    box-shadow: 0 0 0 0 var(--highlight-color);
+    transition: box-shadow 0.3s,
+                border-color 0.2s;
+}
+
+.TabNav-title a,
+.TabNav-title a:visited,
+.TabNav-title a:active {
+    text-decoration: none;
+    color: black;
+    display: block;
+    padding: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.TabNav-title:hover {
+    border-color: var(--highlight-color);
+}
+
+.TabNav-title--selected {
+    border-color: var(--highlight-color);
+    background: var(--highlight-color) !important; /* Why !important ?? TODO */
+    box-shadow: 0 0 0 8px var(--highlight-color);
+    border-radius: 8px 8px 8px 8px;
+}
+.TabNav-title--selected a {
+    color: white !important; /* Why !important ?? TODO */
+}
+
+.Demo-toast {
+    position: fixed;
+    z-index: 400;
+    top: 100px;
+    right: 10px;
+    border: 4px solid black;
+    border-radius: 10px;
+    background: white;
+    width: 400px;
+    max-width: 99vw;
+    box-shadow: 5px 5px 0 0 black,
+                0 0 20px 20px white;
+    overflow: auto;
+}
+
+.Demo-toast > * {
+    margin: 20px;
+}
+.Demo-toast li {
+    list-style-type: decimal;
+    margin-left: 50px;
+}
+
+.Demo-toastButton {
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    border: 1px solid black;
+    border-radius: 2px;
+    background: white;
+    box-shadow: 2px 2px 0 0 black;
+    padding: 5px;
+    text-decoration: none;
+}
+
+.Demo-toastButton:hover {
+    background-color: var(--highlight-color);
+    color: white;
+}
+
+@media (max-width: 992px) {
+    .TabNav > ul {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .TabNav-title {
+        padding: 7px;
+    }
+    .demo-wrapper {
+        --side-width: 130px;
+    }
+    .demo-fs-button {
+        display: none;
+    }
+
+
+    .demo-wrapper.demo-wrapper__tabs {
+        display: grid;
+        grid-template-columns: var(--side-width) 1fr;
+    }
+    
+
+    .demo-wrapper.demo-wrapper__tabs > :nth-child(1) {
+        grid-row: 1 / span 2;
+    }
+    .demo-wrapper.demo-wrapper__tabs > :nth-child(2) {
+        position: absolute;
+        top: 121px;
+        right: -18px;
+        background: white;
+        border-color: black;
+    }
+    .demo-wrapper.demo-wrapper__tabs > :nth-child(3) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .demo-wrapper.demo-wrapper__tabs .TabNav-title {
+        border: 1px solid black;
+        border-radius: 1px;
+        background: white;
+        width: var(--side-width);
+        padding: 6px;
+    }
+
+    .demo-wrapper.demo-wrapper__tabs  .side-by-side-panes {
+        display: grid;
+        grid-template-rows: 200px 1fr;
+    }
+    .demo-wrapper.demo-wrapper__tabs  .side-by-side-panes > :nth-child(1) {
+        grid-row: 2;
+        width: auto;
+        max-width: calc(100vw - var(--side-width) - 2px);
+    }
+    .demo-wrapper.demo-wrapper__tabs  .side-by-side-panes > :nth-child(2) {
+        grid-row: 1;
+        width: auto;
+        max-width: calc(100vw - var(--side-width) - 2px);
+    }
+    /*
+    .TabNav-title--selected {
+        box-shadow: 0 0 0 0 var(--highlight-color);
+        box-shadow: none;
+    }
+    */
+ /* UGH TODO */
+    /*
+    .TabNav-title--selected a {
+        color: var(--highlight-color) !important;
+    }
+    */
+}
+
+
+
+@media (max-width: 768px) {
+    .demo-wrapper.demo-wrapper__fullscreen {
+        position: relative;
+        display: block;
+        width: 100vw;
+        height: auto;
+        z-index: 1;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .editor-toolbar {
+        position: static;
+        padding: 10px;
+        margin: 20px;
+        height: 60px;
+        font-size: 1.1rem;
+    }
+    .demo-wrapper__fullscreen .editor-toolbar {
+        margin: 5px;
+        height: 60px;
+        padding: 5px;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .side-by-side-panes {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .editor-minipreview {
+        width: 100%;
+    }
+    .demo-wrapper__fullscreen .editor-minipreview {
+        width: 90%;
+    }
+}
+
+
+@media (min-width: 768px) {
+    .demo-wrapper__minipreview.demo-wrapper__fullscreen .editor-wrapper {
+        height: auto;
+        width: 70vw;
+        min-height: 87vh;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .editor-wrapper {
+        width: 100%;
+        border: 1px solid black;
+    }
+    .demo-wrapper__fullscreen .editor-wrapper {
+        width: 100%;
+    }
+}
+

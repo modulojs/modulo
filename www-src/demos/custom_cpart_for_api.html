@@ -1,0 +1,228 @@
+<!--
+    This example shows how to write a custom CPart to wrap a backend API. The
+    API used is the Typicode testing API, but by swapping around the exact
+    requests that are sent, it can be used as a template for other APIs as
+    well.
+
+    This is the preferred way of interacting with private or custom APIs in
+    Modulo, since it allows you to remove this sort of more complicated
+    integration code out of individual Components, keeping Component
+    definitions focused on presentation logic only, and possibly eliminates the
+    need for a Script CPart in the Component definitions at all.
+-->
+
+
+<template Modulo>
+    <!--
+        Here we define a Component that uses the API. Note that it doesn't need
+        to know very much about the internal workings of the API, or even any
+        custom Script code at all. This means, the developer of this Component
+        doesn't need to be comfortable with JavaScript to write components
+        interface with an intenral API.
+    -->
+
+    <Component name="ExampleComponent">
+
+        <!-- Include ExampleAPI CPart, with default configuration -->
+        <ExampleAPI></ExampleAPI>
+
+        <Template>
+            <!-- The ExampleAPI CPart exposes ".error" to other CParts (e.g.
+            Template) to allow displaying of error codes to the user -->
+            {% if exampleapi.error %}
+                <p><em>Error:</em> {{ exampleapi.error }}</p>
+            {% endif %}
+
+            <!-- The ExampleAPI CPart exposes ".isLoading" to allow loading
+            spinners, messages, or other such user interface elements -->
+            {% if exampleapi.isLoading %}
+                <section><em>Loading...</em></section>
+            {% endif %}
+
+            <section>
+                <!-- Here we define a form bound to State. This state data will
+                be what we submit when doing a POST to the API -->
+                <h2>New record</h2>
+                <p>Username: <tt>{{ state.user }}</tt></p>
+                <p><input name="topic" [state.bind] /></p>
+                <p><input name="comment" [state.bind] /></p>
+                {% if exampleapi.saveSuccess %}
+                    <p><em>Successfully saved!</em></p>
+                {% endif %}
+
+                <!-- When this button is clicked, it will trigger the submit()
+                method of the ExampleAPI CPart, using the current state object
+                as the payload (argument) -->
+                <button
+                    @click:=exampleapi.submit
+                    payload:=state
+                >Submit form</button>
+            </section>
+
+            <section>
+                <!-- Click event to invoke the ExampleAPI's refresh() method -->
+                <button @click:=exampleapi.refresh>Refresh</button>
+                <h2>Records</h2>
+
+                <!-- Loop through all retrieved data, showing data in divs -->
+                {% for record in exampleapi.records %}
+                    <div><h3>#{{ record.id }} (u={{ record.userId }}) |
+                              {{ record.title|capfirst }}</h3>
+                        <p>{{ record.body|capfirst|truncate:150 }}</p></div>
+                {% empty %}
+                    <em>(No records fetched, click Refresh to see)</em>
+                {% endfor %}
+            </section>
+        </Template>
+
+        <!-- Set up a simple state CPart (for data to be submitted) -->
+        <State
+            user="garibaldi"
+            topic="Incidents at Marseilles"
+            comment="The sad catastrophe of my sudden depature and return to Montevideo"
+        ></State>
+
+        <!-- Finally, sprinkle in a tiny bit of styling -->
+        <Style>
+            section, button, div {
+                border: 1px solid tomato;
+                padding: 10px;
+                margin: 10px;
+                max-width: 500px;
+            }
+            button, h3 {
+                background: tomato;
+                color: white;
+            }
+        </Style>
+    </Component>
+
+</template>
+
+<script src="https://unpkg.com/mdu.js"></script>
+
+<!-- Here is how we define the CPart itself. For the example, we put it in
+embedded in a <script> so we can keep everything in one file. However, it's
+better to move it to a separate JS file included with a <script src="..."> tag
+(just like we include the Modulo.js file). -->
+<script>
+    modulo.register('cpart', class ExampleAPI {
+        constructor() {
+            // Any data private to each component can be defined here. If you
+            // are already utilizing Redux or similar Stores with your API, you
+            // could attach or import necessary dependencies here.
+            // (Note that "this.data" has no special meaning, it is merely
+            // convenient to store exposed data in a single object.)
+            this.data = {
+                records: [],
+                error: null,
+                saveSuccess: null,
+                lastPosted: {},
+                // Expose two methods:
+                refresh: this.refresh.bind(this),
+                submit: this.submit.bind(this),
+            };
+
+            // Since the testing Typicode API doesn't actually save it's POST
+            // data, we'll have manually store it here:
+            this.fakedPosts = [];
+
+            this.url = 'https://jsonplaceholder.typicode.com/posts';
+        }
+
+        initializedCallback() {
+            // This is how we tell Modulo that this.data will be the object
+            // exposed to other CParts (e.g. in this case, the Template in the
+            // form of template variables).
+            return this.data;
+        }
+
+        refresh() {
+            // This will refresh data from the API, and then expose it by
+            // attaching it to the this.data.records property
+            fetch(this.url)
+                .then(response => response.json())
+                .then(data => {
+                    this.data.records = data.concat(this.fakedPosts);
+                    this.element.rerender();
+                })
+                .catch(err => {
+                    this.data.error = err;
+                    this.element.rerender();
+                });
+        }
+
+        submit(payload) {
+            // Rename the state variables to be what the API suggests
+            const postData = {
+                userId: payload.user,
+                title: payload.topic,
+                body: payload.comment,
+            };
+
+            // Send the POST request with fetch, then rerender after
+            const opts = {
+                method: 'POST',
+                body: JSON.stringify(postData),
+                headers: { 'Content-type': 'application/json; charset=UTF-8' },
+            };
+            fetch(this.url, opts)
+                .then(response => response.json())
+                .then(results => {
+                    // (The Typicode API doesn't actually save, so we use fakedPosts)
+                    this.fakedPosts.push(results);
+                    console.log('result of post', results);
+                    this.data.saveSuccess = true;
+                    this.data.isLoading = false;
+                    this.data.error = null;
+                    this.data.lastPosted = postData;
+                    this.element.rerender();
+                })
+                .catch(err => {
+                    this.data.error = err;
+                    this.element.rerender();
+                });
+            this.data.isLoading = true;
+            this.data.saveSuccess = null;
+            this.element.rerender(); // Rerender to show loading
+        }
+
+        /*
+            // The other callbacks aren't useful for this particular API, but
+            // might be useful for other ones
+            prepareCallback() {
+                // Called before each rerender
+            }
+            renderCallback() {
+                // Called during each rerender
+            }
+            reconcileCallback() {
+                // Called after the reconciler has created patches
+            }
+            updateCallback() {
+                // Called after applying patches
+            }
+        */
+    });
+</script>
+
+
+<h1>Custom API CPart Example</h1>
+
+<hr />
+
+<x-ExampleComponent></x-ExampleComponent>
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

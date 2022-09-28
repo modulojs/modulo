@@ -1,0 +1,297 @@
+<!--
+    This is a mini library of components demonstrating how to make a few common
+    types of widgets that are useful when building websites and web apps.
+
+    Every time you refresh, it will pick a different color. The goal is to
+    demonstrate a more complicated page, and give you a selection of starting
+    code to copy & paste from.
+
+    Note: The "aria-*" and "role" attributes are unrelated to Modulo, but are
+    important for accessibility, see:
+    https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/dialog.html
+-->
+<script Modulo src="https://unpkg.com/mdu.js">
+  <Component name="Btn">
+    <Style>
+        :host {
+            font-weight: bold;
+            border-radius: 1px 6px 1px 6px;
+            color: black;
+            border: 3px solid var(--accent1);
+            box-shadow: -5px -5px 1px 1px hsla(0, 100%, 39.2%, 0.05);
+            cursor: default;
+            padding: 5px;
+            background-color: white;
+            margin-bottom: 4px;
+            transition: box-shadow 0.1s;
+            user-select: none;
+        }
+        :host:active {
+            box-shadow: -5px -5px 1px 1px hsla(0, 100%, 39.2%, 0.15);
+        }
+    </Style>
+  </Component>
+
+  <Component name="LayoutRow">
+    <Style>
+        :host {
+            display: flex;
+            font-family: sans-serif;
+            font-size: 1.1rem;
+        }
+        :host > * {
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+    </Style>
+  </Component>
+
+  <Component name="Card">
+    <Props
+      title
+    ></Props>
+
+    <Template>
+      <h2>{{ props.title }}</h2>
+      <slot></slot>
+    </Template>
+
+    <Style>
+        :host {
+            background:  var(--accent1);
+            background: white;
+            color: black;
+            border: 1px solid grey;
+            border-radius: 1px 5px 1px 5px;
+            box-shadow: inset -5px -5px 1px 1px hsla(0,0%,39.2%,.01);
+            padding: 20px;
+        }
+
+        h2:first-child {
+            background-color: var(--accent1);
+            padding: 5px;
+            margin-top: -30px;
+            color: white;
+        }
+    </Style>
+  </Component>
+
+
+<Component name="Tabs">
+    <Template>
+        {% for tab in state.tabs %}
+            <x-Btn
+                @click:=script.selectTab
+                payload="{{ tab }}"
+                role="tab"
+                aria-controls="Tab{{ tab }}"
+                area-selected="{% if tab == state.selected %}true{% else %}false{% endif %}"
+                class="{% if tab == state.selected %}active{% endif %}"
+            >{{ tab|capfirst }}</x-Btn>
+        {% endfor %}
+
+        {# Create named slots for all the children with slots defined #}
+        {% for tab in state.tabs %}
+            <div role="tablist">
+                <slot
+                    name="Tab{{ tab }}"
+                    id="Tab{{ tab }}"
+                    role="tabpanel"
+                    class="tab-body {% if tab == state.selected %}visible{% endif %}"
+                ></slot>
+            </div>
+        {% endfor %}
+    </Template>
+
+    <!-- (Hint: The ="" syntax is for strings, while :='' is for other types) -->
+    <State
+        tabs:=[]
+        selected=""
+    ></State>
+
+    <cpart Script>
+        // (Hint: prepareCallback is invoked before every render)
+        function prepareCallback(renderObj) {
+            state.tabs = [];
+            for (const child of element.originalChildren) {
+                if (!child.hasAttribute || !child.hasAttribute('slot')) { // not a DOM node
+                    continue;
+                }
+                state.tabs.push(child.getAttribute('slot'));
+                if (!state.selected) { // Select the first one found
+                    state.selected = child.getAttribute('slot');
+                }
+            }
+        }
+
+        function selectTab(tabToSelect) {
+            state.selected = tabToSelect;
+        }
+    </cpart>
+
+    <Style>
+        :host {
+            display: relative;
+            overflow: relative;
+        }
+        .tab-body {
+            border: 10px solid var(--accent1);
+            display: none;
+            min-width: 200px;
+            min-height: 100px;
+        }
+        .visible {
+            display: block;
+        }
+        .active {
+            background: var(--accent1);
+            color: white;
+            border-color: white;
+        }
+    </Style>
+</Component>
+
+<Component name="Modal">
+    <Props
+        button
+        title
+    ></Props>
+
+    <Template>
+        <!-- Use the Btn Component (it's local, so we can just do "x-Btn") -->
+        <x-Btn role="button" @click:=script.show>{{ props.button }}</x-Btn>
+
+        <div
+            @click:=script.hide
+            class="modal-backdrop"
+            style="display: {% if state.visible %}block{% else %}none{% endif %}"
+        ></div>
+
+        <!-- Finally, render the modal body. We'll re-use a card component for
+             this, but adding our own class to modify it's CSS. -->
+        <div
+            role="dialog"
+            id="Modal{{ component.uniqueId }}"
+            aria-label="{{ props.title }}"
+            aria-modal="true"
+            title="{{ props.title }}"
+            class="modal-body"
+            style="{% if state.visible %} top: 100px;
+                   {% else %} top: -400px; {% endif %}
+                   --width: {{ state.width }}px">
+            <h2>{{ props.title }}</h2>
+            <slot>...</slot>
+        </div>
+    </Template>
+
+    <State
+        visible:=false
+        width:=400
+    ></State>
+
+    <cpart Script>
+        // (Hint: All named functions defined at the top level will be exported)
+        function show() {
+            state.visible = true;
+        }
+        function hide() {
+            state.visible = false;
+        }
+    </cpart>
+
+    <Style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 11;
+        }
+        .modal-body {
+            --width: 400px;
+            width: var(--width);
+            border: 3px solid var(--accent1);
+            position: fixed;
+            z-index: 12;
+            left: calc(50vw - (var(--width) / 2));
+            display: block;
+            background: white;
+            padding: 50px;
+            transition: top 0.1s;
+        }
+        .modal-body h2:first-child {
+            background-color: var(--accent1);
+            padding: 5px;
+            margin-top: -30px;
+            color: white;
+        }
+    </Style>
+</Component>
+
+</script>
+
+
+
+
+<x-LayoutRow>
+    <x-Card title="Some simple components">
+        <x-Btn>Hello world!</x-Btn>
+    </x-Card>
+
+    <div>
+        <p>...</p>
+        <x-Modal button="Click to open modal" title="Details">
+            <p>Modal contents.</p>
+        </x-Modal>
+        <p>...</p>
+    </div>
+
+    <x-Tabs>
+        <div slot="first">
+            <p>First tab</p>
+        </div>
+        <div slot="second">
+            <p>A second tab</p>
+        </div>
+    </x-Tabs>
+</x-LayoutRow>
+
+<script>
+    // Pick a random color on page load, and update a CSS variable on the
+    // global document ("root") element, so it changes the CSS everywhere
+    window.onload = function () {
+        const colors = ['#a15745', '#ec9747', '#4a3383', '#715ac4', '#a4e06b',
+                        '#c29df2', '#a3134a', '#9af296', '#fc97c3', '#4ed8c3',
+                        '#095363', '#e03e26']
+        const randIndex = Math.floor(Math.random() * colors.length)
+        const randColor = colors[randIndex];
+        document.documentElement.style.setProperty('--accent1', randColor);
+    }
+</script>
+
+<!-- NOTE: To customize the accent color, delete the script tag and use CSS: -->
+<style>/* :root { --accent1: #999; } */</style>
+
+
+<!-- Remember - Move Component definitions to a library file later:
+<script Modulo
+    src="https://unpkg.com/mdu.js"
+    -src="./libraries/my_components.html"
+></script> -->
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

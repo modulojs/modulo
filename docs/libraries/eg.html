@@ -1,0 +1,1163 @@
+<Component namespace="eg" name="Hello">
+
+<Template>
+    <button @click:=script.countUp>Hello {{ state.num }}</button>
+</Template>
+<State
+    num:=42
+></State>
+<Script>
+    function countUp() {
+        state.num++;
+    }
+</Script>
+
+<TestSuite
+    src="./examplelib-tests/Hello-tests.html"
+></TestSuite>
+
+</Component>
+
+
+
+
+<Component namespace="eg" name="Simple">
+
+<Template>
+    Components can use any number of <strong>CParts</strong>.
+    Here we use only <em>Style</em> and <em>Template</em>.
+</Template>
+
+<Style>
+    em { color: darkgreen; }
+    * { text-decoration: underline; }
+</Style>
+
+<TestSuite>
+    <test name="Initially renders">
+        <template>
+            Components can use any number of <strong>CParts</strong>.
+            Here we use only <em>Style</em> and <em>Template</em>.
+        </template>
+    </test>
+</TestSuite>
+
+</Component>
+
+
+
+
+<Component namespace="eg" name="ToDo">
+<Template>
+<ol>
+    {% for item in state.list %}
+        <li>{{ item }}</li>
+    {% endfor %}
+    <li>
+        <input [state.bind] name="text" />
+        <button @click:=script.addItem>Add</button>
+    </li>
+</ol>
+</Template>
+
+<State
+    list:='["Milk", "Bread", "Candy"]'
+    text="Beer"
+></State>
+
+<Script>
+    function addItem() {
+        state.list.push(state.text); // add to list
+        state.text = ""; // clear input
+    }
+</Script>
+
+<TestSuite
+    src="./examplelib-tests/ToDo-tests.html"
+></TestSuite>
+
+</Component>
+
+<!--list:=&#39;["Milk", "Bread", "Candy"]&#39;-->
+
+
+<Component namespace="eg" name="JSON">
+<!-- Use StaticData CPart to include JSON from an API or file -->
+<Template>
+    <strong>Name:</strong> {{ staticdata.name }} <br />
+    <strong>Site:</strong> {{ staticdata.homepage }} <br />
+    <strong>Tags:</strong> {{ staticdata.topics|join }}
+</Template>
+<StaticData
+    -src="https://api.github.com/repos/michaelpb/modulo"
+></StaticData>
+</Component>
+
+
+
+
+<Component namespace="eg" name="JSONArray">
+<!-- Use StaticData CPart to include JSON from an API or file.
+You can use it for arrays as well. Note that it is "bundled"
+as static data in with JS, so it does not refresh. -->
+<Template>
+  {% for post in staticdata %}
+    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}
+        {{ post.title|truncate:15 }}</p>
+  {% endfor %}
+</Template>
+<StaticData
+    -src="https://jsonplaceholder.typicode.com/todos"
+></StaticData>
+</Component>
+
+<Component namespace="eg" name="GitHubAPI">
+<Template>
+<p>{{ state.name }} | {{ state.location }}</p>
+<p>{{ state.bio }}</p>
+<a href="https://github.com/{{ state.search }}/" target="_blank">
+    {% if state.search %}github.com/{{ state.search }}/{% endif %}
+</a>
+<input [state.bind] name="search"
+    placeholder="Type GitHub username" />
+<button @click:=script.fetchGitHub>Get Info</button>
+</Template>
+
+<State
+    search=""
+    name=""
+    location=""
+    bio=""
+></State>
+
+<Script>
+    function fetchGitHub() {
+        fetch(`https://api.github.com/users/${state.search}`)
+            .then(response => response.json())
+            .then(githubCallback);
+    }
+    function githubCallback(apiData) {
+        state.name = apiData.name;
+        state.location = apiData.location;
+        state.bio = apiData.bio;
+        element.rerender();
+    }
+</Script>
+
+<TestSuite
+    src="./examplelib-tests/API-tests.html"
+></TestSuite>
+
+</Component>
+
+
+<Component namespace="eg" name="ColorSelector">
+<Template>
+    <div style="float: right">
+        <p><label>Hue:<br />
+            <input [state.bind] name="hue" type="range" min="0" max="359" step="1" />
+        </label></p>
+        <p><label>Saturation: <br />
+            <input [state.bind] name="sat" type="range" min="0" max="100" step="1" />
+            </label></p>
+        <p><label>Luminosity:<br />
+            <input [state.bind] name="lum" type="range" min="0" max="100" step="1" />
+            </label></p>
+    </div>
+    <div style="
+        width: 80px; height: 80px;
+        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)">
+    </div>
+</Template>
+<State
+    hue:=130
+    sat:=50
+    lum:=50
+></State>
+</Component>
+
+
+
+
+
+<Component namespace="eg" name="DateNumberPicker">
+<Template>
+    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>
+    {% for part in state.ordering %}
+        <label>
+            {{ state|get:part }}
+            <div>
+                <button @click:=script.next payload="{{ part }}">&uarr;</button>
+                <button @click:=script.previous payload="{{ part }}">&darr;</button>
+            </div>
+        </label>
+    {% endfor %}
+</Template>
+
+<State
+    day:=1
+    month:=1
+    year:=2022
+    ordering:='["year", "month", "day"]'
+></State>
+
+<Script>
+    function isValid({ year, month, day }) {
+        month--; // Months are zero indexed
+        const d = new Date(year, month, day);
+        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
+    }
+    function next(part) {
+        state[part]++;
+        if (!isValid(state)) { // undo if not valid
+            state[part]--;
+        }
+    }
+    function previous(part) {
+        state[part]--;
+        if (!isValid(state)) { // undo if not valid
+            state[part]++;
+        }
+    }
+</Script>
+
+<Style>
+    :host {
+        border: 1px solid black;
+        padding: 10px;
+        margin: 10px;
+        margin-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        font-weight: bold;
+    }
+    div {
+        float: right;
+    }
+    label {
+        display: block;
+        width: 100%;
+    }
+</Style>
+</Component>
+
+
+
+<Component namespace="eg" name="PrimeSieve">
+<!-- Demos mouseover, template filters, template control flow,
+     and static script exports -->
+<Template>
+  <div class="grid">
+    {% for i in script.exports.range %}
+      <div @mouseover:=script.setNum
+        class="
+            {# If-statements to check divisibility in template: #}
+            {% if state.number == i %}number{% endif %}
+            {% if state.number lt i %}hidden{% else %}
+              {% if state.number|divisibleby:i %}whole{% endif %}
+            {% endif %}
+        ">{{ i }}</div>
+    {% endfor %}
+  </div>
+</Template>
+
+<State
+    number:=64
+></State>
+
+<Script>
+    // Getting big a range of numbers in JS. Use "script.exports"
+    // to export this as a one-time global constant.
+    // (Hint: Curious how it calculates prime? See CSS!)
+    script.exports.range = 
+        Array.from({length: 63}, (x, i) => i + 2);
+    function setNum(payload, ev) {
+        state.number = Number(ev.target.textContent);
+    }
+</Script>
+
+<Style>
+.grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    color: #ccc;
+    font-weight: bold;
+    width: 100%;
+    margin: -5px;
+}
+.grid > div {
+    border: 1px solid #ccc;
+    cursor: crosshair;
+    transition: 0.2s;
+}
+div.whole {
+    color: white;
+    background: #B90183;
+}
+div.hidden {
+    background: #ccc;
+    color: #ccc;
+}
+
+/* Color green and add asterisk */
+div.number { background: green; }
+div.number::after { content: "*"; }
+/* Check for whole factors (an adjacent div.whole).
+   If found, then hide asterisk and green */
+div.whole ~ div.number { background: #B90183; }
+div.whole ~ div.number::after { opacity: 0; }
+</Style>
+
+<TestSuite
+    src="./examplelib-tests/PrimeSieve-tests.html"
+></TestSuite>
+
+</Component>
+
+
+
+<Component namespace="eg" name="Scatter">
+<!-- StaticData can be used for data visualization as
+well, as an quick way to bring in data sets. Here we loop
+through data, creating labels that appear when hovering. -->
+<Template>
+    {% for user in staticdata %}
+        <div style="--x: {{ user.address.geo.lng }}px;
+                    --y: {{ user.address.geo.lat }}px;"
+        ></div>
+        <label>{{ user.name }} ({{ user.email }})</label>
+    {% endfor %}
+</Template>
+
+<StaticData
+    -src="https://jsonplaceholder.typicode.com/users"
+></StaticData>
+
+<Style>
+  :host {
+      position: relative;
+      display: block;
+      --size: 101px;
+      width: var(--size);
+      height: var(--size);
+      background-size: 10px 10px;
+      background-image: linear-gradient(to right,
+          rgba(100, 100, 100,.3) 1px, transparent 1px),
+        linear-gradient(to bottom,
+          rgba(100, 100, 100,.3) 1px, transparent 1px);
+  }
+  div {
+      position: absolute;
+      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);
+      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);
+      height: 10px;
+      width: 10px;
+      border-radius: 10px;
+      border: 1px solid #B90183;
+      background: rgba(255, 255, 255, 0.0);
+  }
+  div:hover {
+      background: #B90183;
+  }
+  label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      opacity: 0;
+      height: 0;
+      font-size: 11px;
+  }
+  div:hover + label {
+      opacity: 1;
+  }
+</Style>
+</Component>
+
+
+
+<Component namespace="eg" name="FlexibleForm">
+<!-- Here, we have a form that's easy to update. If this gets used more
+than a couple times, it could be turned into a reusable component where
+the "ordering" and initial values get set via Props. -->
+<Template>
+    <form>
+        {% for field in state.fields %}
+            <div class="field-pair">
+                <label for="{{ field }}_{{ component.uniqueId }}">
+                    <strong>{{ field|capfirst }}:</strong>
+                </label>
+                <input
+                    [state.bind]
+                    type="{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}"
+                    name="{{ field }}"
+                    id="{{ field }}_{{ component.uniqueId }}"
+                />
+            </div>
+        {% endfor %}
+    </form>
+</Template>
+
+<State
+    name="Spartacus"
+    topic="On the treatment of Thracian gladiators"
+    subscribe:=true
+    private:=false
+    comment="So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink."
+    fields:='["name", "topic", "comment", "private", "subscribe"]'
+></State>
+</Component>
+
+
+
+
+
+<Component namespace="eg" name="FlexibleFormWithAPI">
+<!-- Combining the code from the previous exercise, we can interact with
+APIs. Here we use a Typicode's placeholder API to make posts -->
+<Template>
+    <form>
+        {% for field in state.fields %}
+            <div class="field-pair">
+                <label for="{{ field }}_{{ component.uniqueId }}">
+                    <strong>{{ field|capfirst }}:</strong>
+                </label>
+                <input
+                    [state.bind]
+                    type='{% if state|get:field|type == "number" %}number{% else %}text{% endif %}'
+                    name="{{ field }}"
+                    id="{{ field }}_{{ component.uniqueId }}"
+                />
+            </div>
+        {% endfor %}
+        <button @click:=script.submit>Post comment</button>
+        <hr />
+
+        {% for post in state.posts|reversed %}
+            <p>
+                {{ post.userId }}:
+                <strong>{{ post.title|truncate:15 }}</strong>
+                {{ post.body|truncate:18 }}
+            </p>
+        {% endfor %}
+    </form>
+</Template>
+
+<State
+    user:=1337
+    topic="On the treatment of Thracian gladiators"
+    comment="So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink."
+    fields:='["user", "topic", "comment"]'
+    posts:='[]'
+></State>
+
+<Script>
+    const URL = 'https://jsonplaceholder.typicode.com/posts';
+    const fakedPosts = [];
+    const headers = [];
+
+    function initializedCallback() {
+        refresh(); // Refresh on first load
+    }
+
+    function refresh() {
+        fetch(URL).then(r => r.json()).then(data => {
+            // Since Typicode API doesn't save it's POST
+            // data, we'll have manually fake it here
+            state.posts = data.concat(fakedPosts);
+            element.rerender();
+        });
+    }
+
+    function submit() {
+        // Rename the state variables to be what the API suggests
+        const postData = {
+              userId: state.user,
+              title: state.topic,
+              body: state.comment,
+        };
+        state.topic = ''; // clear the comment & topic text
+        state.comment = '';
+        fakedPosts.push(postData); // Required for refresh()
+
+        // Send the POST request with fetch, then refresh after
+        const opts = {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        };
+        fetch(URL, opts).then(r => r.json()).then(refresh);
+    }
+</Script>
+
+</Component>
+
+
+
+
+<Component namespace="eg" name="Components">
+<!-- Once defined, Modulo web components can be used like HTML.
+DemoModal and DemoChart are already defined. Try using below! -->
+<Template>
+
+<x-DemoChart
+    data:='[1, 2, 3, 5, 8]'
+></x-DemoChart>
+
+<x-DemoModal button="Nicholas Cage" title="Biography">
+    <p>Prolific Hollywood actor</p>
+    <img src="https://www.placecage.com/640/360" />
+</x-DemoModal>
+
+<x-DemoModal button="Tommy Wiseau" title="Further Data">
+    <p>Actor, director, and acclaimed fashion designer</p>
+    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>
+</x-DemoModal>
+
+</Template>
+
+</Component>
+
+
+
+<Component namespace="eg" name="OscillatingGraph">
+<Template>
+
+    <!-- Note that even with custom components, core properties like "style"
+        are available, making CSS variables a handy way of specifying style
+        overrides. -->
+    <x-DemoChart
+        data:=state.data
+        animated:=true
+        style="
+            --align: center;
+            --speed: {{ state.anim }};
+        "
+    ></x-DemoChart>
+
+    <p>
+        {% if not state.playing %}
+            <button @click:=script.play alt="Play">&#x25B6;  tick: {{ state.tick }}</button>
+        {% else %}
+            <button @click:=script.pause alt="Pause">&#x2016;  tick: {{ state.tick }}</button>
+        {% endif %}
+    </p>
+
+    {% for name in script.exports.properties %}
+        <label>{{ name|capfirst }}:
+            <input [state.bind]
+                name="{{ name }}"
+                type="range"
+                min="1" max="20" step="1" />
+        </label>
+    {% endfor %}
+</Template>
+
+<State
+    playing:=false
+    speed:=10
+    easing="linear"
+    align="flex-end"
+    tick:=1
+    width:=10
+    anim:=10
+    speed:=10
+    pulse:=1
+    offset:=1
+    data:=[]
+></State>
+<Script>
+    let timeout = null;
+    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
+    function play() {
+        state.playing = true;
+        nextTick();
+    }
+    function pause() {
+        state.playing = false;
+    }
+    function setEasing(payload) {
+        state.easing = payload;
+    }
+
+    function nextTick() {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        const el = element;
+        timeout = setTimeout(() => {
+            el.rerender();
+        }, 2000 / state.speed);
+    }
+
+    function updateCallback() {
+        if (state.playing) {
+            while (state.data.length <= state.width) {
+                state.tick++;
+                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
+            }
+            state.data.shift(); // remove one from left
+            nextTick();
+        }
+    }
+</Script>
+<Style>
+    input {
+        width: 50px;
+    }
+</Style>
+</Component>
+
+
+
+
+<Component namespace="eg" name="Search">
+<!-- Modulo can be used with APIs to create interactive apps.
+This book search shows how a Script tag can use an API -->
+<Template>
+  <input [state.bind] name="search" />
+  <button @click:=script.doSearch>Go</button>
+  {% if state.loading %}<em>Loading...</em>{% endif %}
+  <ol>
+    {% for item in state.results %}
+      <li>
+        <img src="{{ item.cover }}" />
+        <strong>{{ item.title }}</strong>
+      </li>
+    {% endfor %}
+  </ol>
+</Template>
+
+<State
+    search="the lord of the rings"
+    loading:=false
+    results:=[]
+></State>
+
+<Script>
+    const OPTS = '&limit=6&fields=title,author_name,cover_i';
+    const COVER ='https://covers.openlibrary.org/b/id/';
+    const API = 'https://openlibrary.org/search.json?q=';
+    function doSearch() {
+        const url = API + '?q=' + state.search + OPTS;
+        state.loading = true;
+        fetch(url)
+            .then(response => response.json())
+            .then(dataBackCallback);
+    }
+
+    function dataBackCallback(data) {
+        for (const item of data.docs) {
+            // For convenience, we prepare the cover URL
+            item.cover = COVER + item.cover_i + '-S.jpg';
+        }
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+</Script>
+
+</Component>
+
+
+
+<Component namespace="eg" name="SearchBox">
+<!-- A "type as you go" search box implementation,
+an example of more complicated HTML and JS behavior -->
+<Template>
+<p>Type a book name for "search as you type"
+(e.g. try &ldquo;the lord of the rings&rdquo;)</p>
+
+<input [state.bind] name="search"
+  @keyup:=script.typingCallback />
+
+<div class="results {% if state.search.length gt 0 %}
+                      visible {% endif %}">
+  <div class="results-container">
+    {% if state.loading %}
+      <img src="{{ staticdata.gif }}" alt="loading" />
+    {% else %}
+      {% for result in state.results %}
+        <div class="result">
+          <img
+            src="{{ staticdata.cover|add:result.cover_i }}-S.jpg"
+          /> <label>{{ result.title }}</label>
+        </div>
+      {% empty %}
+        <p>No books found.</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+</Template>
+
+<State
+    search=""
+    results:=[]
+    loading:=false
+></State>
+
+<!-- Puting long URLs down here to declutter -->
+<StaticData>
+{
+  apiBase: 'https://openlibrary.org/search.json',
+  cover: 'https://covers.openlibrary.org/b/id/',
+  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +
+    'semantic-ui/0.16.1/images/loader-large.gif'
+}
+</StaticData>
+
+<Script>
+    function typingCallback() {
+        state.loading = true;
+        const search = `q=${state.search}`;
+        const opts = 'limit=6&fields=title,author_name,cover_i';
+        const url = `${staticdata.apiBase}?${search}&${opts}`;
+        _globalDebounce(() => {
+            fetch(url)
+                .then(response => response.json())
+                .then(dataBackCallback);
+        });
+    }
+
+    function dataBackCallback(data) {
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+    let _globalDebounceTimeout = null;
+    function _globalDebounce(func) {
+        if (_globalDebounceTimeout) {
+            clearTimeout(_globalDebounceTimeout);
+        }
+        _globalDebounceTimeout = setTimeout(func, 500);
+    }
+</Script>
+
+<Style>
+    input {
+        width: 100%;
+    }
+    .results-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .results-container > img { margin-top 30px; }
+    .results {
+        position: absolute;
+        height: 0;
+        width: 0;
+        overflow: hidden;
+        display: block;
+        border: 2px solid #B90183;
+        border-radius: 0 0 20px 20px;
+        transition: height 0.2s;
+        z-index: 20;
+        background: white;
+    }
+    .results.visible {
+        height: 200px;
+        width: 200px;
+    }
+    .result {
+        padding: 10px;
+        width: 80px;
+        position: relative;
+    }
+    .result label {
+        position: absolute;
+        width: 80px;
+        background: rgba(255, 255, 255, 0.5);
+        font-size: 0.7rem;
+        top: 0;
+        left: 0;
+    }
+</Style>
+
+<TestSuite
+    src="./examplelib-tests/SearchBox-tests.html"
+></TestSuite>
+
+</Component>
+
+
+
+<!--
+
+    {% comment "Uncomment this comment to try changing the easing!" %}
+    <x-DemoSelector
+        [state.bind]
+        name="easing"
+        options:='["linear", "ease-out", "ease-in", "ease-in-out"]'
+    ></x-DemoSelector>
+    {% endcomment %}
+-->
+
+
+<Component namespace="eg" name="WorldMap">
+<!-- Another example of StaticData being used to visualize data, this example
+     places API data onto a world map, and provides a slide down modal for
+     each user that shows more information about that user -->
+<Template>
+    {% for user in staticdata %}
+        <div style="top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;
+                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;">
+            <x-DemoModal button="{{ user.id }}" title="{{ user.name }}">
+                {% for key, value in user %}
+                    <dl>
+                        <dt>{{ key|capfirst }}</dt>
+                        <dd>{% if value|type == "object" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>
+                    </dl>
+                {% endfor %}
+            </x-DemoModal>
+        </div>
+    {% endfor %}
+</Template>
+
+<StaticData
+    -src="https://jsonplaceholder.typicode.com/users"
+></StaticData>
+
+<Style>
+  :host {
+      position: relative;
+      display: block;
+      width: 160px;
+      height: 80px;
+      border-radius: 1px 5px 1px 7px;
+      border: 1px solid gray;
+      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);
+      background-size: 160px 85px;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');
+  }
+  div {
+      position: absolute;
+      height: 7px;
+      width: 7px;
+      border-radius: 5px;
+      background-color: rgba(162, 228, 184);
+  }
+  div > x-DemoModal {
+      opacity: 0;
+      z-index: 50;
+  }
+  div:hover > x-DemoModal{
+      opacity: 1.0;
+  }
+  .modal-body {
+      height: 400px;
+      overflow: auto;
+  }
+  dt {
+      font-weight: 800;
+  }
+  dd {
+      max-width: 300px;
+      overflow: auto;
+      font-family: monospace;
+  }
+</Style>
+</Component>
+
+
+
+
+<Component namespace="eg" name="Memory">
+<!-- A much more complicated example application -->
+<Template>
+{% if not state.cards.length %}
+    <h3>The Symbolic Memory Game</h3>
+    <p>Choose your difficulty:</p>
+    <button @click:=script.setup click.payload=8>2x4</button>
+    <button @click:=script.setup click.payload=16>4x4</button>
+    <button @click:=script.setup click.payload=36>6x6</button>
+{% else %}
+    <div class="board
+        {% if state.cards.length > 16 %}hard{% endif %}">
+    {# Loop through each card in the "deck" (state.cards) #}
+    {% for card in state.cards %}
+        {# Use "key=" to speed up DOM reconciler #}
+        <div key="c{{ card.id }}"
+            class="card
+            {% if card.id in state.revealed %}
+                flipped
+            {% endif %}
+            "
+            style="
+            {% if state.win %}
+                animation: flipping 0.5s infinite alternate;
+                animation-delay: {{ card.id }}.{{ card.id }}s;
+            {% endif %}
+            "
+            @click:=script.flip
+            click.payload="{{ card.id }}">
+            {% if card.id in state.revealed %}
+                {{ card.symbol }}
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+    <p style="{% if state.failedflip %}
+                color: red{% endif %}">
+        {{ state.message }}</p>
+{% endif %}
+</Template>
+
+<State
+    message="Good luck!"
+    win:=false
+    cards:=[]
+    revealed:=[]
+    lastflipped:=null
+    failedflip:=null
+></State>
+
+<Script>
+const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+function setup(payload) {
+    const count = Number(payload);
+    let symbols = symbolsStr.substr(0, count/2).split("");
+    symbols = symbols.concat(symbols); // duplicate cards
+    let id = 0;
+    while (id < count) {
+        const index = Math.floor(Math.random()
+                                    * symbols.length);
+        const symbol = symbols.splice(index, 1)[0];
+        state.cards.push({symbol, id});
+        id++;
+    }
+}
+
+function failedFlipCallback() {
+    // Remove both from revealed array & set to null
+    state.revealed = state.revealed.filter(
+            id => id !== state.failedflip
+                    && id !== state.lastflipped);
+    state.failedflip = null;
+    state.lastflipped = null;
+    state.message = "";
+    element.rerender();
+}
+
+function flip(id) {
+    if (state.failedflip !== null) {
+        return;
+    }
+    id = Number(id);
+    if (state.revealed.includes(id)) {
+        return; // double click
+    } else if (state.lastflipped === null) {
+        state.lastflipped = id;
+        state.revealed.push(id);
+    } else {
+        state.revealed.push(id);
+        const {symbol} = state.cards[id];
+        const lastCard = state.cards[state.lastflipped];
+        if (symbol === lastCard.symbol) {
+            // Successful match! Check for win.
+            const {revealed, cards} = state;
+            if (revealed.length === cards.length) {
+                state.message = "You win!";
+                state.win = true;
+            } else {
+                state.message = "Nice match!";
+            }
+            state.lastflipped = null;
+        } else {
+            state.message = "No match.";
+            state.failedflip = id;
+            setTimeout(failedFlipCallback, 1000);
+        }
+    }
+}
+</Script>
+
+<Style>
+h3 {
+    background: #B90183;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+}
+.board {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 2px;
+    width: 100%;
+    height: 150px;
+    width: 150px;
+}
+.board.hard {
+    grid-gap: 1px;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(6, 1fr);
+}
+.board > .card {
+    background: #B90183;
+    border: 2px solid black;
+    border-radius: 1px;
+    cursor: pointer;
+    text-align: center;
+    min-height: 15px;
+    transition: background 0.3s, transform 0.3s;
+    transform: scaleX(-1);
+    padding-top: 2px;
+    color: #B90183;
+}
+.board.hard > .card {
+    border: none !important;
+    padding: 0;
+}
+.board > .card.flipped {
+    background: #FFFFFF;
+    border: 2px solid #B90183;
+    transform: scaleX(1);
+}
+
+@keyframes flipping {
+    from { transform: scaleX(-1.1); background: #B90183; }
+    to {   transform: scaleX(1.0);  background: #FFFFFF; }
+}
+</Style>
+
+<TestSuite
+    src="./examplelib-tests/MemoryGame-tests.html"
+></TestSuite>
+
+</Component>
+
+
+
+
+<Component namespace="eg" name="ConwayGameOfLife">
+<Template>
+  <div class="grid">
+    {% for i in script.exports.range %}
+        {% for j in script.exports.range %}
+          <div
+            @click:=script.toggle
+            payload:='[ {{ i }}, {{ j }} ]'
+            style="{% if state.cells|get:i %}
+                {% if state.cells|get:i|get:j %}
+                    background: #B90183;
+                {% endif %}
+            {% endif %}"
+           ></div>
+        {% endfor %}
+    {% endfor %}
+  </div>
+  <div class="controls">
+    {% if not state.playing %}
+        <button @click:=script.play alt="Play">&#x25B6;</button>
+    {% else %}
+        <button @click:=script.pause alt="Pause">&#x2016;</button>
+    {% endif %}
+
+    <button @click:=script.randomize alt="Randomize">RND</button>
+    <button @click:=script.clear alt="Randomize">CLR</button>
+    <label>Spd: <input [state.bind]
+        name="speed"
+        type="number" min="1" max="10" step="1" /></label>
+  </div>
+</Template>
+
+<State
+    playing:=false
+    speed:=3
+    cells:='{
+        "12": { "10": true, "11": true, "12": true },
+        "11": { "12": true },
+        "10": { "11": true }
+    }'
+></State>
+
+<Script>
+    function toggle([ i, j ]) {
+        if (!state.cells[i]) {
+            state.cells[i] = {};
+        }
+        state.cells[i][j] = !state.cells[i][j];
+    }
+
+    function play() {
+        state.playing = true;
+        setTimeout(() => {
+            if (state.playing) {
+                updateNextFrame();
+                element.rerender(); // manually rerender
+                play(); // cue next frame
+            }
+        }, 2000 / state.speed);
+    }
+
+    function pause() {
+        state.playing = false;
+    }
+
+    function clear() {
+        state.cells = {};
+    }
+
+    function randomize() {
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!state.cells[i]) {
+                    state.cells[i] = {};
+                }
+                state.cells[i][j] = (Math.random() > 0.5);
+            }
+        }
+    }
+
+    // Helper function for getting a cell from data
+    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
+    function updateNextFrame() {
+        const nextData = {};
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!nextData[i]) {
+                    nextData[i] = {};
+                }
+                const count = countNeighbors(i, j);
+                nextData[i][j] = get(i, j) ?
+                    (count === 2 || count === 3) : // stays alive
+                    (count === 3); // comes alive
+            }
+        }
+        state.cells = nextData;
+    }
+
+    function countNeighbors(i, j) {
+        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
+                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
+                get(i + 1, j - 1), get(i - 1, j + 1)];
+        return neighbors.filter(v => v).length;
+    }
+    script.exports.range = Array.from({length: 24}, (x, i) => i);
+</Script>
+
+<Style>
+    :host {
+        display: flex;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(24, 5px);
+        margin: -2px;
+        grid-gap: 1px;
+    }
+    .grid > div {
+        background: white;
+        width: 5px;
+        height: 5px;
+    }
+    input, button {
+        width: 40px;
+    }
+</Style>
+
+</Component>
+

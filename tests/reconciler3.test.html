@@ -1,0 +1,197 @@
+<!--
+    Tests of tagTransforms and keys
+-->
+<component name="ReconcilerTester3"><testsuite>
+
+
+<test name="ensure ModRec and MTL are defined">
+    <script>
+        const directiveShortcuts = [[/^@/, 'component.event'],
+                                    [/:$/, 'component.dataProp']];
+        Modulo.utils.makeMockElement = function reconcile (html)  {
+            const {makeDiv} = Modulo.utils;
+            const mockElement = makeDiv(html);
+            return mockElement;
+        }
+
+        Modulo.utils.getRecPatches = function reconcile (oldHTML, newHTML, tagTransforms)  {
+            const {makeDiv} = Modulo.utils;
+            const mockElement = Modulo.utils.makeMockElement(oldHTML);
+            const modRec = new ModRec({
+                directiveShortcuts,
+            });
+            modRec.reconcile(mockElement, newHTML, tagTransforms);
+            return modRec.patches;
+        };
+
+        Modulo.utils.patchStringify = function patchStringify (patch)  {
+            const { mergeAttrs } = Modulo.utils;
+            const [node, method, arg1] = patch;
+            let arg = arg1;
+            if (arg1 && arg1.nodeType && arg1.nodeType === 1) { // elem
+                const attrs = mergeAttrs(arg1);
+                arg = `<1 ${arg1.tagName}>${JSON.stringify(attrs)}</1>`;
+            } else if (arg1 && arg1.nodeType) { // text or something else
+                const value = arg1.nodeValue ? arg1.nodeValue.trim() : '?';
+                arg = `<${node.nodeType}>nodeValue=(${value})</${node.nodeType}>`;
+            }
+
+            return `<${node.nodeType} ${node.nodeName}> ${method}("${arg}") </${node.nodeType}>`
+        };
+
+        Modulo.utils.pToString = function patchStringify (patches)  {
+            return patches.map(Modulo.utils.patchStringify).join('\n')
+        };
+
+        const {ModRec} = Modulo.reconcilers;
+        assert: ModRec
+    </script>
+</test>
+
+
+<test name="Test tagTransforms">
+    <script name="Doesn't do transform when not specified">
+        const { getRecPatches, pToString } = Modulo.utils;
+        const patches = pToString(getRecPatches(
+            '<p></p>',
+            '<p><testy a=b c=d></testy></p>',
+        ));
+        const expected = '<1 P> appendChild("<1 TESTY>{"a":"b","c":"d"}</1>") </1>';
+
+        assert: patches === expected
+    </script>
+
+    <script name="Does tag transform with expected attributes">
+        const { getRecPatches, pToString } = Modulo.utils;
+
+        const patches = pToString(getRecPatches(
+            '<p></p>',
+            '<p><testy a=b c=d></testy></p>',
+            { testy: 'x-stuff' },
+        ));
+
+        const expected = '<1 P> appendChild("<1 X-STUFF>{"a":"b","c":"d"}</1>") </1>';
+
+        assert: patches === expected
+    </script>
+
+
+    <script name="Can handle multiple nested tag transforms">
+        const { getRecPatches, pToString } = Modulo.utils;
+
+        const patches = pToString(getRecPatches(
+            '<div></div>',
+            ('<div><otherthing a=b c=d><span>' +
+              '<otherthing abc="123"></otherthing>' +
+                '</span></otherthing></div>'),
+            { testy: 'x-stuff', otherthing: 'y-other' },
+        ));
+
+        const expected = '<1 DIV> appendChild("<1 Y-OTHER>{"a":"b","c":"d"}</1>") </1>';
+
+        assert: patches === expected
+    </script>
+</test>
+
+
+<test name="Keys">
+
+    <script name="Can handle keyed elements lined up but interspersed">
+        const { getRecPatches, pToString } = Modulo.utils;
+
+        const patches = pToString(getRecPatches(
+            (`
+                <div>A</div>
+                <div key="bob">B</div>
+                <div>C</div>
+                <div key="drew">D</div>
+                <div>E</div>
+            `),
+            (`
+                <div>Alice</div>
+                <div key="bob">Bob</div>
+                <div>Candice</div>
+                <div key="drew">Drew</div>
+                <div>Eve</div>
+            `),
+        ))
+
+        const expected = (`
+            <3 #text> node-value("Alice") </3>
+            <3 #text> node-value("Bob") </3>
+            <3 #text> node-value("Candice") </3>
+            <3 #text> node-value("Drew") </3>
+            <3 #text> node-value("Eve") </3>
+        `).trim().replace(/  /g, ''); // scrub ws
+
+        assert: patches === expected
+    </script>
+
+    <script name="Can handle everything being a key">
+        const { getRecPatches, pToString } = Modulo.utils;
+
+        const patches = pToString(getRecPatches(
+            (`
+                <div key="0">A</div>
+                <div key="bob" notakey="ok">B</div>
+                <div key="1">C</div>
+                <div  otherattr="null" key="drew">D</div>
+                <div key="2">E</div>
+            `),
+            (`
+                <div key="0">Alice</div>
+                <div key="bob" notakey="ok">Bob</div>
+                <div key="1">Candice</div>
+                <div otherattr="null" key="drew">Drew</div>
+                <div key="2">Eve</div>
+            `),
+        ))
+
+        const expected = (`
+            <3 #text> node-value("Alice") </3>
+            <3 #text> node-value("Bob") </3>
+            <3 #text> node-value("Candice") </3>
+            <3 #text> node-value("Drew") </3>
+            <3 #text> node-value("Eve") </3>
+        `).trim().replace(/  /g, ''); // scrub ws
+
+        assert: patches === expected
+    </script>
+
+    <!--
+    <script name="Can handle keyed elements interspersed but not lined up">
+        const { getRecPatches, pToString } = Modulo.utils;
+
+        const patches = pToString(getRecPatches(
+            (`
+                <div key="bob">B</div>
+                <div>A</div>
+                <div>C</div>
+                <div key="dave">D</div>
+                <div>E</div>
+            `).trim().replace(/  /g, ''), // scrub ws
+            (`
+                <div>Alice</div>
+                <div key="bob">Bob</div>
+                <div>Candice</div>
+                <div key="dave">Dave</div>
+                <div>Eve</div>
+            `).trim().replace(/  /g, ''), // scrub ws
+        ))
+
+        const expected = (`
+            <3 #text> node-value("Alice") </3>
+            <3 #text> node-value("Candice") </3>
+            <3 #text> node-value("Eve") </3>
+            <3 #text> node-value("Bob") </3>
+            <3 #text> node-value("Dave") </3>
+        `)
+        console.log(patches, expected)
+
+        assert: patches === expected
+    </script>
+    -->
+</test>
+
+</testsuite></component>
+

@@ -1,0 +1,341 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="directives.html"
+    pagetitle="Directives"
+    navbar="docs">
+
+<h1>Directives</h1>
+
+<p><em>Directives</em> are one of the core features of Modulo. It allows for
+callbacks to be triggered when a particular DOM element is "mounted" or first
+appears in the DOM. It allows for your custom code to access references to DOM
+nodes created after rendering.</p>
+
+<mws-Section name="directives">Introduction to directives</mws-Section>
+
+<p>Every directive has a name. Every directive is specified as an attribute on
+the DOM element that you wish to gain access to, by enclosing the name in
+square brackets. For example, the <em>State</em> CPart has the directive named
+<code>bind</code>, making the full attribute be <code>[state.bind]</code>. Some
+directives have shortcut names. For example, <code>[component.event]</code> can
+be shortened to only a single at-sign, <code>@</code>.</p>
+
+<p>Directives also have callback functions. Just like lifecycle callbacks, a
+directive callback name is created by suffixing a string to the end of the name
+of the directive. Unlike lifecycle callback functions, directive callback
+functions end with <code>Mount</code> and <code>Unmount</code>.</p>
+
+<h3>Built-in directives vs custom directives</h3>
+
+<p>Modulo ships with a total of 4 built-in directives, defined by the built-in
+<em>CParts</em> (1 from <em>State</em> and 3 from <em>Component</em>).
+Typically, the built-in directives are all you need. However, just like with
+lifecycle functions, the <em>Script</em> CPart also exposes the directive
+interface to component developers. This is so that you can create custom
+directives in a component to access the DOM after rendering.</p>
+
+
+<mws-Section name="builtin">Built-in directives</mws-Section>
+
+<p>Modulo ships with a total of 4 built-in directives, defined by the built-in
+<em>CParts</em> (1 from <em>State</em> and 3 from <em>Component</em>).</p>
+
+<ul>
+    <li><code>[component.dataProp]</code> (<em>shortcut:</em> suffix <code>:</code>) -
+    Attach data to a DOM element's `.dataProp` object, which can be used to
+    directly pass <code>renderObj</code> values as <em>Props</em> or
+    events
+        <ul>
+            <li>Symbols: <code>ev:=script.gotClicked</code>,
+                <code>data:=state.dataArray</code>,
+                <code>blogs:=props.blogArray</code> etc - Data-props can attach
+                any values that are exposed in the
+                <code>renderObj</code> by any CPart in your component. Use
+                JavaScript reference notation, e.g.
+                <code>state.objdata.prop1</code> would access something like
+                <code>&lt;State&nbsp;objdata:='{"prop1":&nbsp;"my&nbsp;data"}'&gt;</code>
+            </li>
+            <li>Primitives: <code>arr:=[]</code>, <code>obj:={}</code>
+            <code>boo:=true</code>, <code>num:=3</code>, etc -
+            The data-prop can also be used to attach any data in JSON format
+            (whatever "JSON.parse" can parse).</li>
+        </ul>
+    </li>
+
+    <li><code>[component.event]</code> (<em>shortcut:</em> prefix <code>@</code>) -
+    Attach event listeners to DOM elements, and remove them when the DOM
+    elements are removed. (For jQuery users, this is used for similar purposes
+    as "live" (delegated) events, but is faster.)
+        <ul>
+            <li><code>payload=...</code> - By assigning to the "payload"
+            property, either with a regular HTML attribute or a <code>:=</code>
+            data-prop, you can provide extra arguments to events.</li>
+            <li><code>click.payload=...</code>,
+            <code>mouseover.payload=...</code>, etc - If you have multiple
+            events attached, you can attach separate payloads by prefixing the
+            "payload" attribute with the name of the event followed by a
+            dot.</li>
+        </ul>
+    </li>
+
+    <li><code>[component.slot]</code> - Reattach the original child elements
+    that this component had when it was first mounted to a new DOM element.
+    (For React users, this is similar to doing
+    <code>{this.props.children}</code>.)</li>
+
+    <li><code>[state.bind]</code> - Two-way binding with <em>State</em>
+    data, with the key determined by the <code>name=</code> property of
+    whatever it is attached to.</li>
+</ul>
+
+
+<p>Important directive facts: Directives are discovered during the
+<code>reconcile</code> lifecycle phase when DOM reconciliation is occurring, and
+invoked during the <code>update</code> phase. Note that they are independent
+of the <em>Template</em> CPart: You can have a component that has no
+<em>Template</em> but still may employ directives, e.g. if it generates HTML
+contents some other way.</p>
+
+
+
+
+<mws-Section name="custom">Custom directives</mws-Section>
+
+
+<blockquote><p><strong>Custom directives are like "refs"</strong> - Directives
+have the same uses as Refs in <a
+href="https://reactjs.org/docs/refs-and-the-dom.html"
+target="_blank">React</a>: &ldquo;Managing focus, text selection, or media
+playback, triggering imperative animations, or integrating with third-party DOM
+libraries.&rdquo;</p></blockquote>
+
+<p>Custom directives are used for direct access to the DOM. They are invoked
+when a particular element is first rendered on the screen (<code>Mount</code>),
+invoked when that attribute has any changes (e.g. the value gets changed, also
+<code>Mount</code>), and also invoked when about to be removed from the
+document (<code>Unmount</code>). This allows you to do custom set-up or
+tear-down code for particular elements, such as to attach third-party
+JavaScript frameworks in a convenient manner.</p>
+
+<p>Custom directives can be easily registered in <em>Script</em> CParts simply
+by defining a function with a certain name. For example, for a directive called
+<code>myinput</code> directive, you can create a function called
+<code>function&nbsp;myinputMount(opts)&nbsp;{</code>. A full, working example
+is below, which uses a custom directive to focus on an input when a button is
+clicked:</p>
+
+<p><strong>Example custom directives:</strong></p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+{# [script.myinput] is a custom directive, defined below #}
+<input [script.myinput] />
+
+{# [component.event] is a built-in directive (shortcut is @) #}
+<button [component.event]click:=script.showInfo>
+    Click me
+</button>
+</Template>
+
+<Script>
+    function myinputMount(mountOptions) {
+        element.inputRef = mountOptions.el;
+        // Try uncommenting the following to see data:
+        //console.log("myinputMount:", mountOptions);
+    }
+    function showInfo(el) {
+        alert("Focusing on:" + String(element.inputRef));
+        element.inputRef.focus();
+    }
+</Script>
+'></mws-Demo>
+
+
+
+<h3>Custom directive pitfalls</h3>
+
+<p>A quick word of caution on custom directives: If you find yourself using
+custom directives to do vanilla JS DOM manipulation often, you are probably
+doing something wrong! They are meant as an "emergency escape hatch" to gain
+access to the DOM underneath, and typically you only use them to integrate with
+other libraries. The most common usage is mixing in older jQuery-style
+libraries that require a reference to a DOM element. In general, it's when you
+run into the limits of what Modulo is capable of doing.</p>
+
+<h4>Directives vs. Templates for manipulating DOM</h4>
+
+<p>Not sure which to use to manipulate the DOM and generate HTML? Short answer:
+Templates! Long answer: Directives deal with direct DOM references, and thus
+are almost always messier to use. Modulo's <a
+href="/docs/templating.html">templating system is designed</a> to generate a
+string of HTML code as a purposeful limitation during the <code>render</code>
+phase, and thus prevents this messiness with a stricter structure.</p>
+
+<p>So, when you can, try to make the DOM the "source of truth", and attach data
+to DOM elements via regular HTML properties or <code>:=</code>-style dataProp
+properties. In other words, avoid using direct DOM manipulation as your first
+approach, instead only using this "escape hatch" to vanilla JS as a last
+resort.</p>
+
+
+<div class="InfoBox">
+    <h2>Directives and template variables</h2>
+
+    <p>Don't get confused when attempting to mix <em>Template</em> CPart
+    variables with directives.  Directives cannot access template variables,
+    since directives are only are applied after the template is fully rendered
+    and all template variables are already forgotten. As an example, consider
+    the following code:</p>
+
+<mws-Demo
+text='
+<Template>
+    {% for athlete in state.team %}
+        {# (HTML Attributes) #}
+        {# Broken, will not work: #}
+        <a href:=athlete.url>{{ athlete.name }}</a>
+
+        {# Correct, will work: #}
+        <a href="{{ athlete.url }}">{{ athlete.name }}</a>
+
+        {# (Events) #}
+        {# Also broken, will not work: #}
+        <button @click:=athlete.myClickCallback>
+            {{ athlete.name }}</button>
+
+        {# Correct, will work: #}
+        <button @click:=script.selectOne payload="{{ athlete.id }}">
+            {{ athlete.name }}</button>
+    {% endfor %}
+</Template>
+'></mws-Demo>
+
+<blockquote>
+    <p><strong>Why "payload"?</strong> Why does Modulo take this approach, vs
+    something like React, that allows direct attachment of anonymous JavaScript
+    functions? As any React developer knows by now, there are a lot of
+    "footguns" (common mistakes) with attaching events like this, specifically
+    because complexities with "this" context, anonymous functions, and bound
+    functions with arguments can make introspection (e.g. interactive
+    debugging) hard.</p>
+
+    <p>The Modulo approach is always "DOM determines behavior".  Just by using
+    "Inspect" in your browser's Developer Tools, you can examine or even modify
+    the "payload" attribute while debugging event behavior. In other words,
+    Modulo <em>tends to treat the DOM as the "source of truth"</em>, and thus
+    derives it's behavior from properties on DOM elements.</p>
+</blockquote>
+
+    <p>The first attempt (HTML Attributes) uses a directive (<code>[component.dataProp]</code>, in
+    this case using the colon <code>:</code> shortcut), in an attempt to "directly"
+    attach the URL to href. The second attempt correctly uses the template variable
+    with double curly braces to embed it as an actual HTML property.  The first
+    attempt will fail because it fails to take into account that the directives
+    will happen <em>after</em> rendering the template. That is, the resulting HTML
+    will literally resemble something like this:
+    &ldquo;<code>&lt;a href:=athlete.url&gt;Steph Curry &lt;/a&gt;
+    &lt;a href:=athlete.url&gt;Megan Rapinoe&lt;/a&gt;
+    &lt;a href:=athlete.url&gt;Devante Adams&lt;/a&gt;</code>&rdquo;.
+
+    <p>In other words, the "athlete" variable <em>is a temporary Template
+    variable in the for loop</em> (that is to say, not a variable in the
+    <em>renderObj</em>), and will only be used at the templating step, and
+    forgotten immediately after. Since directives are only invoked once
+    templating is fully completed, there is no way to resolve the variable from
+    the for loop.</p>
+
+
+    <p>What is the proper use of the <code>[component.dataProp]</code>
+    directive, you might ask? The proper use is for direct assignment or
+    attachment of values that are not strings or numbers <em>at the top level
+    of the renderObj</em>. Basically, anything that can't be conveniently
+    serialized into a string attribute. The common usage is passing down
+    complex nested data types as <code>Props</code> (i.e. without having to
+    clutter the DOM and waste memory with a massive JSON object serialized as
+    an attribute), or for attaching callbacks from the renderObj.</p>
+
+    <p>We see such correct usage in the second (Events) "correct" example: It
+    references <code>script.selectAthlete</code> which is at the global level.
+    We can tell that it's at the global renderObj level since it starts with
+    <code>script.</code>, referencing the contribution to the renderObj that
+    was provided by the Script CPart. The issue with this, however, is that we
+    won't know <em>which</em> button was clicked, since it references one
+    universal <code>selectAthlete</code> function.
+    This is solved by attaching some sort of ID reference to the DOM element as
+    a "payload" so that the callback function knows which athlete was selected.
+    This is the correct approach: It uses the DOM as a "source of truth" and is
+    predictable in behavior, with no "hidden" functions getting attached.</p>
+
+</div>
+
+
+<!-- TODO The following documentation needs updating once we have a directives
+configuration interface ... -->
+
+<!--
+<h3>Registering CPart directives with shortcuts</h3>
+
+<p>If you are a CPart developer, you might want to register a shortcut along
+with your CPart's directive. Note that this only applies to CPart developers:
+Component developers should never create shortcuts for the script-tag based
+custom directives used (which should be avoided to begin with).</p>
+
+
+<p>See below for an example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    Game Shop: 31 moneys<br />
+    Avg Movie Creeps: 10 moneys<br />
+    <button @click:=script.toggle>
+        {% if state.show %}
+        Hide controls (and trigger unmount callbacks)
+        {% else %}
+        Show controls (and trigger mount directive callbacks)
+        {% endif %}
+    </button> <br />
+    {% if state.show %}
+        <button %%%buy="GMC">(text is replaced)</button>
+        <button %%%sell="GMC"></button>
+        <button %%%long="AMC"></button>
+        <button %%%short="AMC"></button>
+    {% endif %}
+</Template>
+
+<State
+    show:=false
+></State>
+
+<Script>
+    function factoryCallback(partOptions, factory, loadObj)  {
+        loadObj.component.directiveShortcuts.push([/^%%%/, "script.example"]);
+    }
+
+    function exampleMount(info) {
+        console.log("Mounting directive:", info);
+        const {el, value, attrName, rawName} = info;
+        el.textContent = `${attrName} ${value}`;
+        el.onclick = () => alert(attrName + "ing " + value);
+    }
+    function exampleUnmount(info) {
+        console.log("Unmounting directive:", info);
+    }
+    function toggle() {
+        state.show = !state.show;
+    }
+</Script>
+'></mws-Demo>
+
+<p><strong>Note:</strong> "Do as I say, not as I do": To keep the previous
+example simple, we are demonstrating it's use within a script tag in a
+component, but in general shortcuts are only intended for CPart directives, not
+custom script tag directives.</p>
+-->
+
+</mws-Page>

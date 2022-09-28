@@ -1,0 +1,475 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="/templating.html"
+    pagetitle="Templating"
+    navbar="docs">
+
+<h1>Modulo Templating Language</h1>
+
+<p>This document explains the language syntax and functionality of the included
+Modulo template system.</p>
+
+<p>Modulo's templating language is designed to be fairly versatile in
+capabilities, while still feel comfortable to those only used to working with
+HTML. If you have any exposure to other similar template languages, such as
+Django (Python), Shopify's Liquid (Ruby), Hugo (Go), Jinja2 (Python), Nunjucks
+(JavaScript), or Twig (PHP), you should feel right at home with Modulo's
+templates. In fact, Modulo's templating was modeled so closely on Django's,
+that much of this documentation was <a
+href="https://docs.djangoproject.com/en/4.0/ref/templates/language/">
+heavily inspired by Django's own documentation</a>. This also means that most
+text editors already can highlight Modulo template code: Just configure your
+editor to syntax highlight <em>Django HTML templates</em>, and you'll be all
+set for editing Modulo template or library files. Thanks, Django!</p>
+
+
+
+<div class="InfoBox">
+    <h2>Philosophy</h2>
+
+    <p>In approach, Modulo's tempting language joins the ranks of the <a
+    target="_blank"
+    href="https://i5ar.medium.com/template-languages-a7b362971cbc">"Djangolike"</a>
+    templating languages: Intentionally limited, and resembling markup more
+    than programming code.  If you're used to languages which permit mixing
+    programming code directly with DOM elements, such as with React or Svelte,
+    you'll want to bear in mind that the Modulo template system is not simply
+    JavaScript embedded into HTML. This is by design: the template system is
+    meant to express presentation, not program logic.</p>
+
+    <p>The Modulo template system provides "tags" which function similarly to some
+    programming constructs&mdash;an if tag for boolean tests, a for tag for
+    looping, etc.&mdash;but the template system will not execute arbitrary
+    JavaScript expressions. Only the tags, filters and syntax listed here is
+    supported by default (although you can add your own extensions to the template
+    language as needed).</p>
+
+    <p>Why use a text-based template instead of an XML-based one (like React's
+    JSX), or an attribute DOM-based one (like Vue, Angular, or Riot)? The same
+    reason behind the MVC paradigm: "To separate internal representations of
+    information from the ways information is presented to and accepted from the
+    user". Supporting pure-text output enforces this clear wall of separation
+    between presentation and business logic. Furthermore, this will be more
+    familiar to backend developers more familiar with string-based templating
+    in general (such as Ruby, Python, or PHP developers).</p>
+</div>
+
+<mws-Section name="templates">Templates</mws-Section>
+
+<p>A "template" is the text within a Template CPart. Most Components defined
+within Modulo will also define a Template CPart in order to render their
+contents.</p>
+
+<p>A template contains variables, which get replaced with values when the
+template is evaluated, and tags, which control the logic of the template.</p>
+
+<p>Below is a minimal template that illustrates a few basics. Each element will
+be explained later in this document.</p>
+
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Templating_1"
+></mws-Demo>
+
+
+
+
+<mws-Section name="variables">Variables</mws-Section>
+
+<p>Variables look like this: <code>{{ variable }}</code>. When the template
+engine encounters a variable, it evaluates that variable and replaces it with
+the result. Variable names consist of any combination of alphanumeric
+characters and the underscore ("_") but may not start with an underscore, and
+may not be a number. The dot (".") also appears in variable sections, although
+that has a different meaning, as indicated below. Importantly, you cannot have
+spaces or punctuation characters in variable names.</p>
+
+<h3>The dot (.)</h3>
+
+<p>Use a dot (.) to access sub-properties of a variable. This syntax is much
+like JavaScript.</p>
+
+<p>In the above example, <code>{{ state.count }}</code> will be replaced with
+the value of the "count" property of the state data. Similarly,
+<code>{{ script.exports.title }}</code> reaches even further, by first
+accessing the <code>script</code> variable, then the <code>exports</code>
+subproperty, then the <code>title</code> subproperty.</p>
+
+<p>If you use a variable that doesn't exist, the template system will insert
+the value of <code>undefined</code>, much like in JavaScript.</p>
+
+<p>Note that "bar" in a template expression like <code>{{ foo.bar }}</code>
+will be interpreted as a literal string property of "foo', and not a variable
+"bar", even if one exists in the template context. If you wish to to do the
+opposite behavior, that is, actually resolve "bar" into it's own value, and
+then use that value to access a property of bar, consider using the
+<code>get</code> filter: <code>{{&nbsp;foo|get:bar&nbsp;}}</code>. This is
+equivalent to the "square brackets" notation of JavaScript (e.g.
+<code>foo[bar]</code>), and thus is also useful for accessing numeric indices.
+For an example, if we have an array in our state like
+<code>foo:='["a",&nbsp;"b",&nbsp;"c"]'</code>, then we can access
+<code>"b"</code> as follows: <code>{{&nbsp;state.foo|get:1&nbsp;}}</code>.</p>
+
+<p>Variable attributes that begin with an underscore should generally not be
+accessed, as that can be used to indicate private.</p>
+
+
+
+<h3>What variables are available</h3>
+
+<p>Variables come from the component's <code>renderObj</code> that is produced
+in the <code>prepare</code> lifecycle phase. <a
+href="/docs/directives.html#renderobj">More on the "renderObj" in the section
+on lifecycle.</a> In practicality, this is another way to say that most
+variables typically "come from" the CParts of a component. That is,
+<code>state</code> will provide the state values, <code>props</code> will
+provide the values passed down to this component, and finally
+<code>script</code> will provide variables from script tags. In other words,
+each CPart "decides" which variables it supplies to the Template based on it's
+"prepare" lifecycle behavior. See the "Variables from CParts" section below for
+a more thorough look at this.</p>
+
+
+<h3>Custom variables using the <em>Script</em> "prepare" callback</h3>
+
+<p>If you want to create computed variables (like in Vue.js), you can create a
+custom <code>prepare</code> lifecycle callback in your Script CPart tag as
+follows. Examine the following example:</p>
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Templating_PrepareCallback"
+></mws-Demo>
+
+
+
+
+<h4>Variables from CParts</h4>
+
+<p>Each <em>CPart</em> within a given component may contribute a variable to
+the <em>Template</em>. Of the built-in CParts, the following contribute a
+variable with useful data:</p>
+
+<ul>
+    <li><strong>Props</strong> - If the <em>Props</em> CPart is present, then
+    you will have a <code>{{ props }}</code> variable available. This gives
+    access to the current value of props data. For example,
+    <code>{{ props.title }}</code> gives access to the current value of the
+    "title" attribute of the component.</li>
+
+    <li><strong>State</strong> - If the <em>State</em> CPart is present, then
+    you will have a <code>{{ state }}</code> variable available. This gives
+    access to the current value of state data, the object that represents
+    state. For example, <code>{{ state.number }}</code> gives access to the
+    current value of the "number" property of state.</li>
+
+    <li><strong>Script</strong> - If the <em>Script</em> CPart is present, then
+    you will have a <code>{{ script }}</code> variable available. The main
+    uses of this for access to computed variables from the
+    <code>prepareCallback</code>. Another use is to access
+    <code>script.exports</code> variable as a way to store global, static data
+    shared between all instances of a component.</li>
+</ul>
+
+
+<h4>Variables from templatetags</h4>
+
+<p>We'll go over template-tags later, but some template-tags can add variables
+into the mix as well. As a sneak-peak, examine the following code:</p>
+
+<mws-Demo text='
+{% for athlete in state.athletes %}
+    <p>{{ athlete.name }}</p>
+{% endfor %}
+'></mws-Demo>
+
+<p>Note how <code>athlete</code> declares a new variable, which can be reused
+in <code>{{ athlete.name }}</code>. For more on for-loops, see the 
+<a href="/docs/template_reference.html#tags">built-in
+template-tag reference.</a></p>
+
+
+
+<mws-Section name="filters">Filters</mws-Section>
+
+<p>You can modify variables for display by using filters.</p>
+
+<p>Filters look like this: <code>{{ name|lower }}</code>. This displays the
+value of the <code>{{ name }}</code> variable after being filtered through the
+lower filter, which converts text to lowercase. Use a pipe (|) to apply a
+filter.</p>
+
+<p>Filters can be "chained." The output of one filter is applied to the next.
+This chaining feature can be applied, like in
+<code>{{&nbsp;state.color|allow:"red,blue"|default:"green"&nbsp;}}</code>,
+which is a way to conditionally allow for only certain strings to be in
+<code>state.color</code>, while providing a default if none were specified.</p>
+
+<p>Some filters take arguments. A filter argument looks like this:
+<code>{{ state.bio|truncate:30 }}</code>.
+This will display the first 30 characters of the bio variable, possibly
+appending an ellipsis if its full length exceeds that.</p>
+
+<p>Filter arguments that contain spaces must be quoted; for example, to join a
+list with commas and spaces you'd use <code>{{ state.list|join:", " }}</code>.</p>
+
+<p>Modulo's templating language provides several dozen built-in template
+filters. You can read all about them in the
+<a href="/docs/template_reference.html#filters">built-in filter reference</a>.
+To give you a taste of what's available, here are some of the more commonly
+used template filters:</p>
+
+
+<div class="InfoBox">
+  <h2>Common filters</h2>
+
+<h3>default</h3>
+<p>If a variable is false or empty, use given default. Otherwise, use the value of
+the variable. For example:</p>
+
+<pre>
+{{ value|default:"nothing" }}
+</pre>
+
+<p>If value isn't provided or is empty, the above will display "nothing".</p>
+
+
+<h3>length</h3>
+<p>Returns the length of the value. This works for both strings and lists. For
+example:</p>
+
+<pre>
+{{ state.articles|length }}
+</pre>
+
+<p>If <code>state.items</code> is <code>['a', 'b', 'c', 'd']</code>, the output
+will be 4.</p>
+</div>
+
+<p>Again, these are just a few examples; see the <a
+href="/docs/template-reference.html#filters">built-in filter reference</a>.
+for the complete list.</p>
+
+<p>You can also create your own custom template filters; see Custom template
+tags and filters.</p>
+
+
+<mws-Section name="tags">Tags</mws-Section>
+
+<p>Tags look like this: <code>{% tag %}</code> (except  with the word "tag"
+replaced with something else). Tags can be more complex than variables: Some
+create text in the output, some control flow by performing loops or logic, and
+some load external information into the template to be used by later
+variables.</p>
+
+<p>Most built-in tags require beginning and ending tags, in the format of:
+<code>{%&nbsp;tag&nbsp;%}...contents...{%&nbsp;endtag&nbsp;%}</code></p>
+
+<p>Modulo ships with several built-in template-tags. You can read all about
+them in the <a
+href="/docs/templating-reference.html#filters">built-in template-tag reference</a>.</p>
+
+<div class="InfoBox">
+  <h2>Common Template-Tags</h2>
+
+<p>Here are a couple commonly used template-tags:</p>
+
+<h4>for</h4>
+<p>Duplicate a block of HTML code for every item in a collection of items (e.g.
+an array). This allows a HTML code to be repeated while looping over each item
+in an array. For example, to display a list of athletes, assuming one was
+stored as an array of objects within <code>state.athletes</code>:</p>
+
+<mws-Demo text='
+<ul>
+    {% for athlete in state.athletes %}
+        <li>{{ athlete.name }}</li>
+    {% endfor %}
+</ul>
+'></mws-Demo>
+
+<h4>if</h4>
+<p>Evaluates a variable, and if that variable is "true" the contents of the
+block are displayed:</p>
+
+<mws-Demo text='
+{% if state.athletes %}
+    Number of athletes: {{ state.athletes|length }}
+{% endif %}
+'></mws-Demo>
+
+<p>In the above, if state.athletes is not empty, the number of athletes will be
+displayed by the {{ state.athletes|length }} variable.</p>
+
+<p>You can also use filters and various operators in the if tag:</p>
+
+<mws-Demo text='
+{% if state.athletes|length gt 1 %}
+   Team: {% for athlete in state.athletes %} ... {% endfor %}
+{% else %}
+   Athlete: {{ state.athletes|first }}
+{% endif %}
+'></mws-Demo>
+</div>
+
+
+<h3>Final notes on tags</h3>
+
+<p>The most important difference between template tags and template filters are
+that template tags are interpreted at "compile-time" (when the template is
+first loaded or when you are building a JavaScript build or bundle), while
+filters are interpreted at "render-time" (when the component is outputting it's
+HTML into the DOM). This means that mistakes with template tags might stop the
+component from rendering at all (mistakes such as syntax typo or a buggy
+third-party template tag), while mistakes with filters may only be detected
+when it tries using it, and could even be overlooked if the filter doesn't get
+used, e.g.  it's only within an if statement that you haven't tested.</p>
+
+<p>Also, while the above examples work, be aware that some template filters
+return strings, so mathematical comparisons using filters will generally not
+work as you expect. <code>|length</code> is an exception. You can use
+<code>|number</code> in other cases.</p>
+
+<p>Finally, just like filters, you can also create your own custom template
+tags; see <a href="/docs/templating-reference.html">Templating Reference</a>.</p>
+
+
+<mws-Section name="comments">Comments</mws-Section>
+
+<p>To comment-out part of a line in a template, use the comment syntax:
+<code>{# text in here is ignored #}</code>. This syntax should only be used for
+single-line comments. Due to this, it's not intended for "commenting out" or
+disabling portions of template code.</p>
+
+<p>If you need to comment out a multiline portion of the template, especially a
+block of other template code, use the comment tag instead syntax instead. This
+looks like: <code>{% comment %}text in here is ignored{% endcomment %}</code></p>
+
+<p>Examples of both are below:</p>
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Templating_Comments"
+></mws-Demo>
+
+
+
+<mws-Section name="debugging">Debugging</mws-Section>
+
+
+<p>Modulo templates generate JavaScript code which mirrors the logic found in
+the template. Like all generated code in Modulo, it gets appended to the
+<code>&lt;head&gt;</code> as a <code>&lt;script&gt;</code> tag. When inspecting
+the resulting JavaScript code, note the JavaScript comments to each line
+indicating the Templating text that corresponds, so if a Modulo template is
+behaving unexpectedly, you can examine the actual code getting generated.</p>
+
+<p>Modulo templates also come equipped with the
+<code>{%&nbsp;debugger&nbsp;%}</code> template tag. This will insert a
+<code>debugger;</code> JavaScript statement. This "freezes" your app in time.
+After halting execution at the given statement, your browser's Developer Tools
+will allow you to inspect the values of local variables in the generated
+Template code itself. Note that the <code>CTX</code> variable refers to the
+Template render context (which, in the case of Modulo components, refers to the
+<code>renderObj</code>, or the object that has <code>script</code>,
+<code>state</code> etc. properties generated by component parts). This is
+typically what you'll want to poke around on to figure out why something is
+broken. Example below, with a comment hinting at a story as to why the debugger
+was used:</p>
+
+<mws-Demo text='
+{% for item in state.data %}
+    {{ item.user_id }} {# Bug: Keeps on coming back as "undefined" #}
+    {% debugger %}
+{% endfor %}
+'></mws-Demo>
+
+
+<p><strong>Note:</strong> For obvious reasons, it's very important to remember
+to delete all your "debugger" statements before you release your code, or your
+app may freeze for other people as well.</p>
+
+
+<mws-Section name="escaping">Escaping</mws-Section>
+
+<p>By default in Modulo, every template automatically escapes the output of
+every variable value. Specifically, these five characters are escaped:</p>
+
+<ul>
+    <li>&gt; is converted to &amp;lt;</li>
+    <li>&lt; is converted to &amp;gt;</li>
+    <li>' (single quote) is converted to &amp;#x27;</li>
+    <li>" (double quote) is converted to &amp;quot;</li>
+    <li>&amp; is converted to &amp;amp;</li>
+</ul>
+
+<div class="InfoBox">
+<h2>Why escape</h2>
+
+<p>When generating HTML from templates, there's always a risk that a variable
+will include characters that affect the resulting HTML. For example, consider
+this template fragment:</p>
+
+<pre>
+&lt;p&gt;Hello, {{ state.name }}&lt;/p&gt;
+</pre>
+
+<p>Imagine if a user were to enter their name as
+<code>&lt;/p&gt;&lt;h1&gt;Big</code>. If the template system were to insert
+that value directly, without modification, it would result in the P tag getting
+closed prematurely, and a H1 tag taking over, making the text large.</p>
+
+<p>Clearly, user-submitted data shouldn't be inserted directly into your
+Web pages, at least without some sort of validation. A malicious user could
+even use this vulnerability to add in JavaScript behavior that acts on behalf
+of other users, such as by sending requests to an API. To avoid this problem,
+Modulo uses automatic escaping.</p>
+</div>
+
+<h3>How to turn it off</h3>
+
+<p>Sometimes template variables contain trusted data that you actually intend
+to be rendered as raw HTML, in which case you don't want their contents to be
+escaped. For example, you might want to render a string of HTML in your state
+that was generated by JS on the front-end, or a string of HTML loaded from a
+trusted source, such as a staff-only database.</p>
+
+<p>To disable auto-escaping for an individual variable, use the safe
+filter:</p>
+
+<pre>
+This will be escaped: {{ state.content }}
+This will not be escaped: {{ state.content|safe }}
+</pre>
+
+<p>Think of safe as shorthand for safe from further escaping or can be safely
+interpreted as HTML. In this example, if <code>state.content</code> was defined
+like <code>content="&lt;b&gt;"'</code>, the output will be:</p>
+
+<pre>
+This will be escaped: &amp;lt;b&amp;gt;
+This will not be escaped: &lt;b&gt;
+</pre>
+
+<p>Keep in mind that you should only mark trusted data as <code>|safe</code>.
+You don't want anyone trying to slip in malicious JS behavior! How to validate
+if a bit of HTML is safe to include verbatim (e.g. with <code>|safe</code>) is
+outside the scope of this document, but generally you should only trust HTML
+that has been validated on the backend or database, whitelisting only certain
+features of HTML and checking for "red flags" like embedded JavaScript code, or
+if it's a "staff-only" feature like a team blog, and thus the content generated
+is only editable by a trusted source (e.g. yourself or a member of your team).
+Examine the code below for a concrete example of how this escaping behaves:</p>
+
+
+<mws-Demo
+    demotype="minipreview"
+    fromlibrary="Templating_Escaping"
+></mws-Demo>
+
+</mws-Page>

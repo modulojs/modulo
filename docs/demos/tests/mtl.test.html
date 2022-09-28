@@ -1,0 +1,546 @@
+<component name="MTLTester"><testsuite>
+
+<test name="ensure modulo.engines.Templater is defined">
+    <script>
+        //const { MTL } = Modulo.templating;
+        // Attach simple helper function used below
+        Modulo._r = (tText, context) => {
+            const conf = {
+                Content: tText,
+            };
+            const tmpl = new modulo.registry.engines.Templater(modulo, conf);
+            //console.log('tmpl', tmpl.output);
+            return tmpl.render(context);
+        }
+        assert: modulo.registry.engines.Templater && Modulo._r
+    </script>
+</test>
+
+<test name="Template values and filters">
+
+    <script name="Basic test">
+        const context = {'test': 'tester'};
+        const template = 'This is a {{ test }}!';
+        const expected = 'This is a tester!';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="Sub values">
+        const context = { 'test': { 'thing': 'tester' } };
+        const template = 'This is a {{ test.thing }}, cool. {{ test.thing }}';
+        const expected = 'This is a tester, cool. tester';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="Literal test">
+        const context = {'test': 'tester'};
+        const template = 'This is a {{ "testing"|upper }}';
+        const expected = 'This is a TESTING';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="Filter arguments test 1">
+        const context = {'test': 'tester'};
+        const template = 'This is a {{ test|add:"123" }}';
+        const expected = 'This is a tester123';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="Filter arguments test 2">
+        const context = {'count1': 3, 'count2': 1};
+        const template = 'You have {{ count1 }} ' +
+                'cherr{{ count1|pluralize:"ies,y" }} '+
+                'and {{ count2 }} apple{{ count2|pluralize:"s," }}.';
+        const expected = 'You have 3 cherries and 1 apple.';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Filter arguments test 3">
+        const context = {
+            obj: {a: 'b', c: 'd'},
+            //testing: { instance: { render: arg => arg.c } },
+            testing: { Instance: { render: arg => arg.c } },
+        };
+        const template = '{{ obj|renderas:testing }}';
+        const expected = 'd';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="Char test">
+        const context = {'test': 'tester'};
+        const template = [
+                  'This',
+                  'isn\'t {{',
+                  'a }}?',
+                  '{{ test|upper }}'
+                ].join("\n");
+        const expected = 'This\nisn\'t {{\na }}?\nTESTER';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Escaping test">
+        const context = {'abc123': '<script a=\'b\' c="d">&copy;</' + 'script>'};
+        const template = 'Testing {{ abc123 }} testing {{ abc123|safe }}';
+        const expected = 'Testing &lt;script a=&#x27;b&#x27; c=&quot;d&quot;&gt;' +
+                          '&amp;copy;&lt;/script&gt; testing <script a=\'b\' c="d">' +
+                          '&copy;</' + 'script>';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+</test>
+
+<test name="If template-tag">
+    <script name="If test">
+        const context = {'abc123': '<script a=\'b\' c="d">&copy;</' + 'script>'};
+        const template = 'Testing {{ abc123 }} testing {{ abc123|safe }}';
+        const expected = 'Testing &lt;script a=&#x27;b&#x27; c=&quot;d&quot;&gt;' +
+                          '&amp;copy;&lt;/script&gt; testing <script a=\'b\' c="d">' +
+                          '&copy;</' + 'script>';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If test false">
+        const template = [
+                '{% if test == "TeStEr" %}',
+                'something',
+                '{% endif %} else',
+            ].join('');
+        const context = {'test': 'tester'};
+        const expected = ' else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If else test 1">
+        const template =    [
+                '{% if test == "tester" %}',
+                'correct',
+                '{% else %}',
+                'something',
+                '{% endif %} else',
+                ].join("");
+        const context = {'test': '4tester'};
+        const expected = 'something else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If else test 2">
+        const template = [
+                '{% if test == "tester" %}',
+                'correct',
+                '{% else %}',
+                'something',
+                '{% endif %} else',
+            ].join('');
+        const context = {'test': 'tester'};
+        const expected = 'correct else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If else if test">
+        const template =    [
+                '{% if test == "tester" %}',
+                'wrong1',
+                '{% elif test == "tester2"  %}',
+                'wrong2',
+                '{% elif test == "tester3"  %}',
+                'correct',
+                '{% endif %} else'
+                ].join("");
+        const context = {'test': 'tester3'};
+        const expected =        'correct else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Nested test">
+        const template =    [
+                '{% if test == "tester" %}',
+                    '{% if test == "tester" %}',
+                    'corr',
+                    '{% endif %}',
+                'ect',
+                '{% endif %} else'
+                ].join("");
+        const context = {'test': 'tester'};
+        const expected =        'correct else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Expressions in if statement">
+        const template =    [
+                '{% if test|upper == "TESTER" %}',
+                'correct',
+                '{% endif %} else'
+                ].join("");
+        const context = {'test': 'teSteR'};
+        const expected =        'correct else';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If operators (1)">
+        const template =    [
+                '{% if test == "tester" %}0{% endif %}',
+                '{% if test != "tester" %}a{% endif %}',
+                '{% if test is "tester" %}1{% endif %}',
+                '{% if test is not "tester" %}b{% endif %}',
+                '{% if test in "tester" %}2{% endif %}',
+                '{% if test not in "tester" %}c{% endif %}',
+                '{% if "e" in "tester" %}3{% endif %}',
+                '{% if "b" in lst %}4{% endif %}',
+                '{% if "c" in lst %}d{% endif %}',
+                '{% if "three" in dict %}5{% endif %}',
+                '{% if 3 == dict.three %}6{% endif %}',
+                '{% if 3 > dict.three %}e{% endif %}',
+                '{% if 3 < dict.three %}f{% endif %}',
+                '{% if 3 != dict.three %}g{% endif %}',
+                '{% if 3 <= dict.three %}7{% endif %}',
+                '{% if 3 >= dict.three %}8{% endif %}',
+                '{% if 4 > dict.three %}9{% endif %}',
+                '{% if 4 >= dict.three %}0{% endif %}',
+                '{% if 4 <= dict.three %}h{% endif %}',
+                '{% if 4 < dict.three %}i{% endif %}',
+                '{% if 4 < dict.five %}1{% endif %}',
+                ].join("");
+        const context = {'test': 'tester', 'lst': ['a', 'b'], 'dict': {'three': 3, 'five': 5}};
+        const expected =        '012345678901';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="If operators (2) - in">
+        const context = {
+            varA: 'a',
+            var1: 1,
+            arr: ['a', 'b', 'c'],
+            arr2: [1], // try numeric types in arrays
+            obj: { 'a': 'b', 'c': 'd' },
+            str: 'abc',
+            str2: '1',
+        };
+        const template = (`
+            {% if "a" in arr %}A{% endif %}
+            {% if varA in arr %}B{% endif %}
+            {% if var1 in arr2 %}C{% endif %}
+            {% if "c" in arr %}D{% endif %}
+            {% if var1 in arr %}(err1){% endif %}
+            {% if var1 in obj %}(err2){% endif %}
+            {% if varA in arr2 %}(err3){% endif %}
+            {% if 'a' in arr2 %}(err4){% endif %}
+            {% if 'd' in arr %}(err5){% endif %}
+
+            {% if "c" in obj %}E{% endif %}
+            {% if varA in obj %}F{% endif %}
+            {% if "b" in obj %}(err6){% endif %}
+            {% if var1 in obj %}(err7){% endif %}
+            {% if "d" in obj %}(err8){% endif %}
+
+            {% if "c" in str %}H{% endif %}
+            {% if varA in str %}I{% endif %}
+            {% if var1 in str %}(err9){% endif %}
+            {% if var1 in str2 %}J{% endif %}
+        `).replace(/[\s\n\r]+/g, ' ')
+        const expected = 'A B C D E F H I J';
+        let result = Modulo._r(template, context).trim().replace(/\s+/g, ' ');
+
+        assert: result === expected
+    </script>
+
+
+    <script name="If operators (3) - not in">
+        // Same as previous test, only flipped
+        const context = {
+            varA: 'a',
+            var1: 1,
+            arr: ['a', 'b', 'c'],
+            arr2: [1],
+            obj: { 'a': 'b', 'c': 'd' },
+            str: 'abc',
+            str2: '1',
+        };
+        const template = (`
+            {% if "a" not in arr %}(e1){% endif %}
+            {% if varA not in arr %}(e2){% endif %}
+            {% if var1 not in arr2 %}(e3){% endif %}
+            {% if "c" not in arr %}(e4){% endif %}
+            {% if var1 not in arr %}A{% endif %}
+            {% if var1 not in obj %}B{% endif %}
+            {% if varA not in arr2 %}C{% endif %}
+            {% if 'a' not in arr2 %}D{% endif %}
+            {% if 'd' not in arr %}E{% endif %}
+
+            {% if "c" not in obj %}(e5){% endif %}
+            {% if varA not in obj %}(e6){% endif %}
+            {% if "b" not in obj %}F{% endif %}
+            {% if var1 not in obj %}H{% endif %}
+            {% if "d" not in obj %}I{% endif %}
+
+            {% if "c" not in str %}(e7){% endif %}
+            {% if varA not in str %}(e8){% endif %}
+            {% if var1 not in str %}J{% endif %}
+            {% if var1 not in str2 %}(e9){% endif %}
+        `).replace(/[\s\n\r]+/g, ' ')
+        const expected = 'A B C D E F H I J';
+        let result = Modulo._r(template, context).trim().replace(/\s+/g, ' ');
+
+        assert: result === expected
+    </script>
+
+    <script name="Single argument ifs">
+        const template =    [
+                '{% if not doesnotexist %}0{% endif %}',
+                '{% if not exists %}a{% endif %}',
+                '{% if not isfalse %}1{% endif %}',
+                '{% if doesnotexist %}b{% endif %}',
+                '{% if exists %}2{% endif %}',
+                '{% if isfalse %}c{% endif %}',
+                ].join("");
+        const context = {'exists': true, 'isfalse': false};
+        const expected =        '012';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Reserved word in quotes">
+        const template =    [
+                '{% if "is not" != "not in" %}0{% endif %}',
+                '{% if "==" == "==" %}3{% endif %}',
+                ].join("");
+        const context = {'not': 'is not'};
+        const expected =        '03';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <!--
+    // ************************************* *
+    // For loop testing                    * *
+    // ************************************* *
+    -->
+
+</test>
+
+<test name="For loop template-tag">
+    <script name="For loop">
+        const template =    [
+                '{% for num in test %}{{ num }}{% endfor %}',
+                ].join("");
+        const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+        const expected =        '0123456789';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Nested for loop">
+        const template =    [
+                '{% for n in test %}{% for num in test  %}{{ num }}{% endfor %}{% endfor %}',
+                ].join("");
+        const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+        const expected = '01234567890123456789012345678901234567890123456789' +
+                '01234567890123456789012345678901234567890123456789';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="For loop with if">
+        const template =    [
+                '{% for num in test %}{% if num > 4 %}{{ num }}{% else %}a{% endif %}{% endfor %}',
+                ].join("");
+        const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+        const expected =        'aaaaa56789';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="For loop over objects">
+        const template =    [
+                '{% for obj in test %}{{ obj.a|upper }}',
+                '{% if obj.a|upper == "C" %}lol{% endif %}{% endfor %}',
+                ].join("");
+        const context = {'test': [{a: 'a'}, {a: 'b'}, {a: 'c'}]};
+        const expected =        'ABClol';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="For loop with empty 0">
+        const template =    [
+                '{% for num in test %}{{ num }}{% empty %}nothing here{% endfor %}',
+                ].join("");
+        const context = {'test': []};
+        const expected =        'nothing here';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="For loop with empty 1">
+        const template = '{% for a in test %}{{ a }}{% empty %}nothing here{% endfor %}';
+        const context = {'test': ['a', 'b', 'c']};
+        const expected = 'abc';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="For loop with empty 2">
+        const template =    [
+                '{% for num in test1 %}a{% empty %}w{% endfor %}',
+                '{% for num in test2 %}{% empty %}nothing here{% endfor %}',
+            ].join("");
+        const context = {'test1': ['a'], 'test2': []};
+        const expected = 'anothing here';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+    <script name="For loop with empty 3">
+        const template =    [
+                '{% for num in test2 %}{% empty %}nothing here{% endfor %}',
+                '{% for num in test1 %}a{% empty %}w{% endfor %}',
+            ].join("");
+        const context = {'test1': ['a'], 'test2': []};
+        const expected = 'nothing herea';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+
+
+    <script name="Nested for loop with empty">
+        const template =  [
+                '{% for arr in test %}{% for num in arr  %}',
+                '{{ num }}{% empty %}e{% endfor %}',
+                '{% empty %}w{% endfor %}',
+            ].join("");
+        const context = {'test': [[], [1, 2, 3], [], ['a', 'b']]};
+        const expected = 'e123eab';
+        const result = Modulo._r(template, context);
+
+        assert: result === expected
+    </script>
+</test>
+
+<test name="Custom template tags and filters">
+    <script name="For loop with filter">
+        const text = '{% for num in test|first %}{{ num }},{% endfor %}';
+        const first = arr => arr[0];
+        const conf = { Content: text, filters: { first } };
+        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const result = template.render({test: ['ab', 1, 2]});
+
+        assert: result === 'a,b,'
+    </script>
+
+    <script name="Filter and template tag ordering">
+        const text = 'This is a {{ test|a|b:2|caps }} {% lol "ThIs iS a TEst!"|caps %}';
+        const conf = {
+            Content: text,
+            filters: {
+                'a': function (s) { return ['a', 'b', 'correct', 'c']; },
+                'b': function (s, a) { return s[a]; },
+                'caps': function (s) { return s.toUpperCase(); },
+            },
+            tags: {
+                'lol': function (n, G) { return "OUT.push(" + G.parseExpr(n) + ".indexOf('S'));"; },
+            },
+        };
+        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const result = template.render({'test': 'tester'});
+
+        assert: result === 'This is a CORRECT 3'
+    </script>
+</test>
+
+
+<test name="Nested data">
+    <script name="For-loops iterating over nested data">
+        const text =
+            'A\n A\n A{% for row in state.data %}' +
+                '<tr>{% for col in row %}<td>{{ col }}</td>{% endfor %}</tr>' +
+            '{% endfor %}Z\n Z\n Z\n ';
+
+        const conf = { Content: text, };
+        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const result = template.render({state: { data: [ [10, 30] ]} });
+
+        assert: result === 'A\n A\n A<tr><td>10</td><td>30</td></tr>Z\n Z\n Z\n '
+    </script>
+
+</test>
+
+
+
+<!--
+/*
+// TODO bug-ish: when variables have portions of things in them, or lead with
+// quoted reserved words. Need to "consume" as opposed to just blindly split
+test("Reserved word in quotes BREAKING",
+    Modulo.makeTest = (templateText, context, expected) => {
+        const template = new MTL(templateText);
+        const result = template.render(context);
+        return result === expected;
+    };
+    makeTest([
+        '{% if " is not " != "not in" %}0{% endif %}',
+        '{% if is == "in" %}1{% endif %}',
+        '{% if not != "not in" %}1{% endif %}',
+        '{% if not == "is not" %}2{% endif %}',
+        ].join("")), {'is': 'in'},
+        '01');
+*/
+-->
+
+
+</testsuite></component>

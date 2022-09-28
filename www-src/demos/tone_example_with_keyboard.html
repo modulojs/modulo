@@ -1,0 +1,365 @@
+<!-- Want to use Tone to build synths? Look below!  -->
+<template modulo-embed>
+
+  <Component name="HelloWorld">
+    <Props
+        label
+    ></Props>
+
+    <Template>
+        <div class="synth controls" style="display: flex">
+            <h2>MODULO<br />SYNTH</h2>
+            <div>&nbsp;</div>
+
+            <div>
+                <div style="display: flex" class="vertical-labels">
+                    <label>ATTACK
+                        <input [state.bind] name="mono.envelope.attack" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>DECAY
+                        <input [state.bind] name="mono.envelope.decay" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>SUSTAIN
+                        <input [state.bind] name="mono.envelope.sustain" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>RELEASE
+                        <input [state.bind] name="mono.envelope.release" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                </div>
+                <h2>Envelope</h2>
+            </div>
+
+
+            <div class="label-boxes"><h2>OSCILLATOR</h2>
+                <select [state.bind] name="mono.oscillator.type">
+                    <option value="sine">Sine</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="square">Square</option>
+                    <option value="sawtooth">Sawtooth</option>
+                </select>
+
+                <label>DETUNE
+                    <input [state.bind] name="mono.oscillator.detune" type="range"
+                        min="0.0" max="100" step="0.01" />
+                </label>
+            </div>
+
+
+            <div class="label-boxes">
+                <h2>Filter</h2>
+                <select [state.bind] name="mono.filter.type">
+                    <option value="lowpass">Low Pass</option>
+                    <option value="highpass">High Pass</option>
+                    <option value="bandpass">Band Pass</option>
+                    <option value="lowshelf">Low Shelf</option>
+                    <option value="highshelf">High Shelf</option>
+                    <option value="notch">Notch</option>
+                    <option value="allpass">All Pass</option>
+                    <option value="peaking">Peaking</option>
+                </select>
+
+                <select [state.bind] name="mono.filter.rolloff">
+                    <option value="-12" type="number">-12db</option>
+                    <option value="-24" type="number">-24db</option>
+                    <option value="-48" type="number">-48db</option>
+                </select>
+
+                <label>
+                    FILTER Q
+                    <input [state.bind] name="mono.filter.Q" type="range"
+                        min="0.0" max="1.0" step="0.01" />
+                </label>
+            </div>
+
+
+            <div class="label-boxes">
+                <h2>Chorus FX</h2>
+
+                <label>
+                    |MIX
+                    <input [state.bind] name="chorus.wet" type="range"
+                        min="0" max="1" step="0.01" />
+                </label>
+
+                <label>
+                    FREQ
+                    <input [state.bind] name="chorus.frequency" type="range"
+                        min="0" max="100" step="1" />
+                </label>
+
+
+                <label>
+                    FEED
+                    <input [state.bind] name="chorus.feedback" type="range"
+                        min="0" max="1" step="0.01" />
+                </label>
+
+                <label>
+                    SPRD
+                    <input [state.bind] name="chorus.spread" type="range"
+                        min="0" max="100" step="1" />
+                </label>
+
+
+            </div>
+
+        </div>
+
+        <div style="display: flex">
+            <div class="synth" style="display: flex">
+                <h2>SEQ<br />
+                {% if tone.isStarted %}
+                    <button @click:=tone.stop><span alt="Stop">◼</span></button>
+                {% else %}
+                    <button @click:=tone.start><span alt="Play">▶</span></button>
+                {% endif %}
+                </h2>
+                {% for i, note in state.notes %}
+                    <label
+                        class="step {% if tone.sequence|stepprogress == i|number %}active{% endif %}"
+                        @click:=script.selectSeq payload:="{{ i }}">
+                        {{ note }}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div style="width: 150px" class="synth label-boxes">
+                <h2>MIX</h2>
+                <label>
+                    <input [state.bind] name="volume" type="range"
+                        min="-60.0" max="-0.1" step="0.1" />
+                </label>
+
+                <input type="range" value="{{ tone.meter|getval }}"
+                      min="-60.0" max="-0.1" disabled />
+                <div style="position: relative; top: -20px;">
+                  -60db <span style="float: right">0db</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="keyboard">
+            {% for key in midikeyboard.keys %}
+                <div class="{% if key.isSharp %}sharp{% endif %}"
+                    @mousedown:=tone.noteOn
+                    @mouseup:=tone.noteOff
+                    payload="{{ key.letter }}{{ key.octave }}">
+                    {{ key.letter }}
+                </div>
+            {% endfor %}
+        </div>
+    </Template>
+
+    <State
+        volume:=-6.0
+        mono:={}
+        mono.oscillator:='{ "type": "sawtooth", "detune": 0.0 }'
+        mono.envelope:='{ "attack": 0.05, "sustain": 0.0, "decay": 0.5, "release": 0.5 }'
+        mono.filter:='{ "type": "lowpass", "Q": 0.01, "rolloff": -12 }'
+        chorus:={}
+        chorus.wet:=0.1
+        chorus.feedback:=0
+        chorus.spread:=0
+        chorus.frequency:=0
+        notes:='["C3", "C3", "C3", "C3", "C3", "C3", "C3", "C3" ]'
+    ></State>
+    <MidiKeyboard></MidiKeyboard>
+
+<!--
+        mono.filter-envelope:='{ "attack": 0.0, "sustain": 1.0, "decay": 0.5, "release": 0.5 }'
+            <div>
+                <div style="display: flex" class="vertical-labels">
+                    <label>ATTACK
+                        <input [state.bind] name="mono.filterEnvelope.attack" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>DECAY
+                        <input [state.bind] name="mono.filterEnvelope.decay" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>SUSTAIN
+                        <input [state.bind] name="mono.filterEnvelope.sustain" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                    <label>RELEASE
+                        <input [state.bind] name="mono.filterEnvelope.release" type="range"
+                            min="0.0" max="2" step="0.01" />
+                    </label>
+                </div>
+                <h2>Filter Envelope</h2>
+            </div>
+-->
+
+    <Tone
+        Meter
+        Chorus=state.chorus
+        MonoSynth=state.mono
+        Sequence=state.notes
+    ></Tone>
+        <!--FMSynth=state-->
+        <!--Sequence:='["C3", "C3", "D3", "F3", "F#3", "C3"]'-->
+        <!--DuoSynth=state-->
+        <!--:='{ "frequency": "C3" }'-->
+<!--
+        MonoSynth:='{
+            "oscillator": {
+                "type": "sawtooth"
+            },
+            "envelope": {
+                "attack": 0.01,
+                "sustain": 0.0,
+                "decay": 0.5,
+                "release": 0.5
+            }
+        }'
+-->
+
+    <Script>
+
+        function initializedCallback() {
+            setInterval(() => {
+                if (tone.isStarted) {
+                    element.rerender();
+                }
+            }, 100); // ensure 10x updates per second
+        }
+
+        function selectSeq(i) {
+            // Just cycle through letters
+            const currentNote = state.notes[Number(i)];
+            const currentLetter = currentNote[0];
+            const nextLetter = { C: 'D', D: 'E', E: 'F', F: 'G', G: 'A', A: 'B', B: 'C' }[currentLetter];
+            state.notes[Number(i)] = nextLetter + currentNote.substr(1);
+            cparts.state.propagate('notes', state.notes); // ensure gets updated
+        }
+    </Script>
+
+    <Style>
+        .keyboard {
+            display: flex;
+            --key-width: 30px;
+        }
+
+        .keyboard > div {
+            width: var(--key-width);
+            height: 80px;
+            border: 1px solid black;
+            z-index: 1;
+            position: relative;
+        }
+
+        .keyboard > div.active {
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        .keyboard > div.sharp {
+            background: gray;
+            height: 50px;
+            margin-left: calc(1px - (var(--key-width) / 2));
+            margin-right: calc(1px - (var(--key-width) / 2));
+            z-index: 2;
+        }
+
+        button, .step {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 1px 10px 1px 10px;
+            border: 1px solid  #b90183;
+            color: black;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        button:active {
+            box-shadow: inset 5px 5px 1px 1px hsla(0,0%,39.2%,.3);
+        }
+
+        .step.active {
+            color: white;
+            background: #b90183;
+        }
+
+        .synth {
+            font-family: monospace;
+            border:  2px solid #b90183 ;
+            border-radius: 1px 10px 1px 10px;
+            padding: 20px;
+            margin: 20px;
+        }
+        .synth h2 {
+            border-radius: 10px 1px 10px 1px;
+            color: white;
+            background: #b90183;
+            font-size: 13px;
+            font-weight: bold;
+            margin: 0;
+            padding: 2px;
+        }
+
+        .vertical-labels > label {
+            position: relative;
+            width: 50px;
+            height: 150px;
+            left: 50px;
+            top: 40px;
+            transform: rotate(270deg);
+        }
+
+        .label-boxes label {
+            border: 1px solid #b90183;
+            padding: 1px;
+            border-left: none;
+            margin: 3px;
+            border-radius: 10px;
+            display: inline-block;
+            color: #b90183;
+        }
+    </Style>
+  </Component>
+
+
+</template>
+
+<!-- Finally, include a Modulo CDN link & activate (at the bottom) -->
+<script src="https://unpkg.com/tone"></script>
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/Midi.js"></script>
+<script src="/demos/mdu/cparts/ToneJsAdaptor.js"></script>
+
+
+<script>Modulo.defineAll();</script>
+
+
+<!-- Use it anywhere, each instance is isolated: -->
+<hr />
+<x-HelloWorld></x-HelloWorld>
+<hr />
+
+<!--
+    REMEMBER: While the demos show embedded components (with template
+    modulo-embed), this is only to make it easier to copy & paste into one
+    file. Always separate your components into a Library early on to avoid
+    issues later on. E.g., use code like:
+
+    <Modulo>
+        <Library src="/static/components/MyWebComponents.html"></Library>
+    </Modulo>
+-->
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    Modulo.fetchQ.enqueue('.', text => {
+        this.nextSibling.textContent = text;
+        navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

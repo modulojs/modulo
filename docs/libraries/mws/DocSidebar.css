@@ -1,0 +1,16 @@
+li {
+    margin-left: 50px;
+}
+/*
+li.ginactive > ul::before,
+li.gactive > ul::before {
+    content: ' - ';
+    background: var(--highlight-color);
+    color: white;
+    text-decoration: none;
+}
+*/
+li.ginactive > a::before {
+    content: '+ ';
+}
+

@@ -1,0 +1,894 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="/templating-reference.html"
+    pagetitle="Documentation"
+    navbar="docs">
+
+<h1>Templating Reference</h1>
+
+
+<p>Modulo's templating language comes with a standard library of filters and
+template-tags, modeled to be similar to the behavior of Django's templating language
+library. Although in general Django's has more features, some Django
+templates will work as Modulo templates without modification (just include it
+with "src="!). In fact, there's such large overlap that some of this very
+documentation was <a
+href="https://docs.djangoproject.com/en/3.2/ref/templates/language/">copied and
+arranged just like Django's own</a>, to be instantly more familiar to
+developers. Thanks, Django!</p>
+
+
+
+<mws-Section name="templatetags">Built-in Template Tags</mws-Section>
+
+
+<h3>comment</h3>
+
+<p>Used specifically for commenting out blocks of Templating code. Ignores
+everything between <code>{% comment %}</code> and <code>{% endcomment
+%}</code>.  An optional note may be inserted in the first tag. This can be
+useful to document why the code was commented out or disabled. You should avoid
+nesting comment tags.</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>Before comment</p>
+    {% comment "Optional note" %}
+        <p>Commented out text that will be ignored
+          {{ nonExistingVar|brokenFilter:"abc" }}</p>
+    {% endcomment %}
+    <p>After comment</p>
+</Template>
+'></mws-Demo>
+
+<h3>for</h3>
+
+<p>For-loops are for repeating the same HTML code multiple times. It will
+repeat a block of templating code for every item in a specified array or
+object. It's useful for displaying search results, blog articles, chat
+messages, and much more: Any time you have unknown quantities or
+<em>plural</em> amounts of data that you want to template on the screen.</p>
+
+<p>At it's core, <code>{% for %}</code> will loop over each item in an array,
+making the item available in a specified template variable. This is often done
+to objects in an array stored in state, such as data that came back from an
+API. Examine the following example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <ul>
+        {% for athlete in state.athletes %}
+            <li>{{ athlete.name }}</li>
+        {% endfor %}
+    </ul>
+</Template>
+
+<State
+  athletes:=&apos;[
+    {"name": "Devante Adams"},
+    {"name": "Steph Curry"},
+    {"name": "Megan Rapinoe"}
+  ]&apos;
+></State>
+'></mws-Demo>
+
+<p>Note that your for loops should conventionally follow the pattern of
+<code>{% for SINGULAR_THING in PLURAL_THINGS %}</code>. For 3 examples of this:
+<code>{% for item in state.item_data %}</code>,
+<code>{% for user in users %}</code>, or
+<code>{% for city in cities %}</code>.</p>
+
+<p>Within the repeated code of the for
+loop, then the "singular thing" (the variable defined by the for loop) will be
+available as a template variable. Typically, the "plural variable" will be an
+Array or Object defined from the <code>State</code> or <code>Props</code>
+CParts.  Also, it's worth noting that you can loop over an array in reverse by
+using the <code>|reversed</code> filter, e.g.
+<code>{% for obj in list|reversed %}</code>.</p>
+
+<p>If you need to loop over an <em>object</em>, you can unpack each key / value
+pair into individual variables. For example, if your state contains an array of
+(x, y) coordinates called <code>state.data</code>, you could use the following to output the list
+of points:</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <ul>
+        {% for name, color in state.fave_colors %}
+            <li><strong>{{ name }}</strong>: {{ color }}</li>
+        {% endfor %}
+    </ul>
+</Template>
+
+<State
+    fave_colors:=&apos;{
+      "Devante Adams": "Green",
+      "Steph Curry": "Golden",
+      "Megan Rapinoe": "Blue"
+    }&apos;
+></State>
+'></mws-Demo>
+
+
+<h4>empty</h4>
+
+<p>Often you will want to include a default, empty, or "404 message" if nothing
+is in the array of a <code>for</code> tag. To avoid cluttering your loops with
+extra if-statements, the for tag can take an optional <code>{% empty %}</code>
+clause, which functions identically to an if-statement that executes only if
+the given data is empty or could not be found (e.g. if 0 iterations of the loop
+were run). Observe the following example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <ul>
+        {% for name, color in state.fave_colors %}
+            <li><strong>{{ name }}</strong>: {{ color }}</li>
+        {% empty %}
+            No colors were found.
+        {% endfor %}
+    </ul>
+</Template>
+
+<State
+    fave_colors:=&apos;{}&apos;
+></State>
+'></mws-Demo>
+
+
+<h3>if</h3>
+
+<p>The if-statement allows a block of HTML code to be conditionally
+included. It allows "branching" in your templates: That is, one or more
+optional "branches" or blocks of HTML templating code that will be included
+only if a certain condition is satisfied.</p>
+
+
+<p>The simplest behavior of the <code>{% if %}</code> tag is to evaluate a variable,
+and if that variable both exists and is a "truthy" value according to JavaScript
+(<a href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy">see MDN "Truthy"</a>),
+the specified block will be included.  By default, <code>if</code> will include
+(or not) all code until it encounters an <code>{% endif %}</code> tag to close.
+However, it also supports using an <code>{% else %}</code> tag before the
+<code>{% endif %}</code> tag, which can provide alternative code.</p>
+
+<p>Examine the following example, and observe what happens as you change state
+variables from <code>true</code> to <code>false</code>, or vice-versa:</p>
+
+
+<mws-Demo demotype="minipreview"
+ttitle="SimpleIf"
+text='
+<Template>
+    {% if state.show %}
+        Hello testing template world!
+    {% endif %}
+</Template>
+
+<State
+  show:=true
+></State>
+'
+ttitle2="IfElse"
+text2='
+<Template>
+    {% if state.hello %}
+        Hello testing template world!
+    {% else %}
+        Goodbye testing template world!
+    {% endif %}
+</Template>
+
+<State
+  hello:=false
+></State>
+'></mws-Demo>
+
+<h4>elif</h4>
+
+<p>Like with the <code>else</code> tag, the <code>if</code> tag may also
+optionally proceed <code>{% elif %}</code> tags, which is a shortened version
+of the word "else" and "if", combined into a single, made-up word "elif". The
+behavior of the <code>{% elif %}</code> is very similar to the "if": It requires
+specifying condition which will be evaluated, and it will only include the
+specified code block if that condition evaluates to be true.  Unlike the
+<code>{% else %}</code> tag, a single <code>{% if %}</code> can has as many
+<code>{% elif %}</code> tags as you'd like, and it is guaranteed that it will
+only execute  one of those. In other words, only one <code>{% if %}</code>,
+<code>{% elif %}</code>, or <code>{% else %}</code> code block will be
+executed, and there's never a risk that two "elifs" could get executed in the
+same "chain".</p>
+
+<p>For an example of this, examine the following more complicated example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.athletes %}
+        Athletes exists. Total athletes: {{ state.athletes|length }}
+    {% elif state.benched %}
+        Benched exists. Total benched: {{ state.benched|length }}
+    {% else %}
+        No athletes.
+    {% endif %}
+</Template>
+
+<State
+  benched:=&apos;[
+    {"name": "Steph Curry"}
+  ]&apos;
+></State>
+'></mws-Demo>
+
+<p>In the above, if <code>state.athletes</code> exists, the number of athletes will be
+displayed by the <code>{{ state.athletes|length }}</code> filtered template variable.</p>
+
+<h4>Operators</h4>
+
+<p>Within the if tag, you can use a variety of "operators". Operators behave
+similarly to JavaScript operators: They allow comparisons of template variables
+with other template variables and/or hardcoded values. There are about a dozen
+built-in operators. As with template-tags, it is also possible to configure
+your own custom operators.</p>
+
+<p>Built-in operators: <code>==, &gt;, &lt;, &gt;=, &lt;=, !=, not in, is not,
+is, in, not, gt, lt</code>
+
+
+
+<h4><code>==</code>, <code>is</code> (operator)</h4>
+
+<p>Check for equality. Note that this will be a "strict" comparison, equivalent
+to JavaScript's triple-equals <code>===</code> operator.  The syntax variants
+<code>==</code> and <code>is</code> are aliases of each other.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.somevar == "x" %}
+        This appears if variable somevar equals the string "x"
+    {% endif %}
+</Template>
+
+<State
+  somevar="x"
+></State>
+'></mws-Demo>
+
+
+
+<h4><code>!=</code>, <code>is not</code> (operator)</h4>
+
+<p>Check for inequality. Note that this will be a "strict" comparison, equivalent to
+JavaScript's triple-not-equals <code>!==</code> operator. The syntax variants
+<code>!==</code> and <code>is not</code> are aliases of each other.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.somevar != "x" %}
+        This appears if variable state.somevar does not equal the string "x".
+    {% endif %}
+</Template>
+
+<State
+  somevar="y"
+></State>
+'></mws-Demo>
+
+
+<h4><code>not</code> (operator)</h4>
+
+<p>You can use "not" to invert or negate an "if" tag:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if not state.show %}
+        Do not show it!
+    {% else %}
+        Show it!
+    {% endif %}
+</Template>
+
+<State
+  show:=false
+></State>
+'></mws-Demo>
+
+
+<h4><code>lt</code>, <code>&lt;</code>, <code>&lt;=</code> (operators)</h4>
+
+<p>Less than. Has a few variants: <code>lt</code> and <code>&lt;</code> will
+check to see if a variable is strictly less than a given variable or value,
+while <code>&lt;=</code> will be "less than or equal to" and thus also allow it
+if its equal.  Example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.somevar lt 100 %}
+        This appears if variable somevar is less than 100.
+    {% endif %}
+</Template>
+
+<State
+  somevar:=50
+></State>
+'></mws-Demo>
+
+
+
+<h4><code>gt</code>, <code>&gt;</code>, <code>&gt;=</code> (operators)</h4>
+
+<p>Greater than. Has a few variants: <code>gt</code> and <code>&gt;</code> will
+check to see if a variable is strictly greater than a given variable or value,
+while <code>&gt;=</code> will be "greater than or equal to" and thus also allow
+it if its equal.  Example:</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.somevar gt 100 %}
+        This appears if variable somevar is greater than 100.
+    {% endif %}
+</Template>
+
+<State
+  somevar:=2600
+></State>
+'></mws-Demo>
+
+
+<h4><code>in</code>, <code>not in</code> (operators)</h4>
+
+<p>Contained within. Unlike the built-in JavaScript operator "in" which is only
+supported by Objects, this operator supports Strings, Arrays, and Objects as
+the "container" types being checked. In all cases, it will test whether the
+given value is within the given container.  The <code>not in</code> operator
+does what you might expect: The exact opposite of the <code>in</code> operator.
+The following are some examples of how the <code>in</code> operator will be
+interpreted in different contexts:</p>
+
+
+
+<mws-Demo demotype="minipreview"
+ttitle="String"
+text='
+<Template>
+    {% if "B.C.E." in state.era %}
+        This appears since "B.C.E." is a substring of "{{ state.era }}"
+    {% endif %}
+</Template>
+
+<State
+  era="3rd Century B.C.E. (Macedonia)"
+></State>
+'
+
+ttitle2="Array"
+text2='
+<Template>
+    {% if state.word in state.greetings %}
+        "{{ state.word }}" was found in: {{ state.greetings|join:", " }}
+    {% endif %}
+</Template>
+
+<State
+  word="hello"
+  greetings:=&apos;[
+    "hallo",
+    "hello",
+    "hola",
+    "óla"
+  ]&apos;
+></State>'
+
+ttitle3="Object"
+text3='
+<Template>
+    {% if "author" in state.article %}
+        Author was specified: {{ state.article.author }}
+    {% endif %}
+</Template>
+
+<State
+  article:=&apos;{
+    "author": "Albert Einstein",
+    "year": 1949,
+    "month": "May",
+    "publication": "Monthly Review",
+    "title": "Why Socialism?"
+  }&apos;
+></State>
+'></mws-Demo>
+
+<p>Note that in these examples, some use hardcoded strings in places (e.g.
+<code>"B.C.E"</code>), while others use variables in the same place (e.g.
+<code>state.word</code>). As with every if-statement operator, you can either
+hardcoded values and variables are interchangeable.</p>
+
+<h4>Filters</h4>
+
+<p>You can also use filters in combination with operators within an if tag. For
+example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% if state.athletes|length gt 2 %}
+        <p>There are more than 2 athletes!</p>
+    {% endif %}
+</Template>
+
+<State
+    athletes:=&apos;[
+        {"name": "Devante Adams"},
+        {"name": "Steph Curry"},
+        {"name": "Megan Rapinoe"}
+    ]&apos;
+></State>
+'></mws-Demo>
+
+
+<mws-Section name="filters">Built-in Template Filters</mws-Section>
+
+
+<h4>add</h4>
+
+<p>Adds the argument to the value. Example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {{ state.value|add:7 }} hacks <br />
+    {{ state.value|add:state.another }} hz
+</Template>
+
+<State
+    value:=1330
+    another:=1270
+></State>
+'></mws-Demo>
+
+
+
+
+<h4>allow</h4>
+
+<blockquote><p><strong>Input validation?</strong> It's not recommended to use
+this for security (do in backend instead) or for front-end validation of user
+inputs (use <code>pattern=</code> instead).</p></blockquote>
+
+<p>Given an "allowed list" of comma separated strings, only permit values that
+exist exactly the "allowed list". If the value does not exist within the
+allowed list, it will produce an empty string (<code>""</code>).
+The fact that empty strings are "falsy" means you can chain together this
+filter with the default filter in order to provide a fallback as well, which is
+demonstrated in the third example. Examples:</p>
+
+<br style="clear: both" />
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    Valid: {{ state.value|allow:"orange,apple,pear" }} <br />
+    Invalid: {{ state.value|allow:"a,b,c" }} <br />
+    Invalid + default: {{ state.value|allow:"a,b,c"|default:"Oops!" }}
+</Template>
+
+<State
+    value="apple"
+></State>
+'></mws-Demo>
+
+
+
+
+<h4>capfirst</h4>
+
+
+<p>Output given string with the first letter capitalized.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    The {{ state.value|capfirst }} framework is my favorite
+</Template>
+
+<State
+    value="modulo.js"
+></State>
+'></mws-Demo>
+
+
+<h4>default</h4>
+
+<p>If the given value is <a
+href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy">Falsy</a>, use
+the given default. Otherwise, use the value.</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    Fave snack: {{ state.snack|default:"icecream" }} <br />
+    Snack count: {{ state.count|default:"none" }} <br />
+    Fave soda: {{ state.soda|default:"Cola" }}
+</Template>
+<State
+    snack=""
+    count:=0
+    soda="guarana"
+></State>
+'></mws-Demo>
+
+
+
+<h4>divisibleby</h4>
+
+<p>Returns <code>true</code> if the value is evenly divisible by the given argument.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    Can {{ state.value }} divide by 3? <br />
+    {{ state.value|divisibleby:3 }} <br />
+    {% if state.value|divisibleby:2 %}
+        {{ state.value }} is even
+    {% endif %}
+</Template>
+<State
+    value:=4
+></State>
+'></mws-Demo>
+
+
+<h4>escapejs</h4>
+
+<p>Escape special characters in a given string using JavaScript (specifically,
+JSON) escaping rules. If you have a string like <code>"Hello\nWorld!"</code>
+(where <code>\n</code> is a single new-line character), it will output
+<code>Hello\nWorld!</code> (that is, as "backslash-n" or two characters). It
+will also "double-up" any backslashes it encounters.</p>
+
+<p>Note that this is unrelated to the <a
+href="/docs/templating.html#escaping">HTML autoescaping</a>, meaning you may
+need to also mark as <code>|safe</code> if do not want it escaping for HTML
+rules as well (e.g. changing <code>&lt;</code>, which is invalid for HTML text
+but valid for JavaScript, into <code>&amp;lt;</code>). Similarly, there is no
+need to use this for escaping for HTML attribute values (e.g.
+<code>&lt;input&nbsp;placeholder="{{&nbsp;state.msg&nbsp;}}"&gt;</code>), as
+the HTML escaping is sufficient. The only use is embedded JS strings.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    Result: {{ state.value|escapejs }} <br />
+</Template>
+
+<State
+    value="Just
+trying
+\stuff\
+out"
+></State>
+'></mws-Demo>
+
+<h4>first</h4>
+
+<p>Retrieve the first item in an Array:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>{{ state.athletes|first }}</p>
+</Template>
+
+<State
+  athletes:=&apos;["Neymar", "Maradona"]&apos;
+></State>
+'></mws-Demo>
+
+
+<h4>join</h4>
+
+<p>Formats an array to be comma-separated. Optionally, a different separator
+can be specified as an argument.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>{{ state.athletes|join }}</p>
+    <p>{{ state.athletes|join:" + " }}</p>
+</Template>
+
+<State
+  athletes:=&apos;["Neymar", "Maradona"]&apos;
+></State>
+'></mws-Demo>
+
+
+<h4>json</h4>
+
+<p>Formats given data as a JSON string. It takes one optional argument, that if
+specified, will cause indentation by the given amount.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <pre>{{ state.athletes|json }}</pre>
+    <pre>{{ state.athletes|json:2 }}</pre>
+</Template>
+
+<State
+    athletes:=&apos;[
+        {"name": "Devante Adams"},
+        {"name": "Steph Curry"},
+        {"name": "Megan Rapinoe"}
+    ]&apos;
+></State>
+
+'></mws-Demo>
+
+
+
+<h4>last</h4>
+
+<p>Retrieve the last item in an Array:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>{{ state.athletes|last }}</p>
+</Template>
+
+<State
+  athletes:=&apos;["Neymar", "Maradona"]&apos;
+></State>
+'></mws-Demo>
+
+
+
+<h4>length</h4>
+
+<p>Determine the length of the given value. This supports Strings, Arrays, and
+Objects. For Objects, it will return the number of properties on the object.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>Sentence length: {{ state.sentence|length }}</p>
+    <p>Flowers length: {{ state.flowers|length }}</p>
+    <p>Flights length: {{ state.flights|length }}</p>
+</Template>
+
+<State
+    sentence="The sweat wis lashing oafay Sick Boy; he wis trembling."
+    flowers:=&apos;["Marigolds", "Sunflowers"]&apos;
+    flights:=&apos;{"SFO": "LAX", "BAI": "MEX", "MEX": "MVD"}&apos;
+></State>
+'></mws-Demo>
+
+
+
+<h4>lower</h4>
+
+<p>Display the given string in all lowercase letters.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>Without: {{ state.word }}</p>
+    <p>Lower: {{ state.word|lower }}</p>
+</Template>
+
+<State
+    word="rAndOm cAPitalS"
+></State>
+'></mws-Demo>
+
+
+<h4>pluralize</h4>
+
+<p>Allows for convenient pluralization in many human languages. This is for
+words in languages where a plural form is used when there is "0" or "2+" items,
+and a singular form for exactly 1 item. This is useful for the majority of noun
+and verb conjugations in English, along with many other Indo-European
+languages.</p>
+
+<p>To use, give it a number (typically, the length of a list), and a comma
+separated version of two forms of a word. If that number is exactly "1" it will
+output the second form (or nothing at all, if the second form is not
+specified), otherwise it will output the first form.</p>
+
+<p>Below are some examples. Note that in the second example, it does not
+specify a singular form, but instead only specifies an "s" to append to the
+word "flower" to make it's plural "flowers".</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    We visited {{ state.citynames|length}} 
+    {{ state.citynames|length|pluralize:"cities,city" }}
+
+    and picked {{ state.flowers|length}} 
+    flower{{ state.flowers|length|pluralize:"s" }}
+</Template>
+
+<State
+    flowers:=&apos;["Marigolds", "Sunflowers"]&apos;
+    citynames:=&apos;["Oakland", "Berkeley", "Richmond", "Concord"]&apos;
+></State>
+'></mws-Demo>
+
+
+
+
+<h4>subtract</h4>
+
+<p>Subtracts the argument from the value. Example:</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {{ state.value|subtract:3 }} hacks <br />
+    {{ state.value|subtract:state.another }} is the answer
+</Template>
+
+<State
+    value:=1340
+    another:=1298
+></State>
+'></mws-Demo>
+
+
+
+
+<h4>truncate</h4>
+
+<p>Cut off the given string after a number of characters specified by the
+argument. If it has to cut off the string, it will append an "ellipsis"
+character.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>Long sentence: {{ state.sentence|truncate:20 }}</p>
+    <p>Short word: {{ state.word|truncate:20 }}</p>
+</Template>
+
+<State
+    sentence="The sweat wis lashing oafay Sick Boy; he wis trembling."
+    word="Bird."
+></State>
+'></mws-Demo>
+
+
+
+<h4>renderas</h4>
+
+
+<p>A highly useful filter that allows use of re-usable template snippets.</p>
+
+<p>Typically in the format of
+<code>{{ state.data|renderas:template.tableRow }}</code>,
+where <code>state.data</code> is some Object, and there exists a template like
+with the name "tableRow" that renders that object.  The typical usage of this
+is refactoring templates to conveniently render complex data. This allows you
+to take complicated bits of template code and refactor it into another smaller,
+helper, "child" template that is then used within the main template.</p>
+
+<p>The "input" to renderas should always be an Object. The keys and values of
+that object will populate the "template variables" for that template, meaning
+you can access them directly as template variables within the child template.
+As an example, if we <code>renderas</code> with an Object like
+<code>{altTitle:&nbsp;"Newest entry"}</code>, then within the child template
+the "altTitle" becomes a "top-level" variable, and  we can use syntax like
+<code>{{&nbsp;altTitle&nbsp;}}</code> (no need for "." syntax).</p>
+
+<p>Note that the child template will be isolated or "sandboxed" to
+<em>only</em> have access to properties of the specified object. State, props,
+script, etc will not be accessible as template variables. This sandboxing is
+usually good and helps reduce bugs and makes child templates much easier to
+read. However, sometimes you just want to quickly spit up and refactor a
+template, meaning you want the child template to behave just like the parent,
+and you want global variables available, just as they were available to the
+parent. To include another template without any sandboxing, consider using the
+<code>renderObj</code> template variable which contains the "global" template
+scope. For an example, if we have a <code>name="modalInfo"</code> template, we
+might write: <code>{{&nbsp;renderObj|renderas:template.modalInfo&nbsp;}}</code>
+
+
+<!--<mws-Demo demotype="minipreview"-->
+<mws-Demo
+text='
+<Template name="trow">
+    <tr><td>{{ name }}</td> <td>{{ type }}</td> <td>{{ level }}</td></tr>
+</Template>
+
+<Template>
+    <table>
+        <thead><tr><th>Name</th> <th>Type</th> <th>Level</th></tr></thead>
+        <tbody>
+            {% for info in state.pokemon %}
+                {{ info|renderas:template.trow }}
+            {% endfor %}
+        </tbody>
+    </table>
+</Template>
+
+<State
+    pokemon:=&apos;[
+        {"name": "Jigglypuff", "type": "Normal", "level": 13},
+        {"name": "Pikachu", "type": "Electric", "level": 10},
+        {"name": "Ghastly", "type": "Ghost", "level": 8}
+    ]&apos;
+></State>
+'></mws-Demo>
+
+
+<p>Tip: If you want to avoid sandboxing, you can use
+that object will populate the template variables for that template, meaning you
+can access them directly with <code>{{ varName }}</code> style syntax within
+that child template. Note that the child template will be isolated or
+"sandboxed" to <em>only</em> have access to properties of the specified
+object (state, props, etc will not be accessible).</p>
+
+
+
+
+<h4>reversed</h4>
+
+<p>Reverses the given input. Typically, this is used to reverse Arrays, such as
+when you want to iterate over an Array in the opposite direction using a
+<code>{% for %}</code> template-tag. If the input is a String or another data
+type, it will attempt to first convert to an Array.</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>{{ state.flowers|reversed|join }}</p>
+    {% for city in state.cities|reversed %}
+        <p>{{ city }}</p>
+    {% endfor %}
+</Template>
+
+<State
+    flowers:=&apos;["Marigolds", "Sunflowers"]&apos;
+    cities:=&apos;["Oakland", "Berkeley", "Richmond", "Concord"]&apos;
+></State>
+'></mws-Demo>
+
+
+
+<h4>upper</h4>
+
+<p>Display the given string in all uppercase letters.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    <p>Without: {{ state.word }}</p>
+    <p>Upper: {{ state.word|upper }}</p>
+</Template>
+
+<State
+    word="rAndOm cAPitalS"
+></State>
+'></mws-Demo>
+
+
+</mws-Page>

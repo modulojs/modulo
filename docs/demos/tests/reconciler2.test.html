@@ -1,0 +1,35 @@
+<!--
+    Some big, messy reconciler tests. These are "fuzzier" in that we are just
+    testing transformations between large, arbitrary DOMs.
+-->
+
+<component name="ReconcilerTester2">
+
+<!-- Load a few helper utils -->
+<script src="./reconciler-testing-utils.js"></script>
+<script src="./reconciler-testing-fuzzycontent.js"></script>
+
+<testsuite>
+
+<test name="Successfully sets up mocks and testing data">
+    <script>
+        const { ModRec } = Modulo.reconcilers;
+        assert: ModRec && Modulo.utils.elementIH && Modulo.utils.transformDOMCheck;
+    </script>
+</test>
+
+<test name="Supporting interactions with directives">
+    <script name="Complete page replacement with children (1)">
+        const {transformDOMCheck, elementIH, componentIH} = Modulo.utils;
+        assert: transformDOMCheck(
+          elementIH, componentIH, 1);
+    </script>
+
+    <script name="Complete page replacement with children (2)">
+        const {transformDOMCheck, elementIH, componentIH} = Modulo.utils;
+        assert: transformDOMCheck(
+          componentIH, elementIH, 1);
+    </script>
+</test>
+
+</testsuite></component>

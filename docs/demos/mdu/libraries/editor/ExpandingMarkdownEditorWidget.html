@@ -1,0 +1,40 @@
+{#name="{{ props.name|default:'message' }}"#}
+
+<mdu-MirrorEditor
+    [state.bind]value
+    style="height: {{ script.height }}px;
+        width: calc(100% - {{ script.toolbarWidth }}px);"
+></mdu-MirrorEditor>
+
+{% if state.expanded %}
+    <div class="toolbar-right" style="width: {{ script.toolbarWidth }}px">
+        <div class="toolbar-scrolling-button-collection">
+            {% for button in script.buttons %}
+                <button @click:=script.insertAction payload="{{ button.payload }}">
+                    <span style="{{ button.style|default:''}}">{{ button.label|safe }}</span>
+                </button>
+            {% endfor %}
+        </div>
+        <button @click:=script.sendAction class="send-button">
+            <span class="btn-symbol" alt="Return symbol">&#x23CE;</span>
+            <span class="btn-label">SEND</span>
+        </button>
+    </div>
+{% else %}
+    {% if not state.value %}
+        <div class="message-placeholder">
+            {{ props.placeholder|default:"Type a message" }}
+        </div>
+    {% else %}
+        {% if state.value|length lt 50 %}
+            <div class="message-placeholder-instructions">
+                {{ props.placeholderInstructions|default:"<span alt="Return symbol">&#x23CE;</span> &nbsp; (Enter to send)"|safe }}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<button class="expand-button" @click:=script.toggleExpand>
+    {{ props.expandButton|default:'<span alt="Menu Icon">&equiv;</span>'|safe }}
+</button>
+

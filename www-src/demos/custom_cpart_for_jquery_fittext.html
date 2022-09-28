@@ -1,0 +1,94 @@
+<!--
+    This example shows how to write a custom CPart to wrap the API for a jQuery
+    plug-in.
+
+    (In this case FitText.js, a very simple (but also popular) jQuery plugin
+    that saw it's last update about 9 years ago, and is documented here)
+-->
+
+
+<template Modulo>
+    <!--
+        Here we define a Component that uses the plugin. Note that it doesn't
+        need to know very much about the internal workings of the plugin, or
+        even any custom Script code at all. This means, the developer of this
+        Component doesn't need to be comfortable with JavaScript to use this
+        jQuery plugin.
+    -->
+
+    <Component name="ExampleComponent">
+
+        <FitTextJQuery
+            selector="section > h1"
+            size:=0.4
+        ></FitTextJQuery>
+
+        <Template>
+            <section>
+                <h1>Big Test</h1>
+            </section>
+        </Template>
+
+        <!-- Finally, sprinkle in a tiny bit of styling -->
+        <Style>
+            section {
+                width: 500px;
+                border: tomato solid 5px;
+            }
+            h1 {
+                color: tomato;
+            }
+        </Style>
+    </Component>
+
+</template>
+
+<script src="https://unpkg.com/mdu.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.1.slim.js"></script>
+<script src="http://cdn.jsdelivr.net/gh/davatron5000/FitText.js/jquery.fittext.js"></script>
+
+<!-- Here is how we define the CPart itself. For the example, we put it in
+embedded in a <script> so we can keep everything in one file. However, it's
+better to move it to a separate JS file included with a <script src="..."> tag
+(just like we included the Modulo.js and the jQuery plugins). -->
+<script>
+    modulo.register('cpart', class FitTextJQuery {
+        /*
+        // The other callbacks aren't useful for this particular wrapper, but
+        // might be useful for other ones
+        initializedCallback() { } // Called when the element first mounts
+        prepareCallback() { } // Called before each rerender
+        renderCallback() { } // Called during each rerender
+        reconcileCallback() { } // Called after the reconciler has created patches
+        */
+
+        // Called after applying patches, we can now activate the plugin
+        updateCallback() {
+            // By using element.querySelector, we limit the target to be within
+            // this component
+            const target = this.element.querySelector(this.conf.selector)
+            $(target).fitText(this.conf.size || 1.0);
+        }
+    });
+</script>
+
+
+<h1>Custom API CPart Example</h1>
+
+<hr />
+
+<x-ExampleComponent></x-ExampleComponent>
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

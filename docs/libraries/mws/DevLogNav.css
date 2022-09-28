@@ -1,0 +1,40 @@
+nav {
+    min-height: 100px;
+    padding: 20px;
+    clear: both;
+    display: block;
+    max-width: 700px;
+    margin: 10px auto 0 auto;
+    display: flex;
+    border: 1px dotted #888;
+}
+
+ul {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+h4 {
+    font-weight: bold;
+    border-right: 1px dotted #888;
+    color: #888;
+    margin-right: 10px;
+}
+
+h1 {
+    font-weight: bold;
+    text-align: center;
+    border: 1px dotted #888;
+    margin-top: -1px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    ul {
+        grid-auto-flow: row;
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,359 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="lifecycle.html"
+    pagetitle="Lifecycle"
+    navbar="docs">
+
+<h1>Lifecycle</h1>
+
+<p>Every Modulo Component goes through a certain "lifecycle". Here's an
+analogy: If CParts are the stage-hands and actors who put on a play, then the
+"lifecycle" is the pre-described arrangement of each "act", intermission, and
+so on, such that every CPart stage-hand "jumps in" at the right moment to do
+it's job and set up for the next act.</p>
+
+<mws-Section name="global">Global lifecycle</mws-Section>
+
+<p>Every <em>Component</em> that you define triggers a certain set of lifecycle
+phases. The lifecycle phases that a Modulo <em>Component</em> progresses
+through can be categorized into a few groups. One way to think of these phases
+is that typically, the "output" of a previous lifecycle phase in a group is the
+"input" of the next phase. As an example, <code>prebuild</code> generates a
+flat, serializable structure that <code>define</code> uses to instantiate more
+complicated JavaScript instances.  Similarly, <code>prepare</code> figures out
+the template variables, <code>render</code> causes the template to actually
+perform the render based on the variables in the previous phase, and
+<code>update</code> updates the HTML of the element based on the rendered
+output of the previous phase.</p>
+
+
+<h3>Global Modulo lifecycle phases</h3>
+
+<p>These phases happen <em>once per CPart definition</em>. These will happen
+even if the component is never used or instantiated anywhere, but only defined
+and loaded. They are intended for setting up the component "definition" (data
+structure blueprint for component instances).</p>
+
+<ul>
+    <li><code>prebuild</code> - A stage for prebuild processing of data. This
+    is for static analysis and similar pre-processing. Note that if Modulo
+    components are built or cached, or if they are ever pre-compiled into a
+    single JS file, this <code>prebuild</code> phase happens BEFORE saving, and
+    thus gets "baked-in".  This means that the results of a
+    <code>prebuild</code> phase must be "serializable", such as in a JSON
+    format.  Note that this happens after <code>confPreprocessors</code>,
+    meaning it will already have things like <code>-src=</code> resolved for
+    you. This is also when you want to define any assets for the asset manager,
+    such as JS functions or CSS.</li>
+
+    <li><code>define</code> - Use this to actually define and register
+    Components, or run global script tags. This happens after the
+    <code>prebuild</code>, but before the component is used.</li>
+</ul>
+
+<p><strong>Note:</strong> "Modulo lifecycle phases" are only accessible to
+<em>CPart</em> developers, and <em>not</em> accessible to component developers
+using script tags.</p>
+
+<h3>Component lifecycle phases: Factory</h3>
+
+<p>The factory phase happen <em>once per Component definition</em>. It will
+happen even if the component is never used or instantiated anywhere, but only
+defined. This <code>factory</code> thus happens during the <code>define</code>
+global phase of Modulo, and is invoked to prepare the Component definition.</p>
+
+<ul>
+    <li><code>factory</code> - Happens while a component is getting defined.
+    This happens after the <code>prebuild</code> and <code>define</code> phases,
+    but before the component is used.  Unlike the <code>prebuild</code> and
+    <code>define</code> phases, <code>factory</code> happens after the page
+    loads, and thus has no restrictions on what it does or generate. (E.g. it's
+    output does <em>not</em> need to be serializeable, since it will be run
+    after built JS files as well).</li>
+</ul>
+
+
+<mws-Section name="component">Component lifecycle</mws-Section>
+
+<h3>Construction and initialization lifecycle</h3>
+
+<p>Two methods are triggered when a component is mounted on the
+page:</p>
+<ul>
+    <li><em>constructor()</em> - While technically not a lifecycle method, the
+    constructor() method will be invoked when creating an instance of the CPart
+    class. This happens <em>before</em> the Component's HTML Element is
+    guaranteed to be fully loaded on the DOM.</li>
+    <li><code>initialized</code> - Happens once per instance, every time a
+    component is fully mounted (i.e. used) on a page, but before the first
+    render. Useful for fetching or setting up initial data on a component, as
+    all the component will be fully ready for use at this point. Note that this
+    will only be invoked after the initial DOM is fully loaded, but before the
+    <em>prepare</em> of the first rerender (described below).</li>
+</ul>
+
+
+<h3>Rendering lifecycle</h3>
+
+<p>All of 4 these lifecycle phases trigger in the following sequence every time
+a component renders. This including the first time, every manual rerender (e.g.
+invoking <code>element.rerender()</code>), and ever automatic rerender (e.g.
+after events or state manipulation). These will phases even trigger if you
+don't have a <em>Template</em> CPart defined (although without a
+<em>Template</em> there will be nothing to render, <em>per se</em>).</p>
+
+<ul>
+    <li><code>prepare</code> - Gather data needed before rendering (e.g. gather
+    variables for template). Return values from here to have "computed
+    variables" within the Template and Script code.</li>
+    <li><code>render</code> - The Template CPart will use this phase to to
+    render HTML code from the template specified
+    (by setting <code>renderObj.component.innerHTML</code></li>
+    <li><code>reconcile</code> - The Component CPart will compare the new
+    rendered HTML to the DOM, and generates a "patch-set" or array of
+    operations necessary to reconcile the DOM to the new HTML (by setting
+    <code>renderObj.component.patches</code>)</li>
+    <li><code>update</code> - Finally, the Component will apply the patch-set
+    generated in the previous step, actually modifying the DOM and invoking any
+    directive callbacks specified</li>
+</ul>
+
+
+<h3>Directives that invoke lifecycle methods</h3>
+
+<p>Directives can can cause lifecycle phases as well. With the built-in CParts,
+there is only one directive that will trigger any lifecycle phases: The
+<code>event</code> directive (e.g. <code>@click</code>).  More information on
+directives is <a href="/docs/directives.html">covered in the Directives
+section</a>. </p>
+
+<ul>
+    <li><code>event</code> - Triggers when an event is about to happen.</li>
+    <li><code>eventCleanup</code> - Triggers after an event happened. A common
+    pattern is to use this and the previous to figure out what has "changed"
+    due to the event, and respond accordingly.</li>
+</ul>
+
+
+<!--
+<mws-Section name="factory">Mechanics of <em>factory</em> lifecycle</mws-Section>
+
+<p>The "factory" lifecycle behaves slightly differently. Most lifecycle methods
+can be invoked by using the <code>lifecycle</code> method of
+<code>ModuloElement</code>, e.g.  <code>element.lifecycle('prepare')</code>.
+The "factory" lifecycle, however, is run with <code>runFactoryLifecycle</code>,
+a method of <code>ComponentFactory</code>, before any components or actual
+elements are created.</p>
+
+<p>The is a special lifecycle for any global or one-time setup, after component
+definitions are loaded, but before before any components are constructed.
+Examples: the Style CPart uses this stage to set up global CSS, the Template
+CPart uses this to compile the template and include it in a script tag in the
+head, and the Script CPart will actually wrap the script-tag and include into
+the head.</p>
+
+<p>Like every other "lifecycle" in Modulo, it passes around a "renderObj"
+called baseRenderObj. After this method, this baseRenderObj is not modified,
+but instead gets copied into every other renderObj to form, as the name
+implies, the "base" of future renderObj.</p>
+
+<p>In total, the <code>runFactoryLifecycle(cPartOpts)</code> method of
+<code>ComponentFactory</code> loops through all the CPart names, finding
+each relevant CPart Classes, and then invoking each CPart static method
+<code>factoryCallback</code>, which is what does the necessary preprocessing.
+If there are multiples of the same CPart, then whichever appears last will
+overwrite and/or merge data with the previous ones.  However, that particular
+behavior can be controlled from within each CPart factoryCallback itself.</p>
+-->
+
+
+<mws-Section name="callbacks">Lifecycle Callbacks</mws-Section>
+
+<p>The purpose of <em>lifecycle phases</em> is the <em>lifecycle methods</em>
+or callback functions that "hook into" each phase and run during them.</p>
+
+<p>You can get the name for a <em>lifecycle method</em> by simply suffixing the
+name of the phase with the word <code>Callback</code>. For example,
+<code>prepare</code> thus becomes
+<code>function&nbsp;prepareCallback()&nbsp;{...</code>.  Every CPart has the
+ability to hook into lifecycle methods by defining a method with an expected
+name. This is useful for CPart developers to implement the actual behavior and
+functionality of a CPart. In fact, most of CPart code is just hooking into
+these different methods!</p>
+
+<p>The <em>Script</em> CPart also exposes this interface to component
+developers. This is so that you can write custom code in each component to
+execute during any one of the phases. Note that you cannot hook into the global
+phases (e.g., prebuild, define, factory) this way, since those need to happen
+before your script tag is even ready.</p>
+
+<p>Directives also have callback functions, <a href="/docs/directives.html">covered in a
+the directive section</a>.</p>
+
+<p><strong>Try it out below:</strong></p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+Hello <strong>Modulo</strong> World!
+Open your browser dev console to see messages...
+<button @click:=script.gotClicked>Click me to generate an event</button>
+</Template>
+
+<Script>
+    function initializedCallback() {
+        console.log("initalizedCallback: Got mounted");
+    }
+
+    function prepareCallback() {
+        console.log("prepareCallback: Starting to render");
+    }
+
+    function renderCallback() {
+        console.log("renderCallback: Rendering!");
+    }
+
+    function reconcileCallback() {
+        console.log("reconcileCallback: Reconciling the DOM!");
+    }
+
+    function updateCallback() {
+        console.log("updateCallback: Applying patches");
+    }
+
+    function eventCallback() {
+        console.log("eventCallback: An event happened");
+    }
+
+    function eventCleanupCallback() {
+        console.log("eventCleanupCallback: After the event");
+    }
+
+    function gotClicked() {
+        console.log("(the button got clicked)");
+    }
+</Script>
+'></mws-Demo>
+
+
+</section>
+
+
+
+<a name="renderobj"></a>
+<h3>renderObj</h3>
+
+<blockquote>
+<p><strong>renderObj is like "req" </strong> -
+<code>renderObj</code> is comparable to the "request" or "response" objects
+in many backend MVC frameworks, such as in Express.js or Django. In these,
+middleware works behind the scenes to modify or construct the "request" object.
+They prepare it for the controller functions that accept it as an argument, by
+attaching data and injecting dependencies.  For a concrete example, enabling
+Express's JSON parsing middleware adds the <code>req.json</code> attribute to
+request objects, for parsing of JSON data.</p>
+<p>This is what inspired the <code>renderObj</code>, which is a plain object
+that gets passed along throughout the lifecycle phases. The Component Parts act
+just like middleware in other web frameworks: Work together to construct the
+<code>renderObj</code> for users of the framework.</p>
+</blockquote>
+
+<p>So far in this document, we covered how lifecycle methods are central to
+CParts, and that CParts are central to Modulo components in general.
+Now, we will learn how <code>renderObj</code> is central to lifecycle methods.
+It's how lifecycle methods pass data and communicate, as a component passes
+through the different phases.</p>
+
+
+<h3>renderObj and lifecycle</h3>
+
+<p>The renderObj goes through 3 phases. The first is during set-up, the second
+during component factory initialization, and the third happens every time a
+component rerenders.</p>
+
+<ol>
+    <li><code>loadObj</code> - This is the version created during the
+    <code>load</code> phase, and is typically just the text and attributes of
+    the component definition with any pre-processing done. Unlike the other
+    objects, <code>loadObj</code> <em>can only</em> contain plain or
+    JSON-friendly data types.</li>
+
+    <li><code>baseRenderObj</code> - The <code>loadObj</code> is copied to the
+    <code>baseRenderObj</code>, which is the result of the <code>factory</code>
+    phase. This might have more dependencies injected, e.g. the template CPart
+    at this point will have compiled the template code a JS function.</li>
+
+    <li><code>renderObj</code> - This is the one that component developers are
+    more likely to encounter. During first render, and every time a
+    <code>.rerender()</code> method is called, <code>renderObj</code> is
+    duplicated from the <code>baseRenderObj</code>, and then gets passed around
+    through the <code>prepare</code>, <code>render</code>, <code>reconcile</code>,
+    and <code>update</code> phases.</li>
+</ol>
+
+
+
+
+<p>Typically, unless developing new CParts, you will have little need to
+directly interact with the <code>renderObj</code>. You already implicitly use
+it in several cases. For example,
+whenever you access variables in the <em>Script</em> CPart, the
+<code>state</code> variable is in fact shorthand for
+<code>element.renderObj.state</code>, or whenever you access <a
+href="http://icheb.local:8080/docs/templating.html#variables">variables in the
+template</a> <em>CPart</em> (e.g., <code>props.text</code> is
+shorthand for <code>element.renderObj.props.text</code>).
+So, if you are a component developer and not a CPart developer, and you find
+yourself thinking that it doesn't make a lot of sense why you'd need to access
+or modify the <code>renderObj</code> explicitly... You probably don't!</p>
+
+<p>Nevertheless, use the following example to examine the output of the
+following example to see what information is available or modified at each
+step:</p>
+
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+<label>
+<input [state.bind] name="enabled" type="checkbox" />
+Show messages in console</label>
+</Template>
+
+<State
+    enabled:=false
+></State>
+
+<Script>
+    function _logInfo(message, renderObj) {
+        // Little helper function to do messages in console
+        if (state.enabled) {
+            const formattedOutput = JSON.stringify(renderObj, null, 2);
+            console.log(message, formattedOutput);
+        }
+    }
+
+    function prepareCallback(renderObj) {
+        _logInfo("prepareCallback:",  renderObj);
+    }
+
+    function renderCallback(renderObj) {
+        _logInfo("renderCallback:", renderObj);
+    }
+
+    function reconcileCallback(renderObj) {
+        _logInfo("reconcileCallback:", renderObj);
+    }
+
+    function updateCallback(renderObj) {
+        _logInfo("updateCallback:", renderObj);
+    }
+</Script>
+'></mws-Demo>
+
+
+</mws-Page>

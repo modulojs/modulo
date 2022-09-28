@@ -1,0 +1,145 @@
+<!--
+    This demo shows how you can create simple unit tests using Modulo's
+    TestSuite CPart. Modulo's TestSuite CPart isn't intended to replace full
+    testing frameworks, but instead is intended for allowing quick development
+    of unit-testing of components in particular.
+-->
+<template Modulo>
+    <Component name="ExampleClickingComponent">
+        <Props
+            txt
+        ></Props>
+        <Template>
+            <div>
+                <h1>Props: {{ props.txt }}</h1>
+                <button @click:=script.getClicked>State: {{ state.count }}</button>
+            </div>
+        </Template>
+
+        <State
+            count:=5
+        ></State>
+
+        <Script>
+            function getClicked() {
+                console.log('Note how TestSuites "group" console messages');
+                state.count++;
+            }
+        </Script>
+
+        <!--
+            To write unit tests, start with a TestSuite CPart.  A test suite is
+            a collection of tests. Test suites can be embedded in Component
+            definitions. In this case, the test suite will be applied to the
+            component definition that it exists inside.
+        -->
+
+        <TestSuite>
+            <!--
+                Each "Test" consists of a series of "test-steps". Each
+                test-step is named after a CPart, which it either configures
+                (State, Props) or behaves slightly similar to (Template,
+                Script).  Each test-step either initializes values (State,
+                Props), or checks assertions (Template, and Script).
+            -->
+
+            <Test name="Check props and click event">
+                <!-- INIT -->
+                <!-- Using Props and State "Init" steps, we can initialize
+                those CParts to hold certain data, and thus setup the component
+                for testing:-->
+                <props txt="Testing 123"></props>
+
+                <!-- ASSERTIONS -->
+                <!-- Using Template steps, we can assert a "fuzzy" DOM match
+                (normalized DOM formatting, and whitespace) as follows: -->
+                <template>
+                    <div>
+                        <h1>Props: Testing 123</h1>
+                        <button @click:=script.getClicked>State: 5</button>
+                    </div>
+                </template>
+
+                <!-- We can use "script" for simulating user actions: -->
+                <script>
+                    event: click button
+                </script>
+
+                <!-- Finally, using another Template assertion, we make sure
+                that the component rerendered in the expected way, as a result
+                of the simulated click: -->
+                <template>
+                    <div>
+                        <h1>Props: Testing 123</h1>
+                        <button @click:=script.getClicked>State: 6</button>
+                    </div>
+                </template>
+            </Test>
+
+            <Test name="Check state reflects in rendering">
+                <!-- Another test, with a few more example steps -->
+                <props txt="Example props"></props>
+
+                <!-- Can force state to be a certain thing for testing: -->
+                <state count:=1></state>
+
+                <!-- Can check for exact (un-normalized) string occurrences
+                within the browser's innerHTML. Specify a string-count with any
+                count (including 0 to "ban" a string from occurring) -->
+                <template string-count=1>Example props</template>
+                <template string-count=1>State: 1</template>
+                <template string-count=0>State: 6</template>
+
+                <!-- Can write arbitrary assertions and code in script tag: -->
+                <script name="Check state and prop CParts">
+                    assert: props.txt === 'Example props' && state.count === 1
+                </script>
+
+                <!--
+                    Finally, one more feature:
+                    We can use "test-values" to expose the values of inputs:
+                    <template test-values>
+                        <input [state.bind] name="bananas" value="5" />
+                        <h1>I have 5 bananas</h1>
+                    </template>
+                -->
+            </Test>
+        </TestSuite>
+    </Component>
+
+</template>
+
+<!-- Linking to Modulo  -->
+<script src="https://unpkg.com/mdu.js"></script>
+<!-- Load the TestSuite CPart -->
+<script src="https://unpkg.com/mdu.js@latest/mdu/cparts/TestSuite.js"></script>
+
+<p>To run the tests, bring up your JavaScript Console, and click the "test"
+command from the COMMANDS menu (or type: <code>m.test()</code> as a
+shortcut)</p>
+
+<p>
+    The component being tested is also mounted below, so you can examine it's
+    normal usage:
+    <x-ExampleClickingComponent txt="Hello"></x-ExampleClickingComponent>
+</p>
+
+
+<!-- Remember - Move Component definitions to a library file later:
+<script Modulo
+    src="https://unpkg.com/mdu.js"
+    -src="/static/libraries/all.html"
+></script> -->
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

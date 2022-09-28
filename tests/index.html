@@ -1,0 +1,92 @@
+<script Modulo
+    src="/js/Modulo.js"
+></script>
+    <!-- 
+    -src="/demos/tests/core_functionality.test.html" 
+    -name="x"
+    -->
+
+<script src="/demos/mdu/cparts/TestSuite.js"></script>
+
+<template id="modulo">
+    <Component name="TestReporter">
+        <Template>
+            {% if state.success != null %}
+                {% if state.success %}
+                    <h1 style="background: seagreen">OK</h1>
+                {% else %}
+                    <h1 style="background: red">FAILURE</h1>
+                {% endif %}
+            {% else %}
+                <button @click:=script.doTests>Run tests</button>
+            {% endif %}
+            <p><em>Tip: Use the Developer Console to see the output.</em></p>
+        </Template>
+        <State
+            success:=null
+        ></State>
+        <Script>
+            console.log('Running factory for Script for test reporter');
+            function doTests() {
+                if (state.success === null) { // prevent double runs
+                    state.success = modulo.registry.commands.test(modulo);
+                }
+            }
+        </Script>
+    </Component>
+
+    <Library -name="a" -src="/demos/tests/core_functionality.test.html"></Library>
+    <Library -name="b" -src="/demos/tests/mtl.test.html"></Library>
+    <Library -name="c" -src="/demos/tests/domcursor.test.html"></Library>
+    <Library -name="d" -src="/demos/tests/utils.test.html"></Library>
+    <Library -name="e" -src="/demos/tests/cparts/state.test.html"></Library>
+    <Library -name="f" -src="/demos/tests/cparts/component.test.html"></Library>
+    <Library -name="g" -src="/demos/tests/reconciler-directives.test.html"></Library>
+    <Library -name="h" -src="/demos/tests/core_loading.test.html"></Library>
+    <!--
+    Composition tests are disabled because:
+    1. Require component.slot to work 100%
+    2. Require <PassThrough to be rewritten as <x-PassThrough
+    <Library -name="h" -src="/demos/tests/composition.test.html"></Library>
+    -->
+
+    <!--
+    <Library -name="emblib" -src="/components/embeddedexampleslib.html"></Library>
+    -->
+
+    <!--
+    -->
+    <!--
+    <Library -src="/demos/tests/cparts/component_mode.test.html"></Library>
+    -->
+
+    <!-- Load tests for core Modulo.js library -->
+    <!--
+    <Library src="/demos/tests/reconciler1.test.html"></Library>
+    <Library src="/demos/tests/reconciler2.test.html"></Library>
+    <Library src="/demos/tests/reconciler3.test.html"></Library>
+    <Library src="/demos/tests/browser_build.test.html"></Library>
+    <Library src="/demos/tests/cparts/config.test.html"></Library>
+    -->
+
+    <!-- Load tests for documentation examples -->
+    <!--
+    <Library namespace="eglib" src="/components/examplelib.html"></Library>
+    <Library namespace="emblib" src="/components/embeddedexampleslib.html"></Library>
+    -->
+
+    <!-- TODO: Rename & reorg tests to be more clear what tests what -->
+</template>
+
+<button onClick="this.textContent = 'Success: ' + modulo.registry.commands.test(modulo)">
+   Run tests
+</button>
+<script>
+    modulo.loadFromDOM(document.getElementById('modulo').content);
+    modulo.preprocessAndDefine();
+</script>
+
+<!--
+<x-TestReporter></x-TestReporter>
+-->
+

@@ -1,0 +1,62 @@
+<script src="/js/Modulo.js"></script>
+
+<script src="/demos/mdu/extensions/mtl-extensions.js"></script>
+
+
+<template modulo-embed>
+    <Component name="ExapleComponent">
+        <Props
+            message
+        ></Props>
+        <Template>
+
+            <h1>Counter: {{ state.count }}</h1>
+            {?js let i = 0; while (i !== 10) { echo(`<button @click:=script.count payload:=${i}>${i}</button>`); i++; } ?}
+
+            {% if state.liked %}
+                {{ props.message }}
+            {% else %}
+                <button @click:=script.like>Like</button>
+            {% endif %}
+        </Template>
+        <State
+            liked:=false
+            count:=0
+        ></State>
+        <Script>
+            function like() {
+                state.liked = true;
+            }
+            function count(payload) {
+                state.count += payload;
+            }
+        </Script>
+    </Component>
+</template>
+
+<script> Modulo.defineAll() </script>
+
+
+<h1>Custom Templating</h1>
+
+<hr />
+
+<!-- And our Modulo / templating based component: -->
+<h2>Like button example:</h2>
+<x-ExapleComponent
+    message="Templating language test example"
+></x-ExapleComponent>
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    Modulo.fetchQ.enqueue('.', text => {
+        this.nextSibling.textContent = text;
+        navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

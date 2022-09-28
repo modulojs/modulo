@@ -1,0 +1,124 @@
+<!-- Want to use Midi? Look below!  -->
+<template Modulo>
+
+  <Component name="HelloMidiWorld">
+    <Props
+        label
+    ></Props>
+
+    <Template>
+        <div>
+            <h3>Midi Status</h3>
+            <p>Is ready: {{ midi.isReady }}</p>
+            <p>Is error: {{ midi.isError }} {{ midi.error|default:'' }}</p>
+
+            <h3>Select a midi device below:</h3>
+            <p>(Make sure you select "Allow" when the browser prompts for
+            permissions, and then try plugging in a USB midi keyboard.)</p>
+
+            {% if midi.isReady %}
+                {% for input in midi.inputs %}
+                    <div class="input">
+                        {{ input.name }}
+                        <button
+                            @click:=midi.selectInput
+                            payload="{{ input.id }}"
+                        >Select</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {% if midi.lastInputChannel %}
+            <div class="keyboard">
+                {% for key in midikeyboard.keys %}
+                    <div class="
+                        {% if key.isSharp %}
+                            sharp
+                        {% endif %}
+                        {% if midi.lastInputChannel %}
+                            {% if midi.lastInputChannel.notesState|get:key.i %}
+                                active
+                            {% endif %}
+                        {% endif %}
+                        "
+                        >
+                        {{ key.letter }}
+                        {% if midi.lastInputChannel %}
+                            {% if midi.lastInputChannel.notesState|get:key.i %}
+                                &bull;
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </Template>
+
+    <!-- Midi is a experimental CPart that wraps around WebMidi.js to provide a
+    high-level interface for USB Midi devices -->
+    <Midi></Midi>
+
+    <!-- MidiKeyboard provides a few utilities (notably, an array of "keys")
+    for doing stuff with music keyboards -->
+    <MidiKeyboard></MidiKeyboard>
+
+    <Style>
+        .keyboard {
+            display: flex;
+            --key-width: 30px;
+        }
+
+        .keyboard > div {
+            width: var(--key-width);
+            height: 80px;
+            border: 1px solid black;
+            z-index: 1;
+            position: relative;
+        }
+
+        .keyboard > div.active {
+            box-shadow: inset 0 0 5px rgba(0, 0, 100, 0.5);
+        }
+        .keyboard > div.sharp {
+            background: gray;
+            height: 50px;
+            margin-left: calc(1px - (var(--key-width) / 2));
+            margin-right: calc(1px - (var(--key-width) / 2));
+            z-index: 2;
+        }
+    </Style>
+  </Component>
+
+
+</template>
+
+<!-- Finally, include a Modulo script & activate (at the bottom) -->
+<script src="https://cdn.jsdelivr.net/npm/webmidi@next/dist/iife/webmidi.iife.js"></script>
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/Midi.js"></script>
+
+
+<hr />
+<x-HelloMidiWorld></x-HelloMidiWorld>
+<hr />
+
+
+<!-- Remember - Move Component definitions to a library file later:
+<script Modulo
+    src="https://modulojs.org/js/Modulo.js"
+    -src="./libraries/my_components.html"
+></script> -->
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

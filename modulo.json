@@ -1,0 +1,6 @@
+{
+    "isCopyOnly": "^(components|libraries|demos)$",
+    "testPath": "www-src/demos/tests/index.html",
+    "output": "docs",
+    "input": "www-src"
+}

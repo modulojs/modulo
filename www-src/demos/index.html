@@ -1,0 +1,271 @@
+<!--
+    This is the source code to Modulo's Demo page, and shows how Modulo's own
+    website was built. Copying and pasting this into any HTML document will
+    "import" Modulo's entire layout into that page. Examine the 4 comments
+    below for a little tour of how a Modulo's web page is built!
+-->
+
+
+<!-- 1. The 4 lines of boilerplate that initialize Modulo, and import a common
+header HTML file (all.html), which in turn imports all needed libraries -->
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+
+<!-- 2. <mws-Page> is a "vanish-into-document" component, meaning it will
+replace the entire document tree. It's Template is the base page layout. -->
+<mws-Page
+    docbarselected="/demos/"
+    pagetitle="Examples"
+    navbar="docs">
+
+<!-- 3. The docbar, pagetitle, and navbar props control the left-hand
+navigation, the <title> tag, and the navbar's selection respectively. Within
+the mws-Page Template, templating statements like if statements, for loops, etc
+selectively highlight items in the sidebar and navbar. -->
+
+<h1>Examples</h1>
+
+<!-- 4. The rest of the file is just the content of the page, which will get
+slotted into the mws-Page layout -->
+
+<p>This page has a collection of larger demos and library of mini-examples.</p>
+
+<p><strong>Note:</strong> Unlike every other page at modulojs.org, this page is
+NOT pre-rendered! That means you can use "View Source" (Right click, or Ctrl+U)
+to see how Modulo's own website was built.</p>
+
+
+<section class="Tutorial-tryit">
+    <h4>How to "fork" a Modulo.js demo</h4>
+    <p>Some of tiles below link to full-page demonstration apps.  These are
+    intended as a reference of &ldquo;copy &amp; paste recipes&rdquo; so you
+    can get started even quicker with incorporating Modulo into your
+    project.</p>
+    <p>Every demo can be "forked" (copied) by clicking the "COPY SOURCE" button
+    in the top-right. Then, it can be pasted into a local HTML file in your
+    text editor. <!--All demos have been designed with absolute URLs, so they
+    should &ldquo;just work&rdquo; if pasted in any HTML code, whether that is
+    a backend app template (e.g. PHP, Rails, Django), or a static HTML
+    file. (Alpha note: Some are relative, need correcting.)--></p>
+</section>
+
+<mws-Section name="starter">
+    Starter Files
+</mws-Section>
+
+
+<p>These HTML and Zip files are intended to help you start new projects, with
+example components already made, to make remembering syntax easier, and Modulo
+all configured and ready to go.  Use one of these demo pages to get a
+head-start with your own Modulo project.</p>
+
+<!--<h2>Snippets</h2>-->
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/basic_starter.html">Basic Snippet</a>
+        <p>This snippet has a single component defined with examples of common
+        CParts and template syntax.</p>
+    </li>
+
+    <li>
+        <a href="/demos/components_starter.html">Components Snippet</a>
+        <p>This starting snippet defines a small collection of example
+        components, demonstrating how to build a site or app.</p>
+    </li>
+
+    <li>
+        <a href="/demos/ssg-starter.zip">ssg-starter.zip</a>
+        <p>This ZIP file contains a 3 page static site built with Modulo,
+        showing a basic layout, an example custom form.</p>
+    </li>
+
+    <!--
+    <li>
+        <a href="/demos/basic_page.html">Basic Page</a>
+        <p>This SPA-style demo includes the page boilerplate (e.g.
+        <tt>head</tt>) for a fully valid HTML file.</p>
+    </li>
+
+    <li>
+        <a href="/demos/bootstrap_page.html">Bootstrap Page</a>
+        <p>Similar to the SPA starter page, but with Bootstrap 5 CDN already
+        included.</p>
+    </li>
+    -->
+</ul>
+
+<!--
+
+<h2>SPA: Modulo-based layouts</h2>
+
+<p>Thinking Modulo will be taking a "center-stage" in your project, and
+handling layout as well? These demos show how you can define Layout elements to
+omit HTML boilerplate in your Modulo-powered valid HTML file.</p>
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/basic_page.html">SPA Page Layout</a>
+        <p>A simple start page, with a single component defined to get you
+        going.</p>
+    </li>
+</ul>
+-->
+
+
+<mws-Section name="library">
+    Example Library
+</mws-Section>
+
+<mws-AllExamples></mws-AllExamples>
+
+
+<mws-Section name="experiments">
+    Experiments
+</mws-Section>
+
+<p><strong>Experimental:</strong> The following demos show off some of the cool
+and unusual things you can get Modulo to do! However, they are designated
+"experimental" either because they might be using internal APIs that could
+change before the Modulo <em>beta</em>, or require a bit more polish before
+they become fully recommended.</p>
+
+<h2>Custom Component Parts</h2>
+
+<p>The internal CPart API that is used by custom CParts may change before
+<em>beta</em>, and will need further documentation. Read further for typical
+uses of common CParts:</p>
+
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/custom_cpart_for_api.html">Custom CParts for APIs</a>
+        <p>A typical use of custom CParts is to abstract away APIs.</p>
+    </li>
+
+    <li>
+        <a href="/demos/custom_cpart_for_jquery_fittext.html">Custom CParts for
+        legacy frontend</a>
+        <p>Modulo is useful as a glue to integrate with legacy libraries (in
+        this case, FitText.js).</p>
+    </li>
+</ul>
+
+
+
+
+<h2>Custom templating: Handlebars and JSX integrations</h2>
+
+<p>Modulo templating and HTML generation can be customized at various levels.
+You can register custom CParts, in the case of using React-style JSX syntax
+which allows embedding of arbitrary JavaScript. You can also register a custom
+<em>Templater</em> engine, which the existing <em>Template</em> CPart will
+integrate into the render-flow, most notably including Modulo and third-party
+filters into the other syntax.</p>
+
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/handlebars_templater.html">Handlebars</a>
+        <p>Demonstration of integrating Modulo with a custom <em>Templater</em>
+        engine (in this case, Handlebars).</p>
+    </li>
+
+    <li>
+        <a href="/demos/jsx_template.html">JSX Templating</a>
+        <p>Demonstration of integrating Babel JS and replacing Template CPart
+        with custom CPart to enable React-style JSX-syntax in Modulo.</p>
+    </li>
+
+    <!--
+      TODO: Needs update, probably wait until implement a NodeRequire CPart
+      that would then make this much easier, e.g. allow specific React
+      versions, allow importing of third-party React components, etc
+    -->
+    <!--
+    <li>
+        <a href="/demos/react_component.html">ReactComponent</a>
+        <p>Demonstration of integrating React into a Modulo project, mixing
+        components written in React with ones in Modulo.</p>
+    </li>
+    -->
+
+</ul>
+
+<!--
+Should re-think FetchState, e.g. Have it bind with state or something,
+simplify to handle only one route, not use templating, and if it can be
+short enough, include in Modulo.js
+<li>
+    <a href="/demos/fetchstate_book_browser.html">FetchState API</a>
+    <p>Demonstration of an API-backed, paginated book search app,
+    <em>without</em> use of any JavaScript, beyond using the custom CPart
+    <em>FetchState</em>.</p>
+</li>
+-->
+
+<h2>Modulo for Sound & Music</h2>
+
+<p>Modulo's declarative, configuration-focused approach  is especially
+well-suited for sound and music related applications. The Tone JS CPart becomes
+your own sound engineering "rack" of instruments and effects units, where any
+"knob" or configuration setting can be bound to state, and thus to form
+controls, just like anything else in Modulo.</p>
+
+<p>NOTE: WebAudio API
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#browser_compatibility">
+has limited browser compatibility</a>.</p>
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/tone_example.html">Tone.js Synth</a>
+        <p>A functional baseline synthesizer, with a simple step sequencer and
+        some knobs to tweak.</p>
+    </li>
+    <li>
+        <a href="/demos/midi_example.html">USB MIDI Keyboard</a>
+        <p>Demonstration of receiving MIDI keyboard input in Modulo, useful for
+        sound synthesis, DAW, or apps in music ed.</p>
+    </li>
+</ul>
+
+
+
+<h2>Unit testing demos</h2>
+
+
+<p>MDU (a planned collection of CParts and other utilities) includes
+<em>TestSuite</em>, a unit testing framework that is used to test Modulo.js
+itself. Like other MDU CParts, it's usable already, but it's API may change in
+the future.</p>
+
+
+<ul class="DemoPanels">
+    <li>
+        <a href="/demos/testsuite_example.html">TestSuite Demo</a>
+        <p>Show how you use the TestSuite CPart to write your own succinct
+        unit-tests for your components.</p>
+    </li>
+
+
+    <li>
+        <a href="/demos/tests/">Modulo.js Tests</a>
+        <p>One way to check for browser-compatibility bugs is by running
+        Modulo.js's full test-suite in a new tab. View the console for
+        output.</p>
+    </li>
+
+    <li>
+        <p>Or, you can run it embedded in an iframe below. If you get anything
+        other than "Success: true", consider filing a bug.</p>
+        <iframe src="/demos/tests/"
+            height="40px" width="150px" style="border:none" scrolling="no"></iframe>
+    </li>
+
+</ul>
+
+</mws-Page>
+

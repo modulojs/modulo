@@ -1,0 +1,206 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="experimental-cparts.html"
+    pagetitle="Experimental CParts"
+    navbar="docs">
+
+<h1>Experimental CParts</h1>
+
+<p>NOTE: Most of this API documentation is out of date, and references features
+that will were deleted / never included.</p>
+
+
+
+<mws-Section name="state">Store</mws-Section>
+
+<blockquote>
+<p><strong>State vs Store?</strong> <em>State</em> and <em>Store</em> CParts
+are identical except that <em>Store</em> is always shared between components,
+while <em>State</em> is private and can only be shared by parents passing data
+down as <em>Props</em>. Generally speaking, you will use <em>State</em> for
+most data in your app, and <em>Store</em> only for data that is used in so many
+places it's too inconvenient to be passing around via Props. Often,
+<em>Store</em> is used for application data from a backend database that is
+used in multiple places in an app.
+</p></blockquote>
+
+
+<p>The <em>Store</em> is for shared, global data between all component instances.
+It's a way to store changing global data, such as API data from a backend
+database service, or authentication data. It's behavior is almost identical to
+the <em>State</em> CPart, but with two important exceptions: 1) There always
+must be a "name" attribute, and 2) The data is shared between all
+<em>Store</em> CParts with identical name attributes.</p>
+
+
+<p>Store data is universal across every component instance.  For data only used
+by one component instance, you should use a <em>State</em> CPart instead.</p>
+
+
+<h3>Definition</h3>
+
+<p>Store is traditionally included in Component definitions below the
+<em>Script</em> CPart tag.  Store is defined in a similar way to <em>State</em>
+or <em>Props</em>: Only defined with properties, but no contents.</p>
+
+<p>See below for an example of defining a <em>Store</em> CPart:</p>
+
+<mws-Demo
+text='
+<Store
+    -name="userinfo"
+    username="Luiz"
+    favenum:=13
+></Store>
+'></mws-Demo>
+
+<p>All other behavior of Store is the same as State.</p>
+
+
+<mws-Section name="cparts">Props</mws-Section>
+
+<h3>Definition</h3>
+
+<p>Every "prop" within a <em>Props</em> CPart definition can be defined in one
+of 4 ways:</p>
+
+<ol>
+    <li><strong>Any type, required</strong> - Specify the name of the prop in
+    the CPart definition, but give it no value. This will be able to receive
+    data in any type (e.g. String, and/or a JSON type or Function set with
+    <code>:=</code> data prop syntax). By default, all props are required,
+    meaning if this component is used without a required prop being set, it
+    will throw an error and will not render.</li>
+
+    <li><strong>Type-checked, required</strong> - Give the name of a <em>type
+    validator</em> as a value when defining a Prop to enforce data of only
+    certain types being accepted by a Component. There are a number of built-in
+    <em>type validators</em> that you can use for common types:
+    <code>String</code>, <code>Number</code>, <code>Boolean</code>,
+    <code>Array</code>, <code>Object</code>, <code>Date</code>, and
+    <code>Function</code>. You can also create your own validators: The
+    <em>type validator</em> can be the name of any function that will return
+    <code>undefined</code> if the given prop is of an incorrect type, or
+    the value of the prop (with any necessary "casting" or conversion applied)
+    if it's a valid Prop.  The Props CPart will then use these validators to
+    provide more helpful error messages. If you want to support more than one
+    type, allowing <em>any</em> of them, use comma separation (without
+    spaces).</li>
+
+    <li><strong>Any type, optional with default</strong> - To make an optional Prop, you
+    must specify it's default value.  To specify a default value, repeat
+    attribute with a <code>.default</code> suffix. If a default is specified,
+    the component will no longer cause an error when it does not encounter a
+    value, but instead use the default value.   If you don't expect to use the
+    default value, but still want to make a prop optional nonetheless (e.g.
+    perhaps  its usage is dependent on the value of another prop), consider
+    setting the default value with <code>:=null</code>.</li>
+
+
+    <li><strong>Type-checked, optional with default</strong> - Finally, by
+    combining both type-checking with specifying default values, we can make
+    Props that are both type-checked and optional.</li>
+</ol>
+
+
+<p>See below for an example of each of the 4 types of Props:</p>
+
+<mws-Demo
+text='
+<!-- 1. Any type, required -->
+<Props
+    design
+    data
+></Props>
+
+<!-- 2. Type-checked, required -->
+<Props
+    design=String
+    data=Array
+></Props>
+
+<!-- 3. Any type, optional with default -->
+<Props
+    design
+    design.default="square"
+    data
+    data.default:=&apos;[1, 2, 3]&apos;
+></Props>
+
+<!-- 4. Type-checked, optional with default -->
+<Props
+    design=String
+    design.default="square"
+    data=Array
+    data.default:=&apos;[1, 2, 3]&apos;
+></Props>
+'></mws-Demo>
+
+
+<mws-Section name="module">Module</mws-Section>
+
+<p>The "module" CPart is a Factory CPart, much like Component. It behaves
+exactly like Component, except it immediately initializes all of its containing
+CParts, and will not attempt to mount itself anywhere on the page. It's purpose
+is for "stashing" CParts for re-use within a component library file, or
+configuring high-level aspects that are common to multiple Components within a
+given component library file.</p>
+
+<p>The <em>Module</em> CPart is the least frequently used. It enables
+grouping together of any other CParts into a "global" component-like structure.
+It's mostly useful for creating static behavior that goes at the top of a
+library file and is shared by components within that file.</p>
+
+
+<h3>Example usage</h3>
+
+
+<mws-Demo
+text='
+<Module>
+    <Script>
+        // You can write utility functions to be reused
+        function copyTextToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        // Or manually export static data
+        script.exports.globalData = Array.from({ length: 100 });
+
+        // The "module" can also be used to register custom CParts or extending
+        // Modulo features, such as customizing the Templating Engine
+        class MyCoolPart extends Modulo.ComponentPart { /* etc */ }
+        Modulo.cparts.mycoolpart = MyCoolPart;
+
+        class CustomTemplates extends Modulo.templating.MTL { /* etc */ }
+        Modulo.templating.mycoolengine = CustomTemplates;
+    </Script>
+</Module>
+
+<Component name="ExampleComponent">
+    <!-- Custom engines defined above can then be referenced here -->
+    <Template engine="mycoolengine">
+        <p>hello world</p>
+    </Template>
+
+    <Script>
+        // Functions defined above are available here:
+        module.script.copyTextToClipboard("hey there!")
+
+        // All "module" exports are available here:
+        console.log("global data:", module.script.exports.globalData);
+    </Script>
+
+    <!-- And custom registered CParts can be used here as well -->
+    <mycoolpart
+        does="nothing yet"
+    ></mycoolpart>
+
+</Component>
+'></mws-Demo>
+
+</mws-Page>

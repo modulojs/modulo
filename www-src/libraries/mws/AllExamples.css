@@ -1,0 +1,63 @@
+:host {
+    --colcount: 5;
+    display: grid;
+    grid-template-columns: repeat(var(--colcount), 1fr);
+}
+:host > .Example {
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 10px;
+    margin: 10px;
+    min-height: 200px;
+    background: #ddd;
+    position: relative;
+    margin-top: 50px;
+}
+.Example-wrapper {
+    height: 200px;
+    overflow-y: auto;
+}
+
+:host > .Example.expanded {
+    background: transparent;
+    grid-column: 1 / span var(--colcount);
+}
+
+:host > .Example .tool-button {
+    position: absolute;
+    top: -30px;
+    height: 30px;
+    right: 0px;
+    min-width: 80px;
+    border-radius: 10px 10px 0 0;
+    /*border-bottom: none;*/
+    background: #ddd;
+}
+:host > .Example .tool-button:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+@media (max-width: 1550px) {
+    :host {
+        --colcount: 4;
+    }
+}
+@media (max-width: 1250px) {
+    :host {
+        --colcount: 3;
+    }
+}
+
+@media (max-width: 1160px) {
+    :host {
+        --colcount: 2;
+    }
+}
+
+@media (max-width: 550px) {
+    :host {
+        --colcount: 1;
+    }
+}
+

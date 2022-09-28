@@ -1,0 +1,50 @@
+<config
+    globalval="testing123" 
+    gval_override="blue"
+></config>
+
+<component name="ConfigCPart_SimpleTest">
+    <state
+        testing="lol"
+        otherthing:='["x", "y", "z"]'
+    ></state>
+
+    <config
+        test="123"
+        an_array_val:='["a", "b", "c"]'
+        gval_override="green"
+    ></config>
+
+    <!-- TODO: There's something wrong that causes the following to break: -->
+    <!--
+      stuff:='{}'
+      stuff.prop:='"This is it"'
+    -->
+
+    <testsuite>
+
+        <test name="Testing initial config is readable as a CPart">
+            <script name="Config works for simple string">
+                assert: config.test === '123'
+            </script>
+
+            <script name="Config works for dataProp type">
+                const expected = JSON.stringify(["a", "b", "c"]);
+                const actual = JSON.stringify(config.an_array_val);
+                assert: expected === actual
+            </script>
+        </test>
+
+
+        <test name="Module-level config CPart">
+            <script name="Config works for simple string">
+                assert: config.globalval === 'testing123'
+            </script>
+            <script name="Config overrides">
+                assert: config.gval_override === 'green'
+            </script>
+        </test>
+
+    </testsuite>
+</component>
+

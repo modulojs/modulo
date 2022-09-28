@@ -1,0 +1,443 @@
+<component name="LilTester">
+    <template><p>Defhij</p></template>
+</component>
+
+<component name="PassThrough">
+    <Props
+        suffix
+    ></Props>
+    <template>
+        <p>Before{{ props.suffix }}</p>
+        <div [component.slot]>Defhij</div>
+        <p>After{{ props.suffix }}</p>
+    </template>
+</component>
+
+
+<component name="TestBtn">
+    <Props
+        myclicky
+        mytexty
+    ></Props>
+    <template>
+        <button @click:=props.myclicky>{{ props.mytexty }}</button>
+    </template>
+</component>
+
+<component name="CompositionTests">
+<Props b></Props>
+<Template name="comptest2">
+    <x-TestBtn
+        mytexty="Test text"
+        myclicky:=script.gotClickies
+    >should be IGNORED</x-TestBtn>
+    <p>state.a: {{ state.a }}</p>
+</Template>
+
+<Template name="comptest1">
+    Testing
+    <emblib-Tutorial_P1></emblib-Tutorial_P1>
+    <emblib-Templating_Escaping></emblib-Templating_Escaping>
+</Template>
+
+
+<!-- just add some random stuff here -->
+<State
+    a:=1
+></State>
+
+<Script>
+    function gotClickies() {
+        state.a = 1337;
+    }
+</Script>
+
+<!--
+<TestSuite> -->
+    <!-- 
+    OLD NOTE: There used to be a bug with the test runner or testing framework
+    such that including this test will cause other tests to fail, but running
+    it separately it succeeds. However, it seems to work now...
+    -->
+    <!--
+    <Test name="Misc sub-components correctly render, using spares">
+        <script name="Make sure the cpartSpares interface still works">
+            element.cparts.template =
+                element.cpartSpares.template
+                    .find(({attrs}) => attrs.name === 'comptest1')
+            assert: element.cparts.template
+        </script>
+
+        <template>
+            Testing
+            <emblib-Tutorial_P1>
+                Hello <strong>Modulo</strong> World!
+                <p class="neat">Any HTML can be here!</p>
+            </emblib-Tutorial_P1>
+            <emblib-templating_escaping>
+                <p>User "<em>Little &lt;Bobby&gt; &lt;Drop&gt;
+                &amp;tables</em>" sent a message:</p>
+                <div class="msgcontent">
+                    I <i>love</i> the classic <a target="_blank"
+                    href="https://xkcd.com/327/">xkcd #327</a> on
+                    the risk of trusting <b>user inputted data</b>
+                </div>
+            </emblib-templating_escaping>
+        </template>
+    </Test>
+
+    <Test name="Button sub-component behavior">
+        <script>
+            element.cparts.template =
+                element.cpartSpares.template
+                    .find(({attrs}) => attrs.name === 'comptest2')
+        </script>
+    -->
+
+        <!--
+        <template name="Renders">
+            <x-TestBtn mytexty="Test text" myclicky:=script.gotClickies>
+                <button @click:=props.myclicky>Test text</button>
+            </x-TestBtn>
+            <p>state.a: 1</p>
+        </template>
+        -->
+
+    <!--
+        <script>
+            event: click button
+            assert: state.a === 1337
+        </script>
+    -->
+
+        <!--
+        <template name="Renders after click">
+            <x-TestBtn mytexty="Test text" myclicky:=script.gotClickies>
+                <button @click:=props.myclicky>Test text</button>
+            </x-TestBtn>
+            <p>state.a: 1337</p>
+        </template>
+
+        <template name="Shouldn't show subcomp children" string-count=0>
+            IGNORED
+        </template>
+
+        -->
+        <!--
+    </Test>
+
+</TestSuite>
+-->
+
+</component>
+
+
+
+
+
+<component name="CompositionTester1">
+<template>
+    <div>Abc</div>
+    <LilTester></LilTester>
+</template>
+
+<TestSuite>
+
+    <Test>
+        <template name="Renders as expected">
+            <div>Abc</div>
+            <x-LilTester><p>Defhij</p></x-LilTester>
+        </template>
+        <script skip-rerender>
+            const expected = `
+              <div>Abc</div>
+              <x-liltester><p>Defhij</p></x-liltester>
+            `.trim().replace(/\s+/g, '');
+            const ih = element.innerHTML.trim().replace(/\s+/g, '');
+            assert: ih === expected
+        </script>
+    </Test>
+</TestSuite>
+</Component>
+
+
+
+<component name="CompositionTester2">
+
+<Template>
+    <div>Abc</div>
+    <PassThrough><p>{{state.num1}}</p><p>{{state.num2}}</p></PassThrough>
+    <div>Def</div>
+</Template>
+
+<State
+  num1:=123
+  num2:=456
+></State>
+
+<TestSuite>
+
+    <Test>
+        <template name="Renders once as expected">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>123</p><p>456</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <template name="Renders second time as expected">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>123</p><p>456</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <state
+            num1:=789
+            num2:=234
+        ></state>
+
+        <template name="Renders third time with state change">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>789</p><p>234</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <state
+            num1:=234
+            num2:=234
+        ></state>
+
+        <template name="Renders forth time with state change">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>234</p><p>234</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+    </Test>
+
+</TestSuite>
+
+</Component>
+
+
+<component name="CompositionTester3">
+
+<Template>
+    <div>Abc</div>
+    <PassThrough>
+      <p>{{state.num1}}</p>
+      <PassThrough>
+        <p>{{state.num2}}</p>
+      </PassThrough>
+      <p>{{state.num3}}</p>
+    </PassThrough>
+    <div>Def</div>
+</Template>
+
+<State
+  num1:=123
+  num2:=456
+  num3:=789
+></State>
+
+<TestSuite>
+
+    <Test>
+        <template name="Renders with multiple layers of passthrough">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>123</p>
+                    <x-PassThrough>
+                        <p>Before</p>
+                        <div [component.slot]>
+                            <p>456</p>
+                        </div>
+                        <p>After</p>
+                    </x-PassThrough>
+                    <p>789</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <state
+          num1:=111
+          num2:=222
+          num3:=333
+        ></state>
+
+        <template name="Reflects state change with multiple layers of passthrough">
+            <div>Abc</div>
+            <x-PassThrough>
+                <p>Before</p>
+                <div [component.slot]>
+                    <p>111</p>
+                    <x-PassThrough>
+                        <p>Before</p>
+                        <div [component.slot]>
+                            <p>222</p>
+                        </div>
+                        <p>After</p>
+                    </x-PassThrough>
+                    <p>333</p>
+                </div>
+                <p>After</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+    </Test>
+
+</TestSuite>
+
+</Component>
+
+
+<component name="CompositionTester4">
+
+<Template>
+    <div>Abc</div>
+    <PassThrough suffix="{{ state.suff }}">
+        <p>{{state.num1}}</p>
+        <p>{{state.num2}}</p>
+    </PassThrough>
+    <div>Def</div>
+</Template>
+
+<State
+  num1:=123
+  num2:=456
+  suff="AAA"
+></State>
+
+<TestSuite>
+
+    <Test>
+
+        <template name="Renders with prop on subcomponent">
+            <div>Abc</div>
+            <x-PassThrough suffix="AAA">
+                <p>BeforeAAA</p>
+                <div [component.slot]>
+                    <p>123</p>
+                    <p>456</p>
+                </div>
+                <p>AfterAAA</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <state
+          num1:=111
+          num2:=222
+          suff="BBB"
+        ></state>
+
+        <template name="Renders with prop and subdom change on subcomponent">
+            <div>Abc</div>
+            <x-PassThrough suffix="BBB">
+                <p>BeforeBBB</p>
+                <div [component.slot]>
+                    <p>111</p>
+                    <p>222</p>
+                </div>
+                <p>AfterBBB</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+        <state
+          suff="C"
+        ></state>
+
+        <template name="Renders with just prop change on subcomponent">
+            <div>Abc</div>
+            <x-PassThrough suffix="C">
+                <p>BeforeC</p>
+                <div [component.slot]>
+                    <p>111</p>
+                    <p>222</p>
+                </div>
+                <p>AfterC</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+    </Test>
+
+</TestSuite>
+
+</Component>
+
+
+
+<component name="CompositionTester5">
+
+<Template>
+    <div>Abc</div>
+    <PassThrough suffix="{{ state.suff }}">
+        <button @click:=script.outerInc>{{ state.num }}</button>
+    </PassThrough>
+    <div>Def</div>
+</Template>
+
+<State
+  num:=123
+  suff="AAA"
+></State>
+
+<Script>
+    function outerInc() {
+        state.num++;
+        state.suff = 'BBB';
+    }
+</Script>
+
+ <!-- TODO Composable directives broken
+<TestSuite skip>
+
+    <Test>
+        <template name="Renders with passthrough attached event">
+            <div>Abc</div>
+            <x-PassThrough suffix="AAA">
+                <p>BeforeAAA</p>
+                <div [component.slot]>
+                    <button @click:=script.outerInc>123</button>
+                </div>
+                <p>AfterAAA</p>
+            </x-PassThrough>
+            <div>Def</div>
+        </template>
+
+    </Test>
+</TestSuite>
+-->
+
+</Component>
+
+
+

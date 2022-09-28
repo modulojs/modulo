@@ -1,0 +1,50 @@
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/TestSuite.js"></script>
+<script src="/demos/mdu/utils/taglex.js"></script>
+<script src="/demos/mdu/extensions/virtualdom.js"></script>
+<script src="/demos/mdu/extensions/nodeunit-helper.js"></script>
+
+<template modulo-embed>
+    <!-- Load tests for MDU -->
+    <Library src="/demos/tests/mdu/utils-taglex.html"></Library>
+
+    <Component name="TestReporter">
+        <Template>
+            {% if state.success != null %}
+                {% if state.success %}
+                    <h1 style="background: seagreen">OK (MDU)</h1>
+                {% else %}
+                    <h1 style="background: red">FAILURE (MDU)</h1>
+                {% endif %}
+            {% else %}
+                <button @click:=script.doTests>Run MDU tests</button>
+            {% endif %}
+            <p><em>Tip: Use the Developer Console to see the output.</em></p>
+        </Template>
+        <State
+            success:=null
+        ></State>
+        <Script>
+            function doTests() {
+                if (state.success === null) { // prevent double runs
+                    state.success = Modulo.cmd.test();
+                }
+            }
+
+            const getParams = String(window.location.search || '').substr(1);
+            function initializedCallback() {
+                if (getParams.includes('run=y')) {
+                    doTests();
+                }
+            }
+        </Script>
+    </Component>
+
+
+</template>
+
+<script> Modulo.defineAll() </script>
+
+<x-TestReporter></x-TestReporter>
+
+

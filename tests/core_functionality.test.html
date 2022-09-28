@@ -1,0 +1,204 @@
+<Component name="CPartDefinitionTest1">
+    <Script>
+        function thisFunctionShouldBeExportedNoMatterHowLongTheName() { }
+    </Script>
+
+    <State
+        and-this-property-should-exist-as-well-even-if-it-is-long="And the text
+can have newlines"
+    ></State>
+
+    <TestSuite>
+        <Test name="Ensure CParts defined as expected">
+            <script>
+                assert: script.thisFunctionShouldBeExportedNoMatterHowLongTheName
+            </script>
+            <script>
+                assert: state.andThisPropertyShouldExistAsWellEvenIfItIsLong === "And the text\ncan have newlines" 
+            </script>
+        </Test>
+        <Test name="Ensure other Components don't pollute">
+            <script>
+                assert: !script.aTestFunc && !script.getClicked && !('count' in state)
+            </script>
+            <script name="CPart definitions">
+                const tState = typeof state;
+                const tTemplate = typeof template;
+                const tScript = typeof script;
+                const tStyle = typeof style;
+                const tStaticData = typeof staticdata;
+                const UND = 'undefined';
+                const OBJ = 'object';
+                assert: tState === OBJ && tScript === OBJ && tStyle === UND && tStaticData === UND && tTemplate === UND;
+            </script>
+        </Test>
+    </TestSuite>
+</Component>
+
+<Component name="CPartDefinitionTest2">
+    <!-- Test minimalist components -->
+    <Script>
+        function aTestFunc() { }
+    </Script>
+
+    <TestSuite>
+        <Test name="Ensure only script is set">
+            <script>
+                assert: script.aTestFunc
+            </script>
+            <script name="CPart definitions">
+                const tState = typeof state;
+                const tTemplate = typeof template;
+                const tScript = typeof script;
+                const tStyle = typeof style;
+                const tStaticData = typeof staticdata;
+                const UND = 'undefined';
+                const OBJ = 'object';
+                assert: tState === UND && tScript === OBJ && tStyle === UND && tStaticData === UND && tTemplate === UND;
+            </script>
+        </Test>
+    </TestSuite>
+</Component>
+
+<Component name="CoreCPartTest">
+    <Props
+        txt
+    ></Props>
+    <Template>
+        <div>
+            <h1>Props: {{ props.txt }}</h1>
+            <h2>Data: {{ staticdata.some }} {{ staticdata.num }}</h2>
+            <button @click:=script.getClicked>State: {{ state.count }}</button>
+        </div>
+    </Template>
+
+    <StaticData>
+    {
+        "some": "testing data",
+        "num": 123
+    }
+    </StaticData>
+
+    <State
+        count:=5
+    ></State>
+
+    <Script>
+        function getClicked() {
+            state.count++;
+        }
+    </Script>
+
+    <Style>
+        button { background-color: blue; color:white; }
+    </Style>
+
+    <TestSuite>
+        <Test name="Check props and click event">
+            <props txt="Testing 123"></props>
+
+            <template name="before">
+                <div>
+                    <h1>Props: Testing 123</h1>
+                    <h2>Data: testing data 123</h2>
+                    <button @click:=script.getClicked>State: 5</button>
+                </div>
+            </template>
+
+            <script>
+                event: click button
+            </script>
+
+            <template name="after">
+                <div>
+                    <h1>Props: Testing 123</h1>
+                    <h2>Data: testing data 123</h2>
+                    <button @click:=script.getClicked>State: 6</button>
+                </div>
+            </template>
+        </Test>
+
+        <Test name="Check state reflects in rendering">
+            <props txt="Example props"></props>
+            <state count:=1></state>
+            <template string-count=1>Example props</template>
+            <template string-count=1>State: 1</template>
+            <template string-count=0>State: 6</template>
+            <script name="Check state and prop CParts">
+                assert: props.txt === 'Example props' && state.count === 1
+            </script>
+        </Test>
+    </TestSuite>
+</Component>
+
+
+<Component name="TemplatingTester">
+    <Template>
+        <h1>{{ state.a }}</h1>{# IGNORE #}
+        <h2>{% if state.b gt 1 %}{{ state.c }}{% else %}b is less{% endif %}</h2>
+        <h3>{{ state.d|add:10 }}</h3>{% comment %}ignore me too{% endcomment %}
+        <h4>{{ state.e|divisibleby:3|json }}</h4>
+        {% if state.c == 2 %}
+            {% for item in state.stuff %}
+                <p>{{ item|lower }}</p>
+            {% endfor %}
+        {% endif %}
+    </Template>
+
+    <State a:=1 b:=2 c:=3 d:=4 e:=5 stuff:='["A", "B", "C"]'></State>
+
+    <TestSuite>
+        <Test name="Renders as expected">
+            <template name="Initial rendering">
+              <h1>1</h1>
+              <h2>3</h2>
+              <h3>14</h3>
+              <h4>false</h4>
+            </template>
+        </Test>
+
+        <Test name="Filters and if statement works">
+            <state b:=1 d:=5></state>
+            <template>
+              <h1>1</h1>
+              <h2>b is less</h2>
+              <h3>15</h3>
+              <h4>false</h4>
+            </template>
+        </Test>
+
+        <Test name="Handles state change to loop">
+            <state d:=5 e:=6 b:=10 c:=2></state>
+            <template name="After another change with loop">
+              <h1>1</h1>
+              <h2>2</h2>
+              <h3>15</h3>
+              <h4>true</h4>
+              <p>a</p> <p>b</p> <p>c</p>
+            </template>
+        </Test>
+    </TestSuite>
+</Component>
+
+
+<Component name="CPartDefinitionTest3">
+    <!-- Test minimalist components AFTER bigger components are defined -->
+    <TestSuite>
+        <Test name="Ensure nothing beyond element is set">
+            <script>
+                assert: element
+            </script>
+            <script name="CPart definitions">
+                const tState = typeof state;
+                const tTemplate = typeof template;
+                const tScript = typeof script;
+                const tStyle = typeof style;
+                const tStaticData = typeof staticdata;
+                const UND = 'undefined';
+                const OBJ = 'object';
+                assert: tState === UND && tScript === UND && tStyle === UND && tStaticData === UND && tTemplate === UND;
+            </script>
+        </Test>
+    </TestSuite>
+</Component>
+

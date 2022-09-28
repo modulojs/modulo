@@ -1,0 +1,88 @@
+<!--
+    These tests are useful as unit tests testing the loadString method &
+    loadFromDOM methods
+-->
+<Component name="CoreLoading">
+
+<TestSuite>
+
+<Test name="modulo.loadString tests">
+    <script name="modulo.loadString exists">
+        assert: modulo && modulo.loadString
+    </script>
+
+    <script name="loads an empty component with expected values">
+        const code = '<Component name="Testy"></Component>';
+        const loaded = modulo.loadString(code);
+        const { Type, mode, rerender, engine, Name, name } = loaded.length ? loaded[0] : {};
+        assert: Type === 'Component' && mode === 'regular' && rerender === 'event' && engine === 'Reconciler' && Name === 'Testy' && name === 'Testy'
+    </script>
+
+    <script name="loads multiple components">
+        const code = '<Component name="TestA"></Component>' + 
+                      '<Component name="TestB"></Component>';
+        const loaded = modulo.loadString(code);
+        const names = loaded.map(({ Name }) => Name);
+        assert: loaded.length === 2 && names[0] === 'TestA' && names[1] === 'TestB'
+    </script>
+
+    <script name="loads single component with content">
+        const code = '<Component name="TestA"><Template>aaa</Template></Component>';
+        const loaded = modulo.loadString(code);
+        const { Name, Content } = loaded.length ? loaded[0] : {};
+        assert: loaded.length === 1 && Name === 'TestA' && Content === '<template>aaa</template>';
+    </script>
+
+    <script name="loads multiple components with content">
+        const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
+                      '<Component name="TestB"><Template>bbb</Template></Component>';
+        const loaded = modulo.loadString(code);
+        const actual = loaded.map(({ Name, Content }) => ([ Name, Content ]));
+        const expected = [
+            [ 'TestA', '<template>aaa</template>'],
+            [ 'TestB', '<template>bbb</template>'],
+        ];
+        assert: JSON.stringify(expected) === JSON.stringify(actual);
+    </script>
+</Test>
+
+
+
+<Test name="modulo.preprocessAndDefine tests">
+    <script name="modulo exists">
+        assert: modulo && modulo.preprocessAndDefine
+    </script>
+
+    <script name="Preprocesses an empty component with expected values">
+        const mod = new Modulo(modulo);
+        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
+        mod.assets = modulo.assets; // TODO rm
+        const code = '<Component name="Testy"></Component>';
+        const loaded = mod.loadString(code);
+        mod.preprocessAndDefine();
+        const { Type, mode, rerender, engine, Name, name } = loaded.length ? loaded[0] : {};
+        assert: Type === 'Component' && mode === 'regular' && rerender === 'event' && engine === 'Reconciler' && Name === 'Testy' && name === 'Testy'
+    </script>
+
+    <script name="Preprocess and define multiple components with content">
+        const mod = new Modulo(modulo);
+        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
+        mod.assets = modulo.assets; // TODO rm
+        const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
+                      '<Component name="TestB"><Template>bbb</Template></Component>';
+        const loaded = mod.loadString(code);
+        mod.preprocessAndDefine();
+        //const actual = loaded.map(({ Name, TagName, Hash }) => ([ Name, TagName, Hash ]));
+        const actual = loaded.map(({ DefName, Name, TagName }) => ([ DefName, Name, TagName ]));
+        const expected = [
+            [ null, 'TestA', 'x-testa' ],
+            [ null, 'TestB', 'x-testb' ],
+        ];
+        assert: JSON.stringify(expected) === JSON.stringify(actual);
+    </script>
+
+
+</TestSuite>
+
+</Component>
+

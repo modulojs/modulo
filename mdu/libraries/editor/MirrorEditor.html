@@ -1,0 +1,27 @@
+<div class="editor-wrapper" @click:=script.updateDimensions>
+    <div class="editor-underlay-container"
+        style="
+            {% if state.width %}  width: {{ state.width }}px; {% endif %}
+            {% if state.height %} height: {{ state.height }}px; {% endif %}
+        ">
+        <div class="editor-underlay-offset-wrapper"
+            style="
+                {% if state.scrollTop %} top: -{{ state.scrollTop }}px; {% endif %}
+                {% if state.width %} width: {{ state.width }}px; {% endif %}
+            ">
+            <{{ props.component|default:"mdu-SyntaxHighlighter" }}
+                value="{{ state.value }}"
+                number="{{ props.number|default:'on' }}"
+            ></{{ props.component|default:"mdu-SyntaxHighlighter" }}>
+        </div>
+    </div>
+
+    <textarea
+        [script.text]
+        @scroll:=script.updateDimensions
+        data-gramm="false"
+        name="{{ props.name|default:'editor' }}"
+        spellcheck="{{ props.spellcheck|default:'false' }}"
+    ></textarea>
+</div>
+

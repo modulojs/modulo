@@ -1,0 +1,26 @@
+<nav style="{% if props.fn %}border-bottom: none{% endif %}">
+    <h4>DEV LOG</h4>
+
+    <ul>
+        {% for pair in state.data %}
+            <li>
+                {% if pair|get:0 == props.fn %}
+                    <span style="text-decoration: overline underline;">
+                        {{ pair|get:0 }}&nbsp;({{ pair|get:1 }})
+                    </span>
+                {% else %}
+                    <a href="/devlog/{{ pair|get:0 }}.html">
+                        {{ pair|get:0 }}&nbsp;({{ pair|get:1 }})
+                    </a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+
+{% for pair in state.data %}
+    {% if pair|get:0 == props.fn %}
+        <h1>{{ pair|get:1 }}</h1>
+    {% endif %}
+{% endfor %}
+

@@ -1,0 +1,105 @@
+<div 
+    @mouseenter:=script.rerenderFirstTime
+    class="demo-wrapper
+        {% if state.showpreview %}     demo-wrapper__minipreview{% endif %}
+        {% if state.showclipboard %}   demo-wrapper__clipboard  {% endif %}
+        {% if state.fullscreen %}      demo-wrapper__fullscreen {% endif %}
+        {% if state.tabs.length == 1 %}demo-wrapper__notabs     {% endif %}
+        {% if state.tabs.length gt 1 %}demo-wrapper__tabs       {% endif %}
+    ">
+    {% if state.tabs.length gt 1 %}
+        <nav class="TabNav">
+            <ul>
+                {% for tab in state.tabs %}
+                    <li class="TabNav-title
+                        {% if tab.title == state.selected %}
+                            TabNav-title--selected
+                        {% endif %}
+                    "><a @click:=script.selectTab
+                            payload="{{ tab.title }}"
+                        >{{ tab.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <div class="editor-toolbar">
+        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
+                    {% if not state.fullscreen %} display: none; {% endif %}">
+            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
+        </p>
+
+        {% if state.showclipboard %}
+            <button class="m-Btn m-Btn--sm m-Btn--faded"
+                    title="Copy this code" @click:=script.doCopy>
+                Copy <span alt="Clipboard">&#128203;</span>
+            </button>
+        {% endif %}
+
+        {% if state.showcomponentcopy %}
+            <button class="m-Btn"
+                    title="Copy the code to make this component" @click:=script.doCopy payload:=true>
+                <span alt="Copy component symbol">&lsaquo;&#11041;&rsaquo;</span>
+            </button>&nbsp;
+        {% endif %}
+
+        {% if state.showpreview %}
+            <!--
+            <button class="m-Btn demo-fs-button"
+                    title="Toggle full screen view of code" @click:=script.doFullscreen>
+                {% if state.fullscreen %}
+                    <span alt="Shrink">&swarr;</span>
+                {% else %}
+                    <span alt="Go Full Screen">&nearr;</span>
+                {% endif %}
+            </button>
+            &nbsp;
+            -->
+            <button class="m-Btn"
+                    title="Run a preview of this code" @click:=script.doRun>
+                Run <span alt="Refresh">&#10227;</span>
+            </button>
+        {% endif %}
+
+    </div>
+
+    <div class="side-by-side-panes">
+        <div class="editor-wrapper">
+            <div [script.codemirror] modulo-ignore>
+            </div>
+        </div>
+
+        {% if state.showpreview %}
+            <div class="editor-minipreview">
+                <div modulo-ignore>
+                    {{ state.preview|safe }}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% if state.showtoast %}
+    <!--<div class="Demo-toastBackdrop"></div>-->
+    <div class="Demo-toast">
+        <h2>Continue this example locally</h2>
+            <a
+                class="Demo-toastButton"
+                href="#"
+                @click:="script.hideToast"
+            >X</a></h2>
+        <ol>
+            <li>Paste the text into your text editor</li>
+            <li>Save to new ".html" file and/or add to an existing web
+            project</li>
+            <li>View file in your web browser</li>
+            <li>Continue work where you left off!</li>
+        </ol>
+        <span style="float: right" title="The text has already been copied to your clipboard, and is ready to be pasted.">
+            &nbsp;☑ Copied to clipboard!
+        </span>
+        <div style="width: 40%"><textarea>{{ state.toasttext }}</textarea></div>
+    </div>
+{% endif %}
+

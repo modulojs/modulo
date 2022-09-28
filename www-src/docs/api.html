@@ -1,0 +1,161 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    docbarselected="api.html"
+    pagetitle="API & Extension"
+    navbar="docs">
+
+<h1>API & Extension</h1>
+
+<p>NOTE: Most of this API documentation is out of date, and references features
+that will probably be deleted / never included.</p>
+
+
+<p>This documentation is intended for developers intending to write their own
+<em>CParts</em>, developers looking for deeper customization of Modulo (such as
+using a different templating engine or DOM reconciler), or developers looking
+for a deeper understanding of ways to extend Modulo with JavaScript.</p>
+
+
+<p><strong>Note:</strong> Modulo is still under heavy development. While the
+external, component development API might change somewhat as the project
+transitions to a beta version and eventually a v1.0, this internal JavaScript
+API is much more likely to have larger changes before stabilizing. This is
+because it closely follows internal implementations.</p>
+
+<h2>Experimental</h2>
+
+<p>The remaining documentation here is on experimental features for Modulo.
+Experimental features may have incomplete documentation or an API that might
+change drastically in the future.</p>
+
+
+
+<mws-Section name="cparts">CParts</mws-Section>
+
+<p>Want to write your own CPart? Examine the following code: Here we're
+defining a CPart and then instantiating it immediately below.</p>
+<mws-Demo demotype="minipreview"
+text='
+<Script>
+// CParts all extend Modulo.ComponentPart, and then override as many
+// callbacks as necessary to perform the intended "middleware"-style
+// functionality of the CPart.
+class MyCoolPart extends Modulo.ComponentPart {
+    static factoryCallback(partOptions, factory, renderObj) {
+        // Uncomment to see args recieved for "factory" callback
+        //console.log("Factory:", partOptions, factory, renderObj);
+    }
+    renderCallback(renderObj) {
+        // Now, we can add our own behavior. In this case, our CPart
+        // acts a little like a Template (it modifies innerHTML)
+        renderObj.component.innerHTML = this.attrs.exampleattr;
+    }
+}
+// Important: This is what actually "registers" with Modulo
+Modulo.cparts.mycoolpart = MyCoolPart;
+</Script>
+
+<MyCoolPart
+    exampleattr="<h3>Hello CPart World</h3>"
+></MyCoolPart>
+'></mws-Demo>
+
+<p>Note that normally you will not define CParts in script tags and then use
+them immediately: There's no reason for this, as you could just hook into the
+same callbacks using the <em>Script</em> CPart. Instead, typically, CParts
+should be written in a separate, ordinary JS file (e.g. not a Modulo HTML
+file), or at the very most in a "module" at the top of a component library.</p>
+
+<mws-Section name="spares">CPart Spares</mws-Section>
+
+<p>If you have extra car parts lying around, you call them <em>spare
+parts</em>, or just "spares". In Modulo, extra or inactive CParts are also
+called Spares.</p>
+
+
+<h3>Mechanics of Spares</h3>
+
+<p>The use for this might be to have more than one <em>Template</em> that can
+be switched out depending on what data model is being used, more than one
+<em>State</em> to allow for both private and shared data between components, or
+more than one <em>Script</em> to be swapped to quickly change behavior based on
+if the user is logged in or out. Many of these things might be doable without
+CPart spares, such as with if-statements, but spares provide a paradigm for
+working comfortably with multiple CParts.</p>
+
+<p>When you have duplicate CParts of the same type in a component, <em>only
+one</em> CPart a time of each type is the "active" CPart, accessible in the
+<code>element.cparts</code> object. That is to say, there can never be more
+than one active CPart.  Both the active and extra (spare) CParts are available
+in <code>element.cpartSpares</code>. Simply by assigning a property of
+<code>element.cparts</code> you can select which one is active.</p>
+
+<p>By default, the last CPart defined will be the active CPart.</p>
+
+<p>For a concrete example, examine how the following behaves:</p>
+
+<mws-Demo
+demotype="minipreview"
+text='
+<Template name="shop">
+    <nav>Shop|<a @click:=script.swap payload="home">Home</a></nav>
+    <h1>Shop</h1>
+    <p>$10 - A banana</p>
+</Template>
+<Template name="home">
+    <nav><a @click:=script.swap payload="shop">Shop</a>|Home</nav>
+    <h1>Home</h1>
+    <p>Welcome to my banana stand!</p>
+</Template>
+<Script>
+    // swap: Set the active cpart by searching through the spare
+    // array and selecting the one with a name matching payload:
+    function swap(payload) {
+        element.cparts.template = element.cpartSpares.template
+            .find(({attrs}) => attrs.name === payload);
+    }
+</Script>
+
+<!-- some basic styling -->
+<Style>
+nav {
+    background: black;
+    color: gray;
+    padding: 3px;
+}
+a {
+    color: lightblue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+</Style>
+'></mws-Demo>
+
+
+<p><strong>Note:</strong> Swapping templates should <em>not</em> be a suitable
+replacement for real links or an adequate frontend routing system. In other
+words, consider swapping templates as a technique only for things like
+alternate themes, filter views, logged-in vs logged-out, and other such
+scenarios, but not for general page navigation. This is because they break
+many web standards, confuse search bots crawling for SEO, and ruin user
+experience by not looking like links for accessibility purposes, having no URL,
+and no effect on browser history.</p>
+
+
+<h3>CPart spares and renderObj</h3>
+
+<p>CPart spares (inactive CParts) can still influence your component, even if
+they are never activated.
+Specifically, they still get the <code>loadCallback</code> and
+<code>factoryCallback</code> invoked, meaning they still contribute to the
+<code>loadObj</code> and the <code>baseRenderObj</code> like any other CPart of
+their type (<a href="/docs/directives.html#renderobj">see relevant docs on
+these renderObj</a>). For some types of spares, this effectively causes them to
+be "squashed" into a single renderObj.</p>
+
+
+</mws-Page>

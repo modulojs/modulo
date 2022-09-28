@@ -1,0 +1,142 @@
+<!--
+    mws Library:
+    - Components for Modulo WebSite
+    - Note how most of actual HTML, CSS, and JS is in separate files in the
+      mws/ subdirectory.
+-->
+
+<Component namespace="mws" name="Page" mode="vanish-into-document">
+    <Props
+        navbar
+        docbarselected 
+        pagetitle
+    ></Props>
+    <Style -src="/libraries/mws/Page.css"></Style>
+    <Template -src="/libraries/mws/Page.html"></Template>
+    <Script>
+        //console.log('mws-Page/Script is running', modulo);
+    </Script>
+</Component>
+
+<Component namespace="mws" name="ProjectInfo" mode="vanish">
+    <Props
+        version
+    ></Props>
+    <StaticData -src="https://raw.githubusercontent.com/michaelpb/modulo/main/package.json"></StaticData>
+    <Template>
+        {% if props.version %}
+            <a href="/devlog/2022-09.html" title="This product is still under heavy development. Click to learn more."
+            >alpha&nbsp;v{{ staticdata.version }}</a>
+        {% else %}
+            v: {{ staticdata.version }}<br />
+            <!--SLOC: {{ staticdata.sloc }} lines<br />-->
+            <a href="https://github.com/michaelpb/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/{{ staticdata.name }}">npm {{ staticdata.name }}</a>
+        {% endif %}
+    </Template>
+</Component>
+
+<Component namespace="mws" name="DevLogNav">
+    <Props
+        fn
+    ></Props>
+    <Template -src="/libraries/mws/DevLogNav.html"></Template>
+    <State
+        data:='[
+            ["2022-09", "Alpha release"],
+            ["2022-07", "HTML-first"],
+            ["2022-03", "Prealpha"],
+            ["2021-09", "Thoughts on framework design"],
+            ["2021-01", "FAQ"]
+        ]'
+    ></State>
+    <Style -src="/libraries/mws/DevLogNav.css"></Style>
+</Component>
+
+
+<Component namespace="mws" name="DocSidebar">
+  <Props
+      path
+      showall
+  ></Props>
+  <Template -src="/libraries/mws/DocSidebar.html"></Template>
+  <State
+      menu:=[]
+  ></State>
+  <Script -src="/libraries/mws/DocSidebar.js"></Script>
+  <Style -src="/libraries/mws/DocSidebar.css"></Style>
+</Component>
+
+<Component namespace="mws" name="Demo">
+    <!-- TODO: Refactor the following to avoid hacky props-->
+    <Props
+        text
+        text2
+        text3
+        ttitle
+        ttitle2
+        ttitle3
+        demotype
+        fromlibrary
+    ></Props>
+    <Template -src="/libraries/mws/Demo.html"></Template>
+    <State
+        tabs:=[]
+        selected:=null
+        preview=""
+        text=""
+        nscounter:=1
+        showtoast:=false
+        toasttext=""
+        showpreview:=false
+        showclipboard:=false
+        showcomponentcopy:=false
+        fullscreen:=false
+    ></State>
+    <Script -src="/libraries/mws/Demo.js"></Script>
+    <Style -src="/libraries/mws/Demo.css"></Style>
+</Component>
+
+<Component namespace="mws" name="AllExamples">
+    <Template -src="/libraries/mws/AllExamples.html"></Template>
+    <State
+        selected=""
+        examples:=[]
+    ></State>
+    <Script -src="/libraries/mws/AllExamples.js"> </Script>
+    <Style -src="/libraries/mws/AllExamples.css"></Style>
+</Component>
+
+<Component namespace="mws" name="Section">
+    <Props
+        name
+    ></Props>
+    <Template>
+        <a class="secanchor"
+            title="Click to focus on this section."
+            id="{{ props.name }}"
+            name="{{ props.name }}"
+            href="#{{ props.name }}">#</a>
+        <h2>{{ component.originalHTML|safe }}</h2>
+    </Template>
+    <Style>
+        :host {
+            position: relative;
+        }
+        h2 {
+            font-weight: bold;
+            color: var(--highlight-color);
+            margin-bottom: 0;
+        }
+        a.secanchor {
+            padding-top: 100px;
+            color: var(--highlight-color);
+            opacity: 0.3;
+            display: block;
+        }
+        :host:hover .Section-helper {
+            opacity: 1.0;
+        }
+    </Style>
+</Component>
+

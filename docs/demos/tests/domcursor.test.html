@@ -1,0 +1,92 @@
+<component name="DomCursorTester"><testsuite>
+
+<test name="Test DomCursor hasNext() and next() with simple structures">
+    <script name="hasNext() and next() with empty mock data">
+        const fakeNode = { firstChild: null };
+        const cursor = new modulo.registry.engines.DOMCursor(fakeNode, fakeNode);
+        const hasNext = cursor.hasNext();
+        const next = JSON.stringify(cursor.next());
+        const emptyNext = JSON.stringify([null, null]);
+        assert: hasNext === false && next === emptyNext
+    </script>
+
+    <script name="hasNext() and next() with first item">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p>A</p><p>B</p>');
+        const rival = md('<p>A</p><p>B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'A' && t1 === 'A';
+    </script>
+
+
+    <script name="hasNext() and next() can access second item">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p>A</p><p>B</p>');
+        const rival = md('<p>A</p><p>B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'B' && t1 === 'B';
+    </script>
+
+    <script name="hasNext() and next() reaches end">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p>A</p><p>B</p>');
+        const rival = md('<p>A</p><p>B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        cursor.next(); // Skip second
+        // Now ensure has reached end
+        const hasNext = cursor.hasNext();
+        const next = JSON.stringify(cursor.next());
+        const emptyNext = JSON.stringify([null, null]);
+        assert: hasNext === false && next === emptyNext;
+    </script>
+</test>
+
+
+<test name="Test DomCursor descent with nested structures">
+
+    <script name="hasNext() and next() initial is as expected">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p>A<span>B</span>C</p><p>D</p>');
+        const rival = md('<p>A<span>B</span>C</p><p>D</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'ABC' && t1 === 'ABC';
+    </script>
+
+    <script name="saveToStack and initialize can be used to descend or move cursor">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p>A<span>B</span>C</p><p>D</p>');
+        const rival = md('<p>A<span>E</span>C</p><p>D</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // skip first, move to D
+        cursor.saveToStack(); // save location
+        cursor.initialize(node.firstChild.children[0], rival.firstChild.children[0]);
+        const hN = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        const lR = !!cursor.loadFromStack();
+        const next2 = cursor.next();
+        const hN2 = cursor.hasNext();
+        const t3 = next2[0] && next2[0].textContent;
+        const t4 = next2[1] && next2[1].textContent;
+        assert: hN === true && t0 === 'B' && t1 === 'E' && lR && hN2 === false && t3 === 'D' && t4 === 'D';
+    </script>
+
+</test>
+
+
+</testsuite></component>

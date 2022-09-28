@@ -1,0 +1,158 @@
+<Component name="BrowserBuildTester"><TestSuite>
+
+<Test name="Test AssetManager functionality">
+    <script name="Ensure instantiates with expected properties">
+        const inst = new Modulo.AssetManager();
+        assert: inst.functions && inst.stylesheets && inst.rawAssets;
+    </script>
+
+    <script name="Ensure registerFunction successfully evals string">
+        const inst = new Modulo.AssetManager();
+        const func = inst.registerFunction(['a', 'b'], 'return a + b');
+        const result = func(100, 13)
+        assert: result === 113
+    </script>
+
+    <script name="Ensure it doesn't register twice">
+        const inst = new Modulo.AssetManager();
+        const func1 = inst.registerFunction(['a', 'b'], 'return a + b');
+        const func2 = inst.registerFunction(['a', 'b'], 'return a + b');
+        const count = Object.keys(inst.functions).length;
+        assert: func1 === func2 && count === 1
+    </script>
+
+    <script name="Ensure that different functions are kept separate">
+        const inst = new Modulo.AssetManager();
+        const func1 = inst.registerFunction(['a', 'b'], 'return a + b');
+        const func2 = inst.registerFunction(['a', 'b'], 'return a - b');
+        const count = Object.keys(inst.functions).length;
+        assert: func1 !== func2 && count === 2
+    </script>
+
+    <script name="Test registerStylesheet doesn't register twice">
+        const inst = new Modulo.AssetManager();
+        inst.registerStylesheet('a { color: blue }');
+        inst.registerStylesheet('a { color: blue }');
+        const count = Object.keys(inst.stylesheets).length;
+        assert: count === 1
+    </script>
+
+    <script name="Test wrapFunctionText">
+        const inst = new Modulo.AssetManager();
+        const text = inst.wrapFunctionText(['a', 'b'], '/* abc */');
+        const expected = 
+            'Modulo.assets.functions["x1nl2b1t"]' +
+            '= function (a, b){\n/* abc */\n};';
+        assert: text === expected
+    </script>
+
+</test>
+
+
+
+<test name="Test CommandMenu build">
+    <script name="Setup & ensure CommandMenu exists">
+        let oldDoc = Modulo.globals.document;
+        Modulo.cmd = new Modulo.CommandMenu();
+        Modulo.assets = new Modulo.AssetManager();
+        Modulo.cmd.setup = () => {
+            oldDoc = Modulo.globals.document;
+            const body = Modulo.utils.makeDiv('');
+            body.removeChild = () => {}; // make no-op
+            Modulo.globals.document = {
+                body,
+                createElement: (...a) => oldDoc.createElement(...a),
+            };
+            return body;
+        }
+        Modulo.cmd.teardown = () => {
+            Modulo.globals.document = oldDoc;
+        }
+
+        // New codepath: Already mocking the function
+        if (Modulo.utils.originalSaveFileAs) {
+            Modulo.cmd.setup = (doc) => {
+                for (const tag of doc.querySelectorAll('a')) { tag.remove(); }
+                return doc;
+            };
+            Modulo.cmd.teardown = () => {};
+        }
+    </script>
+
+    <script name="Snapshot: Ensure buildcss works as expected">
+        Modulo.assets.registerStylesheet('a { color: blue }');
+
+        let mockDoc = Modulo.cmd.setup(document);
+        Modulo.cmd.buildcss({ type: 'tst' }); // Try building CSS
+        Modulo.cmd.teardown();
+
+        const aTag = mockDoc.querySelector('a[download]');
+        const expHref = "data:text/plain;charset=utf-8,a%20%7B%20color%3A%20blue%20%7D";
+        const expDownload = "modulo-tst-19mok4s.css";
+        assert: aTag !== null && aTag.href === expHref && aTag.download === expDownload;
+    </script>
+
+    <script name="Snapshot: Ensure buildjs works as expected">
+        Modulo.assets = new Modulo.AssetManager();
+        Modulo.assets.registerFunction([ 'a', 'b' ], 'return a + b');
+        Modulo.fetchQ.data = {};
+
+        let mockDoc = Modulo.cmd.setup(document);
+        Modulo.cmd.buildjs({ type: 'tst' }); // Try building JS
+        Modulo.cmd.teardown();
+
+        const aTag = mockDoc.querySelector('a[download]');
+        const actHref = aTag && aTag.href.replace(/%20/g, '');
+        const expHref = "data:text/plain;charset=utf-8,Modulo.assets.functions%5B%22xv8r3rt%22%5D%3Dfunction(a%2Cb)%7B%0Areturna%2Bb%0A%7D%3B%0AModulo.fetchQ.data%3D%7B%0A%7D%3B%0A"
+        const expDownload = "modulo-tst-x90anlu.js";
+        assert: aTag !== null && actHref === expHref && aTag.download === expDownload;
+    </script>
+
+
+    <script name="Snapshot: Ensure buildjs supports additional texts">
+        Modulo.assets = new Modulo.AssetManager();
+        Modulo.assets.registerFunction([ 'a', 'b' ], 'return a + b');
+        Modulo.fetchQ.data = {'test': 'thing'};
+        const opts = {
+            type: 'buildtype',
+            scriptSources: ['abc', 'def'],
+            cssSources: ['ghi', 'jkl'],
+            embeddedSources: ['mno', 'pqr'],
+        };
+
+        let mockDoc = Modulo.cmd.setup(document);
+        Modulo.cmd.buildjs(opts); // Try building JS
+        Modulo.cmd.teardown();
+
+        const aTag = mockDoc.querySelector('a[download]');
+        const actHref = aTag && aTag.href.replace(/%20/g, '');
+        const expHref = "data:text/plain;charset=utf-8,abcdefModulo.assets.functions%5B%22xv8r3rt%22%5D%3Dfunction(a%2Cb)%7B%0Areturna%2Bb%0A%7D%3B%0AModulo.fetchQ.data%3D%7B%0A%22test%22%3A%2F%2F(1lines)%0A%60thing%60%2C%2F%2F(ends%3Atest)%0A%0A%7D%3B%0A%0AModulo.globalLoader.loadString(%22mno%22)%3B%0A%0AModulo.globalLoader.loadString(%22pqr%22)%3B%0A"
+        const expDownload = "modulo-buildtype-1je2oag.js";
+        assert: aTag !== null && actHref === expHref && aTag.download === expDownload;
+    </script>
+
+
+    <script name="Snapshot: Ensure bundle gathers texts">
+        Modulo.assets = new Modulo.AssetManager();
+        Modulo.assets.registerFunction([ 'a', 'b' ], 'return a + b');
+        Modulo.fetchQ.data = {};
+
+        let mockDoc = Modulo.cmd.setup(document);
+        mockDoc.innerHTML = '<modulo>abc</modulo>';
+        Modulo.cmd.buildjs(); // Try building JS
+        Modulo.cmd.teardown();
+        // TODO: UNFINISHED
+
+        /*
+        const aTag = mockDoc.querySelector('a[download]');
+        const actHref = aTag && aTag.href.replace(/%20/g, '');
+        const expHref = "data:text/plain;charset=utf-8,%0A%0AModulo.defineAll()%3B%2F%2FensurefetchQgetsdefined%0AModulo.fetchQ.data%3D%7B%0A%7D%3B%0A%0A%22usestrict%22%3BModulo.assets.functions%5B%22xv8r3rt%22%5D%3Dfunction(a%2Cb)%7B%0Areturna%2Bb%0A%7D%3B%0A%0A%0Awindow.onload%3D()%3D%3EModulo.defineAll()%3B%0A"
+        const expDownload = "modulo-build-j47irm.js"
+        */
+        //assert: aTag !== null && actHref === expHref && aTag.download === expDownload;
+        assert: true
+    </script>
+
+</Test>
+
+</TestSuite></Component>

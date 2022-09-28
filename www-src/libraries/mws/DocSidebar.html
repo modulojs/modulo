@@ -1,0 +1,45 @@
+<ul>
+    {% for linkGroup in state.menu %}
+        <li class="
+            {% if linkGroup.children %}
+                {% if linkGroup.active %}gactive{% else %}ginactive{% endif %}
+            {% endif %}
+            "><a href="{{ linkGroup.filename }}">{{ linkGroup.label }}</a>
+            {% if linkGroup.active %}
+                {% if linkGroup.children %}
+                    <ul>
+                    {% for childLink in linkGroup.children %}
+                        <li><a
+                          href="{% if childLink.filepath %}{{ childLink.filepath }}{% else %}{{ linkGroup.filename }}#{{ childLink.hash }}{% endif %}"
+                            >{{ childLink.label }}</a>
+                        {% if props.showall %}
+                            {% if childLink.keywords.length gt 0 %}
+                                <span style="margin-left: 10px; color: #aaa">(<em>Topics: {{ childLink.keywords|join:', ' }}</em>)</span>
+                            {% endif %}
+                        {% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+        </li>
+    {% endfor %}
+
+
+    <!--
+    <li>
+        Other resources:
+
+        <ul>
+            <li>
+                <a href="/docs/faq.html">FAQ</a>
+            <li title="Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.">
+                Literate Source*<br /><em>* Coming soon!</em>
+            </li>
+        </ul>
+
+    </li>
+    -->
+    <!--<a href="/literate/src/Modulo.html">Literate source</a>-->
+</ul>
+

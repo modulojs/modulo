@@ -1,0 +1,159 @@
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    pagetitle="2021-01"
+    navbar="about">
+
+<mws-DevLogNav fn="2021-01"></mws-DevLogNav>
+
+
+<h3><span alt="Question mark">?</span></h3>
+
+
+<p>I wrote this FAQ in late 2020 and early 2021 when I began to "resurrect" the
+Modulo project around a new set of goals: Choosing the name <em>Modulo</em>,
+relaxing the 500-line limit I had imposed previously, and making it much more
+modular and beginner friendly, and thus more strongly adhering to "KISS"
+principles. This FAQ, like every FAQ, is an imaginary conversation between the
+creator (myself) of Modulo and imaginary people who apparently are invested in
+Modulo enough to ask probing questions about it. That said, if you are a
+non-imaginary person (I should hope so!) with questions about Modulo, they are
+welcome even more: Contact via email, submit a pull request to this page, or
+add an issue to the project on GitHub.</p>
+
+
+<h3>FAQ</h3>
+
+<p>By reading this FAQ, you will get a better understanding of the motivation
+of building Modulo and it's design philosophy.</p>
+
+<hr />
+
+<p><strong>Q: Why yet another JavaScript framework?</strong></p>
+<p>A: To me, the very idea of writing YET ANOTHER JavaScript framework
+is vomit inducing.<br />And yet here I am.</p>
+
+<p>While working at Kickstart Coding, developing our Django-based
+LMS, nothing quite fit the bill for a very simple JS framework to
+sprinkle in some extra interactive features to an otherwise very
+straight-forward multi-page web app. The current solution was a
+mess of Vue and scattered vanilla JavaScript (okay, and a few old
+jQuery plugins, that we'll totally get rid of ASAP totally), with
+the build-step and mounting code for the Vue code getting almost as
+complicated as the little it was even doing.</p>
+<p>We didn't have the developer bandwidth needed for a SPA, and the
+poor state of JS code was slowing down building features, not to
+mention the brittle mounting process was hard to test.  If only I
+could just <em>go in there and do some JS</em> without any more
+fuss... but also develop using hot-reloading and a bundle in the
+end. So, I gave up, gave in, and became the problem. I wrote yet
+another JavaScript component framework.</p>
+
+<hr />
+<p><strong>Q: Any future plans?</strong></p>
+<p>A: Yes, plenty! The three main ones: SSG, server-side, and MDU.
+Currently, this site is already getting generated with a
+Modulo-based SSG. However, it's undocumented and messy, so it still
+needs work before it's released externally. On a similar note,
+there are plans for a JAMstack-style SSG + server-side combo, with
+live-refresh inspired by Phoenix LiveView. Finally, developing this
+site requires developing some key components, so I also hope to
+have time to document and release "mdu", which will be a standard
+library of Modulo components, including a Router system inspired by
+React Router.</p>
+
+<hr />
+<p><strong>Q: Why do you care so much about short source code
+files? Don't you want a framework that does more?</strong></p>
+
+<p>A: In my opinion, the most important feature about a framework
+like this is documentation and structure, not functionality.
+Specifically, my coding philosophy is that good frameworks should
+have aim first and foremost to have a high "documentation to code"
+ratio. This is because a framework is much more than simply a set
+of libraries to import. Choosing a framework represents buy-in to
+file and directory structures, recipes, best practices, code
+patterns, and so on. I don't want to have to dig through
+<em>other</em> people's code to figure out how to solve <em>my</em>
+problems. Instead, a good framework should come "batteries
+included" with documentation that clearly indicates how to solve
+common problems.</p>
+
+<p>Thus, to pump up our "doc/code" ratio, the easiest thing is to keep the
+denominator as low as possible.  This is especially true for a new,
+solo-developed framework project such as this one.  Similarly, I think that
+frameworks should seek to be as simple and elegant as possible, especially in
+this case, when the framework is a layer on top of existing web standards (the
+web component standard). In this case, adding anything more would constitute
+over-engineering.</p>
+
+<hr />
+<p><strong>Q: Can't you have both, however? Maybe not as a solo project, but
+can't you have a big, extensive framework with big and extensive
+documentation?</strong></p>
+
+<p>Sure, it's possible, in some cases situations better, and you can use always
+that too.  Modulo plays well with others! However, Modulo takes a different
+approach.  See the <a href="/devlog/2021-09.html">the design philosophy "thought
+experiment"</a> article for for further and more thorough discussion of
+Modulo's approach and it's motivation.</p>
+
+<hr />
+<p><strong>Q: 80 char line limit? 4 space indentation? Imperative
+coding? What is this, the 90's?</strong></p>
+
+<p>A: Another motivating factor for developing Modulo was how much I
+appreciates libraries such as Django that maintain high quality docs and code,
+and have an easy-to-follow codebase that you can always go to to understand
+exact ordering or behavior of certain operations or steps. This is contrasted
+with other libraries which seem to be designed first and foremost to go fast
+and pass tests, but not for thorough documentation, or self-documenting code.
+This is not a slight on any particular library, nor is it a claim that I write
+better code&mdash;in fact, outside of Modulo.js itself, all the tooling code in
+this repo is a mess!  However, for Modulo.js itself, I invested most of the
+development time in refactoring it over and over (and over and over), until the
+code and logical flow was as simple as possible. My goal is to make the code
+readable and be a good example for novice coders. I want engineers of all skill
+levels to be able to understand <em>why</em> the framework behaves the way it
+does by simply reading the code that powers certain features.</p>
+
+<p>That's where the coding standard comes in. Shorter line length and "more
+intense" indentation requirements naturally causes simpler, less convoluted
+code, causing desirable side-effects such as lower cyclomatic complexity in
+functions. It might not be "pleasant" to write under these conditions, but code
+is written once and read 1000 times. Modulo code was written to be easily read,
+not easily written.</p>
+
+<p>Note: Linting configs are still an unresolved bug, meaning this coding
+standard is partially aspirational.</p>
+
+
+<hr />
+<p><strong>Q: Why call it Modulo?</strong></p>
+<p>A: From Wikipeda: &ldquo;In mathematics, the term modulo is often used to
+assert that two distinct mathematical objects can be regarded as equivalent if
+their difference is accounted for by an additional factor.&rdquo; Basically,
+it's math jargon to say two things are equivalent in a given condition or
+context.</p>
+
+<p>So, maybe the goal of Modulo is provide that context, making a natural way
+to integrate the new and the old! Or maybe it sounded cool. Maybe that!</p>
+
+<hr />
+<p><strong>Q: Isn't <em>Modulo</em> already a thing in
+JavaScript?</strong></pHere>
+<p>Ironically, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder">JavaScript does not have a modulo operator</a>!
+Instead, it uses the percent sign as a <em>remainder operator</em>,
+which behaves similarly for some numbers, but differs for negative
+numbers. So, while Modulo.js is not the first thing to be called
+<abbr title="At the time of picking the name, there were a couple
+similarly named projects, though none seem to be in active use or
+development for years.">"Modulo" in JS</abbr> it <em>is not</em>
+named after the <code>%</code> operator in JavaScript, making both
+the logo and name are a bit of a tongue-in-cheek jab at our
+favorite (but often deficient) computer language.</p>
+
+</mws-Page>

@@ -1,0 +1,84 @@
+<!--
+    Tests some edge cases around reconciling directives
+-->
+
+
+<Component name="ReconcilerDirectivesTester1">
+
+<Template>
+    <div>
+        <p>FIRST:{{ state.firstclicked }}</p>
+        <p>SECOND:{{ state.secondclicked }}</p>
+        {% if not state.showsecond %}
+            <button @click:=script.clickB1 class="example">B1</button>
+        {% else %}
+            <button @click:=script.clickB2 class="example">B2</button>
+        {% endif %}
+    </div>
+</Template>
+
+<State
+    showsecond:=false
+    firstclicked:=0
+    secondclicked:=0
+></State>
+
+<Script>
+    function clickB1() {
+        //console.log('this is clickB1');
+        state.firstclicked++;
+    }
+    function clickB2() {
+        //console.log('this is clickB2');
+        state.secondclicked++;
+    }
+</Script>
+
+<TestSuite >
+
+<!--
+<Test name="Check click directives work as expected">
+    <Template name="Ensure first is 0" string-count=1>
+        FIRST:0
+    </Template>
+
+    <Script>
+        event: click button
+    </Script>
+
+    <Template skip-rerender string-count=1 name="Ensure first is now 1">
+        FIRST:1
+    </Template>
+    <Template skip-rerender string-count=1 name="But second is still 0">
+        SECOND:0
+    </Template>
+</Test>
+-->
+
+<Test name="Check rerendering a similar button can correctly detatch and attach events">
+    <Template name="Ensure all starts at 0">
+        <div>
+            <p>FIRST:0</p>
+            <p>SECOND:0</p>
+            <button @click:=script.clickB1 class="example">B1</button>
+        </div>
+    </Template>
+
+    <State showsecond:=true ></State>
+
+    <Script name="Ensure HTML gets updated">
+        const { innerHTML } = element.querySelector('button');
+        assert: innerHTML === 'B2' // ensure html gets updated on the 2nd button
+    </Script>
+    <Script name="Ensure click button">
+        event: click button
+    </Script>
+
+    <Template string-count=1
+        name="c Ensure first is still 0">FIRST:0</Template>
+    <Template skip-rerender string-count=1
+        name="c Ensure second is now 1">SECOND:1</Template>
+</Test>
+
+
+</TestSuite></Component>

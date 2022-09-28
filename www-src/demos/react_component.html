@@ -1,0 +1,101 @@
+<script src="/js/Modulo.js"></script>
+
+<!-- Load Babel & Modulo's Babel compatibility extension. The modulo-asset=y is
+     to prevent it from being included in a final bundle. -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" modulo-asset=y></script>
+<script src="/demos/mdu/extensions/asset-manager-babel.js" modulo-asset=y></script>
+
+<!-- Load React itself  -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+<!-- Load ReactComponent CPart, which is a Modulo CPart that behaves like
+Component, except it contains a React JS script and will register mount React
+components as named in the script -->
+<script src="/demos/mdu/cparts/ReactComponent.js"></script>
+
+
+<template Modulo>
+    <script ReactComponent name="LikeButton">
+        // Example taken from React's "Like button" tutorial
+        class LikeButton extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { liked: false };
+            }
+
+            render() {
+                if (this.state.liked) {
+                    return this.props.message;
+                }
+                return (
+                    <button onClick={() => this.setState({ liked: true })}>
+                        Like
+                    </button>
+                );
+            }
+        }
+    </script>
+
+    <Component name="LikeButtonModulo">
+        <!-- Same example as above, except written in Modulo -->
+        <Props
+            message
+        ></Props>
+        <Template>
+            {% if state.liked %}
+                {{ props.message }}
+            {% else %}
+                <button @click:=script.like>Like</button>
+            {% endif %}
+        </Template>
+        <State
+            liked:=false
+        ></State>
+        <Script>
+            function like() {
+                state.liked = true;
+            }
+        </Script>
+    </Component>
+</template>
+
+
+
+<h1>Custom CPart: ReactComponent Demo</h1>
+
+<p>ReactComponent CPart is a Modulo CPart that behaves like Component, except
+it contains a React JS script and will register mount React components as named
+in the script. This is both useful for integrating React components into a
+Modulo project, and also a handy way to ramp up to React development in
+general, e.g. it might be less complicated in many situations, for example,
+than ReactJS's official "Add React to a website" tutorial, which is intended as
+a similar ramp up.</p>
+
+<hr />
+
+<!-- Finally, instantiate our JSX-based component -->
+<h2>Like button example (React):</h2>
+<x-LikeButton
+    message="You liked this (from React!)"
+></x-LikeButton>
+
+<!-- And our normal Modulo / templating based component: -->
+<h2>Like button example (Modulo):</h2>
+<x-LikeButtonModulo
+    message="You liked this (from Modulo!)"
+></x-LikeButtonModulo>
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+
