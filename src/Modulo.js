@@ -2301,7 +2301,7 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
 modulo.register('command', function build (modulo, opts = {}) {
     const { buildhtml } = modulo.registry.commands;
     opts.type = opts.bundle ? 'bundle' : 'build';
-    const pre = { js: [], css: [] }; // Prefixed content
+    const pre = { js: [ 'window.hackIsBuild = true;\n' ], css: [] }; // Prefixed content
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
@@ -2389,7 +2389,7 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
         // preprocess blocking vs not, and make more consistent / documented
         modulo.loadFromDOM(document.head, null, true);
         modulo.preprocessAndDefine();
-    } else {
+    } else if (!window.hackIsBuild) {
         document.addEventListener('DOMContentLoaded', () => {
             modulo.loadFromDOM(document.head, null, true);
             modulo.preprocessAndDefine();

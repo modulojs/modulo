@@ -55,7 +55,12 @@ async function doGenerate(moduloWrapper, config) {
 
         // Then, do post processing and write main HTML
         //html = hackPostprocess(html, buildArtifacts);
-        await unlockToWrite(outputFile, html, log);
+        let outPath = outputFile;
+        if (outPath.includes('http:/127.0.0.1:6627/')) {
+            console.log('XXX - Warning, bad outPath filename encountered:', outPath);
+            outPath = outPath.replace('http:/127.0.0.1:6627/', '');
+        }
+        await unlockToWrite(outPath, html, log);
 
     } else {
         throw new Error('Invalid action');
