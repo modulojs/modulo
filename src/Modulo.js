@@ -312,6 +312,7 @@ modulo.register('cpart', class Component {
         conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
         const cpartTypes = new Set(Children.map(({ Type }) => Type));
         const cpartNameString = Array.from(cpartTypes).join(', ');
+        const className = '_' + Name + '_';
 
         const code = (`
             if (typeof currentModulo !== 'undefined') { modulo = currentModulo; } // HAX XXX
@@ -323,7 +324,7 @@ modulo.register('cpart', class Component {
 
             const cpartClasses = { ${ cpartNameString } };
             const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-            class ${ Name } extends modulo.registry.utils.BaseElement {
+            class ${ className } extends modulo.registry.utils.BaseElement {
                 constructor() {
                     super();
                     this.modulo = modulo;
@@ -334,12 +335,12 @@ modulo.register('cpart', class Component {
                 }
             }
 
-            const initRenderObj = { elementClass: ${ Name } };
+            const initRenderObj = { elementClass: ${ className } };
             modulo.applyPatches(factoryPatches, initRenderObj);
             // console.log('XYZ before customElements.define', modulo.id, JSON.stringify(conf));
-            modulo.globals.customElements.define(tagName, ${ Name });
-            //console.log("Registered: ${ Name } as " + tagName);
-            return ${ Name };
+            modulo.globals.customElements.define(tagName, ${ className });
+            //console.log("Registered: ${ className } as " + tagName);
+            return ${ className };
         `).replace(/\n {8}/g, "\n");
         conf.FuncDefHash = modulo.assets.getHash([ 'tagName', 'modulo' ], code);
 

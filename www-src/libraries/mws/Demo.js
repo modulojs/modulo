@@ -231,8 +231,11 @@ function runModuloText(componentDef) {
     const defDiv = document.createElement('div');
     defDiv.innerHTML = componentDef;
     const mod = _newModulo();
+    mod.pushGlobal();
+    window.currentModulo = mod; // XXX Remove, when currentModulo is rm'ed
     mod.loadFromDOM(defDiv);
     mod.preprocessAndDefine();
+    mod.popGlobal();
 }
 
 function doRun() {
