@@ -22,7 +22,7 @@
     <Props
         version
     ></Props>
-    <StaticData -src="https://raw.githubusercontent.com/michaelpb/modulo/main/package.json"></StaticData>
+    <StaticData -src="https://raw.githubusercontent.com/modulojs/modulo/main/package.json"></StaticData>
     <Template>
         {% if props.version %}
             <a href="/devlog/2022-09.html" title="This product is still under heavy development. Click to learn more."
@@ -30,7 +30,7 @@
         {% else %}
             v: {{ staticdata.version }}<br />
             <!--SLOC: {{ staticdata.sloc }} lines<br />-->
-            <a href="https://github.com/michaelpb/modulo/">github</a> |
+            <a href="https://github.com/modulojs/modulo/">github</a> |
             <a href="https://www.npmjs.com/package/{{ staticdata.name }}">npm {{ staticdata.name }}</a>
         {% endif %}
     </Template>

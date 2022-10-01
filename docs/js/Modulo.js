@@ -1,14 +1,18 @@
-const LEGACY = []; // XXX
+const LEGACY = []; // TODO rm
 window.LEG = LEGACY;
 
 // Avoid overwriting other Modulo versions / instances
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 
+const NEW_REQUIRE = true; // temporary feature flag for new require pattern XXX
+
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
         // Note: parentModulo arg is being used by mws/Demo.js
-        window._moduloID = this.id = (window._moduloID || 0) + 1; // Global ID
+        window._moduloID = (window._moduloID || 0) + 1; // Global ID
+        window._moduloStack = (window._moduloStack || [ ]);
+        this.id = window._moduloID;
 
         this.defs = {};
         this.parentDefs = {};
@@ -30,6 +34,19 @@ window.Modulo = class Modulo {
 
     static moduloClone(modulo, other) {
         return modulo; // Never clone Modulos to prevent reference loops
+    }
+
+    pushGlobal() {
+        if (window.modulo && window.modulo.id !== this.id) {
+            window._moduloStack.push(window.modulo);
+        }
+        window.modulo = this;
+    }
+
+    popGlobal() {
+        if (window._moduloStack.length > 0) {
+            window.modulo = window._moduloStack.pop();
+        }
     }
 
     create(type, name, conf = null) {
@@ -94,15 +111,17 @@ window.Modulo = class Modulo {
         }
     }
 
+    lifecycle(names) {
+        this.setupParents(); // Ensure sync'ed up, TODO rm
+        const lcObj = this.registry.cparts;
+        const defArray = Array.from(Object.values(this.defs)).flat();
+        const patches = this.getLifecyclePatches(lcObj, names, defArray);
+        this.applyPatches(patches);
+    }
+
     preprocessAndDefine() {
-        this.repeatConfigurePreprocessors(() => {
-            this.setupParents(); // Ensure sync'ed up
-            const names = [ 'prebuild', 'define' ]; // TODO, make config?
-            const lcObj = this.registry.cparts;
-            const defArray = Array.from(Object.values(this.defs)).flat();
-            const patches = this.getLifecyclePatches(lcObj, names, defArray);
-            this.applyPatches(patches);
-        });
+        //this.lifecycle([ 'configure' ]); // no need?
+        this.repeatPreconf(() => this.lifecycle([ 'prebuild', 'define' ]));
     }
 
     loadString(text, parentFactoryName = null) {
@@ -149,13 +168,13 @@ window.Modulo = class Modulo {
         }
     }
 
-    repeatConfigurePreprocessors(cb) {
-        if (!this._repeatTries) {
-            this._repeatTries = 0;
+    repeatPreconf(cb) {
+        if (!this._configSteps) {
+            this._configSteps = 0;
         }
-        //this.assert(this._repeatTries++ < 50, `Max repeat: ${lcName}`);
         let changed = true; // Run at least once
         while (changed) {
+            this.assert(this._configSteps++ < 10000, 'Config steps: 10000+');
             changed = false;
             for (const [ namespace, confArray ] of Object.entries(this.defs)) {
                 for (const conf of confArray) {
@@ -166,11 +185,10 @@ window.Modulo = class Modulo {
         }
 
         if (Object.keys(this.fetchQueue.queue).length === 0) {
-            delete this._repeatTries;
+            delete this._configSteps;
             cb(); // Synchronous path
         } else {
-            this.fetchQueue.enqueueAll(
-              () => this.repeatConfigurePreprocessors(cb));
+            this.fetchQueue.enqueueAll(() => this.repeatPreconf(cb));
         }
     }
 
@@ -259,12 +277,13 @@ Modulo.INVALID_WORDS = new Set((`
 `).split(/\s+/ig));
 
 // Create a new modulo instance to be the global default instance
-var modulo = new Modulo(null, [
+(new Modulo(null, [
     'cparts', 'dom', 'utils', 'library', 'core', 'engines', 'commands',
     'templateFilters', 'templateTags', 'directives', 'directiveShortcuts',
     'loadDirectives', 'loadDirectiveShortcuts', 'confPreprocessors',
-]);
+])).pushGlobal();
 
+// Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('confPreprocessor', function src (modulo, conf, value) {
     modulo.fetchQueue.enqueue(value, text => {
         conf.Content = (text || '') + (conf.Content || '');
@@ -293,15 +312,19 @@ modulo.register('cpart', class Component {
         conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
         const cpartTypes = new Set(Children.map(({ Type }) => Type));
         const cpartNameString = Array.from(cpartTypes).join(', ');
+        const className = '_' + Name + '_';
 
         const code = (`
-            modulo = currentModulo;// HAX XXX
+            if (typeof currentModulo !== 'undefined') { modulo = currentModulo; } // HAX XXX
+            const conf = modulo.parentDefs['${ FullName }']; // XXX
+            if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
+
             const { ${ cpartNameString } } = modulo.registry.cparts;
             const confArray = modulo.defs['${ FullName }'];
 
             const cpartClasses = { ${ cpartNameString } };
             const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-            class ${ Name } extends modulo.registry.utils.BaseElement {
+            class ${ className } extends modulo.registry.utils.BaseElement {
                 constructor() {
                     super();
                     this.modulo = modulo;
@@ -312,14 +335,20 @@ modulo.register('cpart', class Component {
                 }
             }
 
-            const initRenderObj = { elementClass: ${ Name } };
+            const initRenderObj = { elementClass: ${ className } };
             modulo.applyPatches(factoryPatches, initRenderObj);
-            modulo.globals.customElements.define(tagName, ${ Name });
-            //console.log("Registered: ${ Name } as " + tagName);
-            return ${ Name };
+            // console.log('XYZ before customElements.define', modulo.id, JSON.stringify(conf));
+            modulo.globals.customElements.define(tagName, ${ className });
+            //console.log("Registered: ${ className } as " + tagName);
+            return ${ className };
         `).replace(/\n {8}/g, "\n");
         conf.FuncDefHash = modulo.assets.getHash([ 'tagName', 'modulo' ], code);
-        modulo.assets.registerFunction([ 'tagName', 'modulo' ], code);
+
+        if (NEW_REQUIRE) {
+            modulo.assets.define(FullName, code);
+        } else {
+            modulo.assets.registerFunction([ 'tagName', 'modulo' ], code);
+        }
     }
 
     static defineCallback(modulo, conf) {
@@ -329,12 +358,16 @@ modulo.register('cpart', class Component {
         //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
         //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
         const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
-        //modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
         if (!FuncDefHash) {
             console.warn('Empty component specified:', FullName);
             return;
         }
-        modulo.assets.invoke(FuncDefHash, [ conf.TagName ]);
+
+        if (NEW_REQUIRE) {
+            modulo.assets.mainRequire(conf.FullName);
+        } else {
+            modulo.assets.runInline(`${ exCode }('${ conf.TagName }', currentModulo);\n`);
+        }
     }
 
     /*
@@ -662,7 +695,8 @@ modulo.register('util', function hash (str) {
         //h = ((h << 5 - h) + str.charCodeAt(i)) | 0;
         h = Math.imul(31, h) + str.charCodeAt(i) | 0;
     }
-    return (h || 0).toString(32).replace(/-/g, 'x');
+    const hash8 = ('---------' + (h || 0).toString(32)).slice(-8);
+    return hash8.replace(/-/g, 'x'); // Pad with 'x'
 });
 
 modulo.register('util', function makeDiv(html) {
@@ -859,12 +893,73 @@ modulo.register('util', class BaseElement extends HTMLElement {
 modulo.register('core', class AssetManager {
     constructor (modulo) {
         this.modulo = modulo;
-        this.functions = {};
+        this.functions = {}; // TODO: functions will soon be dead as well!
         this.stylesheets = {};
         this.invocations = [];
         // TODO: rawAssets and rawAssetsArray are both likely dead code!
         this.rawAssets = { js: {}, css: {} };
         this.rawAssetsArray = { js: [], css: [] };
+        this.modules = {};
+        this.moduleSources = {};
+        this.nameToHash = {};
+        this.mainRequires = []; // List of globally invoked modules
+    }
+
+    mainRequire(moduleName) {
+        this.mainRequires.push(moduleName);
+        this.require(moduleName);
+    }
+
+    require(moduleName) {
+        this.modulo.assert(moduleName in this.nameToHash,
+            `${ moduleName } not in ${ Object.keys(this.nameToHash).join(', ') }`);
+        const hash = this.nameToHash[moduleName];
+        this.modulo.assert(hash in this.modules,
+            `${ moduleName } / ${ hash } not in ${ Object.keys(this.modules).join(', ') }`);
+        return this.modules[hash].call(window, modulo);
+    }
+
+    wrapDefine(hash, name, code) {
+        // TODO: Later add document, window, etc to arguments
+        // TODO: Test this
+        const asReturn = name => `return ${ name };`;
+        code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
+        code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
+        const assignee = `window.modulo.assets.modules["${ hash }"]`;
+        return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
+    }
+
+    define(moduleName, code) {
+        const hash = this.modulo.registry.utils.hash(code);
+        this.nameToHash[moduleName] = hash;
+        if (!(hash in this.modules)) {
+            this.moduleSources[hash] = code;
+            const jsText = this.wrapDefine(hash, moduleName, code);
+            this.modulo.assets = this;// TODO Should investigate why needed
+            this.modulo.pushGlobal();
+            this.appendToHead('script', '"use strict";' + jsText);
+            this.modulo.popGlobal();
+        }
+        return () => this.modules[hash](modulo); // TODO: Rm this, and also rm the extra () in Templater
+    }
+
+    buildModuleDefs() {
+        const names = JSON.stringify(this.nameToHash, null, 1);
+        let jsText = `Object.assign(modulo.assets.nameToHash, ${ names });\n\n`;
+        for (const name of Object.keys(this.nameToHash).sort()) {
+            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
+            if (hash in this.moduleSources) {
+                jsText += this.wrapDefine(hash, name, this.moduleSources[hash]);
+                delete this.moduleSources[hash];
+            }
+        }
+        modulo.assert(Object.keys(this.moduleSources).length === 0, 'Unused mod keys');
+        return jsText;
+    }
+
+    buildMain() {
+        const asRequireInvocation = s => `modulo.assets.require("${ s }");`;
+        return this.mainRequires.map(asRequireInvocation).join('\n');
     }
 
     build(ext, opts, prefix = '') {
@@ -1173,13 +1268,46 @@ modulo.register('cpart', class StaticData {
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
         conf.Hash = modulo.assets.getHash([], code);
-        modulo.assets.registerFunction([], code);
+        if (NEW_REQUIRE) {
+            modulo.assets.define(conf.FullName, code);
+        } else {
+            modulo.assets.registerFunction([], code);
+        }
         // TODO: Maybe evaluate and attach directly to conf here?
     }
 
     static factoryCallback(renderObj, conf, modulo) {
         // Now, actually run code in Script tag to do factory method
-        return modulo.assets.functions[conf.Hash]();
+        if (NEW_REQUIRE) {
+            return modulo.assets.require(conf.FullName);
+        } else {
+            return modulo.assets.functions[conf.Hash]();
+        }
+    }
+});
+
+modulo.register('cpart', class Configuration {
+    static prebuildCallback(modulo, conf) {
+        const code = (conf.Content || '').trim();
+        delete conf.Content;
+        const opts = { exports: 'script' };
+        if (NEW_REQUIRE) {
+            modulo.assets.define(conf.FullName)(); // define & invoke
+        } else {
+            const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
+            const exCode = `currentModulo.assets.functions['${ func.hash }']`
+            modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
+        }
+        /*
+        // TODO: Possibly, add something like this to finish this CPart. Should
+        // be a helper, however -- maybe a confPreprocessor that applies to
+        // Library and Modulo as well?
+        for (const [ key, value ] of conf) {
+            if (key.includes('.')) {
+                modulo.utils.set(modulo.conf, key, value);
+            }
+        }
+        */
     }
 });
 
@@ -1202,47 +1330,54 @@ modulo.register('cpart', class Script {
             delete opts.exports;
         }
 
-        const func = modulo.assets.registerFunction(allArgs, code, opts);
-        conf.Hash = modulo.assets.getHash(allArgs, code);
-        conf.localVars = localVars;
-
-        if (conf.register) {
-            // XXX HAX TODO Refactor
-            // Run as prebuild
-            modulo.assert(conf.registerName, 'Must specify register name as well');
-            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
-            // NOTE: Uses "window" as "this." context for better compat
-            modulo.assets.runInline(`modulo.register("${ conf.register }", ` +
-                `${ exCode }.call(window, currentModulo).${ conf.registerName });\n`);
-            delete conf.Hash; // prevent getting run again
-            conf._HackHashDeleted = 'conf.register + ' + conf.Hash;
+        if (NEW_REQUIRE) {
+            conf.TmpRando = 'S' + Math.ceil(Math.random() * 100000000) + conf.FullName;
+            const fullCode = modulo.registry.cparts.Script.nu_wrapFunctionText(code, localVars);
+            //modulo.assets.define(conf.FullName, fullCode);
+            modulo.assets.define(conf.TmpRando, fullCode);
+        } else {
+            const func = modulo.assets.registerFunction(allArgs, code, opts);
+            conf.Hash = modulo.assets.getHash(allArgs, code);
         }
+        conf.localVars = localVars;
     }
 
     static defineCallback(modulo, conf) {
         // XXX -- HAX
-        if (!conf.Parent || (conf.Parent === 'x_x' && conf.Hash)) {
-            const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
-            // TODO: Refactor:
-            // NOTE: Uses "window" as "this." context for better compat
-            modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
-            // currentModulo.registry.cparts.Script.require);\n`);
-            delete conf.Hash; // prevent getting run again
-            conf._HackHashDeleted = '!conf.Parent + ' + conf.Hash;
+        if (!conf.Parent || ((conf.Parent === 'x_x' && conf.Hash) ||
+                             (conf.Parent === 'x_x' && conf.TmpRando))) {
+            if (NEW_REQUIRE) {
+                //modulo.assets.mainRequire(conf.FullName);
+                modulo.assets.mainRequire(conf.TmpRando);
+            } else {
+                const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
+                modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
+                // currentModulo.registry.cparts.Script.require);\n`);
+                delete conf.Hash; // prevent getting run again
+            }
         }
     }
 
     static factoryCallback(renderObj, conf, modulo) {
         const { Content, Hash, localVars } = conf;
-        if (!(Hash in modulo.assets.functions)) {
-            // debugger;
-            console.log('ERROR: Could not find Hash:', conf, renderObj);
-            return {};
+        let results;
+        if (NEW_REQUIRE) {
+            if (!conf.TmpRando) {
+                console.log('ERROR: Could not find TmpRando:', conf, renderObj);
+                return {};
+            }
+            results = modulo.assets.require(conf.TmpRando);
+        } else {
+            if (!(Hash in modulo.assets.functions)) {
+                // debugger;
+                console.log('ERROR: Could not find Hash:', conf, renderObj);
+                return {};
+            }
+            const func = modulo.assets.functions[Hash];
+            results = func.call(null, modulo, this.require || null);
         }
-        const func = modulo.assets.functions[Hash];
         // Now, actually run code in Script tag to do factory method
         //const results = func.call(null, modulo, this.require || null);
-        const results = func.call(null, modulo, this.require || null);
         if (results) {
             results.localVars = localVars;
             modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
@@ -1251,6 +1386,30 @@ modulo.register('cpart', class Script {
             modulo.assert(!conf.Parent, 'Falsy return for parented Script');
             return {};
         }
+    }
+
+    static nu_wrapFunctionText(text, localVars) {
+        let prefix = '';
+        let suffix = '';
+
+        function getSymbolsAsObjectAssignment(contents) {
+            const regexpG = /(function|class)\s+(\w+)/g;
+            const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
+            const matches = contents.match(regexpG) || [];
+            return matches.map(s => s.match(regexp2)[2])
+                .filter(s => s && !Modulo.INVALID_WORDS.has(s))
+                .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
+                .join('');
+        }
+
+        const symbolsString = getSymbolsAsObjectAssignment(text);
+        // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
+        const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
+        prefix += `var script = { exports: {} };  `;
+        prefix += `var ${ localVars.join(', ') };`;
+        prefix += `function __set(name, value) { ${ localVarsIfs } }`;
+        suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
+        return `${prefix}\n${text}\n${suffix}`;
     }
 
     getDirectives() {
@@ -1457,13 +1616,24 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = modulo.assets.functions[this.Hash];
+            if (NEW_REQUIRE) {
+                this.renderFunc = modulo.assets.require(this.Hash);
+            } else {
+                this.renderFunc = modulo.assets.functions[this.Hash];
+            }
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
             this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-            this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
-            this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);
+
+            if (NEW_REQUIRE) {
+                this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
+                this.Hash = 'T' + Math.ceil(Math.random() * 100000000); // XXX
+                this.renderFunc = modulo.assets.define(this.Hash, this.compiledCode)();
+            } else {
+                this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
+                this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);
+            }
         }
     }
 
@@ -2131,7 +2301,7 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
 modulo.register('command', function build (modulo, opts = {}) {
     const { buildhtml } = modulo.registry.commands;
     opts.type = opts.bundle ? 'bundle' : 'build';
-    const pre = { js: [], css: [] }; // Prefixed content
+    const pre = { js: [ 'window.hackIsBuild = true;\n' ], css: [] }; // Prefixed content
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
@@ -2146,9 +2316,19 @@ modulo.register('command', function build (modulo, opts = {}) {
         pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
                     JSON.stringify(modulo.fetchQueue.data) + ';');
     }
+
+    if (NEW_REQUIRE) {
+        pre.js.push('currentModulo.pushGlobal();'); // HAX XXX refs #11
+        pre.js.push(modulo.assets.buildModuleDefs()); // HAX XXX refs #11
+    }
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
     opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
-    opts.jsInlineText = modulo.assets.getInlineJS(opts);
+    //opts.jsInlineText = modulo.assets.getInlineJS(opts);
+    opts.jsInlineText = '';
+    if (NEW_REQUIRE) {
+        opts.jsInlineText += '\ncurrentModulo.pushGlobal();\n';
+        opts.jsInlineText += modulo.assets.buildMain();
+    }
     opts.htmlFilePath = buildhtml(modulo, opts);
     setTimeout(() => {
         document.body.innerHTML = `<h1><a href="?mod-cmd=${opts.type}">&#10227;
@@ -2209,7 +2389,7 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
         // preprocess blocking vs not, and make more consistent / documented
         modulo.loadFromDOM(document.head, null, true);
         modulo.preprocessAndDefine();
-    } else {
+    } else if (!window.hackIsBuild) {
         document.addEventListener('DOMContentLoaded', () => {
             modulo.loadFromDOM(document.head, null, true);
             modulo.preprocessAndDefine();
@@ -2219,12 +2399,12 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
     exports = { Modulo, modulo };
 }
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        // TODO: Better way to know if in built-version browser environ
+        // TODO: Better way to know if in built-version browser environ, this is terrible
         const isProduction = document.querySelector(
             'script[src*="modulo-build"],script[src*="modulo-bundle"]');
-        if (isProduction) {
+        if (isProduction || window.hackIsbuild) {
             return;
         }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');

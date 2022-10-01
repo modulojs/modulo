@@ -200,7 +200,7 @@ modulo.register('cpart', class TestSuite {
             return true;
         } else if (result === false) {
             const msgAttrs = attrs.name ? ` name="${attrs.name}"` : '';
-            console.log(`ASSERTION <${sName}${msgAttrs}> FAILED:`)
+            console.log(`ASSERTION <${sName}${msgAttrs}> FAILED:`);
             if (message.map) {
                 console.log(...message);
             } else {
@@ -238,7 +238,7 @@ modulo.register('cpart', class TestSuite {
             console.log('THE NAME IS', name, testLoaderModulo);
             throw new Error('ERROR: could not find parent Component fac');
         }
-
+        // console.log('XYZ this is componentFac', JSON.stringify(componentFac));
 
         let total = 0;
         let failure = 0;
@@ -545,13 +545,25 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     const body = doc.createElement('body'); // Mock body
     doc.documentElement.appendChild(head);
     doc.documentElement.appendChild(body);
-    modulo.globals._moduloTestNumber = (modulo.globals._moduloTestNumber || 0) + 1;
+    if (!window._moduloTestNumber) {
+        window._moduloTestNumber = 0;
+    }
+    window._moduloTestNumber++;
 
-    const componentFunc = modulo.assets.functions[componentFac.FuncDefHash];
-    const namespace = 't' + modulo.globals._moduloTestNumber;
+    const namespace = 't' + window._moduloTestNumber;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
-    const componentClass = componentFunc(componentFac.TagName, modulo);
+    let componentFunc;
+    let componentClass;
+    if (typeof NEW_REQUIRE !== "undefined" && NEW_REQUIRE) {
+        // console.log('XYZ before require', modulo.id, JSON.stringify(componentFac));
+        modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
+        componentClass = modulo.assets.require(componentFac.FullName);
+    } else {
+        const componentFunc = modulo.assets.functions[componentFac.FuncDefHash];
+        componentClass = componentFunc(componentFac.TagName, modulo);
+    }
+
     const element = new componentClass();
     if (element._moduloTagName) { // virtualdom-based class
         element.tagName = fullName.toUpperCase(); // (todo: rm after cpartdef refactor)

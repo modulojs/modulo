@@ -2399,12 +2399,12 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
     exports = { Modulo, modulo };
 }
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        // TODO: Better way to know if in built-version browser environ
+        // TODO: Better way to know if in built-version browser environ, this is terrible
         const isProduction = document.querySelector(
             'script[src*="modulo-build"],script[src*="modulo-bundle"]');
-        if (isProduction) {
+        if (isProduction || window.hackIsbuild) {
             return;
         }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
