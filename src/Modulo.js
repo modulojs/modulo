@@ -691,7 +691,7 @@ modulo.register('util', function mergeAttrs (elem, defaults) {
 modulo.register('util', function hash (str) {
     // Simple, insecure, "hashCode()" implementation. Returns base32 hash
     let h = 0;
-    for(let i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
         //h = ((h << 5 - h) + str.charCodeAt(i)) | 0;
         h = Math.imul(31, h) + str.charCodeAt(i) | 0;
     }
@@ -922,9 +922,9 @@ modulo.register('core', class AssetManager {
     wrapDefine(hash, name, code) {
         // TODO: Later add document, window, etc to arguments
         // TODO: Test this
-        const asReturn = name => `return ${ name };`;
-        code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
-        code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
+        //const asReturn = name => `return ${ name };`;
+        //code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
+        //code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
         const assignee = `window.modulo.assets.modules["${ hash }"]`;
         return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
     }
@@ -940,7 +940,7 @@ modulo.register('core', class AssetManager {
             this.appendToHead('script', '"use strict";' + jsText);
             this.modulo.popGlobal();
         }
-        return () => this.modules[hash](modulo); // TODO: Rm this, and also rm the extra () in Templater
+        return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
     buildModuleDefs() {
@@ -1288,11 +1288,12 @@ modulo.register('cpart', class StaticData {
 
 modulo.register('cpart', class Configuration {
     static prebuildCallback(modulo, conf) {
-        const code = (conf.Content || '').trim();
+        let code = (conf.Content || '').trim();
         delete conf.Content;
         const opts = { exports: 'script' };
         if (NEW_REQUIRE) {
-            modulo.assets.define(conf.FullName)(); // define & invoke
+            code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
+            modulo.assets.define(conf.FullName, code)(); // define & invoke
         } else {
             const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
             const exCode = `currentModulo.assets.functions['${ func.hash }']`
@@ -1405,8 +1406,8 @@ modulo.register('cpart', class Script {
         const symbolsString = getSymbolsAsObjectAssignment(text);
         // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
         const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-        prefix += `var script = { exports: {} };  `;
-        prefix += `var ${ localVars.join(', ') };`;
+        prefix += `var script = { exports: {} }; `;
+        prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
         prefix += `function __set(name, value) { ${ localVarsIfs } }`;
         suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
         return `${prefix}\n${text}\n${suffix}`;
