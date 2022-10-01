@@ -553,16 +553,8 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     const namespace = 't' + window._moduloTestNumber;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
-    let componentFunc;
-    let componentClass;
-    if (typeof NEW_REQUIRE !== "undefined" && NEW_REQUIRE) {
-        // console.log('XYZ before require', modulo.id, JSON.stringify(componentFac));
-        modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
-        componentClass = modulo.assets.require(componentFac.FullName);
-    } else {
-        const componentFunc = modulo.assets.functions[componentFac.FuncDefHash];
-        componentClass = componentFunc(componentFac.TagName, modulo);
-    }
+    modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
+    const componentClass = modulo.assets.require(componentFac.FullName); // Do register
 
     const element = new componentClass();
     if (element._moduloTagName) { // virtualdom-based class

@@ -19,7 +19,6 @@
                 // Followed Handlebar's documentation for precompiling:
                 // https://handlebarsjs.com/api-reference/compilation.html
                 const code = 'return ' + Handlebars.precompile(text);
-                this.Hash = modulo.assets.getHash([], code);
                 this.stack = []; // ensure stack is set to empty
                 return code;
             }
@@ -70,7 +69,6 @@
     </Component>
 
 </template>
-
 
 <!--<script src="https://unpkg.com/mdu.js"></script>-->
 <script src="/js/Modulo.js"></script>

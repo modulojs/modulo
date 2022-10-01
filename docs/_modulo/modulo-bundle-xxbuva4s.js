@@ -693,7 +693,7 @@ modulo.register('util', function mergeAttrs (elem, defaults) {
 modulo.register('util', function hash (str) {
     // Simple, insecure, "hashCode()" implementation. Returns base32 hash
     let h = 0;
-    for(let i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
         //h = ((h << 5 - h) + str.charCodeAt(i)) | 0;
         h = Math.imul(31, h) + str.charCodeAt(i) | 0;
     }
@@ -924,9 +924,9 @@ modulo.register('core', class AssetManager {
     wrapDefine(hash, name, code) {
         // TODO: Later add document, window, etc to arguments
         // TODO: Test this
-        const asReturn = name => `return ${ name };`;
-        code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
-        code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
+        //const asReturn = name => `return ${ name };`;
+        //code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
+        //code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
         const assignee = `window.modulo.assets.modules["${ hash }"]`;
         return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
     }
@@ -942,7 +942,7 @@ modulo.register('core', class AssetManager {
             this.appendToHead('script', '"use strict";' + jsText);
             this.modulo.popGlobal();
         }
-        return () => this.modules[hash](modulo); // TODO: Rm this, and also rm the extra () in Templater
+        return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
     buildModuleDefs() {
@@ -967,7 +967,16 @@ modulo.register('core', class AssetManager {
     build(ext, opts, prefix = '') {
         const { saveFileAs, hash } = this.modulo.registry.utils;
         const text = prefix + modulo.assets.rawAssetsArray[ext].join('\n');
-        return saveFileAs(`modulo-${ opts.type }-${ hash(text) }.${ ext }`, text);
+        // XXX Refactor this
+        let fileHash;
+        if (opts.type === 'js') {
+            // (quick hack: hashes are hashes of hashes)
+            const all = Object.keys(Object.assign({}, this.modules, this.nameToHash));
+            fileHash = hash(all.sort().join('|'));
+        } else {
+            fileHash = hash(text);
+        }
+        return saveFileAs(`modulo-${ opts.type }-${ fileHash }.${ ext }`, text);
     }
 
     registerFunction(params, text, opts = {}) {
@@ -1290,11 +1299,12 @@ modulo.register('cpart', class StaticData {
 
 modulo.register('cpart', class Configuration {
     static prebuildCallback(modulo, conf) {
-        const code = (conf.Content || '').trim();
+        let code = (conf.Content || '').trim();
         delete conf.Content;
         const opts = { exports: 'script' };
         if (NEW_REQUIRE) {
-            modulo.assets.define(conf.FullName)(); // define & invoke
+            code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
+            modulo.assets.define(conf.FullName, code)(); // define & invoke
         } else {
             const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
             const exCode = `currentModulo.assets.functions['${ func.hash }']`
@@ -1407,8 +1417,8 @@ modulo.register('cpart', class Script {
         const symbolsString = getSymbolsAsObjectAssignment(text);
         // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
         const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-        prefix += `var script = { exports: {} };  `;
-        prefix += `var ${ localVars.join(', ') };`;
+        prefix += `var script = { exports: {} }; `;
+        prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
         prefix += `function __set(name, value) { ${ localVarsIfs } }`;
         suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
         return `${prefix}\n${text}\n${suffix}`;
@@ -2499,7 +2509,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x",
-   "TmpRando": "S82411823x_x_x",
+   "TmpRando": "S67894911x_x_x",
    "localVars": [
     "component",
     "modulo",
@@ -3375,7 +3385,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoModal_x",
-   "Hash": "T46332033"
+   "Hash": "T7213241"
   },
   {
    "Type": "State",
@@ -3394,7 +3404,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoModal_x",
-   "TmpRando": "S19841207x_x_x_DemoModal_x",
+   "TmpRando": "S65596622x_x_x_DemoModal_x",
    "localVars": [
     "component",
     "modulo",
@@ -3439,7 +3449,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoChart_x",
-   "Hash": "T66370145"
+   "Hash": "T59953929"
   },
   {
    "Type": "Script",
@@ -3448,7 +3458,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoChart_x",
-   "TmpRando": "S7718635x_x_x_DemoChart_x",
+   "TmpRando": "S35807685x_x_x_DemoChart_x",
    "localVars": [
     "component",
     "modulo",
@@ -3493,7 +3503,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_ExampleBtn_x",
-   "Hash": "T17104065"
+   "Hash": "T23624942"
   },
   {
    "Type": "Style",
@@ -3525,7 +3535,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoSelector_x",
-   "Hash": "T91702097"
+   "Hash": "T29288649"
   },
   {
    "Type": "State",
@@ -3544,7 +3554,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_x_DemoSelector_x",
-   "TmpRando": "S52185520x_x_x_DemoSelector_x",
+   "TmpRando": "S99634445x_x_x_DemoSelector_x",
    "localVars": [
     "component",
     "modulo",
@@ -3599,7 +3609,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Page_x",
-   "Hash": "T32744475"
+   "Hash": "T28651169"
   },
   {
    "Type": "Script",
@@ -3608,7 +3618,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Page_x",
-   "TmpRando": "S61387397x_x_mws_Page_x",
+   "TmpRando": "S64321721x_x_mws_Page_x",
    "localVars": [
     "component",
     "modulo",
@@ -3652,7 +3662,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_ProjectInfo_x",
-   "Hash": "T98171607"
+   "Hash": "T78262101"
   }
  ],
  "x_x_mws_DevLogNav": [
@@ -3673,7 +3683,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_DevLogNav_x",
-   "Hash": "T86086005"
+   "Hash": "T87359743"
   },
   {
    "Type": "State",
@@ -3735,7 +3745,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_DocSidebar_x",
-   "Hash": "T75539195"
+   "Hash": "T32302014"
   },
   {
    "Type": "State",
@@ -3754,7 +3764,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_DocSidebar_x",
-   "TmpRando": "S17763391x_x_mws_DocSidebar_x",
+   "TmpRando": "S67220748x_x_mws_DocSidebar_x",
    "localVars": [
     "component",
     "modulo",
@@ -3805,7 +3815,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Demo_x",
-   "Hash": "T18811789"
+   "Hash": "T4675729"
   },
   {
    "Type": "State",
@@ -3834,7 +3844,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Demo_x",
-   "TmpRando": "S49090241x_x_mws_Demo_x",
+   "TmpRando": "S48220700x_x_mws_Demo_x",
    "localVars": [
     "component",
     "modulo",
@@ -3868,7 +3878,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_AllExamples_x",
-   "Hash": "T63167612"
+   "Hash": "T59871361"
   },
   {
    "Type": "State",
@@ -3888,7 +3898,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_AllExamples_x",
-   "TmpRando": "S39270034x_x_mws_AllExamples_x",
+   "TmpRando": "S11133490x_x_mws_AllExamples_x",
    "localVars": [
     "component",
     "modulo",
@@ -3932,7 +3942,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_mws_Section_x",
-   "Hash": "T49575650"
+   "Hash": "T95486706"
   },
   {
    "Type": "Style",
@@ -3952,7 +3962,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_1_x",
-   "Hash": "T11879418"
+   "Hash": "T61947381"
   },
   {
    "Type": "State",
@@ -3984,7 +3994,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_1_x",
-   "TmpRando": "S90429676x_x_docseg_Templating_1_x",
+   "TmpRando": "S91664083x_x_docseg_Templating_1_x",
    "localVars": [
     "component",
     "modulo",
@@ -4009,7 +4019,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_PrepareCallback_x",
-   "Hash": "T97063275"
+   "Hash": "T26076963"
   },
   {
    "Type": "State",
@@ -4029,7 +4039,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_PrepareCallback_x",
-   "TmpRando": "S927967x_x_docseg_Templating_PrepareCallback_x",
+   "TmpRando": "S56255608x_x_docseg_Templating_PrepareCallback_x",
    "localVars": [
     "component",
     "modulo",
@@ -4063,7 +4073,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_Comments_x",
-   "Hash": "T69391517"
+   "Hash": "T49450167"
   }
  ],
  "x_x_docseg_Templating_Escaping": [
@@ -4074,7 +4084,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Templating_Escaping_x",
-   "Hash": "T50706837"
+   "Hash": "T38171189"
   },
   {
    "Type": "State",
@@ -4105,7 +4115,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Tutorial_P1_x",
-   "Hash": "T73592026"
+   "Hash": "T64250788"
   },
   {
    "Type": "Style",
@@ -4125,7 +4135,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Tutorial_P2_x",
-   "Hash": "T40788357"
+   "Hash": "T11854254"
   }
  ],
  "x_x_docseg_Tutorial_P2_filters_demo": [
@@ -4136,7 +4146,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Tutorial_P2_filters_demo_x",
-   "Hash": "T30832000"
+   "Hash": "T68053152"
   }
  ],
  "x_x_docseg_Tutorial_P3_state_demo": [
@@ -4147,7 +4157,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Tutorial_P3_state_demo_x",
-   "Hash": "T48846631"
+   "Hash": "T73411549"
   },
   {
    "Type": "State",
@@ -4179,7 +4189,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_docseg_Tutorial_P3_state_bind_x",
-   "Hash": "T92989670"
+   "Hash": "T12372745"
   },
   {
    "Type": "State",
@@ -4202,7 +4212,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Hello_x",
-   "Hash": "T69136371"
+   "Hash": "T4011783"
   },
   {
    "Type": "State",
@@ -4221,7 +4231,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Hello_x",
-   "TmpRando": "S37178216x_x_eg_Hello_x",
+   "TmpRando": "S44787181x_x_eg_Hello_x",
    "localVars": [
     "component",
     "modulo",
@@ -4246,7 +4256,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Simple_x",
-   "Hash": "T95641764"
+   "Hash": "T25866811"
   },
   {
    "Type": "Style",
@@ -4266,7 +4276,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_ToDo_x",
-   "Hash": "T71573484"
+   "Hash": "T5394546"
   },
   {
    "Type": "State",
@@ -4290,7 +4300,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_ToDo_x",
-   "TmpRando": "S267284x_x_eg_ToDo_x",
+   "TmpRando": "S23516427x_x_eg_ToDo_x",
    "localVars": [
     "component",
     "modulo",
@@ -4315,7 +4325,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_JSON_x",
-   "Hash": "T8264963"
+   "Hash": "T91645988"
   },
   {
    "Type": "StaticData",
@@ -4335,7 +4345,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_JSONArray_x",
-   "Hash": "T56461719"
+   "Hash": "T73081117"
   },
   {
    "Type": "StaticData",
@@ -4355,7 +4365,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_GitHubAPI_x",
-   "Hash": "T86433666"
+   "Hash": "T81190081"
   },
   {
    "Type": "State",
@@ -4377,7 +4387,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_GitHubAPI_x",
-   "TmpRando": "S62156615x_x_eg_GitHubAPI_x",
+   "TmpRando": "S90666422x_x_eg_GitHubAPI_x",
    "localVars": [
     "component",
     "modulo",
@@ -4402,7 +4412,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_ColorSelector_x",
-   "Hash": "T22912151"
+   "Hash": "T36301687"
   },
   {
    "Type": "State",
@@ -4425,7 +4435,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_DateNumberPicker_x",
-   "Hash": "T32122263"
+   "Hash": "T91611964"
   },
   {
    "Type": "State",
@@ -4451,7 +4461,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_DateNumberPicker_x",
-   "TmpRando": "S88348657x_x_eg_DateNumberPicker_x",
+   "TmpRando": "S88760725x_x_eg_DateNumberPicker_x",
    "localVars": [
     "component",
     "modulo",
@@ -4485,7 +4495,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_PrimeSieve_x",
-   "Hash": "T24563353"
+   "Hash": "T7944520"
   },
   {
    "Type": "State",
@@ -4504,7 +4514,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_PrimeSieve_x",
-   "TmpRando": "S97094376x_x_eg_PrimeSieve_x",
+   "TmpRando": "S5412210x_x_eg_PrimeSieve_x",
    "localVars": [
     "component",
     "modulo",
@@ -4538,7 +4548,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Scatter_x",
-   "Hash": "T69820296"
+   "Hash": "T97346688"
   },
   {
    "Type": "StaticData",
@@ -4567,7 +4577,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_FlexibleForm_x",
-   "Hash": "T21634767"
+   "Hash": "T57797140"
   },
   {
    "Type": "State",
@@ -4599,7 +4609,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_FlexibleFormWithAPI_x",
-   "Hash": "T31017504"
+   "Hash": "T39276291"
   },
   {
    "Type": "State",
@@ -4626,7 +4636,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_FlexibleFormWithAPI_x",
-   "TmpRando": "S50355371x_x_eg_FlexibleFormWithAPI_x",
+   "TmpRando": "S25925836x_x_eg_FlexibleFormWithAPI_x",
    "localVars": [
     "component",
     "modulo",
@@ -4651,7 +4661,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Components_x",
-   "Hash": "T74749241"
+   "Hash": "T34074791"
   }
  ],
  "x_x_eg_OscillatingGraph": [
@@ -4662,7 +4672,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_OscillatingGraph_x",
-   "Hash": "T34818586"
+   "Hash": "T96697853"
   },
   {
    "Type": "State",
@@ -4690,7 +4700,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_OscillatingGraph_x",
-   "TmpRando": "S4608399x_x_eg_OscillatingGraph_x",
+   "TmpRando": "S73546576x_x_eg_OscillatingGraph_x",
    "localVars": [
     "component",
     "modulo",
@@ -4724,7 +4734,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Search_x",
-   "Hash": "T52318924"
+   "Hash": "T67684616"
   },
   {
    "Type": "State",
@@ -4745,7 +4755,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Search_x",
-   "TmpRando": "S97665649x_x_eg_Search_x",
+   "TmpRando": "S73352984x_x_eg_Search_x",
    "localVars": [
     "component",
     "modulo",
@@ -4770,7 +4780,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_SearchBox_x",
-   "Hash": "T89869610"
+   "Hash": "T72886001"
   },
   {
    "Type": "State",
@@ -4800,7 +4810,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_SearchBox_x",
-   "TmpRando": "S93943585x_x_eg_SearchBox_x",
+   "TmpRando": "S7316782x_x_eg_SearchBox_x",
    "localVars": [
     "component",
     "modulo",
@@ -4834,7 +4844,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_WorldMap_x",
-   "Hash": "T12566737"
+   "Hash": "T35869078"
   },
   {
    "Type": "StaticData",
@@ -4863,7 +4873,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Memory_x",
-   "Hash": "T14995133"
+   "Hash": "T77823629"
   },
   {
    "Type": "State",
@@ -4887,7 +4897,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_Memory_x",
-   "TmpRando": "S5408991x_x_eg_Memory_x",
+   "TmpRando": "S91920606x_x_eg_Memory_x",
    "localVars": [
     "component",
     "modulo",
@@ -4921,7 +4931,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_ConwayGameOfLife_x",
-   "Hash": "T86604952"
+   "Hash": "T58333183"
   },
   {
    "Type": "State",
@@ -4954,7 +4964,7 @@ currentModulo.defs = {
    "DefName": null,
    "Name": "x",
    "FullName": "x_x_eg_ConwayGameOfLife_x",
-   "TmpRando": "S89863731x_x_eg_ConwayGameOfLife_x",
+   "TmpRando": "S50458211x_x_eg_ConwayGameOfLife_x",
    "localVars": [
     "component",
     "modulo",
@@ -5905,7 +5915,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_mws_Page_x",
-  "TmpRando": "S61387397x_x_mws_Page_x",
+  "TmpRando": "S64321721x_x_mws_Page_x",
   "localVars": [
    "component",
    "modulo",
@@ -5928,7 +5938,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_mws_ProjectInfo_x",
-  "Hash": "T98171607"
+  "Hash": "T78262101"
  },
  "x_x_mws_DevLogNav_x": {
   "Type": "Style",
@@ -5982,7 +5992,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_docseg_Templating_1_x",
-  "TmpRando": "S90429676x_x_docseg_Templating_1_x",
+  "TmpRando": "S91664083x_x_docseg_Templating_1_x",
   "localVars": [
    "component",
    "modulo",
@@ -6014,7 +6024,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_docseg_Templating_Comments_x",
-  "Hash": "T69391517"
+  "Hash": "T49450167"
  },
  "x_x_docseg_Templating_Escaping_x": {
   "Type": "Style",
@@ -6041,7 +6051,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_docseg_Tutorial_P2_x",
-  "Hash": "T40788357"
+  "Hash": "T11854254"
  },
  "x_x_docseg_Tutorial_P2_filters_demo_x": {
   "Type": "Template",
@@ -6050,7 +6060,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_docseg_Tutorial_P2_filters_demo_x",
-  "Hash": "T30832000"
+  "Hash": "T68053152"
  },
  "x_x_docseg_Tutorial_P3_state_demo_x": {
   "Type": "Style",
@@ -6080,7 +6090,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_Hello_x",
-  "TmpRando": "S37178216x_x_eg_Hello_x",
+  "TmpRando": "S44787181x_x_eg_Hello_x",
   "localVars": [
    "component",
    "modulo",
@@ -6112,7 +6122,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_ToDo_x",
-  "TmpRando": "S267284x_x_eg_ToDo_x",
+  "TmpRando": "S23516427x_x_eg_ToDo_x",
   "localVars": [
    "component",
    "modulo",
@@ -6153,7 +6163,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_GitHubAPI_x",
-  "TmpRando": "S62156615x_x_eg_GitHubAPI_x",
+  "TmpRando": "S90666422x_x_eg_GitHubAPI_x",
   "localVars": [
    "component",
    "modulo",
@@ -6215,7 +6225,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_FlexibleForm_x",
-  "Hash": "T21634767"
+  "Hash": "T57797140"
  },
  "x_x_eg_FlexibleForm_Spartacus": {
   "Type": "State",
@@ -6245,7 +6255,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_FlexibleFormWithAPI_x",
-  "TmpRando": "S50355371x_x_eg_FlexibleFormWithAPI_x",
+  "TmpRando": "S25925836x_x_eg_FlexibleFormWithAPI_x",
   "localVars": [
    "component",
    "modulo",
@@ -6268,7 +6278,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_Components_x",
-  "Hash": "T74749241"
+  "Hash": "T34074791"
  },
  "x_x_eg_OscillatingGraph_x": {
   "Type": "Style",
@@ -6286,7 +6296,7 @@ currentModulo.parentDefs = {
   "DefName": null,
   "Name": "x",
   "FullName": "x_x_eg_Search_x",
-  "TmpRando": "S97665649x_x_eg_Search_x",
+  "TmpRando": "S73352984x_x_eg_Search_x",
   "localVars": [
    "component",
    "modulo",
@@ -6341,27 +6351,27 @@ currentModulo.parentDefs = {
 };
 currentModulo.pushGlobal();
 Object.assign(modulo.assets.nameToHash, {
- "S82411823x_x_x": "x1kh5nks",
- "S19841207x_x_x_DemoModal_x": "x1dmtor5",
- "S7718635x_x_x_DemoChart_x": "x1avdnu8",
- "S52185520x_x_x_DemoSelector_x": "xxq1ur8i",
- "S61387397x_x_mws_Page_x": "xx6gma8d",
- "S17763391x_x_mws_DocSidebar_x": "x165flh0",
- "S49090241x_x_mws_Demo_x": "x10ilccv",
- "S39270034x_x_mws_AllExamples_x": "x1n3k461",
- "S90429676x_x_docseg_Templating_1_x": "xxnp2hhr",
- "S927967x_x_docseg_Templating_PrepareCallback_x": "x1orip2d",
- "S37178216x_x_eg_Hello_x": "x15ahlpa",
- "S267284x_x_eg_ToDo_x": "x1148e9c",
- "S62156615x_x_eg_GitHubAPI_x": "x1rgd1rc",
- "S88348657x_x_eg_DateNumberPicker_x": "xx3ai1rl",
- "S97094376x_x_eg_PrimeSieve_x": "x12s80f0",
- "S50355371x_x_eg_FlexibleFormWithAPI_x": "xx1krra8",
- "S4608399x_x_eg_OscillatingGraph_x": "x1r09ttj",
- "S97665649x_x_eg_Search_x": "x1ar0ihi",
- "S93943585x_x_eg_SearchBox_x": "x1mn6bdg",
- "S5408991x_x_eg_Memory_x": "xxpi8j21",
- "S89863731x_x_eg_ConwayGameOfLife_x": "xxhq81oh",
+ "S67894911x_x_x": "x19sdspe",
+ "S65596622x_x_x_DemoModal_x": "xxqruikr",
+ "S35807685x_x_x_DemoChart_x": "xxeaisui",
+ "S99634445x_x_x_DemoSelector_x": "x101oqv4",
+ "S64321721x_x_mws_Page_x": "xx8bpcen",
+ "S67220748x_x_mws_DocSidebar_x": "xx8jvi1a",
+ "S48220700x_x_mws_Demo_x": "xxkffnn9",
+ "S11133490x_x_mws_AllExamples_x": "x1jrrsq9",
+ "S91664083x_x_docseg_Templating_1_x": "x126fsnr",
+ "S56255608x_x_docseg_Templating_PrepareCallback_x": "x15c5clt",
+ "S44787181x_x_eg_Hello_x": "xxj7crnk",
+ "S23516427x_x_eg_ToDo_x": "x118d1eu",
+ "S90666422x_x_eg_GitHubAPI_x": "xxhnhhvm",
+ "S88760725x_x_eg_DateNumberPicker_x": "x1ok21rv",
+ "S5412210x_x_eg_PrimeSieve_x": "x130099a",
+ "S25925836x_x_eg_FlexibleFormWithAPI_x": "xxjqdj02",
+ "S73546576x_x_eg_OscillatingGraph_x": "x103uolt",
+ "S73352984x_x_eg_Search_x": "x126gnvs",
+ "S7316782x_x_eg_SearchBox_x": "x1saopm6",
+ "S91920606x_x_eg_Memory_x": "x102h7jl",
+ "S50458211x_x_eg_ConwayGameOfLife_x": "x18eprt5",
  "x_x_x_DemoModal": "xxi78u53",
  "x_x_x_DemoChart": "x11c30mn",
  "x_x_x_ExampleBtn": "x1cgjp3f",
@@ -6401,295 +6411,55 @@ Object.assign(modulo.assets.nameToHash, {
  "x_x_eg_WorldMap": "x183dt0p",
  "x_x_eg_Memory": "xxigia6q",
  "x_x_eg_ConwayGameOfLife": "x1029d81",
- "T46332033": "xx2noapr",
- "T66370145": "xx9i16tt",
- "T17104065": "xx5ann6n",
- "T91702097": "xxbjtni2",
- "T32744475": "x143bi0q",
- "T98171607": "xx9t56li",
- "T86086005": "xxivj2tr",
- "T75539195": "x1s9cikh",
- "T18811789": "x1q6mcmb",
- "T63167612": "xxslhngg",
- "T49575650": "xx3sjna4",
- "T11879418": "x1nrhiqd",
- "T97063275": "xx7jgg2i",
- "T69391517": "x1p85et1",
- "T50706837": "x184ue3a",
- "T73592026": "xxm6soph",
- "T40788357": "x1h93c2j",
- "T30832000": "x1h93c2j",
- "T48846631": "x13o8260",
- "T92989670": "xxonth4n",
- "T69136371": "xx9ntrq4",
- "T95641764": "xxl4an33",
- "T71573484": "xxbdh5fm",
- "T8264963": "x1lhd4rn",
- "T56461719": "x1npfhrn",
- "T86433666": "x130qf1i",
- "T22912151": "x145sdaa",
- "T32122263": "x1j17irn",
- "T24563353": "xxn6m9dp",
- "T69820296": "x1ejsk79",
- "T21634767": "xxb7eeji",
- "T31017504": "xxd9oom7",
- "T74749241": "x1gk8lc3",
- "T34818586": "xxqlg44u",
- "T52318924": "x1l103gn",
- "T89869610": "x1k5cj37",
- "T12566737": "xxmbc1sp",
- "T14995133": "x1rfau7j",
- "T86604952": "x1spom4d",
+ "T7213241": "xx2noapr",
+ "T59953929": "xx9i16tt",
+ "T23624942": "xx5ann6n",
+ "T29288649": "xxbjtni2",
+ "T28651169": "x143bi0q",
+ "T78262101": "xx9t56li",
+ "T87359743": "xxivj2tr",
+ "T32302014": "x1s9cikh",
+ "T4675729": "x1q6mcmb",
+ "T59871361": "xxslhngg",
+ "T95486706": "xx3sjna4",
+ "T61947381": "x1nrhiqd",
+ "T26076963": "xx7jgg2i",
+ "T49450167": "x1p85et1",
+ "T38171189": "x184ue3a",
+ "T64250788": "xxm6soph",
+ "T11854254": "x1h93c2j",
+ "T68053152": "x1h93c2j",
+ "T73411549": "x13o8260",
+ "T12372745": "xxonth4n",
+ "T4011783": "xx9ntrq4",
+ "T25866811": "xxl4an33",
+ "T5394546": "xxbdh5fm",
+ "T91645988": "x1lhd4rn",
+ "T73081117": "x1npfhrn",
+ "T81190081": "x130qf1i",
+ "T36301687": "x145sdaa",
+ "T91611964": "x1j17irn",
+ "T7944520": "xxn6m9dp",
+ "T97346688": "x1ejsk79",
+ "T57797140": "xxb7eeji",
+ "T39276291": "xxd9oom7",
+ "T34074791": "x1gk8lc3",
+ "T96697853": "xxqlg44u",
+ "T67684616": "x1l103gn",
+ "T72886001": "x1k5cj37",
+ "T35869078": "xxmbc1sp",
+ "T77823629": "x1rfau7j",
+ "T58333183": "x1spom4d",
  "x_x_mws_ProjectInfo_x": "x108glgc",
  "x_x_eg_JSON_x": "x1jcgc06",
  "x_x_eg_JSONArray_x": "xxh7u05q",
  "x_x_eg_Scatter_x": "xxi72lf8",
  "x_x_eg_SearchBox_x": "xxkc3g8k",
- "x_x_eg_WorldMap_x": "xxi72lf8",
- "T5806148": "x1tvmo2a",
- "T2532381": "x1oiomuu",
- "T80746520": "x1tvmo2a",
- "T47576549": "x1oiomuu",
- "T74724701": "xxcb0cr4",
- "T24605257": "xxcb0cr4"
+ "x_x_eg_WorldMap_x": "xxi72lf8"
 });
 
-window.modulo.assets.modules["x165flh0"] = function S17763391x_x_mws_DocSidebar_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-function initializedCallback() {
-    const { path, showall } = props;
-    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
-    for (const groupObj of state.menu) {
-        if (showall) {
-            groupObj.active = true;
-        }
-        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
-            groupObj.active = true;
-        }
-    }
-}
-
-function _child(label, hash, keywords=[], filepath=null) {
-    if (!hash) {
-        hash = label.toLowerCase()
-    }
-    if (hash.endsWith('.html') && filepath === null) {
-        filepath = hash;
-    }
-    return {label, hash, keywords, filepath};
-}
-
-let componentTexts = {};
-try {
-    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
-} catch {
-    console.log('couldnt get componentTexts');
-}
-
-script.exports.menu = [
-    {
-        label: 'Table of Contents',
-        filename: '/docs/',
-    },
-
-    {
-        label: 'Tutorial',
-        filename: '/docs/tutorial_part1.html',
-        children: [
-            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
-            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
-            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
-        ],
-    },
-
-    {
-        label: 'Templating',
-        filename: '/docs/templating.html',
-        children: [
-            _child('Templates', null, ['templating philosophy', 'templating overview']),
-            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
-            _child('Filters', null, ['filter syntax', 'example filters']),
-            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
-            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
-            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
-            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
-        ],
-    },
-
-    {
-        label: 'Template Reference',
-        filename: '/docs/templating-reference.html',
-        children: [
-            _child('Built-in Template Tags', 'templatetags', [
-                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
-                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
-                'comparison', 'control-flow',
-            ]),
-            _child('Built-in Filters', 'filters', [
-                'add', 'allow', 'capfirst', 'concat', 'default',
-                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
-                'length', 'lower', 'number', 'pluralize', 'subtract',
-                'truncate', 'renderas', 'reversed', 'upper',
-            ]),
-        ],
-    },
-
-    {
-        label: 'CParts',
-        filename: '/docs/cparts.html',
-        children: [
-            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
-                                'rendering mode', 'manual rerender', 'shadow',
-                                'vanish', 'vanish-into-document', 'component.event',
-                                'component.slot', 'component.dataProp']),
-            _child('Props', 'props', ['accessing props', 'defining props',
-                                'setting props', 'using props']),
-            _child('Script', 'script', ['javascript', 'events', 'computed properties',
-                            'static execution', 'custom lifecycle methods',
-                                'script callback execution context', 'script exports']),
-            _child('State', 'state', ['state definition', 'state data types',
-                            'json', 'state variables', 'state.bind directive']),
-            _child('StaticData', 'staticdata', ['loading API', 'loading json',
-                            'transform function', 'bundling data']),
-            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
-            _child('Template', 'template', ['custom template', 'templating engine']),
-        ],
-    },
-
-    {
-        label: 'Lifecycle',
-        filename: '/docs/lifecycle.html',
-        children: [
-            _child('Global lifecycle', 'global',
-                ['lifestyle phases', 'prebuild', 'define', 'factory']),
-            _child('Component lifecycle', 'global',
-                ['consturctor', 'initialized', 'prepare', 'render',
-                'reconcile', 'update', 'event', 'eventCleanup']),
-            _child('Lifecycle callbacks', 'callbacks',
-                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
-                'renderobj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),
-        ],
-    },
-
-            /*_child('Factory lifecycle', 'factory',
-                ['renderObj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),*/
-    {
-        label: 'Directives',
-        filename: '/docs/directives.html',
-        children: [
-            _child('Directives', 'directives',
-                ['built-in directives', 'directive shortcuts',
-                'custom directives']),
-            _child('Built-in directives', 'builtin', [
-                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
-                    'data-prop', 'assignment',
-                    '[component.event]', '@click', '@...:=',
-                    '[component.slot]', '[state.bind]',
-                ]),
-            _child('Custom directives', 'custom', [
-                'refs', 'accessing dom', 'escape hatch',
-                'Mount callbacks', 'Unmount callbacks',
-                'template variables vs directives',
-                'script-tag custom directives',
-                'custom shortcuts',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'API & Extension',
-        filename: '/docs/api.html',
-        children: [
-            _child('Custom CParts', 'cparts'),
-            _child('CPart Spares', 'spares'),
-            _child('Custom Templating', 'template'),
-            _child('Custom Filters', 'customfilters'),
-            _child('Custom Template Tags', 'customtags'),
-            _child('Custom Template Syntax', 'customtags'),
-            _child('ModRec', 'modrec'),
-            _child('DOMCursor', 'cursor'),
-        ],
-    },
-    */
-
-    {
-        label: 'Examples',
-        filename: '/demos/',
-        children: [
-            _child('Starter Files', 'starter', [ 'snippets',
-                'component libraries', 'bootstrap', 'download', 'zip',
-                'page layouts', 'using vanish' ]),
-            _child('Example Library', 'library', Object.keys(componentTexts)),
-            _child('Experiments', 'experiments', [
-                'TestSuite', 'unit testing',
-                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
-                'FetchState cpart', 'jsx templating', 'babel.js',
-                'transpiling', 'cparts for apis',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'Project Info',
-        filename: '/docs/project-info.html',
-        children: [
-            _child('FAQ', 'faq'),
-            _child('Framework Design Philosophy', 'philosophy'),
-        ],
-    },
-    */
-];
-
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"_child": typeof _child !== "undefined" ? _child : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1dmtor5"] = function S19841207x_x_x_DemoModal_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function show() {
-            state.visible = true;
-        }
-        function hide() {
-            state.visible = false;
-        }
-    
-return { "show": typeof show !== "undefined" ? show : undefined,
-"hide": typeof hide !== "undefined" ? hide : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1148e9c"] = function S267284x_x_eg_ToDo_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function addItem() {
-        state.list.push(state.text); // add to list
-        state.text = ""; // clear input
-    }
-
-return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x15ahlpa"] = function S37178216x_x_eg_Hello_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function countUp() {
-        state.num++;
-    }
-
-return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1n3k461"] = function S39270034x_x_mws_AllExamples_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x1jrrsq9"] = function S11133490x_x_mws_AllExamples_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 function toggleExample(payload) {
     if (state.selected === payload) {
         state.selected = '';
@@ -6717,53 +6487,94 @@ return { "toggleExample": typeof toggleExample !== "undefined" ? toggleExample :
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x1r09ttj"] = function S4608399x_x_eg_OscillatingGraph_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x118d1eu"] = function S23516427x_x_eg_ToDo_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
-    let timeout = null;
-    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
-    function play() {
-        state.playing = true;
-        nextTick();
-    }
-    function pause() {
-        state.playing = false;
-    }
-    function setEasing(payload) {
-        state.easing = payload;
+    function addItem() {
+        state.list.push(state.text); // add to list
+        state.text = ""; // clear input
     }
 
-    function nextTick() {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        const el = element;
-        timeout = setTimeout(() => {
-            el.rerender();
-        }, 2000 / state.speed);
-    }
-
-    function updateCallback() {
-        if (state.playing) {
-            while (state.data.length <= state.width) {
-                state.tick++;
-                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
-            }
-            state.data.shift(); // remove one from left
-            nextTick();
-        }
-    }
-
-return { "play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
-"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
-"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
+return { "addItem": typeof addItem !== "undefined" ? addItem : undefined,
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x10ilccv"] = function S49090241x_x_mws_Demo_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["xxjqdj02"] = function S25925836x_x_eg_FlexibleFormWithAPI_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    const URL = 'https://jsonplaceholder.typicode.com/posts';
+    const fakedPosts = [];
+    const headers = [];
+
+    function initializedCallback() {
+        refresh(); // Refresh on first load
+    }
+
+    function refresh() {
+        fetch(URL).then(r => r.json()).then(data => {
+            // Since Typicode API doesn't save it's POST
+            // data, we'll have manually fake it here
+            state.posts = data.concat(fakedPosts);
+            element.rerender();
+        });
+    }
+
+    function submit() {
+        // Rename the state variables to be what the API suggests
+        const postData = {
+              userId: state.user,
+              title: state.topic,
+              body: state.comment,
+        };
+        state.topic = ''; // clear the comment & topic text
+        state.comment = '';
+        fakedPosts.push(postData); // Required for refresh()
+
+        // Send the POST request with fetch, then refresh after
+        const opts = {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        };
+        fetch(URL, opts).then(r => r.json()).then(refresh);
+    }
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"refresh": typeof refresh !== "undefined" ? refresh : undefined,
+"submit": typeof submit !== "undefined" ? submit : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["xxeaisui"] = function S35807685x_x_x_DemoChart_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            const data = props.data || [];
+            const max = Math.max(...data);
+            const min = 0;// Math.min(...props.data),
+            return {
+                percent: data.map(item => ((item - min) / max) * 100),
+                width: Math.floor(100 / data.length),
+            }
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["xxj7crnk"] = function S44787181x_x_eg_Hello_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function countUp() {
+        state.num++;
+    }
+
+return { "countUp": typeof countUp !== "undefined" ? countUp : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["xxkffnn9"] = function S48220700x_x_mws_Demo_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 let componentTexts = null;
 let exCounter = window._modExCounter || 0; // global variable to prevent conflicts
 
@@ -7215,183 +7026,331 @@ return { "_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ?
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["xx1krra8"] = function S50355371x_x_eg_FlexibleFormWithAPI_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x18eprt5"] = function S50458211x_x_eg_ConwayGameOfLife_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
-    const URL = 'https://jsonplaceholder.typicode.com/posts';
-    const fakedPosts = [];
-    const headers = [];
-
-    function initializedCallback() {
-        refresh(); // Refresh on first load
-    }
-
-    function refresh() {
-        fetch(URL).then(r => r.json()).then(data => {
-            // Since Typicode API doesn't save it's POST
-            // data, we'll have manually fake it here
-            state.posts = data.concat(fakedPosts);
-            element.rerender();
-        });
-    }
-
-    function submit() {
-        // Rename the state variables to be what the API suggests
-        const postData = {
-              userId: state.user,
-              title: state.topic,
-              body: state.comment,
-        };
-        state.topic = ''; // clear the comment & topic text
-        state.comment = '';
-        fakedPosts.push(postData); // Required for refresh()
-
-        // Send the POST request with fetch, then refresh after
-        const opts = {
-            method: 'POST',
-            body: JSON.stringify(postData),
-            headers: { 'Content-type': 'application/json; charset=UTF-8' },
-        };
-        fetch(URL, opts).then(r => r.json()).then(refresh);
-    }
-
-return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
-"refresh": typeof refresh !== "undefined" ? refresh : undefined,
-"submit": typeof submit !== "undefined" ? submit : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["xxq1ur8i"] = function S52185520x_x_x_DemoSelector_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            state.value = element.value;
+    function toggle([ i, j ]) {
+        if (!state.cells[i]) {
+            state.cells[i] = {};
         }
-        function setValue(val) {
-            state.value = val;
-            element.value = val;
-            element.dispatchEvent(new Event('change'));
-        }
-    
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
-"setValue": typeof setValue !== "undefined" ? setValue : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["xxpi8j21"] = function S5408991x_x_eg_Memory_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
-function setup(payload) {
-    const count = Number(payload);
-    let symbols = symbolsStr.substr(0, count/2).split("");
-    symbols = symbols.concat(symbols); // duplicate cards
-    let id = 0;
-    while (id < count) {
-        const index = Math.floor(Math.random()
-                                    * symbols.length);
-        const symbol = symbols.splice(index, 1)[0];
-        state.cards.push({symbol, id});
-        id++;
+        state.cells[i][j] = !state.cells[i][j];
     }
-}
 
-function failedFlipCallback() {
-    // Remove both from revealed array & set to null
-    state.revealed = state.revealed.filter(
-            id => id !== state.failedflip
-                    && id !== state.lastflipped);
-    state.failedflip = null;
-    state.lastflipped = null;
-    state.message = "";
-    element.rerender();
-}
-
-function flip(id) {
-    if (state.failedflip !== null) {
-        return;
-    }
-    id = Number(id);
-    if (state.revealed.includes(id)) {
-        return; // double click
-    } else if (state.lastflipped === null) {
-        state.lastflipped = id;
-        state.revealed.push(id);
-    } else {
-        state.revealed.push(id);
-        const {symbol} = state.cards[id];
-        const lastCard = state.cards[state.lastflipped];
-        if (symbol === lastCard.symbol) {
-            // Successful match! Check for win.
-            const {revealed, cards} = state;
-            if (revealed.length === cards.length) {
-                state.message = "You win!";
-                state.win = true;
-            } else {
-                state.message = "Nice match!";
+    function play() {
+        state.playing = true;
+        setTimeout(() => {
+            if (state.playing) {
+                updateNextFrame();
+                element.rerender(); // manually rerender
+                play(); // cue next frame
             }
-            state.lastflipped = null;
-        } else {
-            state.message = "No match.";
-            state.failedflip = id;
-            setTimeout(failedFlipCallback, 1000);
+        }, 2000 / state.speed);
+    }
+
+    function pause() {
+        state.playing = false;
+    }
+
+    function clear() {
+        state.cells = {};
+    }
+
+    function randomize() {
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!state.cells[i]) {
+                    state.cells[i] = {};
+                }
+                state.cells[i][j] = (Math.random() > 0.5);
+            }
         }
     }
-}
 
-return { "setup": typeof setup !== "undefined" ? setup : undefined,
-"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
-"flip": typeof flip !== "undefined" ? flip : undefined,
+    // Helper function for getting a cell from data
+    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
+    function updateNextFrame() {
+        const nextData = {};
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!nextData[i]) {
+                    nextData[i] = {};
+                }
+                const count = countNeighbors(i, j);
+                nextData[i][j] = get(i, j) ?
+                    (count === 2 || count === 3) : // stays alive
+                    (count === 3); // comes alive
+            }
+        }
+        state.cells = nextData;
+    }
+
+    function countNeighbors(i, j) {
+        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
+                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
+                get(i + 1, j - 1), get(i - 1, j + 1)];
+        return neighbors.filter(v => v).length;
+    }
+    script.exports.range = Array.from({length: 24}, (x, i) => i);
+
+return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
+"play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"clear": typeof clear !== "undefined" ? clear : undefined,
+"randomize": typeof randomize !== "undefined" ? randomize : undefined,
+"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
+"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["xx6gma8d"] = function S61387397x_x_mws_Page_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x130099a"] = function S5412210x_x_eg_PrimeSieve_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    // Getting big a range of numbers in JS. Use "script.exports"
+    // to export this as a one-time global constant.
+    // (Hint: Curious how it calculates prime? See CSS!)
+    script.exports.range = 
+        Array.from({length: 63}, (x, i) => i + 2);
+    function setNum(payload, ev) {
+        state.number = Number(ev.target.textContent);
+    }
+
+return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x15c5clt"] = function S56255608x_x_docseg_Templating_PrepareCallback_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function prepareCallback() {
+        const calcResult = (state.perc / 100) * state.total;
+        return { calcResult };
+    }
+
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["xx8bpcen"] = function S64321721x_x_mws_Page_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
         //console.log('mws-Page/Script is running', modulo);
     
 return {  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x1rgd1rc"] = function S62156615x_x_eg_GitHubAPI_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["xxqruikr"] = function S65596622x_x_x_DemoModal_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
-    function fetchGitHub() {
-        fetch(`https://api.github.com/users/${state.search}`)
-            .then(response => response.json())
-            .then(githubCallback);
-    }
-    function githubCallback(apiData) {
-        state.name = apiData.name;
-        state.location = apiData.location;
-        state.bio = apiData.bio;
-        element.rerender();
-    }
-
-return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
-"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1avdnu8"] = function S7718635x_x_x_DemoChart_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-        function prepareCallback() {
-            const data = props.data || [];
-            const max = Math.max(...data);
-            const min = 0;// Math.min(...props.data),
-            return {
-                percent: data.map(item => ((item - min) / max) * 100),
-                width: Math.floor(100 / data.length),
-            }
+        function show() {
+            state.visible = true;
+        }
+        function hide() {
+            state.visible = false;
         }
     
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+return { "show": typeof show !== "undefined" ? show : undefined,
+"hide": typeof hide !== "undefined" ? hide : undefined,
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x1kh5nks"] = function S82411823x_x_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["xx8jvi1a"] = function S67220748x_x_mws_DocSidebar_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+function initializedCallback() {
+    const { path, showall } = props;
+    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
+    for (const groupObj of state.menu) {
+        if (showall) {
+            groupObj.active = true;
+        }
+        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
+            groupObj.active = true;
+        }
+    }
+}
+
+function _child(label, hash, keywords=[], filepath=null) {
+    if (!hash) {
+        hash = label.toLowerCase()
+    }
+    if (hash.endsWith('.html') && filepath === null) {
+        filepath = hash;
+    }
+    return {label, hash, keywords, filepath};
+}
+
+let componentTexts = {};
+try {
+    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
+} catch {
+    console.log('couldnt get componentTexts');
+}
+
+script.exports.menu = [
+    {
+        label: 'Table of Contents',
+        filename: '/docs/',
+    },
+
+    {
+        label: 'Tutorial',
+        filename: '/docs/tutorial_part1.html',
+        children: [
+            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
+            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
+            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
+        ],
+    },
+
+    {
+        label: 'Templating',
+        filename: '/docs/templating.html',
+        children: [
+            _child('Templates', null, ['templating philosophy', 'templating overview']),
+            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
+            _child('Filters', null, ['filter syntax', 'example filters']),
+            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
+            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
+            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
+            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
+        ],
+    },
+
+    {
+        label: 'Template Reference',
+        filename: '/docs/templating-reference.html',
+        children: [
+            _child('Built-in Template Tags', 'templatetags', [
+                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
+                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
+                'comparison', 'control-flow',
+            ]),
+            _child('Built-in Filters', 'filters', [
+                'add', 'allow', 'capfirst', 'concat', 'default',
+                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
+                'length', 'lower', 'number', 'pluralize', 'subtract',
+                'truncate', 'renderas', 'reversed', 'upper',
+            ]),
+        ],
+    },
+
+    {
+        label: 'CParts',
+        filename: '/docs/cparts.html',
+        children: [
+            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
+                                'rendering mode', 'manual rerender', 'shadow',
+                                'vanish', 'vanish-into-document', 'component.event',
+                                'component.slot', 'component.dataProp']),
+            _child('Props', 'props', ['accessing props', 'defining props',
+                                'setting props', 'using props']),
+            _child('Script', 'script', ['javascript', 'events', 'computed properties',
+                            'static execution', 'custom lifecycle methods',
+                                'script callback execution context', 'script exports']),
+            _child('State', 'state', ['state definition', 'state data types',
+                            'json', 'state variables', 'state.bind directive']),
+            _child('StaticData', 'staticdata', ['loading API', 'loading json',
+                            'transform function', 'bundling data']),
+            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
+            _child('Template', 'template', ['custom template', 'templating engine']),
+        ],
+    },
+
+    {
+        label: 'Lifecycle',
+        filename: '/docs/lifecycle.html',
+        children: [
+            _child('Global lifecycle', 'global',
+                ['lifestyle phases', 'prebuild', 'define', 'factory']),
+            _child('Component lifecycle', 'global',
+                ['consturctor', 'initialized', 'prepare', 'render',
+                'reconcile', 'update', 'event', 'eventCleanup']),
+            _child('Lifecycle callbacks', 'callbacks',
+                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
+                'renderobj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),
+        ],
+    },
+
+            /*_child('Factory lifecycle', 'factory',
+                ['renderObj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),*/
+    {
+        label: 'Directives',
+        filename: '/docs/directives.html',
+        children: [
+            _child('Directives', 'directives',
+                ['built-in directives', 'directive shortcuts',
+                'custom directives']),
+            _child('Built-in directives', 'builtin', [
+                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
+                    'data-prop', 'assignment',
+                    '[component.event]', '@click', '@...:=',
+                    '[component.slot]', '[state.bind]',
+                ]),
+            _child('Custom directives', 'custom', [
+                'refs', 'accessing dom', 'escape hatch',
+                'Mount callbacks', 'Unmount callbacks',
+                'template variables vs directives',
+                'script-tag custom directives',
+                'custom shortcuts',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'API & Extension',
+        filename: '/docs/api.html',
+        children: [
+            _child('Custom CParts', 'cparts'),
+            _child('CPart Spares', 'spares'),
+            _child('Custom Templating', 'template'),
+            _child('Custom Filters', 'customfilters'),
+            _child('Custom Template Tags', 'customtags'),
+            _child('Custom Template Syntax', 'customtags'),
+            _child('ModRec', 'modrec'),
+            _child('DOMCursor', 'cursor'),
+        ],
+    },
+    */
+
+    {
+        label: 'Examples',
+        filename: '/demos/',
+        children: [
+            _child('Starter Files', 'starter', [ 'snippets',
+                'component libraries', 'bootstrap', 'download', 'zip',
+                'page layouts', 'using vanish' ]),
+            _child('Example Library', 'library', Object.keys(componentTexts)),
+            _child('Experiments', 'experiments', [
+                'TestSuite', 'unit testing',
+                'custom cparts', 'Tone.js', 'audio synthesis', 'MIDI',
+                'FetchState cpart', 'jsx templating', 'babel.js',
+                'transpiling', 'cparts for apis',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'Project Info',
+        filename: '/docs/project-info.html',
+        children: [
+            _child('FAQ', 'faq'),
+            _child('Framework Design Philosophy', 'philosophy'),
+        ],
+    },
+    */
+];
+
+
+return { "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined,
+"_child": typeof _child !== "undefined" ? _child : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x19sdspe"] = function S67894911x_x_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -20734,131 +20693,8 @@ return { "classTest": typeof classTest !== "undefined" ? classTest : undefined,
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["xx3ai1rl"] = function S88348657x_x_eg_DateNumberPicker_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function isValid({ year, month, day }) {
-        month--; // Months are zero indexed
-        const d = new Date(year, month, day);
-        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
-    }
-    function next(part) {
-        state[part]++;
-        if (!isValid(state)) { // undo if not valid
-            state[part]--;
-        }
-    }
-    function previous(part) {
-        state[part]--;
-        if (!isValid(state)) { // undo if not valid
-            state[part]++;
-        }
-    }
-
-return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
-"next": typeof next !== "undefined" ? next : undefined,
-"previous": typeof previous !== "undefined" ? previous : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["xxhq81oh"] = function S89863731x_x_eg_ConwayGameOfLife_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function toggle([ i, j ]) {
-        if (!state.cells[i]) {
-            state.cells[i] = {};
-        }
-        state.cells[i][j] = !state.cells[i][j];
-    }
-
-    function play() {
-        state.playing = true;
-        setTimeout(() => {
-            if (state.playing) {
-                updateNextFrame();
-                element.rerender(); // manually rerender
-                play(); // cue next frame
-            }
-        }, 2000 / state.speed);
-    }
-
-    function pause() {
-        state.playing = false;
-    }
-
-    function clear() {
-        state.cells = {};
-    }
-
-    function randomize() {
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!state.cells[i]) {
-                    state.cells[i] = {};
-                }
-                state.cells[i][j] = (Math.random() > 0.5);
-            }
-        }
-    }
-
-    // Helper function for getting a cell from data
-    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
-    function updateNextFrame() {
-        const nextData = {};
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!nextData[i]) {
-                    nextData[i] = {};
-                }
-                const count = countNeighbors(i, j);
-                nextData[i][j] = get(i, j) ?
-                    (count === 2 || count === 3) : // stays alive
-                    (count === 3); // comes alive
-            }
-        }
-        state.cells = nextData;
-    }
-
-    function countNeighbors(i, j) {
-        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
-                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
-                get(i + 1, j - 1), get(i - 1, j + 1)];
-        return neighbors.filter(v => v).length;
-    }
-    script.exports.range = Array.from({length: 24}, (x, i) => i);
-
-return { "toggle": typeof toggle !== "undefined" ? toggle : undefined,
-"play": typeof play !== "undefined" ? play : undefined,
-"pause": typeof pause !== "undefined" ? pause : undefined,
-"clear": typeof clear !== "undefined" ? clear : undefined,
-"randomize": typeof randomize !== "undefined" ? randomize : undefined,
-"updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined,
-"countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["xxnp2hhr"] = function S90429676x_x_docseg_Templating_1_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    script.exports.title = "ModuloNews";
-
-return {  setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1orip2d"] = function S927967x_x_docseg_Templating_PrepareCallback_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    function prepareCallback() {
-        const calcResult = (state.perc / 100) * state.total;
-        return { calcResult };
-    }
-
-return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1mn6bdg"] = function S93943585x_x_eg_SearchBox_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x1saopm6"] = function S7316782x_x_eg_SearchBox_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     function typingCallback() {
         state.loading = true;
@@ -20892,24 +20728,8 @@ return { "typingCallback": typeof typingCallback !== "undefined" ? typingCallbac
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x12s80f0"] = function S97094376x_x_eg_PrimeSieve_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
-
-    // Getting big a range of numbers in JS. Use "script.exports"
-    // to export this as a one-time global constant.
-    // (Hint: Curious how it calculates prime? See CSS!)
-    script.exports.range = 
-        Array.from({length: 63}, (x, i) => i + 2);
-    function setNum(payload, ev) {
-        state.number = Number(ev.target.textContent);
-    }
-
-return { "setNum": typeof setNum !== "undefined" ? setNum : undefined,
- setLocalVariable: __set, exports: script.exports}
-
-};
-window.modulo.assets.modules["x1ar0ihi"] = function S97665649x_x_eg_Search_x (modulo) {
-var script = { exports: {} };  var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+window.modulo.assets.modules["x126gnvs"] = function S73352984x_x_eg_Search_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
 
     const OPTS = '&limit=6&fields=title,author_name,cover_i';
     const COVER ='https://covers.openlibrary.org/b/id/';
@@ -20937,32 +20757,357 @@ return { "doSearch": typeof doSearch !== "undefined" ? doSearch : undefined,
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.modulo.assets.modules["x1nrhiqd"] = function T11879418 (modulo) {
+window.modulo.assets.modules["x103uolt"] = function S73546576x_x_eg_OscillatingGraph_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    let timeout = null;
+    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
+    function play() {
+        state.playing = true;
+        nextTick();
+    }
+    function pause() {
+        state.playing = false;
+    }
+    function setEasing(payload) {
+        state.easing = payload;
+    }
+
+    function nextTick() {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        const el = element;
+        timeout = setTimeout(() => {
+            el.rerender();
+        }, 2000 / state.speed);
+    }
+
+    function updateCallback() {
+        if (state.playing) {
+            while (state.data.length <= state.width) {
+                state.tick++;
+                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
+            }
+            state.data.shift(); // remove one from left
+            nextTick();
+        }
+    }
+
+return { "play": typeof play !== "undefined" ? play : undefined,
+"pause": typeof pause !== "undefined" ? pause : undefined,
+"setEasing": typeof setEasing !== "undefined" ? setEasing : undefined,
+"nextTick": typeof nextTick !== "undefined" ? nextTick : undefined,
+"updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x1ok21rv"] = function S88760725x_x_eg_DateNumberPicker_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function isValid({ year, month, day }) {
+        month--; // Months are zero indexed
+        const d = new Date(year, month, day);
+        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
+    }
+    function next(part) {
+        state[part]++;
+        if (!isValid(state)) { // undo if not valid
+            state[part]--;
+        }
+    }
+    function previous(part) {
+        state[part]--;
+        if (!isValid(state)) { // undo if not valid
+            state[part]++;
+        }
+    }
+
+return { "isValid": typeof isValid !== "undefined" ? isValid : undefined,
+"next": typeof next !== "undefined" ? next : undefined,
+"previous": typeof previous !== "undefined" ? previous : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["xxhnhhvm"] = function S90666422x_x_eg_GitHubAPI_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    function fetchGitHub() {
+        fetch(`https://api.github.com/users/${state.search}`)
+            .then(response => response.json())
+            .then(githubCallback);
+    }
+    function githubCallback(apiData) {
+        state.name = apiData.name;
+        state.location = apiData.location;
+        state.bio = apiData.bio;
+        element.rerender();
+    }
+
+return { "fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined,
+"githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x126fsnr"] = function S91664083x_x_docseg_Templating_1_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+    script.exports.title = "ModuloNews";
+
+return {  setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x102h7jl"] = function S91920606x_x_eg_Memory_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+function setup(payload) {
+    const count = Number(payload);
+    let symbols = symbolsStr.substr(0, count/2).split("");
+    symbols = symbols.concat(symbols); // duplicate cards
+    let id = 0;
+    while (id < count) {
+        const index = Math.floor(Math.random()
+                                    * symbols.length);
+        const symbol = symbols.splice(index, 1)[0];
+        state.cards.push({symbol, id});
+        id++;
+    }
+}
+
+function failedFlipCallback() {
+    // Remove both from revealed array & set to null
+    state.revealed = state.revealed.filter(
+            id => id !== state.failedflip
+                    && id !== state.lastflipped);
+    state.failedflip = null;
+    state.lastflipped = null;
+    state.message = "";
+    element.rerender();
+}
+
+function flip(id) {
+    if (state.failedflip !== null) {
+        return;
+    }
+    id = Number(id);
+    if (state.revealed.includes(id)) {
+        return; // double click
+    } else if (state.lastflipped === null) {
+        state.lastflipped = id;
+        state.revealed.push(id);
+    } else {
+        state.revealed.push(id);
+        const {symbol} = state.cards[id];
+        const lastCard = state.cards[state.lastflipped];
+        if (symbol === lastCard.symbol) {
+            // Successful match! Check for win.
+            const {revealed, cards} = state;
+            if (revealed.length === cards.length) {
+                state.message = "You win!";
+                state.win = true;
+            } else {
+                state.message = "Nice match!";
+            }
+            state.lastflipped = null;
+        } else {
+            state.message = "No match.";
+            state.failedflip = id;
+            setTimeout(failedFlipCallback, 1000);
+        }
+    }
+}
+
+return { "setup": typeof setup !== "undefined" ? setup : undefined,
+"failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined,
+"flip": typeof flip !== "undefined" ? flip : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x101oqv4"] = function S99634445x_x_x_DemoSelector_x (modulo) {
+var script = { exports: {} }; var component, modulo, library, props, style, template, staticdata, configuration, script, state, element, cparts;function __set(name, value) { if (name === 'component') component = value; if (name === 'modulo') modulo = value; if (name === 'library') library = value; if (name === 'props') props = value; if (name === 'style') style = value; if (name === 'template') template = value; if (name === 'staticdata') staticdata = value; if (name === 'configuration') configuration = value; if (name === 'script') script = value; if (name === 'state') state = value; if (name === 'element') element = value; if (name === 'cparts') cparts = value; }
+
+        function prepareCallback() {
+            state.value = element.value;
+        }
+        function setValue(val) {
+            state.value = val;
+            element.value = val;
+            element.dispatchEvent(new Event('change'));
+        }
+    
+return { "prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined,
+"setValue": typeof setValue !== "undefined" ? setValue : undefined,
+ setLocalVariable: __set, exports: script.exports}
+
+};
+window.modulo.assets.modules["x1h93c2j"] = function T11854254 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push("\n  "); // ""
-  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
-  OUT.push("</em>\n  on "); // "</em> on"
-  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
-  OUT.push(".</p>\n\n"); // ".</p>"
-  OUT.push("\n"); // ""
-  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
-  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
-  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
-  OUT.push("</h4>\n    "); // "</h4>"
-  if (CTX.article.tease) { // "if article.tease"
-  OUT.push("\n      <p>"); // "<p>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
-  OUT.push("</p>\n    "); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
+  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxonth4n"] = function T12372745 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
+  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
+  OUT.push(";\n            color: "); // "; color:"
+  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
+  OUT.push(";\n        \">\n        "); // "; \">"
+  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
+  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xx5ann6n"] = function T23624942 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
+  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
+  OUT.push("\">\n            "); // "\">"
+  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
+  OUT.push("\n        </button>\n    "); // "</button>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxl4an33"] = function T25866811 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xx7jgg2i"] = function T26076963 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
+  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
   OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xxmbc1sp"] = function T12566737 (modulo) {
+window.modulo.assets.modules["x143bi0q"] = function T28651169 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
+  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
+  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
+  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
+  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
+  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
+  if (CTX.script.exports.version) { // "if script.exports.version"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
+  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
+  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
+  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
+  } else { // "else"
+  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
+  } // "endif"
+  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
+  if (CTX.props.docbarselected) { // "if props.docbarselected"
+  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
+  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
+  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
+  } else { // "else"
+  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
+  } // "endif"
+  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0 </main></footer></body></html>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxbjtni2"] = function T29288649 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        "); // ""
+  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
+  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" payload=\""); // "\" payload=\""
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("</label>\n        "); // "</label>"
+  } // "endfor"
+  OUT.push("\n    "); // ""
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x1s9cikh"] = function T32302014 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("<ul>\n    "); // "<ul>"
+  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
+  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("gactive"); // "gactive"
+  } else { // "else"
+  OUT.push("ginactive"); // "ginactive"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
+  OUT.push("</a>\n            "); // "</a>"
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                    <ul>\n                    "); // "<ul>"
+  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
+  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
+  if (CTX.childLink.filepath) { // "if childLink.filepath"
+  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
+  } else { // "else"
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("#"); // "#"
+  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
+  } // "endif"
+  OUT.push("\"\n                            >"); // "\" >"
+  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
+  OUT.push("</a>\n                        "); // "</a>"
+  if (CTX.props.showall) { // "if props.showall"
+  OUT.push("\n                            "); // ""
+  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
+  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
+  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
+  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
+  } // "endif"
+  OUT.push("\n                        "); // ""
+  } // "endif"
+  OUT.push("\n                        </li>\n                    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n                    </ul>\n                "); // "</ul>"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x1gk8lc3"] = function T34074791 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxmbc1sp"] = function T35869078 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n    "); // ""
   var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
@@ -20992,67 +21137,75 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x1rfau7j"] = function T14995133 (modulo) {
+window.modulo.assets.modules["x145sdaa"] = function T36301687 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n"); // ""
-  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
-  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
+  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
+  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
+  OUT.push("%, "); // "%,"
+  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
+  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x184ue3a"] = function T38171189 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
+  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
+  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
+  OUT.push("\n</div>\n"); // "</div>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxd9oom7"] = function T39276291 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <form>\n        "); // "<form>"
+  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
+  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n                    <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
+  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
+  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
+  OUT.push("number"); // "number"
   } else { // "else"
-  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
-  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
-  OUT.push("hard"); // "hard"
+  OUT.push("text"); // "text"
   } // "endif"
-  OUT.push("\">\n    "); // "\">"
-  OUT.push("\n    "); // ""
-  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
-  OUT.push("\n        "); // ""
-  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                flipped\n            "); // "flipped"
-  } // "endif"
-  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
-  if (CTX.state.win) { // "if state.win"
-  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("."); // "."
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("s;\n            "); // "s;"
-  } // "endif"
-  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\">\n            "); // "\">"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                "); // ""
-  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </div>\n    "); // "</div>"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("\" id=\""); // "\" id=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push("\">\n            </div>\n        "); // "\"></div>"
   } // "endfor"
-  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
-  if (CTX.state.failedflip) { // "if state.failedflip"
-  OUT.push("\n                color: red"); // "color: red"
-  } // "endif"
-  OUT.push("\">\n        "); // "\">"
-  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
-  OUT.push("</p>\n"); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
+  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
+  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
+  OUT.push("\n            <p>\n                "); // "<p>"
+  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
+  OUT.push(":\n                <strong>"); // ": <strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</strong>\n                "); // "</strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
+  OUT.push("\n            </p>\n        "); // "</p>"
+  } // "endfor"
+  OUT.push("\n    </form>\n"); // "</form>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xx5ann6n"] = function T17104065 (modulo) {
+window.modulo.assets.modules["xx9ntrq4"] = function T4011783 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
-  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
-  OUT.push("\">\n            "); // "\">"
-  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
-  OUT.push("\n        </button>\n    "); // "</button>"
+  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
+  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
+  OUT.push("</button>\n"); // "</button>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x1q6mcmb"] = function T18811789 (modulo) {
+window.modulo.assets.modules["x1q6mcmb"] = function T4675729 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("<div \n    @mouseenter:=script.rerenderFirstTime\n    class=\"demo-wrapper\n        "); // "<div @mouseenter:=script.rerenderFirstTime class=\"demo-wrapper"
   if (CTX.state.showpreview) { // "if state.showpreview"
@@ -21128,7 +21281,38 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xxb7eeji"] = function T21634767 (modulo) {
+window.modulo.assets.modules["x1p85et1"] = function T49450167 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <h1>hello "); // "<h1>hello"
+  OUT.push("</h1>\n    "); // "</h1>"
+  /* // "comment"
+  OUT.push("\n      "); // ""
+  if (CTX.a) { // "if a"
+  OUT.push("<div>"); // "<div>"
+  OUT.push(G.escapeText(CTX.b)); // "b"
+  OUT.push("</div>"); // "</div>"
+  } // "endif"
+  OUT.push("\n      <h3>"); // "<h3>"
+  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
+  OUT.push("</h3>\n    "); // "</h3>"
+  */ // "endcomment"
+  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxbdh5fm"] = function T5394546 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
+  OUT.push("\n        <li>"); // "<li>"
+  OUT.push(G.escapeText(CTX.item)); // "item"
+  OUT.push("</li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxb7eeji"] = function T57797140 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n    <form>\n        "); // "<form>"
   var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
@@ -21156,310 +21340,39 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x145sdaa"] = function T22912151 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
-  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
-  OUT.push("%, "); // "%,"
-  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
-  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxn6m9dp"] = function T24563353 (modulo) {
+window.modulo.assets.modules["x1spom4d"] = function T58333183 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
   var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
-  OUT.push("\n            "); // ""
-  if (CTX.state.number === CTX.i) { // "if state.number == i"
-  OUT.push("number"); // "number"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  if (CTX.state.number < CTX.i) { // "if state.number lt i"
-  OUT.push("hidden"); // "hidden"
-  } else { // "else"
-  OUT.push("\n              "); // ""
-  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
-  OUT.push("whole"); // "whole"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        \">"); // "\">"
+  OUT.push("\n        "); // ""
+  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
+  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
   OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push("</div>\n    "); // "</div>"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.j)); // "j"
+  OUT.push(" ]\" style=\""); // "]\" style=\""
+  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
+  OUT.push("\n                "); // ""
+  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
+  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\"></div>\n        "); // "\"></div>"
   } // "endfor"
-  OUT.push("\n  </div>\n"); // "</div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxcb0cr4"] = function T24605257 (modulo) {
-return function (CTX, G) { var OUT=[];
   OUT.push("\n    "); // ""
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push(" v"); // "v"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("\n    (by "); // "(by"
-  OUT.push(G.escapeText(CTX.staticdata.author)); // "staticdata.author"
-  OUT.push(")\n"); // ")"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1oiomuu"] = function T2532381 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <p>"); // "<p>"
-  var ARR0=CTX.script.exports.bigArray;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in script.exports.bigArray"
-  OUT.push("\n        "); // ""
-  OUT.push(G.escapeText(CTX.item)); // "item"
-  OUT.push(",\n    "); // ","
   } // "endfor"
-  OUT.push("</p>\n"); // "</p>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1h93c2j"] = function T30832000 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxd9oom7"] = function T31017504 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <form>\n        "); // "<form>"
-  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
-  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n                    <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
-  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
-  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
-  OUT.push("number"); // "number"
-  } else { // "else"
-  OUT.push("text"); // "text"
-  } // "endif"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("\" id=\""); // "\" id=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
-  OUT.push("\">\n            </div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
-  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
-  OUT.push("\n            <p>\n                "); // "<p>"
-  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
-  OUT.push(":\n                <strong>"); // ": <strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</strong>\n                "); // "</strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
-  OUT.push("\n            </p>\n        "); // "</p>"
-  } // "endfor"
-  OUT.push("\n    </form>\n"); // "</form>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1j17irn"] = function T32122263 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
-  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
-  OUT.push("</tt></p>\n    "); // "</tt></p>"
-  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
-  OUT.push("\n        <label>\n            "); // "<label>"
-  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
-  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x143bi0q"] = function T32744475 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
-  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
-  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
-  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
-  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
-  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
-  if (CTX.script.exports.version) { // "if script.exports.version"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
-  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
-  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
-  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
-  } else { // "else"
-  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
-  } // "endif"
-  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
-  if (CTX.props.docbarselected) { // "if props.docbarselected"
-  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
-  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
-  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
-  } else { // "else"
-  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
-  } // "endif"
-  OUT.push("\n\n<footer>\n    <main>\n        (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2022 - Michael Bethencourt - Documentation under LGPL 3.0 </main></footer></body></html>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxqlg44u"] = function T34818586 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
-  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
-  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
+  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
   if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
+  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
   } else { // "else"
-  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
+  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
   } // "endif"
-  OUT.push("\n    </p>\n\n    "); // "</p>"
-  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
-  OUT.push("\n        <label>"); // "<label>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
-  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
-  OUT.push(G.escapeText(CTX.name)); // "name"
-  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
+  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xx2noapr"] = function T46332033 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
-  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
-  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push("block"); // "block"
-  } else { // "else"
-  OUT.push("none"); // "none"
-  } // "endif"
-  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push(" top: 100px; "); // "top: 100px;"
-  } else { // "else"
-  OUT.push(" top: -500px; "); // "top: -500px;"
-  } // "endif"
-  OUT.push("\">\n            <h2>"); // "\"><h2>"
-  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
-  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x13o8260"] = function T48846631 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
-  OUT.push(" who\n"); // "who"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ed a "); // "ed a"
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push(",\ntaught "); // ", taught"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ing in\nthe City of "); // "ing in the City of"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
-  OUT.push(",\nto "); // ", to"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push(" "); // ""
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push("s.\n</pre>\n"); // "s. </pre>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xx3sjna4"] = function T49575650 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""); // "<a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" href=\"#"); // "\" href=\"#"
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\">#</a>\n        <h2>"); // "\">#</a><h2>"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.component.originalHTML))); // "component.originalHTML|safe"
-  OUT.push("</h2>\n    "); // "</h2>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x184ue3a"] = function T50706837 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
-  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
-  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
-  OUT.push("\n</div>\n"); // "</div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1l103gn"] = function T52318924 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
-  } // "endif"
-  OUT.push("\n  <ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
-  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
-  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
-  OUT.push("\">\n        <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
-  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
-  } // "endfor"
-  OUT.push("\n  </ol>\n"); // "</ol>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1npfhrn"] = function T56461719 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
-  OUT.push("\n    <p>"); // "<p>"
-  if (CTX.post.completed) { // "if post.completed"
-  OUT.push("★"); // "★"
-  } else { // "else"
-  OUT.push("☆"); // "☆"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</p>\n  "); // "</p>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1tvmo2a"] = function T5806148 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    API data: <pre>"); // "API data: <pre>"
-  OUT.push(G.escapeText(G.filters["truncate"](G.filters["json"](CTX.state.data),80))); // "state.data|json|truncate:80"
-  OUT.push("</pre>\n    <button @click:=\"script.fetchMe\">Get API data</button>\n"); // "</pre><button @click:=\"script.fetchMe\">Get API data</button>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxslhngg"] = function T63167612 (modulo) {
+window.modulo.assets.modules["xxslhngg"] = function T59871361 (modulo) {
 return function (CTX, G) { var OUT=[];
   var ARR0=CTX.state.examples;for (var KEY in ARR0) {CTX. example=ARR0[KEY]; // "for example in state.examples"
   OUT.push("\n    "); // ""
@@ -21494,7 +21407,7 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xx9i16tt"] = function T66370145 (modulo) {
+window.modulo.assets.modules["xx9i16tt"] = function T59953929 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n        <div class=\"chart-container\n        "); // "<div class=\"chart-container"
   if (CTX.props.animated) { // "if props.animated"
@@ -21524,144 +21437,263 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xx9ntrq4"] = function T69136371 (modulo) {
+window.modulo.assets.modules["x1nrhiqd"] = function T61947381 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
-  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
-  OUT.push("</button>\n"); // "</button>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1p85et1"] = function T69391517 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <h1>hello "); // "<h1>hello"
-  OUT.push("</h1>\n    "); // "</h1>"
-  /* // "comment"
-  OUT.push("\n      "); // ""
-  if (CTX.a) { // "if a"
-  OUT.push("<div>"); // "<div>"
-  OUT.push(G.escapeText(CTX.b)); // "b"
-  OUT.push("</div>"); // "</div>"
+  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push("\n  "); // ""
+  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
+  OUT.push("</em>\n  on "); // "</em> on"
+  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
+  OUT.push(".</p>\n\n"); // ".</p>"
+  OUT.push("\n"); // ""
+  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
+  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
+  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
+  OUT.push("</h4>\n    "); // "</h4>"
+  if (CTX.article.tease) { // "if article.tease"
+  OUT.push("\n      <p>"); // "<p>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
+  OUT.push("</p>\n    "); // "</p>"
   } // "endif"
-  OUT.push("\n      <h3>"); // "<h3>"
-  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
-  OUT.push("</h3>\n    "); // "</h3>"
-  */ // "endcomment"
-  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1ejsk79"] = function T69820296 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
-  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
-  OUT.push("px;\n                    --y: "); // "px; --y:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
-  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
-  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
-  OUT.push(" ("); // "("
-  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
-  OUT.push(")</label>\n    "); // ")</label>"
+  OUT.push("\n"); // ""
   } // "endfor"
   OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xxbdh5fm"] = function T71573484 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
-  OUT.push("\n        <li>"); // "<li>"
-  OUT.push(G.escapeText(CTX.item)); // "item"
-  OUT.push("</li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxm6soph"] = function T73592026 (modulo) {
+window.modulo.assets.modules["xxm6soph"] = function T64250788 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n"); // "Hello <strong>Modulo</strong> World! <p class=\"neat\">Any HTML can be here!</p>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x1gk8lc3"] = function T74749241 (modulo) {
+window.modulo.assets.modules["x1l103gn"] = function T67684616 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
+  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
+  } // "endif"
+  OUT.push("\n  <ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
+  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
+  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
+  OUT.push("\">\n        <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
+  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
+  } // "endfor"
+  OUT.push("\n  </ol>\n"); // "</ol>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x1s9cikh"] = function T75539195 (modulo) {
+window.modulo.assets.modules["xx2noapr"] = function T7213241 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("<ul>\n    "); // "<ul>"
-  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
-  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("gactive"); // "gactive"
+  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
+  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
+  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push("block"); // "block"
   } else { // "else"
-  OUT.push("ginactive"); // "ginactive"
+  OUT.push("none"); // "none"
   } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
-  OUT.push("</a>\n            "); // "</a>"
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                    <ul>\n                    "); // "<ul>"
-  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
-  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
-  if (CTX.childLink.filepath) { // "if childLink.filepath"
-  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
+  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push(" top: 100px; "); // "top: 100px;"
   } else { // "else"
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("#"); // "#"
-  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
+  OUT.push(" top: -500px; "); // "top: -500px;"
   } // "endif"
-  OUT.push("\"\n                            >"); // "\" >"
-  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
-  OUT.push("</a>\n                        "); // "</a>"
-  if (CTX.props.showall) { // "if props.showall"
-  OUT.push("\n                            "); // ""
-  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
-  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
-  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
-  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
-  } // "endif"
-  OUT.push("\n                        "); // ""
-  } // "endif"
-  OUT.push("\n                        </li>\n                    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n                    </ul>\n                "); // "</ul>"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
+  OUT.push("\">\n            <h2>"); // "\"><h2>"
+  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
+  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x1lhd4rn"] = function T8264963 (modulo) {
+window.modulo.assets.modules["x1k5cj37"] = function T72886001 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
-  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
-  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
+  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
+  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
+  OUT.push("\n                      visible "); // "visible"
+  } // "endif"
+  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("\n      <img src=\""); // "<img src=\""
+  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
+  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
+  } else { // "else"
+  OUT.push("\n      "); // ""
+  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
+  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
+  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
+  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
+  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
+  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
+  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
+  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
+  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
+  OUT.push("\n    "); // ""
+  } // "endif"
+  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x1npfhrn"] = function T73081117 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
+  OUT.push("\n    <p>"); // "<p>"
+  if (CTX.post.completed) { // "if post.completed"
+  OUT.push("★"); // "★"
+  } else { // "else"
+  OUT.push("☆"); // "☆"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</p>\n  "); // "</p>"
+  } // "endfor"
   OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xxivj2tr"] = function T86086005 (modulo) {
+window.modulo.assets.modules["x13o8260"] = function T73411549 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
+  OUT.push(" who\n"); // "who"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ed a "); // "ed a"
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push(",\ntaught "); // ", taught"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ing in\nthe City of "); // "ing in the City of"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
+  OUT.push(",\nto "); // ", to"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push(" "); // ""
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push("s.\n</pre>\n"); // "s. </pre>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x1rfau7j"] = function T77823629 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n"); // ""
+  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
+  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
+  } else { // "else"
+  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
+  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
+  OUT.push("hard"); // "hard"
+  } // "endif"
+  OUT.push("\">\n    "); // "\">"
+  OUT.push("\n    "); // ""
+  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
+  OUT.push("\n        "); // ""
+  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                flipped\n            "); // "flipped"
+  } // "endif"
+  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
+  if (CTX.state.win) { // "if state.win"
+  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("."); // "."
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("s;\n            "); // "s;"
+  } // "endif"
+  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\">\n            "); // "\">"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                "); // ""
+  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </div>\n    "); // "</div>"
+  } // "endfor"
+  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
+  if (CTX.state.failedflip) { // "if state.failedflip"
+  OUT.push("\n                color: red"); // "color: red"
+  } // "endif"
+  OUT.push("\">\n        "); // "\">"
+  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
+  OUT.push("</p>\n"); // "</p>"
+  } // "endif"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xx9t56li"] = function T78262101 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        "); // ""
+  if (CTX.props.version) { // "if props.version"
+  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("</a>\n        "); // "</a>"
+  } else { // "else"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
+  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
+  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("\">npm "); // "\">npm"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("</a>\n        "); // "</a>"
+  } // "endif"
+  OUT.push("\n    "); // ""
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxn6m9dp"] = function T7944520 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
+  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
+  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
+  OUT.push("\n            "); // ""
+  if (CTX.state.number === CTX.i) { // "if state.number == i"
+  OUT.push("number"); // "number"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  if (CTX.state.number < CTX.i) { // "if state.number lt i"
+  OUT.push("hidden"); // "hidden"
+  } else { // "else"
+  OUT.push("\n              "); // ""
+  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
+  OUT.push("whole"); // "whole"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        \">"); // "\">"
+  OUT.push(G.escapeText(CTX.i)); // "i"
+  OUT.push("</div>\n    "); // "</div>"
+  } // "endfor"
+  OUT.push("\n  </div>\n"); // "</div>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x130qf1i"] = function T81190081 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>"); // "<p>"
+  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
+  OUT.push(" | "); // "|"
+  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
+  OUT.push("</p>\n<p>"); // "</p><p>"
+  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
+  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
+  if (CTX.state.search) { // "if state.search"
+  OUT.push("github.com/"); // "github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/"); // "/"
+  } // "endif"
+  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxivj2tr"] = function T87359743 (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("<nav style=\""); // "<nav style=\""
   if (CTX.props.fn) { // "if props.fn"
@@ -21701,155 +21733,95 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["x130qf1i"] = function T86433666 (modulo) {
+window.modulo.assets.modules["x1j17irn"] = function T91611964 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>"); // "<p>"
-  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
-  OUT.push(" | "); // "|"
-  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
-  OUT.push("</p>\n<p>"); // "</p><p>"
-  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
-  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
-  if (CTX.state.search) { // "if state.search"
-  OUT.push("github.com/"); // "github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/"); // "/"
-  } // "endif"
-  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1spom4d"] = function T86604952 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
-  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n        "); // ""
-  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
-  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
-  OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.j)); // "j"
-  OUT.push(" ]\" style=\""); // "]\" style=\""
-  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
-  OUT.push("\n                "); // ""
-  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
-  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\"></div>\n        "); // "\"></div>"
+  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
+  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
+  OUT.push("</tt></p>\n    "); // "</tt></p>"
+  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
+  OUT.push("\n        <label>\n            "); // "<label>"
+  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
+  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
   } // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endfor"
-  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
-  if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
-  } else { // "else"
-  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
-  } // "endif"
-  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["x1k5cj37"] = function T89869610 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
-  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
-  OUT.push("\n                      visible "); // "visible"
-  } // "endif"
-  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("\n      <img src=\""); // "<img src=\""
-  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
-  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
-  } else { // "else"
-  OUT.push("\n      "); // ""
-  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
-  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
-  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
-  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
-  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
-  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
-  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
-  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
-  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endif"
-  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxbjtni2"] = function T91702097 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        "); // ""
-  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
-  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" payload=\""); // "\" payload=\""
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("</label>\n        "); // "</label>"
-  } // "endfor"
-  OUT.push("\n    "); // ""
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxonth4n"] = function T92989670 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
-  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
-  OUT.push(";\n            color: "); // "; color:"
-  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
-  OUT.push(";\n        \">\n        "); // "; \">"
-  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
-  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xxl4an33"] = function T95641764 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
-
-return OUT.join(""); };
-};
-window.modulo.assets.modules["xx7jgg2i"] = function T97063275 (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
-  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
   OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };
-window.modulo.assets.modules["xx9t56li"] = function T98171607 (modulo) {
+window.modulo.assets.modules["x1lhd4rn"] = function T91645988 (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n        "); // ""
-  if (CTX.props.version) { // "if props.version"
-  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("</a>\n        "); // "</a>"
+  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
+  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
+  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xx3sjna4"] = function T95486706 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""); // "<a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" href=\"#"); // "\" href=\"#"
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\">#</a>\n        <h2>"); // "\">#</a><h2>"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.component.originalHTML))); // "component.originalHTML|safe"
+  OUT.push("</h2>\n    "); // "</h2>"
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["xxqlg44u"] = function T96697853 (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
+  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
+  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
+  if (!(CTX.state.playing)) { // "if not state.playing"
+  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
   } else { // "else"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
-  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
-  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("\">npm "); // "\">npm"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("</a>\n        "); // "</a>"
+  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
   } // "endif"
+  OUT.push("\n    </p>\n\n    "); // "</p>"
+  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
+  OUT.push("\n        <label>"); // "<label>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
+  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
+  OUT.push(G.escapeText(CTX.name)); // "name"
+  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.modulo.assets.modules["x1ejsk79"] = function T97346688 (modulo) {
+return function (CTX, G) { var OUT=[];
   OUT.push("\n    "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
+  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
+  OUT.push("px;\n                    --y: "); // "px; --y:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
+  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
+  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
+  OUT.push(" ("); // "("
+  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
+  OUT.push(")</label>\n    "); // ")</label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };

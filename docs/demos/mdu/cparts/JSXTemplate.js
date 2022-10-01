@@ -31,6 +31,7 @@ modulo.register('cpart', class JSXTemplate {
         const getRO = ({ RenderObj }) => RenderObj;
         const roArgs = Object.values(modulo.config).filter(getRO).map(getRO);
         const args = [ 'React', ...roArgs, ...Object.keys(conf.nameMap) ];
+        // TODO: This uses registerFunction, which is a legacy method
         const func = modulo.assets.registerFunction(args, Content, opts);
         conf.Hash = modulo.assets.getHash(args, Content);
         conf.renderArgs = args;
