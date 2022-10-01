@@ -115,24 +115,13 @@ window.Modulo = class Modulo {
         this.setupParents(); // Ensure sync'ed up, TODO rm
         const lcObj = this.registry.cparts;
         const defArray = Array.from(Object.values(this.defs)).flat();
-        this.applyPatches(this.getLifecyclePatches(lcObj, names, defArray));
+        const patches = this.getLifecyclePatches(lcObj, names, defArray);
+        this.applyPatches(patches);
     }
 
-
     preprocessAndDefine() {
-        this.lifecycle([ 'configure' ]); // TODO, make all these get(config, ...)?
+        //this.lifecycle([ 'configure' ]); // no need?
         this.repeatPreconf(() => this.lifecycle([ 'prebuild', 'define' ]));
-        console.log('whoops');
-        /*
-        {
-            this.setupParents(); // Ensure sync'ed up
-            const names = [ 'prebuild', 'define' ];
-            const lcObj = this.registry.cparts;
-            const defArray = Array.from(Object.values(this.defs)).flat();
-            const patches = this.getLifecyclePatches(lcObj, names, defArray);
-            this.applyPatches(patches);
-        });
-        */
     }
 
     loadString(text, parentFactoryName = null) {
@@ -325,8 +314,10 @@ modulo.register('cpart', class Component {
         const cpartNameString = Array.from(cpartTypes).join(', ');
 
         const code = (`
-            if (typeof tagName === 'undefined') { var tagName = '${ conf.TagName }'; } // HAX XXX
-            modulo = currentModulo;// HAX XXX
+            if (typeof currentModulo !== 'undefined') { modulo = currentModulo; } // HAX XXX
+            const conf = modulo.parentDefs['${ FullName }']; // XXX
+            if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
+
             const { ${ cpartNameString } } = modulo.registry.cparts;
             const confArray = modulo.defs['${ FullName }'];
 
@@ -702,7 +693,8 @@ modulo.register('util', function hash (str) {
         //h = ((h << 5 - h) + str.charCodeAt(i)) | 0;
         h = Math.imul(31, h) + str.charCodeAt(i) | 0;
     }
-    return (h || 0).toString(32).replace(/-/g, 'x');
+    const hash8 = ('---------' + (h || 0).toString(32)).slice(-8);
+    return hash8.replace(/-/g, 'x'); // Pad with 'x'
 });
 
 modulo.register('util', function makeDiv(html) {
@@ -917,7 +909,12 @@ modulo.register('core', class AssetManager {
     }
 
     require(moduleName) {
-        return this.modules[this.nameToHash[moduleName]].call(window, modulo);
+        this.modulo.assert(moduleName in this.nameToHash,
+            `${ moduleName } not in ${ Object.keys(this.nameToHash).join(', ') }`);
+        const hash = this.nameToHash[moduleName];
+        this.modulo.assert(hash in this.modules,
+            `${ moduleName } / ${ hash } not in ${ Object.keys(this.modules).join(', ') }`);
+        return this.modules[hash].call(window, modulo);
     }
 
     wrapDefine(hash, name, code) {
@@ -1269,13 +1266,21 @@ modulo.register('cpart', class StaticData {
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
         conf.Hash = modulo.assets.getHash([], code);
-        modulo.assets.registerFunction([], code);
+        if (NEW_REQUIRE) {
+            modulo.assets.define(conf.FullName, code);
+        } else {
+            modulo.assets.registerFunction([], code);
+        }
         // TODO: Maybe evaluate and attach directly to conf here?
     }
 
     static factoryCallback(renderObj, conf, modulo) {
         // Now, actually run code in Script tag to do factory method
-        return modulo.assets.functions[conf.Hash]();
+        if (NEW_REQUIRE) {
+            return modulo.assets.require(conf.FullName);
+        } else {
+            return modulo.assets.functions[conf.Hash]();
+        }
     }
 });
 
@@ -1284,10 +1289,10 @@ modulo.register('cpart', class Configuration {
         const code = (conf.Content || '').trim();
         delete conf.Content;
         const opts = { exports: 'script' };
-        const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
         if (NEW_REQUIRE) {
-            modulo.assets.invoke(func.hash, [ ]);
+            modulo.assets.define(conf.FullName)(); // define & invoke
         } else {
+            const func = modulo.assets.registerFunction([ 'modulo' ], code, opts);
             const exCode = `currentModulo.assets.functions['${ func.hash }']`
             modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
         }
@@ -1323,36 +1328,54 @@ modulo.register('cpart', class Script {
             delete opts.exports;
         }
 
-        const func = modulo.assets.registerFunction(allArgs, code, opts);
-        conf.Hash = modulo.assets.getHash(allArgs, code);
+        if (NEW_REQUIRE) {
+            conf.TmpRando = 'S' + Math.ceil(Math.random() * 100000000) + conf.FullName;
+            const fullCode = modulo.registry.cparts.Script.nu_wrapFunctionText(code, localVars);
+            //modulo.assets.define(conf.FullName, fullCode);
+            modulo.assets.define(conf.TmpRando, fullCode);
+        } else {
+            const func = modulo.assets.registerFunction(allArgs, code, opts);
+            conf.Hash = modulo.assets.getHash(allArgs, code);
+        }
         conf.localVars = localVars;
     }
 
     static defineCallback(modulo, conf) {
         // XXX -- HAX
-        if (!conf.Parent || (conf.Parent === 'x_x' && conf.Hash)) {
+        if (!conf.Parent || ((conf.Parent === 'x_x' && conf.Hash) ||
+                             (conf.Parent === 'x_x' && conf.TmpRando))) {
             if (NEW_REQUIRE) {
-                modulo.assets.invoke(conf.Hash, [ ]);
+                //modulo.assets.mainRequire(conf.FullName);
+                modulo.assets.mainRequire(conf.TmpRando);
             } else {
                 const exCode = `currentModulo.assets.functions['${ conf.Hash }']`
                 modulo.assets.runInline(`${ exCode }.call(window, currentModulo);\n`);
+                // currentModulo.registry.cparts.Script.require);\n`);
+                delete conf.Hash; // prevent getting run again
             }
-            // currentModulo.registry.cparts.Script.require);\n`);
-            delete conf.Hash; // prevent getting run again
         }
     }
 
     static factoryCallback(renderObj, conf, modulo) {
         const { Content, Hash, localVars } = conf;
-        if (!(Hash in modulo.assets.functions)) {
-            // debugger;
-            console.log('ERROR: Could not find Hash:', conf, renderObj);
-            return {};
+        let results;
+        if (NEW_REQUIRE) {
+            if (!conf.TmpRando) {
+                console.log('ERROR: Could not find TmpRando:', conf, renderObj);
+                return {};
+            }
+            results = modulo.assets.require(conf.TmpRando);
+        } else {
+            if (!(Hash in modulo.assets.functions)) {
+                // debugger;
+                console.log('ERROR: Could not find Hash:', conf, renderObj);
+                return {};
+            }
+            const func = modulo.assets.functions[Hash];
+            results = func.call(null, modulo, this.require || null);
         }
-        const func = modulo.assets.functions[Hash];
         // Now, actually run code in Script tag to do factory method
         //const results = func.call(null, modulo, this.require || null);
-        const results = func.call(null, modulo, this.require || null);
         if (results) {
             results.localVars = localVars;
             modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
@@ -1361,6 +1384,30 @@ modulo.register('cpart', class Script {
             modulo.assert(!conf.Parent, 'Falsy return for parented Script');
             return {};
         }
+    }
+
+    static nu_wrapFunctionText(text, localVars) {
+        let prefix = '';
+        let suffix = '';
+
+        function getSymbolsAsObjectAssignment(contents) {
+            const regexpG = /(function|class)\s+(\w+)/g;
+            const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
+            const matches = contents.match(regexpG) || [];
+            return matches.map(s => s.match(regexp2)[2])
+                .filter(s => s && !Modulo.INVALID_WORDS.has(s))
+                .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
+                .join('');
+        }
+
+        const symbolsString = getSymbolsAsObjectAssignment(text);
+        // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
+        const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
+        prefix += `var script = { exports: {} };  `;
+        prefix += `var ${ localVars.join(', ') };`;
+        prefix += `function __set(name, value) { ${ localVarsIfs } }`;
+        suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
+        return `${prefix}\n${text}\n${suffix}`;
     }
 
     getDirectives() {
@@ -1567,13 +1614,24 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = modulo.assets.functions[this.Hash];
+            if (NEW_REQUIRE) {
+                this.renderFunc = modulo.assets.require(this.Hash);
+            } else {
+                this.renderFunc = modulo.assets.functions[this.Hash];
+            }
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
             this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-            this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
-            this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);
+
+            if (NEW_REQUIRE) {
+                this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
+                this.Hash = 'T' + Math.ceil(Math.random() * 100000000); // XXX
+                modulo.assets.define(this.Hash, this.compiledCode);
+            } else {
+                this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
+                this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);
+            }
         }
     }
 
@@ -2263,9 +2321,10 @@ modulo.register('command', function build (modulo, opts = {}) {
     }
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
     opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
-    opts.jsInlineText = modulo.assets.getInlineJS(opts);
-    opts.jsInlineText += '\ncurrentModulo.pushGlobal();\n';
+    //opts.jsInlineText = modulo.assets.getInlineJS(opts);
+    opts.jsInlineText = '';
     if (NEW_REQUIRE) {
+        opts.jsInlineText += '\ncurrentModulo.pushGlobal();\n';
         opts.jsInlineText += modulo.assets.buildMain();
     }
     opts.htmlFilePath = buildhtml(modulo, opts);

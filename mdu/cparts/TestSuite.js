@@ -545,13 +545,23 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     const body = doc.createElement('body'); // Mock body
     doc.documentElement.appendChild(head);
     doc.documentElement.appendChild(body);
-    modulo.globals._moduloTestNumber = (modulo.globals._moduloTestNumber || 0) + 1;
+    if (!window._moduloTestNumber) {
+        window._moduloTestNumber = 0;
+    }
+    window._moduloTestNumber++;
 
-    const componentFunc = modulo.assets.functions[componentFac.FuncDefHash];
     const namespace = 't' + modulo.globals._moduloTestNumber;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
-    const componentClass = componentFunc(componentFac.TagName, modulo);
+    let componentFunc;
+    let componentClass;
+    if (typeof NEW_REQUIRE !== "undefined" && NEW_REQUIRE) {
+        componentClass = modulo.assets.require(componentFac.FullName);
+    } else {
+        const componentFunc = modulo.assets.functions[componentFac.FuncDefHash];
+        componentClass = componentFunc(componentFac.TagName, modulo);
+    }
+
     const element = new componentClass();
     if (element._moduloTagName) { // virtualdom-based class
         element.tagName = fullName.toUpperCase(); // (todo: rm after cpartdef refactor)
