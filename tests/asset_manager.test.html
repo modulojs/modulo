@@ -1,0 +1,68 @@
+<!--
+    These tests are useful as unit tests testing the AssetManager core class
+-->
+<Component name="AssetManager">
+
+<TestSuite>
+
+<Test name="modulo.assets tests">
+    <script name="modulo.assets exists">
+        assert: modulo && modulo.assets && modulo.registry.core.AssetManager
+    </script>
+
+    <script name="wrapDefine creates an assignment">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        const actual = assets.wrapDefine("x1bqrlhi", 'Test_x_x_x', 'return "testing123"');
+        const expected = 'window.modulo.assets.modules["x1bqrlhi"] = ' +
+                         'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
+        assert: actual === expected
+    </script>
+
+    <script name="Associates module name with hash">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        assets.define('Test_x_x_x', 'return "testing123"');
+        const actual = JSON.stringify(assets.nameToHash);
+        const expected = JSON.stringify({ Test_x_x_x: "x1bqrlhi" });
+        assert: actual === expected
+    </script>
+
+    <script name="Associates module source with hash">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        assets.define('Test_x_x_x', 'return "testing123"');
+        const actual = JSON.stringify(assets.moduleSources);
+        const expected = JSON.stringify({ x1bqrlhi: 'return "testing123"' });
+        assert: actual === expected
+    </script>
+
+    <script name="Associates compiled function code with hash">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        assets.define('Test_x_x_x', 'return "testing123"');
+        const actual = JSON.stringify(Object.keys(assets.modules));
+        const expected = JSON.stringify([ "x1bqrlhi" ]);
+        assert: actual === expected
+    </script>
+
+    <script name="Compiled function is executable">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        const func = assets.define('Test_x_x_x', 'return "testing123"');
+        assert: func() === 'testing123'
+    </script>
+
+    <script name="Build module defs creates expected string">
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        assets.define('Test_x_x_x', 'return "testing123"');
+        const actual = assets.buildModuleDefs();
+        const expected = 'Object.assign(modulo.assets.nameToHash, ' +
+                            '{\n "Test_x_x_x": "x1bqrlhi"\n});\n\n' +
+                         'window.modulo.assets.modules["x1bqrlhi"] = ' +
+                         'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
+        assert: actual === expected
+    </script>
+
+</Test>
+
+
+</TestSuite>
+
+</Component>
+
