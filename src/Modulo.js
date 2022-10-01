@@ -5,7 +5,7 @@ window.LEG = LEGACY;
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 
-const NEW_REQUIRE = false;
+const NEW_REQUIRE = true; // temporary feature flag for new require pattern XXX
 
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
@@ -336,6 +336,7 @@ modulo.register('cpart', class Component {
 
             const initRenderObj = { elementClass: ${ Name } };
             modulo.applyPatches(factoryPatches, initRenderObj);
+            // console.log('XYZ before customElements.define', modulo.id, JSON.stringify(conf));
             modulo.globals.customElements.define(tagName, ${ Name });
             //console.log("Registered: ${ Name } as " + tagName);
             return ${ Name };
@@ -938,7 +939,7 @@ modulo.register('core', class AssetManager {
             this.appendToHead('script', '"use strict";' + jsText);
             this.modulo.popGlobal();
         }
-        return () => this.modules[hash](modulo);
+        return () => this.modules[hash](modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
     buildModuleDefs() {
@@ -1627,7 +1628,7 @@ modulo.register('engine', class Templater {
             if (NEW_REQUIRE) {
                 this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
                 this.Hash = 'T' + Math.ceil(Math.random() * 100000000); // XXX
-                modulo.assets.define(this.Hash, this.compiledCode);
+                this.renderFunc = modulo.assets.define(this.Hash, this.compiledCode)();
             } else {
                 this.Hash = modulo.assets.getHash([ 'CTX', 'G' ], this.compiledCode);
                 this.renderFunc = modulo.assets.registerFunction([ 'CTX', 'G' ], this.compiledCode);

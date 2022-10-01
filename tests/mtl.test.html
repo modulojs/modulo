@@ -4,7 +4,9 @@
     <script>
         //const { MTL } = Modulo.templating;
         // Attach simple helper function used below
-        Modulo._r = (tText, context) => {
+        // TODO: Replace this window. silliness with a way to register helpers,
+        // maybe a script SetupScript CPart?
+        window._r = (tText, context) => {
             const conf = {
                 Content: tText,
             };
@@ -12,7 +14,7 @@
             //console.log('tmpl', tmpl.output);
             return tmpl.render(context);
         }
-        assert: modulo.registry.engines.Templater && Modulo._r
+        assert: modulo.registry.engines.Templater && window._r
     </script>
 </test>
 
@@ -22,7 +24,7 @@
         const context = {'test': 'tester'};
         const template = 'This is a {{ test }}!';
         const expected = 'This is a tester!';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -31,7 +33,7 @@
         const context = { 'test': { 'thing': 'tester' } };
         const template = 'This is a {{ test.thing }}, cool. {{ test.thing }}';
         const expected = 'This is a tester, cool. tester';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -40,7 +42,7 @@
         const context = {'test': 'tester'};
         const template = 'This is a {{ "testing"|upper }}';
         const expected = 'This is a TESTING';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -49,7 +51,7 @@
         const context = {'test': 'tester'};
         const template = 'This is a {{ test|add:"123" }}';
         const expected = 'This is a tester123';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -60,7 +62,7 @@
                 'cherr{{ count1|pluralize:"ies,y" }} '+
                 'and {{ count2 }} apple{{ count2|pluralize:"s," }}.';
         const expected = 'You have 3 cherries and 1 apple.';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -74,7 +76,7 @@
         };
         const template = '{{ obj|renderas:testing }}';
         const expected = 'd';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -88,7 +90,7 @@
                   '{{ test|upper }}'
                 ].join("\n");
         const expected = 'This\nisn\'t {{\na }}?\nTESTER';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -100,7 +102,7 @@
         const expected = 'Testing &lt;script a=&#x27;b&#x27; c=&quot;d&quot;&gt;' +
                           '&amp;copy;&lt;/script&gt; testing <script a=\'b\' c="d">' +
                           '&copy;</' + 'script>';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -113,7 +115,7 @@
         const expected = 'Testing &lt;script a=&#x27;b&#x27; c=&quot;d&quot;&gt;' +
                           '&amp;copy;&lt;/script&gt; testing <script a=\'b\' c="d">' +
                           '&copy;</' + 'script>';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -127,7 +129,7 @@
             ].join('');
         const context = {'test': 'tester'};
         const expected = ' else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -143,7 +145,7 @@
                 ].join("");
         const context = {'test': '4tester'};
         const expected = 'something else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -159,7 +161,7 @@
             ].join('');
         const context = {'test': 'tester'};
         const expected = 'correct else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -177,7 +179,7 @@
                 ].join("");
         const context = {'test': 'tester3'};
         const expected =        'correct else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -194,7 +196,7 @@
                 ].join("");
         const context = {'test': 'tester'};
         const expected =        'correct else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -208,7 +210,7 @@
                 ].join("");
         const context = {'test': 'teSteR'};
         const expected =        'correct else';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -240,7 +242,7 @@
                 ].join("");
         const context = {'test': 'tester', 'lst': ['a', 'b'], 'dict': {'three': 3, 'five': 5}};
         const expected =        '012345678901';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -278,7 +280,7 @@
             {% if var1 in str2 %}J{% endif %}
         `).replace(/[\s\n\r]+/g, ' ')
         const expected = 'A B C D E F H I J';
-        let result = Modulo._r(template, context).trim().replace(/\s+/g, ' ');
+        let result = window._r(template, context).trim().replace(/\s+/g, ' ');
 
         assert: result === expected
     </script>
@@ -318,7 +320,7 @@
             {% if var1 not in str2 %}(e9){% endif %}
         `).replace(/[\s\n\r]+/g, ' ')
         const expected = 'A B C D E F H I J';
-        let result = Modulo._r(template, context).trim().replace(/\s+/g, ' ');
+        let result = window._r(template, context).trim().replace(/\s+/g, ' ');
 
         assert: result === expected
     </script>
@@ -334,7 +336,7 @@
                 ].join("");
         const context = {'exists': true, 'isfalse': false};
         const expected =        '012';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -347,7 +349,7 @@
                 ].join("");
         const context = {'not': 'is not'};
         const expected =        '03';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -367,7 +369,7 @@
                 ].join("");
         const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
         const expected =        '0123456789';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -380,7 +382,7 @@
         const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
         const expected = '01234567890123456789012345678901234567890123456789' +
                 '01234567890123456789012345678901234567890123456789';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -392,7 +394,7 @@
                 ].join("");
         const context = {'test': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
         const expected =        'aaaaa56789';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -405,7 +407,7 @@
                 ].join("");
         const context = {'test': [{a: 'a'}, {a: 'b'}, {a: 'c'}]};
         const expected =        'ABClol';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -417,7 +419,7 @@
                 ].join("");
         const context = {'test': []};
         const expected =        'nothing here';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -427,7 +429,7 @@
         const template = '{% for a in test %}{{ a }}{% empty %}nothing here{% endfor %}';
         const context = {'test': ['a', 'b', 'c']};
         const expected = 'abc';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -440,7 +442,7 @@
             ].join("");
         const context = {'test1': ['a'], 'test2': []};
         const expected = 'anothing here';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -452,7 +454,7 @@
             ].join("");
         const context = {'test1': ['a'], 'test2': []};
         const expected = 'nothing herea';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
@@ -466,7 +468,7 @@
             ].join("");
         const context = {'test': [[], [1, 2, 3], [], ['a', 'b']]};
         const expected = 'e123eab';
-        const result = Modulo._r(template, context);
+        const result = window._r(template, context);
 
         assert: result === expected
     </script>
