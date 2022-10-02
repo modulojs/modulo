@@ -249,13 +249,31 @@ modulo.register('cpart', class TestSuite {
 
         //const parentNode = componentFac.loader._stringToDom(content);
         const parentNode = makeDiv(Content);
+
+        function _newModulo() {
+            const mod = new Modulo(null, []); // TODO
+            mod.globals = modulo.globals; // XXX
+            mod.config = deepClone(modulo.config, modulo);
+            mod.registry = modulo.registry;
+            // Refresh queue & asset manager
+            /*(mod.register('core', modulo.registry.core.FetchQueue);
+            mod.register('core', modulo.registry.core.AssetManager);*/
+            mod.defs = deepClone(modulo.defs, modulo);
+            mod.assets = modulo.assets; // Copy over asset manager
+            mod.assets.modulo = mod; // TODO Rethink these back references
+            mod.setupParents();
+            return mod;
+        }
+
         for (const testNode of parentNode.children) {
             let element;
             let err;
-            const testModulo = new Modulo(modulo); // "Fork" modulo obj
-            testModulo.defs = deepClone(modulo.defs, modulo);
-            testModulo.setupParents();
+            const testModulo = _newModulo();
             TestSuite.setupMocks(testModulo);
+            componentFac = testModulo.parentDefs[componentFac.FullName]; // get cloned version
+            /*
+            const testModulo = new Modulo(modulo); // "Fork" modulo obj
+            */
             if (useTry) {
                 try {
                     element = registerTestElement(testModulo, componentFac);
@@ -533,6 +551,14 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount) {
         console.log('%c FAILURE ', 'background-color: red');
         const compNames = failedComponents.map(({ Name }) => Name);
         console.log(`${failure} assertions failed. Failing components:`, compNames);
+        console.log(`${failure} assertions failed. Failing components:`, compNames);
+        const getParams = String(modulo.globals.location ?
+                                 modulo.globals.location.search : '').substr(1);
+        if (!getParams.includes('stacktrace=y')) {
+            console.log(new (class RERUN_WITH {
+                get stack_trace() { window.location.href += '&stacktrace=y' }
+            }));
+        }
         return false;
     }
 });
@@ -554,7 +580,8 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
     modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
-    const componentClass = modulo.assets.require(componentFac.FullName); // Do register
+
+    const componentClass = modulo.assets.require(componentFac.FullName); // Retrieved registered version
 
     const element = new componentClass();
     if (element._moduloTagName) { // virtualdom-based class

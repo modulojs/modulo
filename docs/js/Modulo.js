@@ -122,9 +122,9 @@ window.Modulo = class Modulo {
     }
 
     loadString(text, parentFactoryName = null) {
-        const tmp_Cmp = new modulo.registry.cparts.Component({}, {}, modulo);
+        const tmp_Cmp = new this.registry.cparts.Component({}, {}, this);
         tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
-        this.reconciler = modulo.create('engine', 'Reconciler', {
+        this.reconciler = this.create('engine', 'Reconciler', {
             directives: { 'modulo.dataPropLoad': tmp_Cmp }, // TODO: Change to "this", + resolve to conf stuff
             directiveShortcuts: [ [ /:$/, 'modulo.dataProp' ] ],
         });
@@ -313,6 +313,9 @@ modulo.register('cpart', class Component {
 
         const code = (`
             const conf = modulo.parentDefs['${ FullName }']; // XXX
+            if (!conf) {
+                console.log('ERROR: Empty ${ FullName } conf:', conf, Object.keys(modulo.parentDefs));
+            }
             if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
 
             const { ${ cpartNameString } } = modulo.registry.cparts;
