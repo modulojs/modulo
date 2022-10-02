@@ -118,8 +118,7 @@ window.Modulo = class Modulo {
     }
 
     preprocessAndDefine() {
-        //this.lifecycle([ 'configure' ]); // no need?
-        this.repeatPreconf(() => this.lifecycle([ 'prebuild', 'define' ]));
+        this.repeatPreconf(() => this.lifecycle([ 'prebuild', 'define' ]))
     }
 
     loadString(text, parentFactoryName = null) {
@@ -313,7 +312,6 @@ modulo.register('cpart', class Component {
         const className = '_' + Name + '_';
 
         const code = (`
-            if (typeof currentModulo !== 'undefined') { modulo = currentModulo; } // HAX XXX
             const conf = modulo.parentDefs['${ FullName }']; // XXX
             if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
 
@@ -335,9 +333,7 @@ modulo.register('cpart', class Component {
 
             const initRenderObj = { elementClass: ${ className } };
             modulo.applyPatches(factoryPatches, initRenderObj);
-            // console.log('XYZ before customElements.define', modulo.id, JSON.stringify(conf));
             modulo.globals.customElements.define(tagName, ${ className });
-            //console.log("Registered: ${ className } as " + tagName);
             return ${ className };
         `).replace(/\n {8}/g, "\n");
         conf.FuncDefHash = modulo.registry.utils.hash(code);
@@ -349,14 +345,10 @@ modulo.register('cpart', class Component {
         const { FullName, FuncDefHash } = conf;
         const { stripWord } = modulo.registry.utils;
         const { library } = modulo.config;
-        //const defsCode = `currentModulo.defs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        //const defsCode = `currentModulo.parentDefs['${ FullName }'] = ` + JSON.stringify(conf, null, 1);
-        const exCode = `currentModulo.assets.functions['${ FuncDefHash }']`;
         if (!FuncDefHash) {
             console.warn('Empty component specified:', FullName);
             return;
         }
-
         modulo.assets.mainRequire(conf.FullName);
     }
 
@@ -906,7 +898,7 @@ modulo.register('core', class AssetManager {
         const hash = this.nameToHash[moduleName];
         this.modulo.assert(hash in this.modules,
             `${ moduleName } / ${ hash } not in ${ Object.keys(this.modules).join(', ') }`);
-        return this.modules[hash].call(window, modulo);
+        return this.modules[hash].call(window, this.modulo);
     }
 
     wrapDefine(hash, name, code) {
@@ -1210,8 +1202,9 @@ modulo.register('cpart', class Configuration {
         let code = (conf.Content || '').trim();
         delete conf.Content;
         const opts = { exports: 'script' };
-        code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
-        modulo.assets.define(conf.FullName, code)(); // define & invoke
+        //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
+        modulo.assets.define(conf.FullName, code); // define & invoke
+        modulo.assets.mainRequire(conf.FullName);
         /*
         // TODO: Possibly, add something like this to finish this CPart. Should
         // be a helper, however -- maybe a confPreprocessor that applies to
@@ -2188,25 +2181,23 @@ modulo.register('command', function build (modulo, opts = {}) {
     for (const bundle of (opts.bundle || [])) { // Loop through bundle data
         pre[bundle.type].push(bundle.content);
     }
-    pre.js.push('var currentModulo = new Modulo(modulo);'); // Fork modulo
     // TODO: Clean this up:
     if (opts.bundle) {
         // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('currentModulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('currentModulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
+        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
+        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
     } else {
         // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('currentModulo.fetchQueue.data = modulo.fetchQueue.data = ' +
+        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
                     JSON.stringify(modulo.fetchQueue.data) + ';');
     }
 
-    pre.js.push('currentModulo.pushGlobal();'); // HAX XXX refs #11
+    pre.js.push('modulo.pushGlobal();'); // HAX XXX refs #11
     pre.js.push(modulo.assets.buildModuleDefs()); // HAX XXX refs #11
     opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
     opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
     //opts.jsInlineText = modulo.assets.getInlineJS(opts);
     opts.jsInlineText = '';
-    opts.jsInlineText += '\ncurrentModulo.pushGlobal();\n';
     opts.jsInlineText += modulo.assets.buildMain();
     opts.htmlFilePath = buildhtml(modulo, opts);
     setTimeout(() => {
