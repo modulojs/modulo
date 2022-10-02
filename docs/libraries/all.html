@@ -1,5 +1,5 @@
-<!-- Load some global JS deps -->
-<Script -src="/js/codemirror_5.63.0/codemirror_bundled.js">
+<!-- Load some global JS deps, and register utils -->
+<script Configuration -src="/js/codemirror_5.63.0/codemirror_bundled.js">
     modulo.register('util', CodeMirror); // Expose CodeMirror as a global utility
 
     // Expose a global utility, which creates an object containing the contents
@@ -86,7 +86,7 @@
         });
     }
     modulo.register('util', copyTextToClipboard);
-</Script>
+</script>
 
 <!-- Components referenced in below examples (registering with "x" for easy
 global use) -->

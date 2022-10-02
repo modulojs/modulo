@@ -220,7 +220,10 @@ function rerenderFirstTime() {
 }
 
 function _newModulo() {
-    const mod = new Modulo(window.hackCoreModulo);
+    const mod = new Modulo(null, []); // TODO
+    mod.globals = modulo.globals; // XXX
+    mod.config = modulo.config;
+    mod.registry = modulo.registry;
     // Refresh queue & asset manager
     mod.register('core', modulo.registry.core.FetchQueue);
     mod.register('core', modulo.registry.core.AssetManager);
@@ -231,11 +234,8 @@ function runModuloText(componentDef) {
     const defDiv = document.createElement('div');
     defDiv.innerHTML = componentDef;
     const mod = _newModulo();
-    mod.pushGlobal();
-    window.currentModulo = mod; // XXX Remove, when currentModulo is rm'ed
     mod.loadFromDOM(defDiv);
     mod.preprocessAndDefine();
-    mod.popGlobal();
 }
 
 function doRun() {
