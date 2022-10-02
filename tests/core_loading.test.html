@@ -67,13 +67,12 @@
     <script name="Preprocess and define multiple components with content">
         const mod = new Modulo(modulo);
         mod.fetchQueue = { queue: {} }; // Mock fetchQueue
-        mod.assets = modulo.assets; // TODO rm
+        mod.assets = modulo.assets; // Copy over asset manager
+        mod.assets.modulo = mod; // TODO Rethink these back references
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
                       '<Component name="TestB"><Template>bbb</Template></Component>';
         const loaded = mod.loadString(code);
-        mod.pushGlobal();
         mod.preprocessAndDefine();
-        mod.popGlobal();
         //const actual = loaded.map(({ Name, TagName, Hash }) => ([ Name, TagName, Hash ]));
         const actual = loaded.map(({ DefName, Name, TagName }) => ([ DefName, Name, TagName ]));
         const expected = [
