@@ -340,7 +340,7 @@ modulo.register('cpart', class Component {
             //console.log("Registered: ${ className } as " + tagName);
             return ${ className };
         `).replace(/\n {8}/g, "\n");
-        conf.FuncDefHash = modulo.assets.getHash([ 'tagName', 'modulo' ], code);
+        conf.FuncDefHash = modulo.registry.utils.hash(code);
 
         modulo.assets.define(FullName, code);
     }
@@ -966,23 +966,6 @@ modulo.register('core', class AssetManager {
         return saveFileAs(`modulo-${ opts.type }-${ fileHash }.${ ext }`, text);
     }
 
-    registerFunction(params, text, opts = {}) {
-        // Checks if text IS the hash, in which case use that, otherwise gen hash
-        const hash = text in this.functions ? text : this.getHash(params, text);
-        if (!(hash in this.functions)) {
-            const funcText = this.wrapFunctionText(params, text, opts, hash);
-            this.runInline(funcText);
-            /*
-            this.rawAssets.js[hash] = funcText; // "use strict" only in tag
-            window.currentModulo = this.modulo; // Ensure stays silo'ed in current
-            this.appendToHead('script', '"use strict";\n' + funcText);
-            */
-            this.modulo.assert(hash in this.functions, `Func ${hash} did not register`);
-            this.functions[hash].hash = hash;
-        }
-        return this.functions[hash];
-    }
-
     registerStylesheet(text) {
         const hash = this.modulo.registry.utils.hash(text);
         if (!(hash in this.stylesheets)) {
@@ -997,60 +980,6 @@ modulo.register('core', class AssetManager {
         this.invocations.push([ hash, JSON.stringify(args) ]);
         args.push(this.modulo); // TODO: need to standardize Modulo dependency injection patterns
         this.functions[hash].apply(window, args);
-    }
-
-    getInlineJS(opts) {
-        // TODO: XXX Fix currentModulo -> modulo
-        let text = 'var _X = currentModulo.assets.invoke.bind(currentModulo.assets);\n';
-        for (const [ hash, argStr ] of this.invocations) {
-            //text += `try { _X('${ hash }', ${ argStr }); } catch (e) { console.log('${ hash } - ERROR:', e); }\n`;
-            text += `_X('${ hash }', ${ argStr });\n`;
-        }
-        return text;
-    }
-
-    runInline(funcText) {
-        const hash = this.modulo.registry.utils.hash(funcText);
-        if (!(hash in this.rawAssets.js)) {
-            this.rawAssets.js[hash] = funcText; // "use strict" only in tag
-            this.rawAssetsArray.js.push(funcText);
-        }
-        window.currentModulo = this.modulo; // Ensure stays silo'ed in current
-        // TODO: Make functions named, e.g. function x_Button_Template () etc,
-        // so stack traces / debugger looks better
-        this.appendToHead('script', '"use strict";\n' + funcText);
-    }
-
-    getSymbolsAsObjectAssignment(contents) {
-        const regexpG = /(function|class)\s+(\w+)/g;
-        const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
-        const matches = contents.match(regexpG) || [];
-        return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s))
-            .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
-            .join('');
-    }
-
-    wrapFunctionText(params, text, opts = {}, hash = null) {
-        // TODO: e.g. change public API to this, make opts & hash required
-        //let prefix = `modulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        let prefix = `currentModulo.assets.functions["${hash || this.getHash(params, text)}"]`;
-        prefix += `= function ${ opts.funcName || ''}(${ params.join(', ') }){`;
-        let suffix = '};'
-        if (opts.exports) {
-            const symbolsString = this.getSymbolsAsObjectAssignment(text);
-            // TODO test: params = params.filter(text.includes.bind(text)); // Slight optimization
-            const localVarsIfs = params.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-            prefix += `var ${ opts.exports } = { exports: {} };  `;
-            prefix += `function __set(name, value) { ${ localVarsIfs } }`;
-            suffix = `return { ${symbolsString} setLocalVariable: __set, exports: ${ opts.exports }.exports}\n};`;
-        }
-        return `${prefix}\n${text}\n${suffix}`;
-    }
-
-    getHash(params, text) {
-        const { hash } = this.modulo.registry.utils;
-        return hash(params.join(',') + '|' + text);
     }
 
     appendToHead(tagName, codeStr) {
@@ -1265,7 +1194,7 @@ modulo.register('cpart', class StaticData {
         const transform = transforms[conf.type || 'js'];
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
-        conf.Hash = modulo.assets.getHash([], code);
+        conf.Hash = modulo.registry.utils.hash(code);
         modulo.assets.define(conf.FullName, code);
         // TODO: Maybe evaluate and attach directly to conf here?
     }
