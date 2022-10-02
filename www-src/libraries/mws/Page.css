@@ -86,7 +86,7 @@ nav.Navbar {
     align-items: center;
     position: sticky;
     top: 0;
-    z-index: 7; /* code mirror scrollbars are 6 */
+    z-index: 8; /* code mirror scrollbars are 6, Demo.css mini-preview is 7 */
     height: 100px;
 }
 
@@ -243,7 +243,7 @@ nav.Navbar {
     align-items: center;
     position: sticky;
     top: 0;
-    z-index: 7;
+    z-index: 8; /* code mirror scrollbars are 6, Demo.css mini-preview is 7 */
     /*box-shadow: 0 50px 50px 2px rgba(255, 255, 255, 1);*/
     border-bottom: 1px solid black;
 }
