@@ -176,7 +176,7 @@ class ModuloBrowser {
                     if (typeof modulo !== 'undefined' && modulo.register) {
                         // Modulo Prealpha3
                         const opts = {
-                            callback: () => {
+                            callback: (results) => {
                                 resolve({ artifacts, results });
                             },
                         };
