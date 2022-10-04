@@ -336,7 +336,7 @@ modulo.register('cpart', class Component {
 
             const initRenderObj = { elementClass: ${ className } };
             modulo.applyPatches(factoryPatches, initRenderObj);
-            modulo.globals.customElements.define(tagName, ${ className });
+            window.customElements.define(tagName, ${ className });
             return ${ className };
         `).replace(/\n {8}/g, "\n");
         conf.FuncDefHash = modulo.registry.utils.hash(code);
@@ -928,6 +928,23 @@ modulo.register('core', class AssetManager {
         return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
+    buildJavaScript() {
+        return this.buildConfigDef() + this.buildModuleDefs();
+    }
+
+    buildConfigDef() {
+        // TODO: Make both buildConfigDef and buildModuleDefs attach to a
+        // window.moduloBuildConfig, the presence of which means it's a
+        // "build", and the moduloLoadWhatevers will in fact use this
+        return ('modulo.defs = ' + JSON.stringify(this.modulo.defs, null, 1) + ';\n') +
+               ('modulo.parentDefs = ' + JSON.stringify(this.modulo.parentDefs, null, 1) + ';');
+        /*
+        return 'window.moduleBuild = {};' +
+              ('window.moduleBuild.defs = ' + JSON.stringify(this.modulo.defs, null, 1) + ';\n') +
+              ('window.moduleBuild.parentDefs = ' + JSON.stringify(this.modulo.parentDefs, null, 1) + ';') +
+        */
+    }
+
     buildModuleDefs() {
         const names = JSON.stringify(this.nameToHash, null, 1);
         let jsText = `Object.assign(modulo.assets.nameToHash, ${ names });\n\n`;
@@ -939,7 +956,7 @@ modulo.register('core', class AssetManager {
             }
         }
         modulo.assert(Object.keys(this.moduleSources).length === 0, 'Unused mod keys');
-        return jsText;
+        return jsText.length > 50 ? jsText : ''; // <40 chars means no-op
     }
 
     buildMain() {
@@ -978,7 +995,8 @@ modulo.register('core', class AssetManager {
     }
 
     appendToHead(tagName, codeStr) {
-        const doc = this.modulo.globals.document;
+        //const doc = this.modulo.globals.document;
+        const doc = window.document;
         const elem = doc.createElement(tagName);
         elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
         if (doc.head === null) {
@@ -1178,8 +1196,6 @@ modulo.register('cpart', class Template {
 
 modulo.register('cpart', class StaticData {
     static prebuildCallback(modulo, conf) {
-        // TODO put into conf, make default to JSON, and make CSV actually
-        // correct + instantly useful (e.g. separate headers, parse quotes)
         const transforms = {
             csv: s => JSON.stringify(s.split('\n').map(line => line.split(','))),
             js: s => s,
@@ -1191,11 +1207,15 @@ modulo.register('cpart', class StaticData {
         delete conf.Content;
         conf.Hash = modulo.registry.utils.hash(code);
         modulo.assets.define(conf.FullName, code);
-        // TODO: Maybe evaluate and attach directly to conf here?
+        // TODO put into conf, make default to JSON, and make CSV actually
+        // correct + instantly useful (e.g. separate headers, parse quotes)
+        //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
     }
 
     static factoryCallback(renderObj, conf, modulo) {
-        // Now, actually run code in Script tag to do factory method
+        // Now, actually run code in Script tag to do factory method. By
+        // putting this in factory, each Component that uses the same -src will
+        // NOT share the data, but within each Component it will.
         return modulo.assets.require(conf.FullName);
     }
 });
@@ -1500,19 +1520,20 @@ modulo.register('engine', class Templater {
     }
 
     setup(text, conf) {
-        Object.assign(this, modulo.config.templater, conf);
-        this.filters = Object.assign({}, modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, modulo.registry.templateTags, this.tags);
+        Object.assign(this, this.modulo.config.templater, conf);
+        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
+        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = modulo.assets.require(this.Hash);
+            this.renderFunc = this.modulo.assets.require(this.Hash);
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
             this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
 
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
-            this.Hash = 'T' + Math.ceil(Math.random() * 100000000); // XXX
-            this.renderFunc = modulo.assets.define(this.Hash, this.compiledCode)();
+            const { hash } = this.modulo.registry.utils;
+            this.Hash = 'T' + hash(this.compiledCode);
+            this.renderFunc = this.modulo.assets.define(this.Hash, this.compiledCode)();
         }
     }
 
@@ -1530,7 +1551,7 @@ modulo.register('engine', class Templater {
 
     compile(text) {
         // const prepComment = token => truncate(escapejs(trim(token)), 80);
-        const { normalize } = modulo.registry.utils;
+        const { normalize } = this.modulo.registry.utils;
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
@@ -1575,7 +1596,7 @@ modulo.register('engine', class Templater {
     parseVal(string) {
         // Parses string literals, de-escaping as needed, numbers, and context
         // variables
-        const { cleanWord } = modulo.registry.utils;
+        const { cleanWord } = this.modulo.registry.utils;
         const s = string.trim();
         if (s.match(/^('.*'|".*")$/)) { // String literal
             return JSON.stringify(s.substr(1, s.length - 2));

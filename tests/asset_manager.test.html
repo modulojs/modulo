@@ -5,7 +5,7 @@
 
 <TestSuite>
 
-<Test name="modulo.assets tests">
+<Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
         assert: modulo && modulo.assets && modulo.registry.core.AssetManager
     </script>
@@ -48,7 +48,15 @@
         assert: func() === 'testing123'
     </script>
 
-    <script name="Build module defs creates expected string">
+    <script name="assets.buildModuleDefs produces empty-string for empty modulo conf">
+        const mod = new Modulo(null, [ ]);
+        mod.registry = modulo.registry;
+        mod.assets = new mod.registry.core.AssetManager(mod);
+        const moduleDefs = mod.assets.buildModuleDefs();
+        assert: moduleDefs === ''
+    </script>
+
+    <script name="assets.buildModuleDefs creates expected string for a single registered thing">
         const assets = new modulo.registry.core.AssetManager(modulo);
         assets.define('Test_x_x_x', 'return "testing123"');
         const actual = assets.buildModuleDefs();
@@ -58,6 +66,102 @@
                          'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
         assert: actual === expected
     </script>
+
+</Test>
+
+
+<Test name="modulo.assets building functional scripts">
+    <script name="assets.buildJavaScript exists">
+        const originalRegistry = modulo.registry;
+        const originalConfig = modulo.config;
+        const { deepClone, cloneStub } = modulo.registry.utils;
+
+        function _prepIsolatedModulo(callback = null) {
+            // Now, let's make a fresh modulo, and see if we can "load" the
+            // build using this separate instance
+            const mod2 = new Modulo(null, [ ]);
+            mod2.registry = originalRegistry;
+            mod2.config = deepClone(originalConfig, modulo);
+            mod2.assets = new mod2.registry.core.AssetManager(mod2);
+            mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
+            const customElements = { define: () => {} };
+            const fakeWindow = { customElements, modulo: mod2 };
+
+            // Patch appendToHead so it doesn't "escape" (TODO: Will not be necessary for ModuloVM)
+            delete mod2.assets.appendToHead;
+            mod2.assets.appendToHead = (type, code)  => {
+                if (type === 'script') {
+                    (new Function('modulo', 'window', code))(mod2, fakeWindow);
+                }
+            };
+
+            if (callback) {
+                callback(mod2, fakeWindow);
+            }
+            return mod2;
+        }
+
+
+        window._buildAndRun = function (callback) {
+            // Let's make a fresh modulo to do the initial loading (e.g. the
+            // page we are "building from")
+            const mod = _prepIsolatedModulo(callback); // allow test to do any modifications
+            mod.preprocessAndDefine(); // ensure preprocessed before handing back
+            const code = mod.assets.buildJavaScript();
+
+            // Now, let's make a fresh modulo, and "load" the build using this
+            // separate instance
+            const runBuiltJavaScript = new Function('modulo', 'window', code);
+            const mod2 = _prepIsolatedModulo(runBuiltJavaScript);
+            return mod2; // return instance 2 for iso checks
+        };
+        assert: modulo && modulo.assets && modulo.assets.buildJavaScript
+    </script>
+
+    <script name="assets.buildJavaScript builds modules">
+        const mod2 = window._buildAndRun(mod => {
+            mod.assets.define('Test_x_x_x', 'return "testing123"');
+        });
+        // Now we ensure it set up the new module
+        const actual1 = JSON.stringify(mod2.assets.nameToHash);
+        const expected1 = JSON.stringify({ Test_x_x_x: "x1bqrlhi" });
+        const actual2 = JSON.stringify(Array.from(Object.keys(mod2.assets.modules)));
+        const expected2 = JSON.stringify([ "x1bqrlhi" ]);
+        const actual3 = mod2.assets.modules.x1bqrlhi && mod2.assets.modules.x1bqrlhi(mod2);
+        const expected3 = "testing123";
+        const actual4 = JSON.stringify(Array.from(Object.keys(mod2.assets.moduleSources)));
+        const expected4 = "[]"; // Empty, since we won't include source in build
+        assert: actual1 === expected1 && actual2 === expected2 && actual3 === expected3 && actual4 === expected4
+    </script>
+
+    <script name="assets.buildJavaScript builds defs">
+        const mod2 = window._buildAndRun(mod => {
+            mod.loadString('<Component name="TestA"><Template>aaa</Template></Component>' + 
+                           '<Component name="TestB"><Template>bbb</Template></Component>');
+        });
+        // Now ensure it correctly created 2 items, and the templates
+        // registered hash matches a name as well
+        const actual1 = JSON.stringify(Array.from(Object.keys(mod2.defs)));
+        const expected1 = JSON.stringify([ 'x', 'x_TestA' , 'x_TestB' ]);
+        let actual2a = null;
+        let actual2b = null;
+        let tName = '';
+        if (mod2.defs.x_TestA && mod2.defs.x_TestA.length) {
+            actual2a = mod2.defs.x_TestA.length;
+            tName = mod2.defs.x_TestA[0].Hash; // TODO, update when name based
+        }
+        if (mod2.defs.x_TestB && mod2.defs.x_TestB.length) {
+            actual2b = mod2.defs.x_TestB.length;
+        }
+        const hash = mod2.assets.nameToHash[tName] || '';
+        const defaultFunc = a => b => '';
+        const moduleFunc = mod2.assets.modules[hash] || defaultFunc;
+        const templateFunc = moduleFunc(modulo);
+        const actual4 = templateFunc({});
+        const expected4 = 'aaa';
+        assert: actual1 === expected1 && actual2a === 1 && actual2b === 1 && hash in mod2.assets.modules && actual4 === expected4
+    </script>
+
 
 </Test>
 

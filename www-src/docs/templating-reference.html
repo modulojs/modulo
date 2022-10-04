@@ -38,13 +38,41 @@ nesting comment tags.</p>
 <mws-Demo demotype="minipreview"
 text='
 <Template>
-    <p>Before comment</p>
     {% comment "Optional note" %}
         <p>Commented out text that will be ignored
           {{ nonExistingVar|brokenFilter:"abc" }}</p>
     {% endcomment %}
     <p>After comment</p>
 </Template>
+'></mws-Demo>
+
+
+<h3>debugger</h3>
+
+<p>Inserts a "debugger" statement at that location in JavaScript. This allows
+for detailed debugging of the generated code.</p>
+
+<p>In the following demo, you can uncomment the "debugger" statement to
+practice "stepping through" the for loop, examining the <code>CTX.user</code>
+variable for each iteration in the Developer Tools debug panel.</p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+    {% for user in state.users %}
+        <!-- (Hint: try removing the "comment" tags to enable the debugger -->
+        {% comment %} {% debugger %} {% endcomment %}
+        <p>{{ user.username }}</p>
+    {% endfor %}
+</Template>
+
+<State
+  users:=&apos;[
+    {"username": "zer0c00l"},
+    {"username": "ac1dburn", "id": 1337},
+    {"username": "the_phantom_phr34k", "name": "Ramon"}
+  ]&apos;
+></State>
 '></mws-Demo>
 
 <h3>for</h3>
