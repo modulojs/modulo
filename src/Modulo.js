@@ -971,15 +971,10 @@ modulo.register('core', class AssetManager {
         return jsText.length > 40 ? jsText : ''; // <40 chars means no-op
     }
 
-    nu_buildMain() {
+    buildMain() {
         const p = 'window.moduloBuild && modulo.start(window.moduloBuild);\n';
         const asRequireInvocation = s => `modulo.assets.require("${ s }");`;
         return p + this.mainRequires.map(asRequireInvocation).join('\n');
-    }
-
-    buildMain() {
-        const asRequireInvocation = s => `modulo.assets.require("${ s }");`;
-        return this.mainRequires.map(asRequireInvocation).join('\n');
     }
 
     bundleAssets(callback) {
@@ -2253,19 +2248,18 @@ modulo.register('util', function nu_getBuiltHTML(modulo, opts = {}) {
     return '<!DOCTYPE HTML><html>' + head + body + '</html>';
 });
 
-modulo.register('command', function nu_build (modulo, opts = {}) {
+modulo.register('command', function build (modulo, opts = {}) {
     const { saveFileAs, nu_getBuiltHTML, hash } = modulo.registry.utils;
-    const { buildhtml } = modulo.registry.commands;
     modulo.assets.bundleAssets((js, css) => {
-        opts.jsInlineText = modulo.assets.nu_buildMain();
+        opts.jsInlineText = modulo.assets.buildMain();
         opts.jsFilePath = saveFileAs(`modulo-build-${ hash(js) }.js`, js);
         opts.cssFilePath = saveFileAs(`modulo-build-${ hash(css) }.css`, css);
         const htmlFN = window.location.pathname.split('/').pop() || 'index.html';
         opts.htmlFilePath = saveFileAs(htmlFN, nu_getBuiltHTML(modulo, opts));
         window.setTimeout(() => {
             // TODO: Move this "refresh" into a generic utility
-            window.document.body.innerHTML = `<h1><a href="?mod-cmd=nu_build">&#10227;
-                nu_build</a>: ${ opts.htmlFilePath }</h1>`;
+            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
+                build</a>: ${ opts.htmlFilePath }</h1>`;
             if (opts && opts.callback) {
                 opts.callback();
             }
@@ -2273,40 +2267,6 @@ modulo.register('command', function nu_build (modulo, opts = {}) {
     });
 });
 
-modulo.register('command', function nope_build (modulo, opts = {}) {
-    const { buildhtml } = modulo.registry.commands;
-    opts.type = opts.bundle ? 'bundle' : 'build';
-    const pre = { js: [ 'window.hackIsBuild = true;\n' ], css: [] }; // Prefixed content
-    for (const bundle of (opts.bundle || [])) { // Loop through bundle data
-        pre[bundle.type].push(bundle.content);
-    }
-    // TODO: Clean this up:
-    if (opts.bundle) {
-        // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
-    } else {
-        // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
-                    JSON.stringify(modulo.fetchQueue.data) + ';');
-    }
-
-    pre.js.push('modulo.pushGlobal();'); // HAX XXX refs #11
-    pre.js.push(modulo.assets.buildModuleDefs()); // HAX XXX refs #11
-    opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
-    opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
-    //opts.jsInlineText = modulo.assets.getInlineJS(opts);
-    opts.jsInlineText = '';
-    opts.jsInlineText += modulo.assets.buildMain();
-    opts.htmlFilePath = buildhtml(modulo, opts);
-    setTimeout(() => {
-        window.document.body.innerHTML = `<h1><a href="?mod-cmd=${opts.type}">&#10227;
-            ${ opts.type }</a>: ${ opts.htmlFilePath }</h1>`;
-        if (opts && opts.callback) {
-            opts.callback();
-        }
-    }, 0);
-});
 
 modulo.register('command', function bundle (modulo, opts = {}) {
     const { build } = modulo.registry.commands;
