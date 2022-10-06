@@ -2217,8 +2217,11 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
             dataItem.content = text;
         });
     }
-    //modulo.fetchQueue.enqueueAll(() => callback(data));
-    modulo.fetchQueue.wait(() => callback(data));
+    if (Object.keys(modulo.fetchQueue.queue).length < 1) {
+        callback(data); // Synchronous route
+    } else {
+        modulo.fetchQueue.enqueueAll(() => callback(data));
+    }
 });
 
 
@@ -2227,16 +2230,16 @@ modulo.register('util', function nu_getBuiltHTML(modulo, opts = {}) {
     // as needed, and clearing link / script tags that have been bundled
     const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
     for (const elem of window.document.querySelectorAll('*')) {
-        /*
         if (elem.tagName.toLowerCase() in bundledTags) {
             elem.remove();
+        }
+        /*
             // TODO: As we are bundling together, create a src/href/etc collection
             // to the compare against instead?
             // TODO: Maybe remove bundle logic here, since we remove when bundling?
-            if (elem.hasAttribute('modulo-asset') || opts.bundle) {
-                elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
-            }
-        } else 
+        if (elem.hasAttribute('modulo-asset')) {
+            elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
+        }
         */
         if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
             elem.setAttribute('modulo-original-html', elem.originalHTML);
@@ -2261,8 +2264,8 @@ modulo.register('command', function nu_build (modulo, opts = {}) {
         opts.htmlFilePath = saveFileAs(htmlFN, nu_getBuiltHTML(modulo, opts));
         window.setTimeout(() => {
             // TODO: Move this "refresh" into a generic utility
-            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
-                build</a>: ${ opts.htmlFilePath }</h1>`;
+            window.document.body.innerHTML = `<h1><a href="?mod-cmd=nu_build">&#10227;
+                nu_build</a>: ${ opts.htmlFilePath }</h1>`;
             if (opts && opts.callback) {
                 opts.callback();
             }
@@ -2270,7 +2273,7 @@ modulo.register('command', function nu_build (modulo, opts = {}) {
     });
 });
 
-modulo.register('command', function build (modulo, opts = {}) {
+modulo.register('command', function nope_build (modulo, opts = {}) {
     const { buildhtml } = modulo.registry.commands;
     opts.type = opts.bundle ? 'bundle' : 'build';
     const pre = { js: [ 'window.hackIsBuild = true;\n' ], css: [] }; // Prefixed content
@@ -2344,21 +2347,9 @@ modulo.register('command', function buildhtml(modulo, opts = {}) {
     return saveFileAs(filename, getBuiltHTML(modulo, opts));
 });
 
-if (typeof document !== 'undefined' && document.head) { // Browser environ
-    Modulo.globals = window; // TODO, remove?
-    modulo.globals = window;
-    window.hackCoreModulo = new Modulo(modulo); // XXX
-    modulo.start(window.moduloBuild);
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
-}
-
-if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
+if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        // TODO: Better way to know if in built-version browser environ, this is terrible
-        const isProduction = document.querySelector(
-            'script[src*="modulo-build"],script[src*="modulo-bundle"]');
-        if (isProduction || window.hackIsbuild) {
+        if (window.moduloBuild) {
             return;
         }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
@@ -2389,4 +2380,14 @@ if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
         }
     }));
 }
+
+if (typeof document !== 'undefined' && document.head) { // Browser environ
+    Modulo.globals = window; // TODO, remove?
+    modulo.globals = window;
+    window.hackCoreModulo = new Modulo(modulo); // XXX
+    modulo.start(window.moduloBuild);
+} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
+    exports = { Modulo, modulo };
+}
+
 

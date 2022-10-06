@@ -163,7 +163,7 @@ window.moduloBuild.nameToHash = {
                 callback('/* js code for (' + src + ') */\n');
             };
             const opts = {};
-            modulo.registry.commands.nu_build(mod, opts); // Build, synchronously
+            modulo.registry.commands.build(mod, opts); // Build, synchronously
             if (!shouldRun) {
                 return files;
             }
@@ -236,14 +236,14 @@ window.moduloBuild.nameToHash = {
         const files = window._buildCommandAndRun(false, mod => {
             mod.loadString(window._componentText);
         });
-        const expected1 = JSON.stringify([
+        const expectedFns = JSON.stringify([
             'modulo-build-xxxxxxxx.js',
             'modulo-build-xxxxxxxx.css',
             'index.html',
         ]);
-        const actual1 = JSON.stringify(files.map(({ filename }) => filename));
-        const actual2 = files.map(({ text }) => text.length);
-        assert: expected1 === actual1 && actual2[0] > 3000 && actual2[1] === 0 && actual2[2] > 3000
+        const actualFns = JSON.stringify(files.map(({ filename }) => filename));
+        const [ jsSize, cssSize, htmlSize ] = files.map(({ text }) => text.length).concat([-1, -1, -1]); // have -1 as placeholder
+        assert: expectedFns === actualFns && jsSize > 3000 && cssSize === 0 && htmlSize > 3000
     </script>
 
     <script name="commands.build produces html file with expected content">
