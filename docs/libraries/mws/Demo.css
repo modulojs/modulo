@@ -342,6 +342,9 @@
     .side-by-side-panes {
         display: block;
     }
+    .editor-toolbar {
+        z-index: 8;
+    }
 }
 
 @media (max-width: 768px) {

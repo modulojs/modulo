@@ -386,7 +386,7 @@ modulo.register('cpart', class TestSuite {
 });
 
 
-modulo.register('command', function test(modulo) {
+modulo.register('command', function test(modulo, opts) {
     let discovered = [];
     let soloMode = false;
     let skippedCount = 0;
@@ -443,9 +443,9 @@ modulo.register('command', function test(modulo) {
         discovered = discovered.filter(([ fac, conf ]) => 'solo' in conf);
     }
 
-    // TODO: Fix this to load Src during configure step, ahead of time!
-    // Either run synchronously, or run after Src catches up
-    const func = () => modulo.registry.utils.runTest(modulo, discovered, skippedCount);
+    // TODO: Fix this to load Src during configure step, ahead of time!  Either
+    // run synchronously, or run after Src catches up
+    const func = () => modulo.registry.utils.runTest(modulo, discovered, skippedCount, opts);
     if (Object.keys(modulo.fetchQueue.queue).length === 0) {
         return func();
     }
@@ -453,7 +453,7 @@ modulo.register('command', function test(modulo) {
     return null;
 });
 
-modulo.register('util', function runTest(modulo, discovered, skippedCount) {
+modulo.register('util', function runTest(modulo, discovered, skippedCount, opts) {
 
     const msg = '%c[%] ' + discovered.length + ' test suites found';
     console.log(msg, 'border: 3px solid #B90183; padding: 10px;');
@@ -541,6 +541,9 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount) {
     if (!failure && !omission && success) {
         console.log('%c     OK    ', 'background-color: green');
         console.log(`${success} assertions passed`);
+        if (opts && opts.callback) {
+            opts.callback(true);
+        }
         return true;
     } else {
         console.log('SUCCESSES:', success, 'assertions passed');
@@ -558,6 +561,9 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount) {
             console.log(new (class RERUN_WITH {
                 get stack_trace() { window.location.href += '&stacktrace=y' }
             }));
+        }
+        if (opts.callback) {
+            opts.callback(false);
         }
         return false;
     }

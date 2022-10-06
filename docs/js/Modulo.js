@@ -47,6 +47,32 @@ window.Modulo = class Modulo {
         }
     }
 
+    start(moduloBuild = null) {
+        if (moduloBuild) {
+            if (moduloBuild.loadedBy) {
+                return;
+            }
+            this.assets.modules = moduloBuild.modules;
+            this.assets.nameToHash = moduloBuild.nameToHash;
+            this.defs = moduloBuild.defs;
+            this.parentDefs = moduloBuild.parentDefs;
+            moduloBuild.loadedBy = this.id;
+            return;
+        }
+        // Loading <script Modulo> tag, meaning we want to run blocking
+        if (document.head.querySelector('script[modulo]')) {
+            this.loadFromDOM(document.head, null, true);
+            this.preprocessAndDefine();
+        } else {
+            // TODO: Remove "else", so both sync and async paths happen, but
+            // make loads always idempotent
+            document.addEventListener('DOMContentLoaded', () => {
+                this.loadFromDOM(document.head, null, true);
+                this.preprocessAndDefine();
+            });
+        }
+    }
+
     create(type, name, conf = null) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
         const instance = new this.registry[type][name](modulo, conf);
@@ -86,7 +112,8 @@ window.Modulo = class Modulo {
     loadFromDOM(elem, parentName = null, quietErrors = false) {
         const partialConfs = [];
         const X = 'x';
-        const isModulo = node => this.getNodeModuloType(node, quietErrors);
+        const isModulo = node => (this.getNodeModuloType(node, quietErrors)
+                                  && !node.getAttribute('modulo-has-loaded'));
         for (const node of Array.from(elem.children).filter(isModulo)) {
             const conf = this.loadPartialConfigFromNode(node);
             conf.Parent = conf.Parent || parentName;
@@ -94,9 +121,10 @@ window.Modulo = class Modulo {
             conf.Name = conf.Name || conf.name || X; // name or -name or 'x'
             const parentNS = conf.Parent || X; // Cast falsy to 'x'
             this.defs[parentNS] = this.defs[parentNS] || []; // Prep empty arr
-            this.defs[parentNS].push(conf); // Push to Namespace
-            partialConfs.push(conf);
-            conf.FullName = parentNS + '_' + conf.Name;
+            this.defs[parentNS].push(conf); // Push to Namespace array
+            partialConfs.push(conf); // Push to return Array
+            conf.FullName = parentNS + '_' + conf.Name; // Concat full name
+            // node.setAttribute('modulo-has-loaded', 'y'); // TODO RM this?
         }
         return partialConfs;
     }
@@ -192,12 +220,7 @@ window.Modulo = class Modulo {
     getNodeModuloType(node, quietErrors = false) {
         const { tagName, nodeType, textContent } = node;
         const err = msg => quietErrors || console.error('Modulo Load:', msg);
-
-        // node.nodeType equals 1 if the node is a DOM element (as opposed to
-        // text, or comment). Ignore comments, tolerate empty text nodes, but
-        // warn on others (since those are typically syntax mistakes).
-        if (nodeType !== 1) {
-            // Text nodes, comment nodes, etc
+        if (nodeType !== 1) { // Text nodes, comment nodes, etc
             if (nodeType === 3 && textContent && textContent.trim()) {
                 err(`Unexpected text found near definitions: ${textContent}`);
             }
@@ -209,10 +232,9 @@ window.Modulo = class Modulo {
             for (const attrUnknownCase of node.getAttributeNames()) {
                 const attr = attrUnknownCase.toLowerCase();
                 if (attr in this.registry.dom && !node.getAttribute(attr)) {
-                    cPartName = attr;
-                    //break;
+                    cPartName = attr; // Is a CPart, but has empty string value
                 }
-                break; // should always be first?
+                break; // Always exit, since we are only looking at first iter
             }
         }
         if (!(cPartName in this.registry.dom)) {
@@ -336,7 +358,7 @@ modulo.register('cpart', class Component {
 
             const initRenderObj = { elementClass: ${ className } };
             modulo.applyPatches(factoryPatches, initRenderObj);
-            modulo.globals.customElements.define(tagName, ${ className });
+            window.customElements.define(tagName, ${ className });
             return ${ className };
         `).replace(/\n {8}/g, "\n");
         conf.FuncDefHash = modulo.registry.utils.hash(code);
@@ -553,8 +575,7 @@ modulo.register('cpart', class Component {
     }
 }, { mode: 'regular', rerender: 'event', engine: 'Reconciler', ConfPreprocessors: [ 'Src', 'Content' ] });
 
-modulo.register('cpart', class Modulo {
-}, { ConfPreprocessors: [ 'Src', 'Content' ] });
+modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content' ] });
 
 //                v- Later put somewhere more appropriate
 //modulo.register('util', Modulo);
@@ -689,7 +710,7 @@ modulo.register('util', function makeDiv(html) {
       <state -> <script type="modulo/state"
       <\s*(state|props|template)([\s>]) -> <script type="modulo/\1"\2
       </(state|props|template)> -> </script>*/
-    const div = document.createElement('div');
+    const div = window.document.createElement('div');
     div.innerHTML = html;
     return div;
 });
@@ -701,14 +722,13 @@ modulo.register('util', function normalize(html) {
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
-    const doc = Modulo.globals.document;
-    const element = doc.createElement('a');
+    const element = window.document.createElement('a');
     const enc = encodeURIComponent(text); // TODO silo in globals
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + enc);
     element.setAttribute('download', filename);
-    doc.body.appendChild(element);
+    window.document.body.appendChild(element);
     element.click();
-    doc.body.removeChild(element);
+    window.document.body.removeChild(element);
     return `./${filename}`; // by default, return local path
 });
 
@@ -834,7 +854,7 @@ modulo.register('util', class BaseElement extends HTMLElement {
 
     connectedCallback() {
         if (!this.isMounted) {
-            setTimeout(() => this.parsedCallback(), 0);
+            window.setTimeout(() => this.parsedCallback(), 0);
         }
     }
 
@@ -904,13 +924,8 @@ modulo.register('core', class AssetManager {
         return this.modules[hash].call(window, this.modulo);
     }
 
-    wrapDefine(hash, name, code) {
-        // TODO: Later add document, window, etc to arguments
-        // TODO: Test this
-        //const asReturn = name => `return ${ name };`;
-        //code = code.replace(/module.exports\s*=\s*(\w+)\s*;?\s*$/, asReturn);
-        //code = code.replace(/export default \s*(\w+)\s*;?\s*$/, asReturn);
-        const assignee = `window.modulo.assets.modules["${ hash }"]`;
+    wrapDefine(hash, name, code, prefix = 'window.modulo.assets') {
+        const assignee = `${ prefix }.modules["${ hash }"]`;
         return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
     }
 
@@ -928,37 +943,51 @@ modulo.register('core', class AssetManager {
         return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
+    buildJavaScript() {
+        const prefix = `window.moduloBuild = window.moduloBuild || { modules: {} };\n`;
+        return prefix + this.buildModuleDefs() + this.buildConfigDef();
+    }
+
+    buildConfigDef() {
+        // TODO: Make this a loop assigning to names
+        return ('window.moduloBuild.defs = ' + JSON.stringify(this.modulo.defs, null, 1) + ';\n') +
+               ('window.moduloBuild.parentDefs = ' + JSON.stringify(this.modulo.parentDefs, null, 1) + ';');
+    }
+
     buildModuleDefs() {
-        const names = JSON.stringify(this.nameToHash, null, 1);
-        let jsText = `Object.assign(modulo.assets.nameToHash, ${ names });\n\n`;
+        let jsText = '';
+        const pre = 'window.moduloBuild';
         for (const name of Object.keys(this.nameToHash).sort()) {
             const hash = this.nameToHash[name]; // Alphabetic by name, not hash
             if (hash in this.moduleSources) {
-                jsText += this.wrapDefine(hash, name, this.moduleSources[hash]);
+                const source = this.moduleSources[hash];
+                jsText += this.wrapDefine(hash, name, source, pre);
                 delete this.moduleSources[hash];
             }
         }
+        const namesString = JSON.stringify(this.nameToHash, null, 1);
+        jsText += pre + '.nameToHash = ' + namesString + ';\n';
         modulo.assert(Object.keys(this.moduleSources).length === 0, 'Unused mod keys');
-        return jsText;
+        return jsText.length > 40 ? jsText : ''; // <40 chars means no-op
     }
 
     buildMain() {
+        const p = 'window.moduloBuild && modulo.start(window.moduloBuild);\n';
         const asRequireInvocation = s => `modulo.assets.require("${ s }");`;
-        return this.mainRequires.map(asRequireInvocation).join('\n');
+        return p + this.mainRequires.map(asRequireInvocation).join('\n');
     }
 
-    build(ext, opts, prefix = '') {
-        const { saveFileAs, hash } = this.modulo.registry.utils;
-        const text = prefix + modulo.assets.rawAssetsArray[ext].join('\n');
-        let fileHash; // XXX Refactor this
-        if (opts.type === 'js') {
-            // (quick hack: hashes are hashes of hashes)
-            const all = Object.keys(Object.assign({}, this.modules, this.nameToHash));
-            fileHash = hash(all.sort().join('|'));
-        } else {
-            fileHash = hash(text);
-        }
-        return saveFileAs(`modulo-${ opts.type }-${ fileHash }.${ ext }`, text);
+    bundleAssets(callback) {
+        const { fetchBundleData } = this.modulo.registry.utils;
+        fetchBundleData(this.modulo, bundleData => {
+            //const results = this.rawAssetsArray;
+            const results = { js: [], css: this.rawAssetsArray.css };
+            results.js.push(this.modulo.assets.buildJavaScript());
+            for (const bundle of bundleData) { // Loop through bundle data
+                results[bundle.type].push(bundle.content);
+            }
+            callback(results.js.join('\n'), results.css.join('\n'));
+        });
     }
 
     registerStylesheet(text) {
@@ -971,14 +1000,9 @@ modulo.register('core', class AssetManager {
         }
     }
 
-    invoke(hash, args) {
-        this.invocations.push([ hash, JSON.stringify(args) ]);
-        args.push(this.modulo); // TODO: need to standardize Modulo dependency injection patterns
-        this.functions[hash].apply(window, args);
-    }
-
     appendToHead(tagName, codeStr) {
-        const doc = this.modulo.globals.document;
+        //const doc = this.modulo.globals.document;
+        const doc = window.document;
         const elem = doc.createElement(tagName);
         elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
         if (doc.head === null) {
@@ -1024,7 +1048,7 @@ modulo.register('core', class FetchQueue {
             this.queue[src] = [ callback ];
             // TODO: Think about if we want to keep cache:no-store
             //console.log('FETCH', src);
-            this.modulo.globals.fetch(src, { cache: 'no-store' })
+            window.fetch(src, { cache: 'no-store' })
                 .then(response => response.text())
                 .then(text => this.receiveData(text, label, src))
                 //.catch(err => console.error('Modulo Load ERR', src, err));
@@ -1133,8 +1157,7 @@ modulo.register('cpart', class Style {
     initializedCallback(renderObj) {
         const { component, style } = renderObj;
         if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
-            console.log('Shadow styling!');
-            const style = Modulo.globals.document.createElement('style');
+            const style = window.document.createElement('style');
             style.setAttribute('modulo-ignore', 'true');
             style.textContent = style.content;// `<style modulo-ignore>${style.content}</style>`;
             this.element.shadowRoot.append(style);
@@ -1178,8 +1201,6 @@ modulo.register('cpart', class Template {
 
 modulo.register('cpart', class StaticData {
     static prebuildCallback(modulo, conf) {
-        // TODO put into conf, make default to JSON, and make CSV actually
-        // correct + instantly useful (e.g. separate headers, parse quotes)
         const transforms = {
             csv: s => JSON.stringify(s.split('\n').map(line => line.split(','))),
             js: s => s,
@@ -1191,11 +1212,15 @@ modulo.register('cpart', class StaticData {
         delete conf.Content;
         conf.Hash = modulo.registry.utils.hash(code);
         modulo.assets.define(conf.FullName, code);
-        // TODO: Maybe evaluate and attach directly to conf here?
+        // TODO put into conf, make default to JSON, and make CSV actually
+        // correct + instantly useful (e.g. separate headers, parse quotes)
+        //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
     }
 
     static factoryCallback(renderObj, conf, modulo) {
-        // Now, actually run code in Script tag to do factory method
+        // Now, actually run code in Script tag to do factory method. By
+        // putting this in factory, each Component that uses the same -src will
+        // NOT share the data, but within each Component it will.
         return modulo.assets.require(conf.FullName);
     }
 });
@@ -1500,19 +1525,20 @@ modulo.register('engine', class Templater {
     }
 
     setup(text, conf) {
-        Object.assign(this, modulo.config.templater, conf);
-        this.filters = Object.assign({}, modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, modulo.registry.templateTags, this.tags);
+        Object.assign(this, this.modulo.config.templater, conf);
+        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
+        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = modulo.assets.require(this.Hash);
+            this.renderFunc = this.modulo.assets.require(this.Hash);
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
             this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
 
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
-            this.Hash = 'T' + Math.ceil(Math.random() * 100000000); // XXX
-            this.renderFunc = modulo.assets.define(this.Hash, this.compiledCode)();
+            const { hash } = this.modulo.registry.utils;
+            this.Hash = 'T' + hash(this.compiledCode);
+            this.renderFunc = this.modulo.assets.define(this.Hash, this.compiledCode)();
         }
     }
 
@@ -1530,7 +1556,7 @@ modulo.register('engine', class Templater {
 
     compile(text) {
         // const prepComment = token => truncate(escapejs(trim(token)), 80);
-        const { normalize } = modulo.registry.utils;
+        const { normalize } = this.modulo.registry.utils;
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
@@ -1575,7 +1601,7 @@ modulo.register('engine', class Templater {
     parseVal(string) {
         // Parses string literals, de-escaping as needed, numbers, and context
         // variables
-        const { cleanWord } = modulo.registry.utils;
+        const { cleanWord } = this.modulo.registry.utils;
         const s = string.trim();
         if (s.match(/^('.*'|".*")$/)) { // String literal
             return JSON.stringify(s.substr(1, s.length - 2));
@@ -2157,127 +2183,79 @@ modulo.register('engine', class Reconciler {
 modulo.register('util', function fetchBundleData(modulo, callback) {
     const query = 'script[src],link[rel=stylesheet]';
     const data = [];
-    const elems = Array.from(modulo.globals.document.querySelectorAll(query));
+    const elems = Array.from(window.document.querySelectorAll(query));
     for (const elem of elems) {
         const dataItem = {
             src: elem.src || elem.href,
             type: elem.tagName === 'SCRIPT' ? 'js' : 'css',
             content: null,
         };
+        elem.remove();
         // TODO: Add support for inline script tags..?
         data.push(dataItem);
         modulo.fetchQueue.enqueue(dataItem.src, text => {
             delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
             dataItem.content = text;
         });
-        elem.remove();
     }
-    //console.log('this is dataItems', data);
-    modulo.fetchQueue.enqueueAll(() => callback(data));
-});
-
-
-modulo.register('command', function build (modulo, opts = {}) {
-    const { buildhtml } = modulo.registry.commands;
-    opts.type = opts.bundle ? 'bundle' : 'build';
-    const pre = { js: [ 'window.hackIsBuild = true;\n' ], css: [] }; // Prefixed content
-    for (const bundle of (opts.bundle || [])) { // Loop through bundle data
-        pre[bundle.type].push(bundle.content);
-    }
-    // TODO: Clean this up:
-    if (opts.bundle) {
-        // Serialize parsed modulo definitions (less verbose)
-        pre.js.push('modulo.defs = ' + JSON.stringify(modulo.defs, null, 1) + ';');
-        pre.js.push('modulo.parentDefs = ' + JSON.stringify(modulo.parentDefs, null, 1) + ';');
+    if (Object.keys(modulo.fetchQueue.queue).length < 1) {
+        callback(data); // Synchronous route
     } else {
-        // Serialize fetch queue (more verbose, more similar to dev)
-        pre.js.push('modulo.fetchQueue.data = modulo.fetchQueue.data = ' +
-                    JSON.stringify(modulo.fetchQueue.data) + ';');
+        modulo.fetchQueue.enqueueAll(() => callback(data));
     }
-
-    pre.js.push('modulo.pushGlobal();'); // HAX XXX refs #11
-    pre.js.push(modulo.assets.buildModuleDefs()); // HAX XXX refs #11
-    opts.jsFilePath = modulo.assets.build('js', opts, pre.js.join('\n'));
-    opts.cssFilePath = modulo.assets.build('css', opts, pre.css.join('\n'));
-    //opts.jsInlineText = modulo.assets.getInlineJS(opts);
-    opts.jsInlineText = '';
-    opts.jsInlineText += modulo.assets.buildMain();
-    opts.htmlFilePath = buildhtml(modulo, opts);
-    setTimeout(() => {
-        document.body.innerHTML = `<h1><a href="?mod-cmd=${opts.type}">&#10227;
-            ${ opts.type }</a>: ${ opts.htmlFilePath }</h1>`;
-        if (opts.callback) {
-            opts.callback();
-        }
-    }, 0);
 });
 
-modulo.register('command', function bundle (modulo, opts = {}) {
-    const { build } = modulo.registry.commands;
-    const { fetchBundleData } = modulo.registry.utils;
-    fetchBundleData(modulo, bundle => build(modulo, Object.assign({ bundle }, opts)));
-});
 
 modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     // Scan document for modulo elements, attaching modulo-original-html=""
     // as needed, and clearing link / script tags that have been bundled
-    const doc = modulo.globals.document;
     const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
-    for (const elem of doc.querySelectorAll('*')) {
-        // TODO: As we are bundling together, create a src/href/etc collection
-        // to the compare against instead?
+    for (const elem of window.document.querySelectorAll('*')) {
         if (elem.tagName.toLowerCase() in bundledTags) {
-            if (elem.hasAttribute('modulo-asset') || opts.bundle) {
-                elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
-            }
-        } else if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
+            elem.remove();
+        }
+        /*
+            // TODO: As we are bundling together, create a src/href/etc collection
+            // to the compare against instead?
+            // TODO: Maybe remove bundle logic here, since we remove when bundling?
+        if (elem.hasAttribute('modulo-asset')) {
+            elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
+        }
+        */
+        if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
             elem.setAttribute('modulo-original-html', elem.originalHTML);
         }
     }
-    // TODO: Generate in a template of some sort instead!
-    const linkProps = { rel: 'stylesheet', href: opts.cssFilePath };
-    doc.head.append(Object.assign(doc.createElement('link'), linkProps));
-    const scriptProps = { src: opts.jsFilePath };
-    doc.body.append(Object.assign(doc.createElement('script'), scriptProps));
-    const inlineProps = { textContent: opts.jsInlineText };
-    doc.body.append(Object.assign(doc.createElement('script'), inlineProps));
-    //let inlineExtra = '<script>\n' + (opts.jsInlineText || '') + '\n</script>';
-    return '<!DOCTYPE HTML><html>' + doc.documentElement.innerHTML + '</html>';
+    let head = '<head>' + window.document.head.innerHTML;
+    let body = '<body>' + window.document.body.innerHTML;
+    head += `<link rel="stylesheet" href="${ opts.cssFilePath }" /></head>`;
+    body += `<script src="${ opts.jsFilePath }"></script>`;
+    body += `<script>${ opts.jsInlineText }</script></body>`;
+    return '<!DOCTYPE HTML><html>' + head + body + '</html>';
 });
 
-modulo.register('command', function buildhtml(modulo, opts = {}) {
-    const { saveFileAs, getBuiltHTML } = modulo.registry.utils;
-    const filename = window.location.pathname.split('/').pop() || 'index.html';
-    return saveFileAs(filename, getBuiltHTML(modulo, opts));
+modulo.register('command', function build (modulo, opts = {}) {
+    const { saveFileAs, getBuiltHTML, hash } = modulo.registry.utils;
+    modulo.assets.bundleAssets((js, css) => {
+        opts.jsInlineText = modulo.assets.buildMain();
+        opts.jsFilePath = saveFileAs(`modulo-build-${ hash(js) }.js`, js);
+        opts.cssFilePath = saveFileAs(`modulo-build-${ hash(css) }.css`, css);
+        const htmlFN = window.location.pathname.split('/').pop() || 'index.html';
+        opts.htmlFilePath = saveFileAs(htmlFN, getBuiltHTML(modulo, opts));
+        window.setTimeout(() => {
+            // TODO: Move this "refresh" into a generic utility
+            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
+                build</a>: ${ opts.htmlFilePath }</h1>`;
+            if (opts && opts.callback) {
+                opts.callback();
+            }
+        }, 0);
+    });
 });
 
-
-if (typeof document !== 'undefined' && document.head) { // Browser environ
-    Modulo.globals = window; // TODO, remove?
-    modulo.globals = window;
-    window.hackCoreModulo = new Modulo(modulo); // XXX
-    window.hackRunBlocking = (document.querySelectorAll('script[modulo]')).length === 1;
-    if (window.hackRunBlocking) {
-        // TODO - Cleanup this logic, need to determine advantages of running
-        // preprocess blocking vs not, and make more consistent / documented
-        modulo.loadFromDOM(document.head, null, true);
-        modulo.preprocessAndDefine();
-    } else if (!window.hackIsBuild) {
-        document.addEventListener('DOMContentLoaded', () => {
-            modulo.loadFromDOM(document.head, null, true);
-            modulo.preprocessAndDefine();
-        });
-    }
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
-}
-
-if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
+if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        // TODO: Better way to know if in built-version browser environ, this is terrible
-        const isProduction = document.querySelector(
-            'script[src*="modulo-build"],script[src*="modulo-bundle"]');
-        if (isProduction || window.hackIsbuild) {
+        if (window.moduloBuild) {
             return;
         }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
@@ -2308,4 +2286,14 @@ if (typeof document !== 'undefined' && !(window.hackIsBuild)) {
         }
     }));
 }
+
+if (typeof document !== 'undefined' && document.head) { // Browser environ
+    Modulo.globals = window; // TODO, remove?
+    modulo.globals = window;
+    window.hackCoreModulo = new Modulo(modulo); // XXX
+    modulo.start(window.moduloBuild);
+} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
+    exports = { Modulo, modulo };
+}
+
 
