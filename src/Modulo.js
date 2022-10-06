@@ -990,20 +990,6 @@ modulo.register('core', class AssetManager {
         });
     }
 
-    build(ext, opts, prefix = '') {
-        const { saveFileAs, hash } = this.modulo.registry.utils;
-        const text = prefix + modulo.assets.rawAssetsArray[ext].join('\n');
-        let fileHash; // XXX Refactor this
-        if (opts.type === 'js') {
-            // (quick hack: hashes are hashes of hashes)
-            const all = Object.keys(Object.assign({}, this.modules, this.nameToHash));
-            fileHash = hash(all.sort().join('|'));
-        } else {
-            fileHash = hash(text);
-        }
-        return saveFileAs(`modulo-${ opts.type }-${ fileHash }.${ ext }`, text);
-    }
-
     registerStylesheet(text) {
         const hash = this.modulo.registry.utils.hash(text);
         if (!(hash in this.stylesheets)) {
@@ -2220,7 +2206,7 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
 });
 
 
-modulo.register('util', function nu_getBuiltHTML(modulo, opts = {}) {
+modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     // Scan document for modulo elements, attaching modulo-original-html=""
     // as needed, and clearing link / script tags that have been bundled
     const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
@@ -2249,13 +2235,13 @@ modulo.register('util', function nu_getBuiltHTML(modulo, opts = {}) {
 });
 
 modulo.register('command', function build (modulo, opts = {}) {
-    const { saveFileAs, nu_getBuiltHTML, hash } = modulo.registry.utils;
+    const { saveFileAs, getBuiltHTML, hash } = modulo.registry.utils;
     modulo.assets.bundleAssets((js, css) => {
         opts.jsInlineText = modulo.assets.buildMain();
         opts.jsFilePath = saveFileAs(`modulo-build-${ hash(js) }.js`, js);
         opts.cssFilePath = saveFileAs(`modulo-build-${ hash(css) }.css`, css);
         const htmlFN = window.location.pathname.split('/').pop() || 'index.html';
-        opts.htmlFilePath = saveFileAs(htmlFN, nu_getBuiltHTML(modulo, opts));
+        opts.htmlFilePath = saveFileAs(htmlFN, getBuiltHTML(modulo, opts));
         window.setTimeout(() => {
             // TODO: Move this "refresh" into a generic utility
             window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
@@ -2265,46 +2251,6 @@ modulo.register('command', function build (modulo, opts = {}) {
             }
         }, 0);
     });
-});
-
-
-modulo.register('command', function bundle (modulo, opts = {}) {
-    const { build } = modulo.registry.commands;
-    const { fetchBundleData } = modulo.registry.utils;
-    fetchBundleData(modulo, bundle => build(modulo, Object.assign({ bundle }, opts)));
-});
-
-modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
-    // Scan document for modulo elements, attaching modulo-original-html=""
-    // as needed, and clearing link / script tags that have been bundled
-    const doc = window.document;
-    const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
-    for (const elem of doc.querySelectorAll('*')) {
-        // TODO: As we are bundling together, create a src/href/etc collection
-        // to the compare against instead?
-        if (elem.tagName.toLowerCase() in bundledTags) {
-            if (elem.hasAttribute('modulo-asset') || opts.bundle) {
-                elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
-            }
-        } else if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-            elem.setAttribute('modulo-original-html', elem.originalHTML);
-        }
-    }
-    // TODO: Generate in a template of some sort instead!
-    const linkProps = { rel: 'stylesheet', href: opts.cssFilePath };
-    doc.head.append(Object.assign(doc.createElement('link'), linkProps));
-    const scriptProps = { src: opts.jsFilePath };
-    doc.body.append(Object.assign(doc.createElement('script'), scriptProps));
-    const inlineProps = { textContent: opts.jsInlineText };
-    doc.body.append(Object.assign(doc.createElement('script'), inlineProps));
-    //let inlineExtra = '<script>\n' + (opts.jsInlineText || '') + '\n</script>';
-    return '<!DOCTYPE HTML><html>' + doc.documentElement.innerHTML + '</html>';
-});
-
-modulo.register('command', function buildhtml(modulo, opts = {}) {
-    const { saveFileAs, getBuiltHTML } = modulo.registry.utils;
-    const filename = window.location.pathname.split('/').pop() || 'index.html';
-    return saveFileAs(filename, getBuiltHTML(modulo, opts));
 });
 
 if (typeof document !== 'undefined') {
