@@ -13,12 +13,11 @@
 
 <blockquote>
 <p><strong>Custom CParts?</strong> Here we describe core CParts used by
-component developers, which are sufficient for most common use-cases.
-However, if you are instead looking to extend this core functionality with
-custom CParts written in JavaScript, refer to the
-<a href="/demos/#experiments">Custom Component Part examples on the demos
-page</a>, at least until more thorough CPart API documentation is
-developed.</p>
+component developers, which are sufficient for most common use-cases.  However,
+if you are instead looking to extend this core functionality with custom CParts
+written in JavaScript, refer to the <a href="/demos/#experiments">Custom
+Component Part examples on the demos page</a>, at least until more thorough
+CPart API documentation is developed.</p>
 </blockquote>
 
 <p>The central concept to Modulo is that of <em>Component Parts</em>. Because
@@ -42,14 +41,20 @@ order within a given <em>Component</em> definition:</p>
     <li>Style</li>
 </ol>
 
-<p>The rationale for this ordering is to put Props and Template first since
-they are often the first CParts that are important to read when trying to
-understand or debug the behavior of a Component, while putting Style last as
-it's typically the least important to read. Note that ordering makes a
-difference: They will be processed in the order given, and in the case of
-duplicate CParts, "whoever gets the last word in wins", or the final CPart is
-typically what takes precedence (although for custom CParts that may be
-different).</p>
+<p>The rationale for this ordering is to put <em>Props</em> and
+<em>Template</em> first since they are often the first CParts that are
+important to read when trying to understand or debug the behavior of a
+<em>Component</em>, while putting <em>Style</em> last as it's typically the
+least important to read. Note that ordering makes a difference: They will be
+processed in the order given.</p>
+
+<p>Typically, you will not need to have more than one of the same type of CPart
+in a given component.  However, in some cases for particular CParts it might
+make sense, such as to mix in multiple <em>Styles</em> into a single
+<em>Component</em>.  In the case of duplicate CParts of the same type, often
+the behavior is that "whoever gets the last word in wins", or the configuration
+specified by the final CPart takes precedence (although this depends on the
+CPart in question).</p>
 
 
 
@@ -102,20 +107,19 @@ interface with it.</p>
     <code>update</code> stages, the "patches" property is exposed to allow
     access to or modification of the patches that the Component intends to
     apply. This is an advanced feature that gives fine-grained control to how
-    rendering works, and is rarely useful. For example, you could use this
-    property to "intercept" the patches that are about to be applied to your
-    component while re-rendering, and, for an example, forbid the removal of
-    attributes by deleting all patches with <em>"removeAttribute"</em>.
-    all patches  This is in
-    the format of an Array. Each item in the Array is itself a 4-Array (Array
-    of length 4), in the following format:
-    <code>[element, method, arg1, arg2]</code>.
+    rendering works, and thus is only useful in rare situations where that
+    control is needed. For example, you could use this property to "intercept"
+    the patches that are about to be applied to your component while
+    re-rendering, and, for an example, forbid the removal of attributes by
+    deleting all patches with <em>"removeAttribute"</em>. This is in the format
+    of an Array. Each item in the Array is itself a 4-Array (Array of length
+    4), in the following format: <code>[element, method, arg1, arg2]</code>.
     For example, to do a <em>"removeAttribute"</em> patch on an "id" attribute
     for a given "target element" (a real DOM node on the page somewhere), it
     might be
-    <code>[(ref to "target element"), "removeAttribute", "id", undefined]</code>
-    If the Array is empty, then no
-    patches will be applied. </li>
+<code>[(ref&nbsp;to&nbsp;"target element"),&nbsp;"removeAttribute",&nbsp;"id",&nbsp;undefined]</code>
+If the Array is empty, then no patches will be applied.
+    </li>
 </ul>
 
 
@@ -197,7 +201,9 @@ They take the following attributes:</p>
             shadow mode should work exactly the same as regular. That said,
             <em>Style</em> CParts will still be automatically scoped to the
             component, but will use the shadowDOM feature to more strictly
-            enforce that scoping. For a component by itself, switching from
+            enforce that scoping. Note that shadowDOM CSS will <em>not</em> get
+            included in the CSS file bundle, but instead will be bundled in the
+            JavaScript source code. For a component by itself, switching from
             "shadow" to "regular" or vice-versa shouldn't change behavior at
             all. It's only useful when CSS from one component or a third party
             CSS library is "getting inside" your other components in an
@@ -379,16 +385,17 @@ text='
 <h4>Using within embedded component definitions</h4>
 
 <p>Problems arise when attempting to include a <em>Script</em> CPart within an
-embedded Component definition, e.g. one that is being defined within the script
-tag of the same HTML file that it is being used on. This is because the
-<code>&lt;/Script&gt;</code> tag will end up closing off the outer
-<code>script</code> tag early, due to HTML syntax. The ideal solution is to
-simply move the component to a separate library file, included with
-<code>-src=</code> syntax, since that is preferred in general, and solves other
-issues as well (e.g. templating instructions in HTML tags). However, if you
-simply must include a <em>Script</em> tag in an embedded component definition
-you can write <code>&lt;cpart Script&gt;</code> as the opening tag, and
-<code>&lt;/cpart&gt;</code> as the closing tag.  See the following:</p>
+embedded Component <code>&lt;script&nbsp;Modulo&gt;</code>definition, e.g. one
+that is being defined within the script tag of the same HTML file that it is
+being used on. This is because the <code>&lt;/Script&gt;</code> tag will end up
+closing off the outer <code>script</code> tag early, due to HTML syntax. The
+ideal solution is to simply move the component to a separate library file,
+included with <code>-src=</code> syntax, since that is preferred in general,
+and solves other issues as well (e.g. templating instructions in HTML tags).
+However, if you simply must include a <em>Script</em> tag in an embedded
+component definition you can write <code>&lt;cpart Script&gt;</code> as the
+opening tag, and <code>&lt;/cpart&gt;</code> as the closing tag.  See the
+following:</p>
 
 <mws-Demo
 text='
@@ -402,6 +409,20 @@ text='
 '></mws-Demo>
 
 
+<p>Another alternative is to use the slightly more verbose
+<code>&lt;template&nbsp;Modulo&gt;</code> instead:</p>
+
+<mws-Demo
+text='
+<script src="https://modulojs.org/js/Modulo.js"></script>
+<template Modulo>
+    <Component name="ButtonExample">
+        <Script>
+            console.log("Hello, world!");
+        </Script>
+    </Component>
+</script>
+'></mws-Demo>
 
 <h3>Defining event callbacks</h3>
 
@@ -444,8 +465,9 @@ you should avoid direct DOM manipulation whenever you can, instead using a
 <h3>Static execution context</h3>
 
 <p>The contents of the script tag is executed <em>exactly once</em> during the
-"factory" phase. This means that that any loose variables defined will be
-"static", or shared between all instances of that component.</p>
+"factory" phase that prepares a component class. This means that that any loose
+variables defined will be "static", or shared between all instances of that
+component.</p>
 
 <mws-Demo
 text='
@@ -453,19 +475,17 @@ text='
     <button @click:=script.increment>Click me</button>
 </Template>
 <Script>
-    // "Static" execution context. We have access to 3 variables:
-    console.log("Modulo library instance:", Modulo);
-    console.log("Any modules defined above in this file, or null:", module);
-    console.log("My factory instance:", factory);
+    // "Static" execution context. We only have access to global variables:
+    console.log("The global modulo instance is here:", modulo);
+    console.log("But element is undefined:", element);
 
-    // (Note: CParts are processed top-to-bottom, meaning CParts defined after
-    // the <script> tag will not have been initialized.)
-
-    // Variables defined in this "static" context are shared:
+    // Variables defined in this "static" context are shared globally.
+    // Nonetheless, this is run in a function, so it still is private.
     let count = 0;
+
     function increment() {
         count++;
-        console.log("Shared count between buttons:", count);
+        console.log("Shared count between different components:", count);
     }
 </Script>
 '></mws-Demo>
@@ -498,15 +518,16 @@ invoked during it's namesake lifecycle phase:
 </p>
 
 <p>Note that there is no "factory" callback, since the <code>factory</code>
-phase is when the code in the script tag itself gets executed.</p>
+phase is when the code in the script tag itself gets executed. That is to say,
+the entire script tag is the factory phase. See previous section for more on
+this.</p>
 
 <h3>Callback execution context: The "callback wrapper"</h3>
 
 <blockquote>
-<p><strong>Implicit Script CPart</strong>
-Modulo has a rule: "Explicit is better than implicit". Modulo has another rule:
-"It's okay to break rules for good reasons". The <em>Script</em> CPart is one
-such case. It has an implicit or "magical" feature of setting up execution
+<p><strong>Implicit Script CPart</strong> Mostly, Modulo follows the rule:
+"Explicit is better than implicit".  The <em>Script</em> CPart, however, is an
+exception.  It has an implicit or "magical" feature of setting up execution
 context for each callback function before that callback function is run.</p>
 </blockquote></p>
 

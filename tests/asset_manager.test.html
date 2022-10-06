@@ -1,9 +1,7 @@
 <!--
     These tests are useful as unit tests testing the AssetManager core class
 -->
-<Component name="AssetManager">
-
-<TestSuite>
+<Component name="AssetManager"><TestSuite solo>
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -11,6 +9,15 @@
     </script>
 
     <script name="wrapDefine creates an assignment">
+        const pre = 'window.moduloBuild';
+        const assets = new modulo.registry.core.AssetManager(modulo);
+        const actual = assets.wrapDefine("x1bqrlhi", 'Test_x_x_x', 'return "testing123"', pre);
+        const expected = 'window.moduloBuild.modules["x1bqrlhi"] = ' +
+                         'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
+        assert: actual === expected
+    </script>
+
+    <script name="wrapDefine defaults to modulo.assets">
         const assets = new modulo.registry.core.AssetManager(modulo);
         const actual = assets.wrapDefine("x1bqrlhi", 'Test_x_x_x', 'return "testing123"');
         const expected = 'window.modulo.assets.modules["x1bqrlhi"] = ' +
@@ -59,11 +66,15 @@
     <script name="assets.buildModuleDefs creates expected string for a single registered thing">
         const assets = new modulo.registry.core.AssetManager(modulo);
         assets.define('Test_x_x_x', 'return "testing123"');
-        const actual = assets.buildModuleDefs();
-        const expected = 'Object.assign(modulo.assets.nameToHash, ' +
-                            '{\n "Test_x_x_x": "x1bqrlhi"\n});\n\n' +
-                         'window.modulo.assets.modules["x1bqrlhi"] = ' +
-                         'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
+        const actual = assets.buildModuleDefs().trim();
+        const expected = `
+window.moduloBuild.modules["x1bqrlhi"] = function Test_x_x_x (modulo) {
+return "testing123"
+};
+window.moduloBuild.nameToHash = {
+ "Test_x_x_x": "x1bqrlhi"
+};
+`.trim()
         assert: actual === expected
     </script>
 
@@ -84,8 +95,14 @@
             mod2.config = deepClone(originalConfig, modulo);
             mod2.assets = new mod2.registry.core.AssetManager(mod2);
             mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
-            const customElements = { define: () => {} };
-            const fakeWindow = { customElements, modulo: mod2 };
+            const customElements = {
+                define: (tagName, cls) => {
+                    customElements.elemClasses[tagName] = cls;
+                },
+                elemClasses: {},
+            };
+            const setTimeout = cb => cb(); // Synchronous
+            const fakeWindow = { customElements, modulo: mod2, setTimeout };
 
             // Patch appendToHead so it doesn't "escape" (TODO: Will not be necessary for ModuloVM)
             delete mod2.assets.appendToHead;
@@ -95,12 +112,15 @@
                 }
             };
 
+            mod2._customElements = customElements;
             if (callback) {
                 callback(mod2, fakeWindow);
+                if (fakeWindow.moduloBuild) {
+                    mod2.start(fakeWindow.moduloBuild);
+                }
             }
             return mod2;
         }
-
 
         window._buildAndRun = function (callback) {
             // Let's make a fresh modulo to do the initial loading (e.g. the
@@ -114,6 +134,62 @@
             const runBuiltJavaScript = new Function('modulo', 'window', code);
             const mod2 = _prepIsolatedModulo(runBuiltJavaScript);
             return mod2; // return instance 2 for iso checks
+        };
+
+        window._buildCommandAndRun = function (shouldRun, callback) {
+            const mod = _prepIsolatedModulo(callback); // (ditto)
+            mod.preprocessAndDefine();
+            const files = [];
+            mod.register('util', function saveFileAs (filename, text) {
+                if (!shouldRun) {
+                    // Censor hashes so the tests aren't so fragile
+                    filename = filename.replace(/(\-x[a-z0-9]+)\.(js|css)$/, '-xxxxxxxx.$2');
+                }
+                files.push({ filename, text });
+            });
+            mod.fetchQueue.enqueue = (src, callback) => {
+                callback('/* js code for (' + src + ') */\n');
+            };
+            const opts = {};
+            modulo.registry.commands.nu_build(mod, opts); // Build, synchronously
+            if (!shouldRun) {
+                return files;
+            }
+            // Squash js files, and then add to the end the inline text
+            let code = files.filter(({ filename }) => filename.endsWith('js'))
+                        .map(({ text }) => text).join('');
+            code += opts.jsInlineText || '';
+
+            const runBuiltJavaScript = new Function('modulo', 'window', code);
+            const mod2 = _prepIsolatedModulo(runBuiltJavaScript);
+            mod2.files = files;
+            return mod2; // return instance 2 for iso checks
+        };
+
+        window._componentText = (
+            '<Component name="TestA"><Template>aaa</Template></Component>' + 
+            '<Component name="TestB"><Template>bbb</Template></Component>'
+        );
+        window._getRelevantInfoForComponentTexts = (mod2) => {
+            const actual1 = JSON.stringify(Array.from(Object.keys(mod2.defs)));
+            const expected1 = JSON.stringify([ 'x', 'x_TestA' , 'x_TestB' ]);
+            let actual2a = null;
+            let actual2b = null;
+            let tName = '';
+            if (mod2.defs.x_TestA && mod2.defs.x_TestA.length) {
+                actual2a = mod2.defs.x_TestA.length;
+                tName = mod2.defs.x_TestA[0].Hash; // TODO, update when name based
+            }
+            if (mod2.defs.x_TestB && mod2.defs.x_TestB.length) {
+                actual2b = mod2.defs.x_TestB.length;
+            }
+            const hash = mod2.assets.nameToHash[tName] || '';
+            const defaultFunc = a => b => '';
+            const moduleFunc = mod2.assets.modules[hash] || defaultFunc;
+            const templateFunc = moduleFunc(modulo);
+            const actual4 = templateFunc({});
+            const expected4 = 'aaa';
+            return { actual1, expected1, actual2a, actual2b, hash, actual4, expected4 };
         };
         assert: modulo && modulo.assets && modulo.assets.buildJavaScript
     </script>
@@ -136,37 +212,83 @@
 
     <script name="assets.buildJavaScript builds defs">
         const mod2 = window._buildAndRun(mod => {
-            mod.loadString('<Component name="TestA"><Template>aaa</Template></Component>' + 
-                           '<Component name="TestB"><Template>bbb</Template></Component>');
+            mod.loadString(window._componentText);
         });
-        // Now ensure it correctly created 2 items, and the templates
-        // registered hash matches a name as well
-        const actual1 = JSON.stringify(Array.from(Object.keys(mod2.defs)));
-        const expected1 = JSON.stringify([ 'x', 'x_TestA' , 'x_TestB' ]);
-        let actual2a = null;
-        let actual2b = null;
-        let tName = '';
-        if (mod2.defs.x_TestA && mod2.defs.x_TestA.length) {
-            actual2a = mod2.defs.x_TestA.length;
-            tName = mod2.defs.x_TestA[0].Hash; // TODO, update when name based
-        }
-        if (mod2.defs.x_TestB && mod2.defs.x_TestB.length) {
-            actual2b = mod2.defs.x_TestB.length;
-        }
-        const hash = mod2.assets.nameToHash[tName] || '';
-        const defaultFunc = a => b => '';
-        const moduleFunc = mod2.assets.modules[hash] || defaultFunc;
-        const templateFunc = moduleFunc(modulo);
-        const actual4 = templateFunc({});
-        const expected4 = 'aaa';
+
+        const { actual1, expected1, actual2a, actual2b, hash, actual4,
+                expected4 } = window._getRelevantInfoForComponentTexts(mod2);
+        assert: actual1 === expected1 && actual2a === 1 && actual2b === 1 && hash in mod2.assets.modules && actual4 === expected4
+    </script>
+
+    <script name="commands.build produces files with expected names and sizes">
+        const files = window._buildCommandAndRun(false, mod => {
+            mod.loadString(window._componentText);
+        });
+        const expected1 = JSON.stringify([
+            'modulo-build-xxxxxxxx.js',
+            'modulo-build-xxxxxxxx.css',
+            'index.html',
+        ]);
+        const actual1 = JSON.stringify(files.map(({ filename }) => filename));
+        const actual2 = files.map(({ text }) => text.length);
+        assert: expected1 === actual1 && actual2[0] > 3000 && actual2[1] === 0 && actual2[2] > 3000
+    </script>
+
+
+    <script name="commands.build produces expected structure when loaded">
+        const mod2 = window._buildCommandAndRun(true, mod => {
+            mod.loadString(window._componentText);
+        });
+
+        const { actual1, expected1, actual2a, actual2b, hash, actual4,
+                expected4 } = window._getRelevantInfoForComponentTexts(mod2);
         assert: actual1 === expected1 && actual2a === 1 && actual2b === 1 && hash in mod2.assets.modules && actual4 === expected4
     </script>
 
 
+    <script name="commands.build registers expected classes">
+        const mod2 = window._buildCommandAndRun(true, mod => {
+            mod.loadString(window._componentText);
+        });
+
+        const elemClasses = mod2._customElements.elemClasses;
+        const testA = elemClasses['x-testa'];
+        const testB = elemClasses['x-testb'];
+        assert: testA && testB && testA.name === '_TestA_' && testB.name === '_TestB_'
+    </script>
+
+
+    <script name="commands.build registers classes that can render and mount">
+        const mod2 = window._buildCommandAndRun(true, mod => {
+            mod.loadString(window._componentText);
+        });
+
+        const elemClasses = mod2._customElements.elemClasses;
+        const testA = elemClasses['x-testa'];
+        const testB = elemClasses['x-testb'];
+        // NOTE: This is to prevent real browsers from throwing an error
+        const uuTagA = 'test-x' + Math.ceil(Math.random() * 100000000);
+        const uuTagB = 'test-x' + Math.ceil(Math.random() * 100000000);
+        window.customElements.define(uuTagA, testA);
+        window.customElements.define(uuTagB, testB);
+        //////////////////////////////////
+        const doc = window.document.implementation.createHTMLDocument('testworld');
+        const head = doc.createElement('head'); // Mock head
+        const body = doc.createElement('body'); // Mock body
+        doc.documentElement.appendChild(head);
+        doc.documentElement.appendChild(body);
+        const instA = new testA();
+        const instB = new testB();
+        doc.body.appendChild(instA);
+        doc.body.appendChild(instB);
+        instA.parsedCallback(); // Ensure parsedCallback called synchronously
+        instB.parsedCallback(); // Ensure parsedCallback called synchronously
+        instA.parsedCallback = () => {}; // Prevent double calling
+        instB.parsedCallback = () => {}; // Prevent double calling
+        assert: instA.isModulo && instB.isModulo && instA.innerHTML === 'aaa' && instB.innerHTML === 'bbb';
+    </script>
+
 </Test>
 
 
-</TestSuite>
-
-</Component>
-
+</TestSuite></Component>

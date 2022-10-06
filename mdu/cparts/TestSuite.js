@@ -541,7 +541,7 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
     if (!failure && !omission && success) {
         console.log('%c     OK    ', 'background-color: green');
         console.log(`${success} assertions passed`);
-        if (opts.callback) {
+        if (opts && opts.callback) {
             opts.callback(true);
         }
         return true;
