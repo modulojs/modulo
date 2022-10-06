@@ -2217,7 +2217,6 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
             dataItem.content = text;
         });
     }
-    //console.log('this is dataItems', data);
     //modulo.fetchQueue.enqueueAll(() => callback(data));
     modulo.fetchQueue.wait(() => callback(data));
 });
@@ -2228,17 +2227,18 @@ modulo.register('util', function nu_getBuiltHTML(modulo, opts = {}) {
     // as needed, and clearing link / script tags that have been bundled
     const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
     for (const elem of window.document.querySelectorAll('*')) {
+        /*
         if (elem.tagName.toLowerCase() in bundledTags) {
             elem.remove();
-            /*
             // TODO: As we are bundling together, create a src/href/etc collection
             // to the compare against instead?
             // TODO: Maybe remove bundle logic here, since we remove when bundling?
             if (elem.hasAttribute('modulo-asset') || opts.bundle) {
                 elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
             }
-            */
-        } else if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
+        } else 
+        */
+        if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
             elem.setAttribute('modulo-original-html', elem.originalHTML);
         }
     }

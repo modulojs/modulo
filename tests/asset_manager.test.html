@@ -1,7 +1,8 @@
 <!--
     These tests are useful as unit tests testing the AssetManager core class
+    and "build" command
 -->
-<Component name="AssetManager"><TestSuite solo>
+<Component name="AssetManager"><TestSuite>
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -137,6 +138,16 @@ window.moduloBuild.nameToHash = {
         };
 
         window._buildCommandAndRun = function (shouldRun, callback) {
+            ///////////////////////////////////////////////////
+            // HACK: Normalize up script / link tags in REAL window (test environ)
+            const query = 'script[src],link[rel=stylesheet]';
+            const elems = Array.from(window.document.querySelectorAll(query));
+            for (const elem of elems) { elem.remove() }
+            //window.document.head.innerHTML += '<link rel="stylesheet" href="./testing123.css" />';
+            window.document.body.innerHTML +=  '<script src="/foo/testing123.js"></' + 'script>';
+            window.document.body.innerHTML +=  '<script src="http://bar.com/testing456.js"></' + 'script>';
+            ///////////////////////////////////////////////////
+
             const mod = _prepIsolatedModulo(callback); // (ditto)
             mod.preprocessAndDefine();
             const files = [];
@@ -146,6 +157,7 @@ window.moduloBuild.nameToHash = {
                     filename = filename.replace(/(\-x[a-z0-9]+)\.(js|css)$/, '-xxxxxxxx.$2');
                 }
                 files.push({ filename, text });
+                return `./${ filename }`;
             });
             mod.fetchQueue.enqueue = (src, callback) => {
                 callback('/* js code for (' + src + ') */\n');
@@ -234,6 +246,32 @@ window.moduloBuild.nameToHash = {
         assert: expected1 === actual1 && actual2[0] > 3000 && actual2[1] === 0 && actual2[2] > 3000
     </script>
 
+    <script name="commands.build produces html file with expected content">
+        const files = window._buildCommandAndRun(false, mod => {
+            mod.loadString(window._componentText);
+        });
+        const [ js, css, html ] = files.map(({ text }) => text);
+        const htmlE1 = '<script src="./modulo-build-xxxxxxxx.js"></s' + 'cript>';
+        const htmlE2 = '<link rel="stylesheet" href="./modulo-build-xxxxxxxx.css" /></head>';
+        const expectedInline = (
+            '<script>window.moduloBuild && modulo.start(window.moduloBuild);\n' +
+            'modulo.assets.require("x_TestA");\n' +
+            'modulo.assets.require("x_TestB");</sc' + 'ript></body>'
+        );
+        assert: html .includes(htmlE1) && html .includes(htmlE2) && html .includes(expectedInline)
+    </script>
+
+    <script name="commands.build produces js file with expected content">
+        const files = window._buildCommandAndRun(false, mod => {
+            mod.loadString(window._componentText);
+        });
+        const [ js, css, html ] = files.map(({ text }) => text);
+        const jsE1 = `js code for (${ window.location.protocol }//${ window.location.host }/foo/testing123.js)`;
+        const jsE2 = 'js code for (http://bar.com/testing456.js)';
+        const jsE3 = 'OUT.push("aaa");'; // Ensure the template for TestA got compiled and included
+        const jsE4 = 'OUT.push("bbb");'; // Ensure the template for TestB got compiled and included
+        assert: js .includes(jsE1) && js .includes(jsE1) && js .includes(jsE3) && js .includes(jsE4)
+    </script>
 
     <script name="commands.build produces expected structure when loaded">
         const mod2 = window._buildCommandAndRun(true, mod => {
