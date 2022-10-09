@@ -210,20 +210,21 @@ window.moduloBuild.nameToHash = {
         };
 
         window._getRelevantInfoForComponentTexts = (mod2) => {
-            const actual1 = JSON.stringify(Array.from(Object.keys(mod2.defs)));
-            const expected1 = JSON.stringify([ 'x', 'TestA' , 'TestB' ]);
+            const actual1 = JSON.stringify(Array.from(Object.keys(mod2.definitions)));
+            const expected1 = JSON.stringify([ 'TestA' , 'TestB', 'TestA_template', 'TestB_template' ]);
             let actual2a = null;
             let actual2b = null;
             let tName = '';
-            if (mod2.defs.TestA && mod2.defs.TestA.length) {
-                actual2a = mod2.defs.TestA.length;
-                tName = mod2.defs.TestA[0].Hash; // TODO, update when name based
+
+            if (mod2.definitions.TestA && mod2.definitions.TestA.ChildrenNames) {
+                actual2a = mod2.definitions.TestA.ChildrenNames.length;
+                tName = mod2.definitions.TestA.ChildrenNames[0];
             }
-            if (mod2.defs.TestB && mod2.defs.TestB.length) {
-                actual2b = mod2.defs.TestB.length;
+            if (mod2.definitions.TestB && mod2.definitions.TestB.ChildrenNames) {
+                actual2b = mod2.definitions.TestB.ChildrenNames.length;
             }
             const hash = mod2.assets.nameToHash[tName] || '';
-            const defaultFunc = a => b => '';
+            const defaultFunc = a => b => `(COULD NOT FIND template "${tName}")`;
             const moduleFunc = mod2.assets.modules[hash] || defaultFunc;
             const templateFunc = moduleFunc(modulo);
             const actual4 = templateFunc({});

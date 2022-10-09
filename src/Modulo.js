@@ -377,8 +377,8 @@ modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
     if (UNIFIED_DEFINITIONS === 1) {
         const X = 'x';
         const parentNS = conf.Parent || X; // Cast falsy to 'x'
-        modulo.defs[parentNS] = modulo.defs[parentNS] || []; // Prep empty arr
-        modulo.defs[parentNS].push(conf); // Push to Namespace array
+        //modulo.defs[parentNS] = modulo.defs[parentNS] || []; // Prep empty arr
+        //modulo.defs[parentNS].push(conf); // Push to Namespace array
     }
 });
 
@@ -1078,9 +1078,9 @@ modulo.register('core', class AssetManager {
     }
 
     buildConfigDef() {
-        const defs = JSON.stringify(this.modulo.definitions, null, 1);
         let s = '';
         if (UNIFIED_DEFINITIONS) {
+            const defs = JSON.stringify(this.modulo.definitions, null, 1);
             s += `window.moduloBuild.definitions = ${ defs };\n`;
         }
         if (!UNIFIED_DEFINITIONS || UNIFIED_DEFINITIONS === 1) {
@@ -1695,7 +1695,11 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = this.modulo.assets.require(this.Hash);
+            if (UNIFIED_DEFINITIONS) {
+                this.renderFunc = this.modulo.assets.require(this.DefinitionName);
+            } else {
+                this.renderFunc = this.modulo.assets.require(this.Hash);
+            }
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
@@ -1704,7 +1708,11 @@ modulo.register('engine', class Templater {
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
             const { hash } = this.modulo.registry.utils;
             this.Hash = 'T' + hash(this.compiledCode);
-            this.renderFunc = this.modulo.assets.define(this.Hash, this.compiledCode)();
+            if (UNIFIED_DEFINITIONS) {
+                this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
+            } else {
+                this.renderFunc = this.modulo.assets.define(this.Hash, this.compiledCode)();
+            }
         }
     }
 
