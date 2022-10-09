@@ -6,14 +6,15 @@
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
     function getComponentDefs(path) {
-        if (modulo.parentDefs.x_x.cachedComponentDefs) {
+        const confDef = modulo.definitions.modulo_configuration;
+        if (confDef.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this
-            if (path in modulo.parentDefs.x_x.cachedComponentDefs) {
-                return modulo.parentDefs.x_x.cachedComponentDefs[path];
+            if (path in confDef.cachedComponentDefs) {
+                return confDef.cachedComponentDefs[path];
             }
         } else {
-            modulo.parentDefs.x_x.cachedComponentDefs = {};
+            confDef.cachedComponentDefs = {};
         }
         if (!(path in modulo.fetchQueue.data)) {
             console.error('ERROR: Have not loaded:', path);
@@ -41,7 +42,7 @@
                 currentComponent += line + '\n';
             }
         }
-        modulo.parentDefs.x_x.cachedComponentDefs[path] = componentTexts;
+        confDef.cachedComponentDefs[path] = componentTexts;
         return componentTexts;
     }
     modulo.register('util', getComponentDefs);

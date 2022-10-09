@@ -5,8 +5,6 @@ window.LEG = LEGACY;
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 
-const UNIFIED_DEFINITIONS = true;
-
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
         // Note: parentModulo arg is being used by mws/Demo.js
@@ -14,7 +12,7 @@ window.Modulo = class Modulo {
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
 
-        // New unified "definitions" structure:
+        this.config = {};
         this.definitions = {};
 
         if (parentModulo) {
@@ -27,7 +25,6 @@ window.Modulo = class Modulo {
             this.assets = parentModulo.assetManager;
             this.globals = parentModulo.globals;
         } else {
-            this.config = {};
             this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
         }
     }
@@ -56,8 +53,6 @@ window.Modulo = class Modulo {
             }
             this.assets.modules = moduloBuild.modules;
             this.assets.nameToHash = moduloBuild.nameToHash;
-            this.defs = moduloBuild.defs;
-            this.parentDefs = moduloBuild.parentDefs;
             this.definitions = moduloBuild.definitions;
             moduloBuild.loadedBy = this.id;
             return;
@@ -121,31 +116,23 @@ window.Modulo = class Modulo {
         for (const node of Array.from(elem.children).filter(isModulo)) {
             const conf = this.loadPartialConfigFromNode(node);
             partialConfs.push(conf); // Push to return Array
-            if (UNIFIED_DEFINITIONS) {
-                conf.DefinedAs = conf.Name || null; // -name only, null otherwise
-                conf.DefName = conf.Name || null; // -name only, null otherwise
-                conf.Parent = conf.Parent || parentName;
-                let changed = true;
-                while (changed) {
-                    const list = conf.ConfLoaders || [ 'DefinedAs' ];
-                    changed = this.applyPreprocessor(conf, list);
-                }
+            conf.DefinedAs = conf.Name || null; // -name only, null otherwise
+            conf.DefName = conf.Name || null; // -name only, null otherwise
+            conf.Parent = conf.Parent || parentName;
+            let changed = true;
+            while (changed) {
+                const list = conf.ConfLoaders || [ 'DefinedAs' ];
+                changed = this.applyPreprocessor(conf, list);
             }
         }
         return partialConfs;
     }
 
-    setupParents() {
-        if (UNIFIED_DEFINITIONS) {
-            return;
-        }
-    }
+    setupParents() { }
 
     lifecycle(names) {
         this.setupParents(); // Ensure sync'ed up, TODO rm
         const lcObj = this.registry.cparts;
-        //const defArray = Array.from(Object.values(this.defs)).flat();
-        //const defArray = Array.from(Object.values(this.defs)).flat();
         const defArray = Object.values(this.definitions);
         const patches = this.getLifecyclePatches(lcObj, names, defArray);
         this.applyPatches(patches);
@@ -208,11 +195,9 @@ window.Modulo = class Modulo {
             this.setupParents(); // Ensure sync'ed up (TODO clean up)
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
-            if (UNIFIED_DEFINITIONS) {
-                for (const conf of Object.values(this.definitions)) {
-                    const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
-                    changed = changed || this.applyPreprocessor(conf, preprocessors);
-                }
+            for (const conf of Object.values(this.definitions)) {
+                const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
+                changed = changed || this.applyPreprocessor(conf, preprocessors);
             }
         }
         if (Object.keys(this.fetchQueue.queue).length === 0) {
@@ -316,11 +301,9 @@ modulo.register('confPreprocessor', function src (modulo, conf, value) {
 });
 
 modulo.register('confPreprocessor', function content (modulo, conf, value) {
-    if (UNIFIED_DEFINITIONS) {
-        modulo.loadString(value, conf.DefinitionName);
-        if (value) {
-            conf.Prebuild = conf.DefinitionName; // XXX
-        }
+    modulo.loadString(value, conf.DefinitionName);
+    if (value) {
+        conf.Prebuild = conf.DefinitionName; // XXX
     }
     conf.Hash = modulo.registry.utils.hash(value);
 });
@@ -350,40 +333,29 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
 
     //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
     conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
-    let libInfo;
-    if (UNIFIED_DEFINITIONS) {
-        libInfo = modulo.definitions[conf.Parent || ''] || {};
-    }
+    let libInfo = modulo.definitions[conf.Parent || ''] || {};
     conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace || 'x';
     conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
 
-    let cpartTypes;
-    if (UNIFIED_DEFINITIONS) {
-        if (!conf.ChildrenNames || conf.ChildrenNames.length === 0) {
-            console.warn('Empty conf.ChildrenNames specified:', conf.DefinitionName);
-            return;
-        }
-        const defs = conf.ChildrenNames.map(name => modulo.definitions[name]);
-        cpartTypes = new Set(defs.map(({ Type }) => Type));
+    if (!conf.ChildrenNames || conf.ChildrenNames.length === 0) {
+        console.warn('Empty conf.ChildrenNames specified:', conf.DefinitionName);
+        return;
     }
+    const defs = conf.ChildrenNames.map(name => modulo.definitions[name]);
+    const cpartTypes = new Set(defs.map(({ Type }) => Type));
     const cpartNameString = Array.from(cpartTypes).join(', ');
     const className = '_' + Name + '_';
 
     const code = (`
         let conf;
-        if (UNIFIED_DEFINITIONS) {
-            conf = modulo.definitions['${ DefinitionName }'];
-            if (!conf) {
-                console.log('ERROR: Empty ${ DefinitionName } conf:', conf, Object.keys(modulo.definitions));
-            }
+        conf = modulo.definitions['${ DefinitionName }'];
+        if (!conf) {
+            console.log('ERROR: Empty ${ DefinitionName } conf:', conf, Object.keys(modulo.definitions));
         }
         if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
 
         const { ${ cpartNameString } } = modulo.registry.cparts;
-        let confArray;
-        if (UNIFIED_DEFINITIONS) {
-            confArray = conf.ChildrenNames.map(name => modulo.definitions[name]);
-        }
+        const confArray = conf.ChildrenNames.map(name => modulo.definitions[name]);
 
         const cpartClasses = { ${ cpartNameString } };
         const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
@@ -394,9 +366,7 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
                 this.defHash = '${ Hash }';
                 this.initRenderObj = initRenderObj;
                 this.moduloChildrenData = confArray;
-                if (UNIFIED_DEFINITIONS) {
-                    this.moduloComponentConf = modulo.definitions['${ conf.DefinitionName }'];
-                }
+                this.moduloComponentConf = modulo.definitions['${ conf.DefinitionName }'];
             }
         }
 
@@ -405,11 +375,8 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
         window.customElements.define(tagName, ${ className });
         return ${ className };
     `).replace(/\n {8}/g, "\n");
-
-    if (UNIFIED_DEFINITIONS) {
-        modulo.assets.define(conf.DefinitionName, code);
-        conf.MainRequire = conf.DefinitionName;
-    }
+    modulo.assets.define(conf.DefinitionName, code);
+    conf.MainRequire = conf.DefinitionName;
 });
 
 /*
@@ -422,9 +389,7 @@ modulo.register('confPreprocessor', function mainrequire (modulo, conf, value) {
 modulo.register('cpart', class Component {
     static defineCallback(modulo, conf) {
         if (conf.MainRequire) {
-            if (UNIFIED_DEFINITIONS) {
-                modulo.assets.mainRequire(conf.DefinitionName);
-            }
+            modulo.assets.mainRequire(conf.DefinitionName);
         }
     }
 
@@ -996,9 +961,7 @@ modulo.register('core', class AssetManager {
 
     define(moduleName, code) {
         const hash = this.modulo.registry.utils.hash(code);
-        if (UNIFIED_DEFINITIONS) {
-            this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
-        }
+        this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
         this.nameToHash[moduleName] = hash;
         if (!(hash in this.modules)) {
             this.moduleSources[hash] = code;
@@ -1018,10 +981,8 @@ modulo.register('core', class AssetManager {
 
     buildConfigDef() {
         let s = '';
-        if (UNIFIED_DEFINITIONS) {
-            const defs = JSON.stringify(this.modulo.definitions, null, 1);
-            s += `window.moduloBuild.definitions = ${ defs };\n`;
-        }
+        const defs = JSON.stringify(this.modulo.definitions, null, 1);
+        s += `window.moduloBuild.definitions = ${ defs };\n`;
         return s;
     }
 
@@ -1204,9 +1165,7 @@ modulo.register('cpart', class Style {
         }
         if (Parent) {
             let namespace, mode, Name;
-            if (UNIFIED_DEFINITIONS) {
-                ({ namespace, mode, Name } = modulo.definitions[Parent]);
-            }
+            ({ namespace, mode, Name } = modulo.definitions[Parent]);
             // XXX HAX, conf is a big tangled mess
             if (Name.startsWith('x_')) {
                 Name = Name.replace('x_', '');
@@ -1292,9 +1251,7 @@ modulo.register('cpart', class StaticData {
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
         conf.Hash = modulo.registry.utils.hash(code);
-        if (UNIFIED_DEFINITIONS) {
-            modulo.assets.define(conf.DefinitionName, code);
-        }
+        modulo.assets.define(conf.DefinitionName, code);
         // TODO put into conf, make default to JSON, and make CSV actually
         // correct + instantly useful (e.g. separate headers, parse quotes)
         //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
@@ -1304,9 +1261,7 @@ modulo.register('cpart', class StaticData {
         // Now, actually run code in Script tag to do factory method. By
         // putting this in factory, each Component that uses the same -src will
         // NOT share the data, but within each Component it will.
-        if (UNIFIED_DEFINITIONS) {
-            return modulo.assets.require(conf.DefinitionName);
-        }
+        return modulo.assets.require(conf.DefinitionName);
     }
 });
 
@@ -1317,10 +1272,8 @@ modulo.register('cpart', class Configuration {
         const opts = { exports: 'script' };
         //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
 
-        if (UNIFIED_DEFINITIONS) {
-            modulo.assets.define(conf.DefinitionName, code); // define & invoke
-            modulo.assets.mainRequire(conf.DefinitionName);
-        }
+        modulo.assets.define(conf.DefinitionName, code); // define & invoke
+        modulo.assets.mainRequire(conf.DefinitionName);
         /*
         // TODO: Possibly, add something like this to finish this CPart. Should
         // be a helper, however -- maybe a confPreprocessor that applies to
@@ -1354,9 +1307,7 @@ modulo.register('cpart', class Script {
         }
 
         const fullCode = modulo.registry.cparts.Script.nu_wrapFunctionText(code, localVars);
-        if (UNIFIED_DEFINITIONS) {
-            modulo.assets.define(conf.DefinitionName, fullCode);
-        }
+        modulo.assets.define(conf.DefinitionName, fullCode);
         conf.localVars = localVars;
     }
 
@@ -1373,9 +1324,7 @@ modulo.register('cpart', class Script {
     static factoryCallback(renderObj, conf, modulo) {
         const { Content, Hash, localVars } = conf;
         let results;
-        if (UNIFIED_DEFINITIONS) {
-            results = modulo.assets.require(conf.DefinitionName);
-        }
+        results = modulo.assets.require(conf.DefinitionName);
         // Now, actually run code in Script tag to do factory method
         //const results = func.call(null, modulo, this.require || null);
         if (results) {
@@ -1616,9 +1565,7 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            if (UNIFIED_DEFINITIONS) {
-                this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-            }
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
@@ -1627,9 +1574,7 @@ modulo.register('engine', class Templater {
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
             const { hash } = this.modulo.registry.utils;
             this.Hash = 'T' + hash(this.compiledCode);
-            if (UNIFIED_DEFINITIONS) {
-                this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
-            }
+            this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
         }
     }
 
