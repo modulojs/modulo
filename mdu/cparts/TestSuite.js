@@ -1,6 +1,10 @@
 // TODO: Refactor entire file to use new Modulo register system, with a
 // registered system of "testStep" functions or classes
 
+if (typeof UNIFIED_DEFINITIONS === "undefined") { // XXX RM
+    UNIFIED_DEFINITIONS = true;
+}
+
 modulo.register('cpart', class TestSuite {
     /*
     static configureCallback(modulo, conf) {
@@ -233,7 +237,11 @@ modulo.register('cpart', class TestSuite {
             console.log('HACK: Fixing name', name);
             name = 'x_' + name;
         }
-        componentFac = testLoaderModulo.parentDefs[name];
+        if (UNIFIED_DEFINITIONS === true) {
+            componentFac = testLoaderModulo.definitions[name];
+        } else {
+            componentFac = testLoaderModulo.parentDefs[name];
+        }
         if (!componentFac) {
             console.log('THE NAME IS', name, testLoaderModulo);
             throw new Error('ERROR: could not find parent Component fac');
@@ -259,6 +267,7 @@ modulo.register('cpart', class TestSuite {
             /*(mod.register('core', modulo.registry.core.FetchQueue);
             mod.register('core', modulo.registry.core.AssetManager);*/
             mod.defs = deepClone(modulo.defs, modulo);
+            mod.definitions = deepClone(modulo.definitions, modulo);
             mod.assets = modulo.assets; // Copy over asset manager
             mod.assets.modulo = mod; // TODO Rethink these back references
             mod.setupParents();
@@ -586,6 +595,7 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
     modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
+    modulo.definitions[componentFac.DefinitionName] = componentFac; // XXX For some reason have to re-assign
 
     const componentClass = modulo.assets.require(componentFac.FullName); // Retrieved registered version
 
