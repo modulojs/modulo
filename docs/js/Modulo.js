@@ -12,8 +12,8 @@ window.Modulo = class Modulo {
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
 
-        this.defs = {};
-        this.parentDefs = {};
+        this.config = {};
+        this.definitions = {};
 
         if (parentModulo) {
             this.parentModulo = parentModulo;
@@ -25,7 +25,6 @@ window.Modulo = class Modulo {
             this.assets = parentModulo.assetManager;
             this.globals = parentModulo.globals;
         } else {
-            this.config = {};
             this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
         }
     }
@@ -54,8 +53,7 @@ window.Modulo = class Modulo {
             }
             this.assets.modules = moduloBuild.modules;
             this.assets.nameToHash = moduloBuild.nameToHash;
-            this.defs = moduloBuild.defs;
-            this.parentDefs = moduloBuild.parentDefs;
+            this.definitions = moduloBuild.definitions;
             moduloBuild.loadedBy = this.id;
             return;
         }
@@ -112,35 +110,30 @@ window.Modulo = class Modulo {
     loadFromDOM(elem, parentName = null, quietErrors = false) {
         const partialConfs = [];
         const X = 'x';
+        //const increment = name => /[0-9]$/.test(name) ? name
         const isModulo = node => (this.getNodeModuloType(node, quietErrors)
                                   && !node.getAttribute('modulo-has-loaded'));
         for (const node of Array.from(elem.children).filter(isModulo)) {
             const conf = this.loadPartialConfigFromNode(node);
-            conf.Parent = conf.Parent || parentName;
-            conf.DefName = conf.Name || null; // -name only, null otherwise
-            conf.Name = conf.Name || conf.name || X; // name or -name or 'x'
-            const parentNS = conf.Parent || X; // Cast falsy to 'x'
-            this.defs[parentNS] = this.defs[parentNS] || []; // Prep empty arr
-            this.defs[parentNS].push(conf); // Push to Namespace array
             partialConfs.push(conf); // Push to return Array
-            conf.FullName = parentNS + '_' + conf.Name; // Concat full name
-            // node.setAttribute('modulo-has-loaded', 'y'); // TODO RM this?
+            conf.DefinedAs = conf.Name || null; // -name only, null otherwise
+            conf.DefName = conf.Name || null; // -name only, null otherwise
+            conf.Parent = conf.Parent || parentName;
+            let changed = true;
+            while (changed) {
+                const list = conf.ConfLoaders || [ 'DefinedAs' ];
+                changed = this.applyPreprocessor(conf, list);
+            }
         }
         return partialConfs;
     }
 
-    setupParents() {
-        for (const [ namespace, confArray ] of Object.entries(this.defs)) {
-            for (const conf of confArray) {
-                this.parentDefs[conf.FullName] = conf;
-            }
-        }
-    }
+    setupParents() { }
 
     lifecycle(names) {
         this.setupParents(); // Ensure sync'ed up, TODO rm
         const lcObj = this.registry.cparts;
-        const defArray = Array.from(Object.values(this.defs)).flat();
+        const defArray = Object.values(this.definitions);
         const patches = this.getLifecyclePatches(lcObj, names, defArray);
         this.applyPatches(patches);
     }
@@ -199,16 +192,14 @@ window.Modulo = class Modulo {
         }
         let changed = true; // Run at least once
         while (changed) {
-            this.assert(this._configSteps++ < 10000, 'Config steps: 10000+');
+            this.setupParents(); // Ensure sync'ed up (TODO clean up)
+            this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
-            for (const [ namespace, confArray ] of Object.entries(this.defs)) {
-                for (const conf of confArray) {
-                    const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
-                    changed = changed || this.applyPreprocessor(conf, preprocessors);
-                }
+            for (const conf of Object.values(this.definitions)) {
+                const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
+                changed = changed || this.applyPreprocessor(conf, preprocessors);
             }
         }
-
         if (Object.keys(this.fetchQueue.queue).length === 0) {
             delete this._configSteps;
             cb(); // Synchronous path
@@ -310,71 +301,99 @@ modulo.register('confPreprocessor', function src (modulo, conf, value) {
 });
 
 modulo.register('confPreprocessor', function content (modulo, conf, value) {
-    modulo.loadString(value, conf.FullName);
+    modulo.loadString(value, conf.DefinitionName);
+    if (value) {
+        conf.Prebuild = conf.DefinitionName; // XXX
+    }
     conf.Hash = modulo.registry.utils.hash(value);
 });
 
-modulo.register('cpart', class Component {
-    static prebuildCallback(modulo, conf) {
-        const { FullName, Hash, Name, Parent } = conf;
-        const { stripWord } = modulo.registry.utils;
-        const Children = modulo.defs[FullName];
-        if (!Children || Children.length === 0) {
-            console.warn('Empty component specified:', FullName);
-            return;
-        }
-        //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
-        conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
-        // TODO: Fix this logic when Library gets rewritten
-        const libInfo = modulo.parentDefs[conf.Parent || ''] || {};
-        conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace || 'x';
-        conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
-        const cpartTypes = new Set(Children.map(({ Type }) => Type));
-        const cpartNameString = Array.from(cpartTypes).join(', ');
-        const className = '_' + Name + '_';
-
-        const code = (`
-            const conf = modulo.parentDefs['${ FullName }']; // XXX
-            if (!conf) {
-                console.log('ERROR: Empty ${ FullName } conf:', conf, Object.keys(modulo.parentDefs));
-            }
-            if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
-
-            const { ${ cpartNameString } } = modulo.registry.cparts;
-            const confArray = modulo.defs['${ FullName }'];
-
-            const cpartClasses = { ${ cpartNameString } };
-            const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
-            class ${ className } extends modulo.registry.utils.BaseElement {
-                constructor() {
-                    super();
-                    this.modulo = modulo;
-                    this.defHash = '${ Hash }';
-                    this.initRenderObj = initRenderObj;
-                    this.moduloChildrenData = confArray;
-                    this.moduloComponentConf = modulo.parentDefs['${ FullName }'];
-                }
-            }
-
-            const initRenderObj = { elementClass: ${ className } };
-            modulo.applyPatches(factoryPatches, initRenderObj);
-            window.customElements.define(tagName, ${ className });
-            return ${ className };
-        `).replace(/\n {8}/g, "\n");
-        conf.FuncDefHash = modulo.registry.utils.hash(code);
-
-        modulo.assets.define(FullName, code);
+modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
+    conf.Name = conf.Name || conf.name || conf.Type.toLowerCase();
+    const parentPrefix = conf.Parent ? conf.Parent + '_' : '';
+    conf.DefinitionName = parentPrefix + conf.Name;
+    // Search for the next free Name by suffixing numbers
+    while (conf.DefinitionName in modulo.definitions) {
+        const match = /([0-9]+)$/.exec(conf.Name);
+        const number = match ? match[0] : '';
+        conf.Name = conf.Name.replace(number, '') + (number + 1);
+        conf.DefinitionName = parentPrefix + conf.Name;
     }
+    modulo.definitions[conf.DefinitionName] = conf; // store definition
+    const parentConf = modulo.definitions[conf.Parent];
+    if (parentConf) {
+        parentConf.ChildrenNames = parentConf.ChildrenNames || [];
+        parentConf.ChildrenNames.push(conf.DefinitionName);
+    }
+});
 
-    static defineCallback(modulo, conf) {
-        const { FullName, FuncDefHash } = conf;
-        const { stripWord } = modulo.registry.utils;
-        const { library } = modulo.config;
-        if (!FuncDefHash) {
-            console.warn('Empty component specified:', FullName);
-            return;
+modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
+    const { DefinitionName, FullName, Hash, Name, Parent } = conf;
+    const { stripWord } = modulo.registry.utils;
+
+    //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
+    conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
+    let libInfo = modulo.definitions[conf.Parent || ''] || {};
+    conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace;
+    if (conf.namespace === 'modulo') {
+        conf.namespace = 'x'; // XXX
+    }
+    conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
+
+    if (!conf.ChildrenNames || conf.ChildrenNames.length === 0) {
+        console.warn('Empty conf.ChildrenNames specified:', conf.DefinitionName);
+        return;
+    }
+    const defs = conf.ChildrenNames.map(name => modulo.definitions[name]);
+    const cpartTypes = new Set(defs.map(({ Type }) => Type));
+    const cpartNameString = Array.from(cpartTypes).join(', ');
+    const className = '_' + Name + '_';
+
+    const code = (`
+        let conf;
+        conf = modulo.definitions['${ DefinitionName }'];
+        if (!conf) {
+            console.log('ERROR: Empty ${ DefinitionName } conf:', conf, Object.keys(modulo.definitions));
         }
-        modulo.assets.mainRequire(conf.FullName);
+        if (typeof tagName === 'undefined') { var tagName = conf.TagName; } // HAX XXX
+
+        const { ${ cpartNameString } } = modulo.registry.cparts;
+        const confArray = conf.ChildrenNames.map(name => modulo.definitions[name]);
+
+        const cpartClasses = { ${ cpartNameString } };
+        const factoryPatches = modulo.getLifecyclePatches(cpartClasses, [ 'factory' ], confArray);
+        class ${ className } extends modulo.registry.utils.BaseElement {
+            constructor() {
+                super();
+                this.modulo = modulo;
+                this.defHash = '${ Hash }';
+                this.initRenderObj = initRenderObj;
+                this.moduloChildrenData = confArray;
+                this.moduloComponentConf = modulo.definitions['${ conf.DefinitionName }'];
+            }
+        }
+
+        const initRenderObj = { elementClass: ${ className } };
+        modulo.applyPatches(factoryPatches, initRenderObj);
+        window.customElements.define(tagName, ${ className });
+        return ${ className };
+    `).replace(/\n {8}/g, "\n");
+    modulo.assets.define(conf.DefinitionName, code);
+    conf.MainRequire = conf.DefinitionName;
+});
+
+/*
+modulo.register('confPreprocessor', function mainrequire (modulo, conf, value) {
+    //console.log('main require hapenning!', value);
+    modulo.assets.mainRequire(value);
+});
+*/
+
+modulo.register('cpart', class Component {
+    static defineCallback(modulo, conf) {
+        if (conf.MainRequire) {
+            modulo.assets.mainRequire(conf.DefinitionName);
+        }
     }
 
     /*
@@ -573,7 +592,13 @@ modulo.register('cpart', class Component {
         delete el.dataProps[attrName];
         delete el.dataPropsAttributeNames[rawName];
     }
-}, { mode: 'regular', rerender: 'event', engine: 'Reconciler', ConfPreprocessors: [ 'Src', 'Content' ] });
+}, {
+    mode: 'regular',
+    rerender: 'event',
+    engine: 'Reconciler',
+    //ConfPreprocessors: [ 'Src', 'Content', 'Prebuild', 'MainRequire' ]
+    ConfPreprocessors: [ 'Src', 'Content', 'Prebuild' ]
+});
 
 modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content' ] });
 
@@ -581,6 +606,18 @@ modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content
 //modulo.register('util', Modulo);
 
 modulo.register('cpart', class Library {
+    // TODO:
+    /*
+      <Library namespace="" -src="..."></Library>
+      Is shortcut for:
+
+      <Modulo -src="..">
+          <Configuration
+              component.namespace=""
+          ></Configuration>
+      </Modulo>
+    */
+
     /*
     static configureCallback(modulo, conf) {
         modulo.applyPreprocessor(conf, [ 'Src', 'Content' ]);
@@ -898,12 +935,8 @@ modulo.register('util', class BaseElement extends HTMLElement {
 modulo.register('core', class AssetManager {
     constructor (modulo) {
         this.modulo = modulo;
-        this.functions = {}; // TODO: functions will soon be dead as well!
         this.stylesheets = {};
-        this.invocations = [];
-        // TODO: rawAssets and rawAssetsArray are both likely dead code!
-        this.rawAssets = { js: {}, css: {} };
-        this.rawAssetsArray = { js: [], css: [] };
+        this.cssAssetsArray = [];
         this.modules = {};
         this.moduleSources = {};
         this.nameToHash = {};
@@ -931,6 +964,7 @@ modulo.register('core', class AssetManager {
 
     define(moduleName, code) {
         const hash = this.modulo.registry.utils.hash(code);
+        this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
         this.nameToHash[moduleName] = hash;
         if (!(hash in this.modules)) {
             this.moduleSources[hash] = code;
@@ -949,9 +983,10 @@ modulo.register('core', class AssetManager {
     }
 
     buildConfigDef() {
-        // TODO: Make this a loop assigning to names
-        return ('window.moduloBuild.defs = ' + JSON.stringify(this.modulo.defs, null, 1) + ';\n') +
-               ('window.moduloBuild.parentDefs = ' + JSON.stringify(this.modulo.parentDefs, null, 1) + ';');
+        let s = '';
+        const defs = JSON.stringify(this.modulo.definitions, null, 1);
+        s += `window.moduloBuild.definitions = ${ defs };\n`;
+        return s;
     }
 
     buildModuleDefs() {
@@ -980,8 +1015,8 @@ modulo.register('core', class AssetManager {
     bundleAssets(callback) {
         const { fetchBundleData } = this.modulo.registry.utils;
         fetchBundleData(this.modulo, bundleData => {
-            //const results = this.rawAssetsArray;
-            const results = { js: [], css: this.rawAssetsArray.css };
+            //const results = this.cssAssetsArray;
+            const results = { js: [], css: this.cssAssetsArray };
             results.js.push(this.modulo.assets.buildJavaScript());
             for (const bundle of bundleData) { // Loop through bundle data
                 results[bundle.type].push(bundle.content);
@@ -994,14 +1029,12 @@ modulo.register('core', class AssetManager {
         const hash = this.modulo.registry.utils.hash(text);
         if (!(hash in this.stylesheets)) {
             this.stylesheets[hash] = true;
-            this.rawAssets.css[hash] = text;
-            this.rawAssetsArray.css.push(text);
+            this.cssAssetsArray.push(text);
             this.appendToHead('style', text);
         }
     }
 
     appendToHead(tagName, codeStr) {
-        //const doc = this.modulo.globals.document;
         const doc = window.document;
         const elem = doc.createElement(tagName);
         elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
@@ -1068,10 +1101,12 @@ modulo.register('core', class FetchQueue {
     enqueueAll(callback) {
         const allQueues = Array.from(Object.values(this.queue));
         let callbackCount = 0;
+        if (allQueues.length === 0) {
+            return callback();
+        }
         for (const queue of allQueues) {
             queue.push(() => {
                 callbackCount++;
-                //console.log('callbackCount', callbackCount, callbackCount >= allQueues.length);
                 if (callbackCount >= allQueues.length) {
                     callback();
                 }
@@ -1122,7 +1157,6 @@ modulo.register('cpart', class Props {
 
 modulo.register('cpart', class Style {
     static prebuildCallback(modulo, conf) {
-
         /*
         //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
         //    return;
@@ -1133,7 +1167,8 @@ modulo.register('cpart', class Style {
             return;
         }
         if (Parent) {
-            let { namespace, mode, Name } = modulo.parentDefs[Parent];
+            let namespace, mode, Name;
+            ({ namespace, mode, Name } = modulo.definitions[Parent]);
             // XXX HAX, conf is a big tangled mess
             if (Name.startsWith('x_')) {
                 Name = Name.replace('x_', '');
@@ -1201,6 +1236,14 @@ modulo.register('cpart', class Template {
 
 modulo.register('cpart', class StaticData {
     static prebuildCallback(modulo, conf) {
+        // TODO: Refactor all of this into preprocessors! E.g. JSON, TXT, and
+        // CSV would all be options and defined as confPreprocessors
+        // Only thing StaticData would do (maybe also via conf preprocessors)
+        // would guess as to what the best preproessor to use based on src
+        // extension, e.g. contentCSV, contentJSON, contentTXT
+        // Another IDEA! contentBinary ... will just do data64 on binary data,
+        // so it can be inserted as a string, and that way images etc can be
+        // imported as StaticData! (AND/OR, do |datauri as a filter)
         const transforms = {
             csv: s => JSON.stringify(s.split('\n').map(line => line.split(','))),
             js: s => s,
@@ -1211,7 +1254,7 @@ modulo.register('cpart', class StaticData {
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
         conf.Hash = modulo.registry.utils.hash(code);
-        modulo.assets.define(conf.FullName, code);
+        modulo.assets.define(conf.DefinitionName, code);
         // TODO put into conf, make default to JSON, and make CSV actually
         // correct + instantly useful (e.g. separate headers, parse quotes)
         //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
@@ -1221,7 +1264,7 @@ modulo.register('cpart', class StaticData {
         // Now, actually run code in Script tag to do factory method. By
         // putting this in factory, each Component that uses the same -src will
         // NOT share the data, but within each Component it will.
-        return modulo.assets.require(conf.FullName);
+        return modulo.assets.require(conf.DefinitionName);
     }
 });
 
@@ -1231,8 +1274,9 @@ modulo.register('cpart', class Configuration {
         delete conf.Content;
         const opts = { exports: 'script' };
         //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
-        modulo.assets.define(conf.FullName, code); // define & invoke
-        modulo.assets.mainRequire(conf.FullName);
+
+        modulo.assets.define(conf.DefinitionName, code); // define & invoke
+        modulo.assets.mainRequire(conf.DefinitionName);
         /*
         // TODO: Possibly, add something like this to finish this CPart. Should
         // be a helper, however -- maybe a confPreprocessor that applies to
@@ -1265,30 +1309,25 @@ modulo.register('cpart', class Script {
             delete opts.exports;
         }
 
-        conf.TmpRando = 'S' + Math.ceil(Math.random() * 100000000) + conf.FullName;
         const fullCode = modulo.registry.cparts.Script.nu_wrapFunctionText(code, localVars);
-        //modulo.assets.define(conf.FullName, fullCode);
-        modulo.assets.define(conf.TmpRando, fullCode);
+        modulo.assets.define(conf.DefinitionName, fullCode);
         conf.localVars = localVars;
     }
 
+    /*
     static defineCallback(modulo, conf) {
-        // XXX -- HAX, should probably rm this since we have now Configuration
         if (!conf.Parent || ((conf.Parent === 'x_x' && conf.Hash) ||
                              (conf.Parent === 'x_x' && conf.TmpRando))) {
             //modulo.assets.mainRequire(conf.FullName);
             modulo.assets.mainRequire(conf.TmpRando);
         }
     }
+    */
 
     static factoryCallback(renderObj, conf, modulo) {
         const { Content, Hash, localVars } = conf;
         let results;
-        if (!conf.TmpRando) {
-            console.log('ERROR: Could not find TmpRando:', conf, renderObj);
-            return {};
-        }
-        results = modulo.assets.require(conf.TmpRando);
+        results = modulo.assets.require(conf.DefinitionName);
         // Now, actually run code in Script tag to do factory method
         //const results = func.call(null, modulo, this.require || null);
         if (results) {
@@ -1326,7 +1365,7 @@ modulo.register('cpart', class Script {
     }
 
     getDirectives() {
-        LEGACY.push('script.getDirectives');
+        window.LEG.push('script.getDirectives');
         let { script } = this.element.initRenderObj;
         const isCbRegex = /(Unmount|Mount)$/;
         if (!script) { script = {}; } // TODO XXX
@@ -1408,7 +1447,7 @@ modulo.register('cpart', class Script {
 
 modulo.register('cpart', class State {
     getDirectives() {
-        LEGACY.push('state.getDirectives');
+        window.LEG.push('state.getDirectives');
         return [ 'state.bindMount', 'state.bindUnmount' ];
     }
 
@@ -1529,7 +1568,7 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
-            this.renderFunc = this.modulo.assets.require(this.Hash);
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
@@ -1538,7 +1577,7 @@ modulo.register('engine', class Templater {
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
             const { hash } = this.modulo.registry.utils;
             this.Hash = 'T' + hash(this.compiledCode);
-            this.renderFunc = this.modulo.assets.define(this.Hash, this.compiledCode)();
+            this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
         }
     }
 
@@ -1910,7 +1949,7 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            LEGACY.push('this.directiveShortcuts.length === 0')
+            window.LEG.push('this.directiveShortcuts.length === 0')
             this.directiveShortcuts = [
                 [ /^@/, 'component.event' ],
                 [ /:$/, 'component.dataProp' ],
@@ -2198,11 +2237,7 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
             dataItem.content = text;
         });
     }
-    if (Object.keys(modulo.fetchQueue.queue).length < 1) {
-        callback(data); // Synchronous route
-    } else {
-        modulo.fetchQueue.enqueueAll(() => callback(data));
-    }
+    modulo.fetchQueue.enqueueAll(() => callback(data));
 });
 
 
@@ -2295,5 +2330,3 @@ if (typeof document !== 'undefined' && document.head) { // Browser environ
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }
-
-

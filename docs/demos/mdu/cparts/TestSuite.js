@@ -1,6 +1,10 @@
 // TODO: Refactor entire file to use new Modulo register system, with a
 // registered system of "testStep" functions or classes
 
+if (typeof UNIFIED_DEFINITIONS === "undefined") { // XXX RM
+    UNIFIED_DEFINITIONS = true;
+}
+
 modulo.register('cpart', class TestSuite {
     /*
     static configureCallback(modulo, conf) {
@@ -227,13 +231,18 @@ modulo.register('cpart', class TestSuite {
         let componentFac;
 
         // REFACTOR this garbagee
-        testLoaderModulo.defs = deepClone(modulo.defs, modulo);
-        testLoaderModulo.setupParents();
-        if (('x_' + name) in testLoaderModulo.defs) {
-            console.log('HACK: Fixing name', name);
-            name = 'x_' + name;
+        if (UNIFIED_DEFINITIONS) {
+            testLoaderModulo.definitions = deepClone(modulo.definitions, modulo);
+            componentFac = testLoaderModulo.definitions[name];
+        } else {
+            testLoaderModulo.defs = deepClone(modulo.defs, modulo);
+            testLoaderModulo.setupParents();
+            if (('x_' + name) in testLoaderModulo.defs) {
+                console.log('HACK: Fixing name', name);
+                name = 'x_' + name;
+            }
+            componentFac = testLoaderModulo.parentDefs[name];
         }
-        componentFac = testLoaderModulo.parentDefs[name];
         if (!componentFac) {
             console.log('THE NAME IS', name, testLoaderModulo);
             throw new Error('ERROR: could not find parent Component fac');
@@ -258,7 +267,11 @@ modulo.register('cpart', class TestSuite {
             // Refresh queue & asset manager
             /*(mod.register('core', modulo.registry.core.FetchQueue);
             mod.register('core', modulo.registry.core.AssetManager);*/
-            mod.defs = deepClone(modulo.defs, modulo);
+            if (UNIFIED_DEFINITIONS) {
+                mod.definitions = deepClone(modulo.definitions, modulo);
+            } else {
+                mod.defs = deepClone(modulo.defs, modulo);
+            }
             mod.assets = modulo.assets; // Copy over asset manager
             mod.assets.modulo = mod; // TODO Rethink these back references
             mod.setupParents();
@@ -270,7 +283,11 @@ modulo.register('cpart', class TestSuite {
             let err;
             const testModulo = _newModulo();
             TestSuite.setupMocks(testModulo);
-            componentFac = testModulo.parentDefs[componentFac.FullName]; // get cloned version
+            if (UNIFIED_DEFINITIONS) {
+                componentFac = testModulo.definitions[componentFac.DefinitionName]; // get cloned version
+            } else {
+                componentFac = testModulo.parentDefs[componentFac.FullName]; // get cloned version
+            }
             /*
             const testModulo = new Modulo(modulo); // "Fork" modulo obj
             */
@@ -393,17 +410,23 @@ modulo.register('command', function test(modulo, opts) {
     console.log('%c%', 'font-size: 50px; line-height: 0.7; padding: 5px; border: 3px solid black;');
 
     // TODO: needs refactor
-    const suites = [];
+    let suites = [];
     //const components = {};
-    for (const [ namespace, confArray ] of Object.entries(modulo.defs)) {
-        for (const conf of confArray) {
-            if (conf.Type === 'TestSuite') {
-                //console.log('this is namespace', namespace, conf);
-                suites.push([ namespace, conf ]);
-            } /*else if (conf.Type === 'Component') {
-                //console.log('this is Name', conf.Name);
-                components[conf.Name] = conf;
-            }*/
+    if (UNIFIED_DEFINITIONS) {
+        suites = Object.values(modulo.definitions)
+            .filter(({ Type }) => Type === 'TestSuite')
+            .map(conf => ([ conf.Parent, conf ]));
+    } else {
+        for (const [ namespace, confArray ] of Object.entries(modulo.defs)) {
+            for (const conf of confArray) {
+                if (conf.Type === 'TestSuite') {
+                    //console.log('this is namespace', namespace, conf);
+                    suites.push([ namespace, conf ]);
+                } /*else if (conf.Type === 'Component') {
+                    //console.log('this is Name', conf.Name);
+                    components[conf.Name] = conf;
+                }*/
+            }
         }
     }
 
@@ -419,20 +442,26 @@ modulo.register('command', function test(modulo, opts) {
             soloMode = true;
         }
 
-        if ('Src' in suite) {
-            throw new Error('Not expecting a Src still here');
-            modulo.fetchQueue.enqueue(suite.Src, text => {
-                suite.Content = (text || '') + (suite.Content || '');
-            });
+        if (!UNIFIED_DEFINITIONS) {
+            if ('Src' in suite) {
+                throw new Error('Not expecting a Src still here');
+                modulo.fetchQueue.enqueue(suite.Src, text => {
+                    suite.Content = (text || '') + (suite.Content || '');
+                });
+            }
+
+            if (('x_' + componentName) in modulo.defs) {
+                console.log('HACK: Fixing componentName', componentName);
+                componentName = 'x_' + componentName;
+            }
         }
 
-        if (('x_' + componentName) in modulo.defs) {
-            console.log('HACK: Fixing componentName', componentName);
-            componentName = 'x_' + componentName;
+        let componentConf;
+        if (UNIFIED_DEFINITIONS) {
+            componentConf = modulo.definitions[componentName];
+        } else {
+            componentConf = modulo.parentDefs[componentName];
         }
-
-        //const componentConf = components[componentName];
-        const componentConf = modulo.parentDefs[componentName];
         if (!componentConf) {
             console.log(componentConf, componentName);
             throw new Error('ERROR: could not find parent Component fac', componentConf);
@@ -472,7 +501,13 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
         const label = '%cTestSuite: ' + componentFac.Name + info
         //console.groupCollapsed(label, 'border-top: 3px dotted #aaa; margin-top: 5px;');
         console.group(label, 'border-top: 3px dotted #aaa; margin-top: 5px;');
-        const [ successes, failures ] = runTests(modulo, suite, componentFac.FullName)
+        let successes, failures;
+        if (UNIFIED_DEFINITIONS) {
+            ([ successes, failures ] = runTests(modulo, suite, componentFac.DefinitionName))
+        } else {
+            ([ successes, failures ] = runTests(modulo, suite, componentFac.FullName))
+        }
+
         if (failures) {
             failedComponents.push(componentFac);
         }
@@ -585,9 +620,14 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     const namespace = 't' + window._moduloTestNumber;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
-    modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
-
-    const componentClass = modulo.assets.require(componentFac.FullName); // Retrieved registered version
+    let componentClass;
+    if (UNIFIED_DEFINITIONS) {
+        modulo.definitions[componentFac.DefinitionName] = componentFac; // XXX For some reason have to re-assign
+        componentClass = modulo.assets.require(componentFac.DefinitionName); // Retrieved registered version
+    } else {
+        modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
+        componentClass = modulo.assets.require(componentFac.FullName); // Retrieved registered version
+    }
 
     const element = new componentClass();
     if (element._moduloTagName) { // virtualdom-based class

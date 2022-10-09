@@ -150,7 +150,7 @@ function initializedCallback() {
         for (const title of componentNames) {
             if (firstPreviewTag === null) {
                 // XXX HACK, fix this once we have more dependable namespacing
-                for (const component of Object.values(modulo.parentDefs)) {
+                for (const component of Object.values(modulo.definitions)) {
                     if (component.Name === title) {
                         firstPreviewTag = component.TagName;
                         break;

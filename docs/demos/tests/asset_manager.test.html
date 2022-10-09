@@ -138,6 +138,10 @@ window.moduloBuild.nameToHash = {
         };
 
         window._buildCommandAndRun = function (shouldRun, callback) {
+            if (callback === null) {
+                callback = mod => mod.loadString(window._componentText);
+            }
+
             ///////////////////////////////////////////////////
             // HACK: Normalize up script / link tags in REAL window (test environ)
             const query = 'script[src],link[rel=stylesheet]';
@@ -182,7 +186,8 @@ window.moduloBuild.nameToHash = {
             '<Component name="TestA"><Template>aaa</Template></Component>' + 
             '<Component name="TestB"><Template>bbb</Template></Component>'
         );
-        window._getRelevantInfoForComponentTexts = (mod2) => {
+
+        window._getRelevantInfoForComponentTextsOLD = (mod2) => {
             const actual1 = JSON.stringify(Array.from(Object.keys(mod2.defs)));
             const expected1 = JSON.stringify([ 'x', 'x_TestA' , 'x_TestB' ]);
             let actual2a = null;
@@ -203,6 +208,30 @@ window.moduloBuild.nameToHash = {
             const expected4 = 'aaa';
             return { actual1, expected1, actual2a, actual2b, hash, actual4, expected4 };
         };
+
+        window._getRelevantInfoForComponentTexts = (mod2) => {
+            const actual1 = JSON.stringify(Array.from(Object.keys(mod2.definitions)));
+            const expected1 = JSON.stringify([ 'TestA' , 'TestB', 'TestA_template', 'TestB_template' ]);
+            let actual2a = null;
+            let actual2b = null;
+            let tName = '';
+
+            if (mod2.definitions.TestA && mod2.definitions.TestA.ChildrenNames) {
+                actual2a = mod2.definitions.TestA.ChildrenNames.length;
+                tName = mod2.definitions.TestA.ChildrenNames[0];
+            }
+            if (mod2.definitions.TestB && mod2.definitions.TestB.ChildrenNames) {
+                actual2b = mod2.definitions.TestB.ChildrenNames.length;
+            }
+            const hash = mod2.assets.nameToHash[tName] || '';
+            const defaultFunc = a => b => `(COULD NOT FIND template "${tName}")`;
+            const moduleFunc = mod2.assets.modules[hash] || defaultFunc;
+            const templateFunc = moduleFunc(modulo);
+            const actual4 = templateFunc({});
+            const expected4 = 'aaa';
+            return { actual1, expected1, actual2a, actual2b, hash, actual4, expected4 };
+        };
+
         assert: modulo && modulo.assets && modulo.assets.buildJavaScript
     </script>
 
@@ -233,9 +262,7 @@ window.moduloBuild.nameToHash = {
     </script>
 
     <script name="commands.build produces files with expected names and sizes">
-        const files = window._buildCommandAndRun(false, mod => {
-            mod.loadString(window._componentText);
-        });
+        const files = window._buildCommandAndRun(false, null);
         const expectedFns = JSON.stringify([
             'modulo-build-xxxxxxxx.js',
             'modulo-build-xxxxxxxx.css',
@@ -247,24 +274,25 @@ window.moduloBuild.nameToHash = {
     </script>
 
     <script name="commands.build produces html file with expected content">
-        const files = window._buildCommandAndRun(false, mod => {
-            mod.loadString(window._componentText);
-        });
-        const [ js, css, html ] = files.map(({ text }) => text);
+        const files = window._buildCommandAndRun(false, null);
+        let [ js, css, html ] = files.map(({ text }) => text);
         const htmlE1 = '<script src="./modulo-build-xxxxxxxx.js"></s' + 'cript>';
         const htmlE2 = '<link rel="stylesheet" href="./modulo-build-xxxxxxxx.css" /></head>';
         const expectedInline = (
             '<script>window.moduloBuild && modulo.start(window.moduloBuild);\n' +
-            'modulo.assets.require("x_TestA");\n' +
-            'modulo.assets.require("x_TestB");</sc' + 'ript></body>'
+            //'modulo.assets.require("x_TestA");\n' +
+            //'modulo.assets.require("x_TestB");</sc' + 'ript></body>'
+            'modulo.assets.require("TestA");\n' +
+            'modulo.assets.require("TestB");</sc' + 'ript>'
         );
-        assert: html .includes(htmlE1) && html .includes(htmlE2) && html .includes(expectedInline)
+        // Ensure it only appears at the end
+        const htmlSuffix = html.substring(html.length - (expectedInline.length + 200)); // 200 character buffer
+        //assert: htmlSuffix .includes(htmlE1) && html .includes(htmlE2) && htmlSuffix .includes(expectedInline)
+        assert: htmlSuffix .includes(htmlE1) && htmlSuffix .includes(expectedInline)
     </script>
 
-    <script name="commands.build produces js file with expected content">
-        const files = window._buildCommandAndRun(false, mod => {
-            mod.loadString(window._componentText);
-        });
+    <script name="commands.build produces JS file with expected content">
+        const files = window._buildCommandAndRun(false, null);
         const [ js, css, html ] = files.map(({ text }) => text);
         const jsE1 = `js code for (${ window.location.protocol }//${ window.location.host }/foo/testing123.js)`;
         const jsE2 = 'js code for (http://bar.com/testing456.js)';
@@ -273,10 +301,22 @@ window.moduloBuild.nameToHash = {
         assert: js .includes(jsE1) && js .includes(jsE1) && js .includes(jsE3) && js .includes(jsE4)
     </script>
 
-    <script name="commands.build produces expected structure when loaded">
-        const mod2 = window._buildCommandAndRun(true, mod => {
-            mod.loadString(window._componentText);
+    <script name="commands.build produces properly prefixed CSS file with expected content">
+        const files = window._buildCommandAndRun(false, mod => {
+            mod.loadString(
+                '<Component name="TestA"><Template>aaa</Template>' +
+                  '<Style>a { color: blue; }</Style></Component>' + 
+                '<Component name="TestB"><Template>bbb</Template>' +
+                  '<Style>:host { color: red; }</Style></Component>'
+            );
         });
+        const [ _js, actual, _html ] = files.map(({ text }) => text);
+        const expected = 'x-TestA a { color: blue; }\nx-TestB { color: red; }';
+        assert: actual === expected
+    </script>
+
+    <script name="commands.build produces expected structure when loaded">
+        const mod2 = window._buildCommandAndRun(true, null);
 
         const { actual1, expected1, actual2a, actual2b, hash, actual4,
                 expected4 } = window._getRelevantInfoForComponentTexts(mod2);
@@ -285,21 +325,17 @@ window.moduloBuild.nameToHash = {
 
 
     <script name="commands.build registers expected classes">
-        const mod2 = window._buildCommandAndRun(true, mod => {
-            mod.loadString(window._componentText);
-        });
+        const mod2 = window._buildCommandAndRun(true, null);
 
         const elemClasses = mod2._customElements.elemClasses;
         const testA = elemClasses['x-testa'];
         const testB = elemClasses['x-testb'];
-        assert: testA && testB && testA.name === '_TestA_' && testB.name === '_TestB_'
+        assert: testA && testB && testA .name === '_TestA_' && testB .name === '_TestB_'
     </script>
 
 
     <script name="commands.build registers classes that can render and mount">
-        const mod2 = window._buildCommandAndRun(true, mod => {
-            mod.loadString(window._componentText);
-        });
+        const mod2 = window._buildCommandAndRun(true, null);
 
         const elemClasses = mod2._customElements.elemClasses;
         const testA = elemClasses['x-testa'];
@@ -307,7 +343,7 @@ window.moduloBuild.nameToHash = {
         // NOTE: This is to prevent real browsers from throwing an error
         const uuTagA = 'test-x' + Math.ceil(Math.random() * 100000000);
         const uuTagB = 'test-x' + Math.ceil(Math.random() * 100000000);
-        window.customElements.define(uuTagA, testA);
+        window.customElements.define(uuTagA, testA); // use "real" (test environ) browser
         window.customElements.define(uuTagB, testB);
         //////////////////////////////////
         const doc = window.document.implementation.createHTMLDocument('testworld');

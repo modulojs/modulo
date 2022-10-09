@@ -2,18 +2,30 @@
     These tests are useful as unit tests testing the loadString method &
     loadFromDOM methods
 -->
-<Component name="CoreLoading">
-
-<TestSuite>
+<Component name="CoreLoading"><TestSuite>
 
 <Test name="modulo.loadString tests">
     <script name="modulo.loadString exists">
+        const originalRegistry = modulo.registry;
+        const originalConfig = modulo.config;
+        const { deepClone, cloneStub } = modulo.registry.utils;
+        window._loadString = function _prepIsolatedModulo(str) {
+            // Now, let's make a fresh modulo, and see if we can "load" the
+            // build using this separate instance
+            const mod2 = new Modulo(null, [ ]);
+            mod2.registry = originalRegistry;
+            mod2.config = deepClone(originalConfig, modulo);
+            mod2.assets = new mod2.registry.core.AssetManager(mod2);
+            mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
+            return mod2.loadString(str);
+        }
+
         assert: modulo && modulo.loadString
     </script>
 
     <script name="loads an empty component with expected values">
         const code = '<Component name="Testy"></Component>';
-        const loaded = modulo.loadString(code);
+        const loaded = window._loadString(code);
         const { Type, mode, rerender, engine, Name, name } = loaded.length ? loaded[0] : {};
         assert: Type === 'Component' && mode === 'regular' && rerender === 'event' && engine === 'Reconciler' && Name === 'Testy' && name === 'Testy'
     </script>
@@ -21,14 +33,14 @@
     <script name="loads multiple components">
         const code = '<Component name="TestA"></Component>' + 
                       '<Component name="TestB"></Component>';
-        const loaded = modulo.loadString(code);
+        const loaded = window._loadString(code);
         const names = loaded.map(({ Name }) => Name);
         assert: loaded.length === 2 && names[0] === 'TestA' && names[1] === 'TestB'
     </script>
 
     <script name="loads single component with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>';
-        const loaded = modulo.loadString(code);
+        const loaded = window._loadString(code);
         const { Name, Content } = loaded.length ? loaded[0] : {};
         assert: loaded.length === 1 && Name === 'TestA' && Content === '<template>aaa</template>';
     </script>
@@ -36,7 +48,7 @@
     <script name="loads multiple components with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
                       '<Component name="TestB"><Template>bbb</Template></Component>';
-        const loaded = modulo.loadString(code);
+        const loaded = window._loadString(code);
         const actual = loaded.map(({ Name, Content }) => ([ Name, Content ]));
         const expected = [
             [ 'TestA', '<template>aaa</template>'],
