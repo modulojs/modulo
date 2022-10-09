@@ -14,11 +14,6 @@ window.Modulo = class Modulo {
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
 
-        if (!UNIFIED_DEFINITIONS || UNIFIED_DEFINITIONS === 1) {
-            this.defs = {};
-            this.parentDefs = {};
-        }
-
         if (UNIFIED_DEFINITIONS) {
             // New unified "definitions" structure:
             this.definitions = {};
@@ -151,6 +146,9 @@ window.Modulo = class Modulo {
     }
 
     setupParents() {
+        if (UNIFIED_DEFINITIONS) {
+            return;
+        }
         for (const [ namespace, confArray ] of Object.entries(this.defs)) {
             for (const conf of confArray) {
                 this.parentDefs[conf.FullName] = conf;
@@ -355,7 +353,6 @@ modulo.register('confPreprocessor', function content (modulo, conf, value) {
 });
 
 modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
-    //conf.Name = conf.Name || conf.name || 'x'; // name, -name or 'x'
     conf.Name = conf.Name || conf.name || conf.Type.toLowerCase();
     const parentPrefix = conf.Parent ? conf.Parent + '_' : '';
     conf.DefinitionName = parentPrefix + conf.Name;
@@ -371,14 +368,6 @@ modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
     if (parentConf) {
         parentConf.ChildrenNames = parentConf.ChildrenNames || [];
         parentConf.ChildrenNames.push(conf.DefinitionName);
-    }
-
-    // 1 === transitional flag, so set up legacy def structure as well
-    if (UNIFIED_DEFINITIONS === 1) {
-        const X = 'x';
-        const parentNS = conf.Parent || X; // Cast falsy to 'x'
-        //modulo.defs[parentNS] = modulo.defs[parentNS] || []; // Prep empty arr
-        //modulo.defs[parentNS].push(conf); // Push to Namespace array
     }
 });
 

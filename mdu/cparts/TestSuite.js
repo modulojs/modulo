@@ -267,8 +267,11 @@ modulo.register('cpart', class TestSuite {
             // Refresh queue & asset manager
             /*(mod.register('core', modulo.registry.core.FetchQueue);
             mod.register('core', modulo.registry.core.AssetManager);*/
-            mod.defs = deepClone(modulo.defs, modulo);
-            mod.definitions = deepClone(modulo.definitions, modulo);
+            if (UNIFIED_DEFINITIONS) {
+                mod.definitions = deepClone(modulo.definitions, modulo);
+            } else {
+                mod.defs = deepClone(modulo.defs, modulo);
+            }
             mod.assets = modulo.assets; // Copy over asset manager
             mod.assets.modulo = mod; // TODO Rethink these back references
             mod.setupParents();
