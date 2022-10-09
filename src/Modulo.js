@@ -334,7 +334,10 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
     //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
     conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
     let libInfo = modulo.definitions[conf.Parent || ''] || {};
-    conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace || 'x';
+    conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace;
+    if (conf.namespace === 'modulo') {
+        conf.namespace = 'x'; // XXX
+    }
     conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
 
     if (!conf.ChildrenNames || conf.ChildrenNames.length === 0) {
