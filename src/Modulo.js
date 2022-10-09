@@ -225,10 +225,17 @@ window.Modulo = class Modulo {
             this.setupParents(); // Ensure sync'ed up (TODO clean up)
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
-            for (const [ namespace, confArray ] of Object.entries(this.defs)) {
-                for (const conf of confArray) {
+            if (UNIFIED_DEFINITIONS) {
+                for (const conf of Object.values(this.definitions)) {
                     const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
                     changed = changed || this.applyPreprocessor(conf, preprocessors);
+                }
+            } else {
+                for (const [ namespace, confArray ] of Object.entries(this.defs)) {
+                    for (const conf of confArray) {
+                        const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
+                        changed = changed || this.applyPreprocessor(conf, preprocessors);
+                    }
                 }
             }
         }
@@ -335,13 +342,16 @@ modulo.register('confPreprocessor', function src (modulo, conf, value) {
 modulo.register('confPreprocessor', function content (modulo, conf, value) {
     if (UNIFIED_DEFINITIONS) {
         modulo.loadString(value, conf.DefinitionName);
+        if (value) {
+            conf.Prebuild = conf.DefinitionName; // XXX
+        }
     } else {
         modulo.loadString(value, conf.FullName);
+        if (value) {
+            conf.Prebuild = conf.FullName; // XXX
+        }
     }
     conf.Hash = modulo.registry.utils.hash(value);
-    if (value) {
-        conf.Prebuild = conf.FullName; // XXX
-    }
 });
 
 modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
@@ -369,7 +379,6 @@ modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
         const parentNS = conf.Parent || X; // Cast falsy to 'x'
         modulo.defs[parentNS] = modulo.defs[parentNS] || []; // Prep empty arr
         modulo.defs[parentNS].push(conf); // Push to Namespace array
-        conf.FullName = parentNS + '_' + conf.Name; // Concat full name
     }
 });
 
@@ -379,8 +388,12 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
 
     //conf.namespace = conf.namespace || conf.Parent || 'x'; // TODO Make this more logical once Library etc is done
     conf.namespace = conf.namespace || 'x'; // TODO Make this more logical once Library etc is done
-    // TODO: Fix this logic when Library gets rewritten
-    const libInfo = modulo.parentDefs[conf.Parent || ''] || {};
+    let libInfo;
+    if (UNIFIED_DEFINITIONS) {
+        libInfo = modulo.definitions[conf.Parent || ''] || {};
+    } else {
+        libInfo = modulo.parentDefs[conf.Parent || ''] || {};
+    }
     conf.namespace = libInfo.namespace || libInfo.Name || conf.namespace || 'x';
     conf.TagName = (conf.TagName || `${ conf.namespace }-${ Name }`).toLowerCase();
 
@@ -435,7 +448,11 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
                 this.defHash = '${ Hash }';
                 this.initRenderObj = initRenderObj;
                 this.moduloChildrenData = confArray;
-                this.moduloComponentConf = modulo.parentDefs['${ FullName }'];
+                if (UNIFIED_DEFINITIONS) {
+                    this.moduloComponentConf = modulo.definitions['${ conf.DefinitionName }'];
+                } else {
+                    this.moduloComponentConf = modulo.parentDefs['${ FullName }'];
+                }
             }
         }
 
@@ -682,6 +699,18 @@ modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content
 //modulo.register('util', Modulo);
 
 modulo.register('cpart', class Library {
+    // TODO:
+    /*
+      <Library namespace="" -src="..."></Library>
+      Is shortcut for:
+
+      <Modulo -src="..">
+          <Configuration
+              component.namespace=""
+          ></Configuration>
+      </Modulo>
+    */
+
     /*
     static configureCallback(modulo, conf) {
         modulo.applyPreprocessor(conf, [ 'Src', 'Content' ]);
@@ -1330,7 +1359,11 @@ modulo.register('cpart', class StaticData {
         const code = 'return ' + transform((conf.Content || '').trim()) + ';';
         delete conf.Content;
         conf.Hash = modulo.registry.utils.hash(code);
-        modulo.assets.define(conf.FullName, code);
+        if (UNIFIED_DEFINITIONS) {
+            modulo.assets.define(conf.DefinitionName, code);
+        } else {
+            modulo.assets.define(conf.FullName, code);
+        }
         // TODO put into conf, make default to JSON, and make CSV actually
         // correct + instantly useful (e.g. separate headers, parse quotes)
         //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
@@ -1340,7 +1373,11 @@ modulo.register('cpart', class StaticData {
         // Now, actually run code in Script tag to do factory method. By
         // putting this in factory, each Component that uses the same -src will
         // NOT share the data, but within each Component it will.
-        return modulo.assets.require(conf.FullName);
+        if (UNIFIED_DEFINITIONS) {
+            return modulo.assets.require(conf.DefinitionName);
+        } else {
+            return modulo.assets.require(conf.FullName);
+        }
     }
 });
 
@@ -1350,8 +1387,14 @@ modulo.register('cpart', class Configuration {
         delete conf.Content;
         const opts = { exports: 'script' };
         //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
-        modulo.assets.define(conf.FullName, code); // define & invoke
-        modulo.assets.mainRequire(conf.FullName);
+
+        if (UNIFIED_DEFINITIONS) {
+            modulo.assets.define(conf.DefinitionName, code); // define & invoke
+            modulo.assets.mainRequire(conf.DefinitionName);
+        } else {
+            modulo.assets.define(conf.FullName, code); // define & invoke
+            modulo.assets.mainRequire(conf.FullName);
+        }
         /*
         // TODO: Possibly, add something like this to finish this CPart. Should
         // be a helper, however -- maybe a confPreprocessor that applies to
