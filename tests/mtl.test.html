@@ -6,12 +6,13 @@
         // Attach simple helper function used below
         // TODO: Replace this window. silliness with a way to register helpers,
         // maybe a script SetupScript CPart?
+        window._uudn = 0;
         window._r = (tText, context) => {
             const conf = {
                 Content: tText,
+                DefinitionName: 'TestTemplate' + (++window._uudn),
             };
             const tmpl = new modulo.registry.engines.Templater(modulo, conf);
-            //console.log('tmpl', tmpl.output);
             return tmpl.render(context);
         }
         assert: modulo.registry.engines.Templater && window._r
@@ -489,6 +490,7 @@
         const text = 'This is a {{ test|a|b:2|caps }} {% lol "ThIs iS a TEst!"|caps %}';
         const conf = {
             Content: text,
+            DefinitionName: 'TemplateTesterFilterOrdering',
             filters: {
                 'a': function (s) { return ['a', 'b', 'correct', 'c']; },
                 'b': function (s, a) { return s[a]; },
@@ -513,7 +515,10 @@
                 '<tr>{% for col in row %}<td>{{ col }}</td>{% endfor %}</tr>' +
             '{% endfor %}Z\n Z\n Z\n ';
 
-        const conf = { Content: text, };
+        const conf = {
+            Content: text,
+            DefinitionName: 'TemplateTesterForLoop',
+        };
         const template = new modulo.registry.engines.Templater(modulo, conf);
         const result = template.render({state: { data: [ [10, 30] ]} });
 

@@ -5,7 +5,7 @@ window.LEG = LEGACY;
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 
-const UNIFIED_DEFINITIONS = 1;
+const UNIFIED_DEFINITIONS = true;
 
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
@@ -1046,7 +1046,7 @@ modulo.register('core', class AssetManager {
 
     define(moduleName, code) {
         const hash = this.modulo.registry.utils.hash(code);
-        if (UNIFIED_DEFINITIONS && UNIFIED_DEFINITIONS === true) {
+        if (UNIFIED_DEFINITIONS) {
             this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
         }
         this.nameToHash[moduleName] = hash;
