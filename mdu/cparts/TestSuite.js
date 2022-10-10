@@ -236,7 +236,6 @@ modulo.register('cpart', class TestSuite {
             componentFac = testLoaderModulo.definitions[name];
         } else {
             testLoaderModulo.defs = deepClone(modulo.defs, modulo);
-            testLoaderModulo.setupParents();
             if (('x_' + name) in testLoaderModulo.defs) {
                 console.log('HACK: Fixing name', name);
                 name = 'x_' + name;
@@ -274,7 +273,6 @@ modulo.register('cpart', class TestSuite {
             }
             mod.assets = modulo.assets; // Copy over asset manager
             mod.assets.modulo = mod; // TODO Rethink these back references
-            mod.setupParents();
             return mod;
         }
 

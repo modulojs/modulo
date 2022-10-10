@@ -128,10 +128,7 @@ window.Modulo = class Modulo {
         return partialConfs;
     }
 
-    setupParents() { }
-
     lifecycle(names) {
-        this.setupParents(); // Ensure sync'ed up, TODO rm
         const lcObj = this.registry.cparts;
         const defArray = Object.values(this.definitions);
         const patches = this.getLifecyclePatches(lcObj, names, defArray);
@@ -192,7 +189,6 @@ window.Modulo = class Modulo {
         }
         let changed = true; // Run at least once
         while (changed) {
-            this.setupParents(); // Ensure sync'ed up (TODO clean up)
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
             for (const conf of Object.values(this.definitions)) {
@@ -1685,7 +1681,7 @@ modulo.config.templater.modes = {
         } // Normal opening tag
         const result = tagFunc(text.slice(tTag.length + 1), tmplt);
         if (result.end) { // Not self-closing, push to stack
-            stack.push({ close: `end${tTag}`, ...result });
+            stack.push({ close: `end${ tTag }`, ...result });
         }
         return result.start || result;
     },
@@ -1713,23 +1709,6 @@ modulo.config.templater.filters = (function () {
         }
     }
 
-    // TODO: Once we get unit tests for build, replace jsobj with actual loop
-    // in build template (and just backtick escape as filter).
-    function jsobj(obj, arg) {
-        let s = '{\n';
-        for (const [key, value] of sorted(obj)) {
-            s += '  ' + JSON.stringify(key) + ': ';
-            if (typeof value === 'string') {
-                s += '// (' + value.split('\n').length + ' lines)\n`';
-                s += value.replace(/\\/g , '\\\\')
-                          .replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                s += '`,// (ends: ' + key + ') \n\n';
-            } else {
-                s += JSON.stringify(value, null, 4) + ',\n';
-            }
-        }
-        return s + '}';
-    }
     const safe = s => Object.assign(new String(s), {safe: true});
 
     //trim: s => s.trim(), // TODO: improve interface to be more useful
@@ -1770,7 +1749,7 @@ modulo.config.templater.filters = (function () {
         upper: s => s.toUpperCase(),
     };
     const { values, keys, entries } = Object;
-    const extra = { get, jsobj, safe, sorted, values, keys, entries };
+    const extra = { get, safe, sorted, values, keys, entries };
     return Object.assign(filters, extra);
 })();
 
