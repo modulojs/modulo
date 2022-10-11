@@ -110,8 +110,6 @@ window.Modulo = class Modulo {
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
         const partialConfs = [];
-        const X = 'x';
-        //const increment = name => /[0-9]$/.test(name) ? name
         const isModulo = node => (this.getNodeModuloType(node, quietErrors)
                                   && !node.getAttribute('modulo-has-loaded'));
         for (const node of Array.from(elem.children).filter(isModulo)) {
@@ -121,21 +119,13 @@ window.Modulo = class Modulo {
             conf.DefName = conf.Name || null; // -name only, null otherwise
             conf.Parent = conf.Parent || parentName;
         }
-        this.repeatPreconf(partialConfs, 'ConfLoaders', [ 'DefinedAs' ]);
+        this.repeatProcessors(partialConfs, 'DefLoaders', [ 'DefinedAs' ]);
         return partialConfs;
     }
 
-    lifecycle(names) {
-        const lcObj = this.registry.cparts;
-        const defArray = Object.values(this.definitions);
-        const patches = this.getLifecyclePatches(lcObj, names, defArray);
-        this.applyPatches(patches);
-    }
-
     preprocessAndDefine() {
-        this.repeatPreconf(null, 'ConfPreprocessors', [ 'Src' ], () => {
-            this.lifecycle([ 'prebuild', 'define' ]);
-        });
+        this.repeatProcessors(null, 'DefBuilders', [ 'Src' ],
+            () => this.repeatProcessors(null, 'DefFinalizers', [ ]));
     }
 
     loadString(text, parentFactoryName = null) {
@@ -182,14 +172,15 @@ window.Modulo = class Modulo {
         }
     }
 
-    repeatPreconf(confs, field, defaults, cb) {
+    repeatProcessors(confs, field, defaults, cb) {
         let changed = true; // Run at least once
+        const repeat = () => this.repeatProcessors(confs, field, defaults, cb);
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
             for (const conf of confs || Object.values(this.definitions)) {
-                const preprocessors = conf[field] || defaults;
-                changed = changed || this.applyPreprocessor(conf, preprocessors);
+                const processors = conf[field] || defaults;
+                changed = changed || this.applyProcessors(conf, processors);
             }
         }
         if (Object.keys(this.fetchQueue ? this.fetchQueue.queue : {}).length === 0) { // TODO: Remove ?: after core object refactor
@@ -197,7 +188,6 @@ window.Modulo = class Modulo {
                 cb(); // Synchronous path
             }
         } else {
-            const repeat = () => this.repeatPreconf(confs, field, defaults, cb);
             this.fetchQueue.enqueueAll(repeat);
         }
     }
@@ -241,12 +231,13 @@ window.Modulo = class Modulo {
         return config;
     }
 
-    applyPreprocessor(conf, preprocessorNames) {
+    applyProcessors(conf, preprocessorNames) {
         for (const name of preprocessorNames) {
+            //const [ attrName, processorName ] = name.split(':'); // TODO: Optional alt syntax
             if (name in conf) {
                 const value = conf[name];
                 delete conf[name];
-                this.registry.confPreprocessors[name.toLowerCase()](this, conf, value);
+                this.registry.processors[name.toLowerCase()](this, conf, value);
                 return true;
             }
         }
@@ -284,17 +275,17 @@ Modulo.INVALID_WORDS = new Set((`
 (new Modulo(null, [
     'cparts', 'dom', 'utils', 'library', 'core', 'engines', 'commands',
     'templateFilters', 'templateTags', 'directives', 'directiveShortcuts',
-    'loadDirectives', 'loadDirectiveShortcuts', 'confPreprocessors',
+    'loadDirectives', 'loadDirectiveShortcuts', 'processors',
 ])).pushGlobal();
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
-modulo.register('confPreprocessor', function src (modulo, conf, value) {
+modulo.register('processor', function src (modulo, conf, value) {
     modulo.fetchQueue.enqueue(value, text => {
         conf.Content = (text || '') + (conf.Content || '');
     });
 });
 
-modulo.register('confPreprocessor', function content (modulo, conf, value) {
+modulo.register('processor', function content (modulo, conf, value) {
     modulo.loadString(value, conf.DefinitionName);
     if (value) {
         conf.Prebuild = conf.DefinitionName; // XXX
@@ -302,7 +293,7 @@ modulo.register('confPreprocessor', function content (modulo, conf, value) {
     conf.Hash = modulo.registry.utils.hash(value);
 });
 
-modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
+modulo.register('processor', function definedas (modulo, conf, value) {
     conf.Name = conf.Name || conf.name || conf.Type.toLowerCase();
     const parentPrefix = conf.Parent ? conf.Parent + '_' : '';
     conf.DefinitionName = parentPrefix + conf.Name;
@@ -321,7 +312,7 @@ modulo.register('confPreprocessor', function definedas (modulo, conf, value) {
     }
 });
 
-modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
+modulo.register('processor', function prebuild (modulo, conf, value) {
     const { DefinitionName, FullName, Hash, Name, Parent } = conf;
     const { stripWord } = modulo.registry.utils;
 
@@ -376,20 +367,11 @@ modulo.register('confPreprocessor', function prebuild (modulo, conf, value) {
     conf.MainRequire = conf.DefinitionName;
 });
 
-/*
-modulo.register('confPreprocessor', function mainrequire (modulo, conf, value) {
-    //console.log('main require hapenning!', value);
+modulo.register('processor', function mainrequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
-*/
 
 modulo.register('cpart', class Component {
-    static defineCallback(modulo, conf) {
-        if (conf.MainRequire) {
-            modulo.assets.mainRequire(conf.DefinitionName);
-        }
-    }
-
     /*
     static factoryCallback(modulo, conf) {
         conf.directiveShortcuts = [
@@ -590,14 +572,13 @@ modulo.register('cpart', class Component {
     mode: 'regular',
     rerender: 'event',
     engine: 'Reconciler',
-    //ConfPreprocessors: [ 'Src', 'Content', 'Prebuild', 'MainRequire' ]
-    ConfPreprocessors: [ 'Src', 'Content', 'Prebuild' ]
+    DefBuilders: [ 'Src', 'Content', 'Prebuild' ],
+    DefFinalizers: [ 'MainRequire' ],
 });
 
-modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content' ] });
+modulo.register('cpart', class Modulo {}, { DefBuilders: [ 'Src', 'Content' ] });
 
 modulo.register('cpart', class Library {
-    // TODO:
     /*
       <Library namespace="" -src="..."></Library>
       Is shortcut for:
@@ -608,44 +589,7 @@ modulo.register('cpart', class Library {
           ></Configuration>
       </Modulo>
     */
-
-    /*
-    static configureCallback(modulo, conf) {
-        modulo.applyPreprocessor(conf, [ 'Src', 'Content' ]);
-        let { Content, Src, Hash, src, Name, name, namespace } = conf;
-        //const { hash } = modulo.registry.utils;
-        const regName = (Name || name || namespace || 'x').toLowerCase();
-        if (Hash) {
-            delete conf.Content; // Prevent repeat
-            delete conf.Hash; // Prevent repeat
-            let libName = regName;
-            if (libName === 'x') { // TODO fix this stuff, default to FN?
-                libName = 'm-' + conf.Hash;
-            }
-            let libraryModulo = modulo.registry.library[libName];
-            if (!libraryModulo) { // No existing library, fork into new one
-                libraryModulo = new modulo.registry.utils.Modulo(modulo);
-                libraryModulo.name = libName; // ".name" is for register()
-                modulo.register('library', libraryModulo);
-            }
-            const oldConf = libraryModulo.config.library || {};
-            libraryModulo.config.library = Object.assign(oldConf, conf);
-            libraryModulo.loadString(Content);
-            libraryModulo.runLifecycle(libraryModulo.registry.cparts, 'configure');
-            conf.RegName = regName; // Ensure RegName is set on conf as well
-            conf.LibName = libName; // ditto
-        }
-    }
-    static defineCallback(modulo, conf) {
-        if (conf.LibName) {
-            console.log('Does this even work??')
-            delete conf.LibName; // idempotent
-            const library = modulo.registry.library[conf.LibName];
-            library.runLifecycle(library.registry.cparts, 'define');
-        }
-    }
-    */
-}, { ConfPreprocessors: [ 'Src', 'Content' ] });
+}, { DefBuilders: [ 'Src', 'Content' ] });
 
 modulo.register('util', function keyFilter (obj, func) {
     const keys = func.call ? Object.keys(obj).filter(func) : func;
@@ -1146,40 +1090,40 @@ modulo.register('cpart', class Props {
 });
 
 
-modulo.register('cpart', class Style {
-    static prebuildCallback(modulo, conf) {
-        /*
-        //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
-        //    return;
-        //}
-        */
-        let { Content, Parent } = conf;
-        if (!Content) {
-            return;
-        }
-        if (Parent) {
-            let namespace, mode, Name;
-            ({ namespace, mode, Name } = modulo.definitions[Parent]);
-            // XXX HAX, conf is a big tangled mess
-            if (Name.startsWith('x_')) {
-                Name = Name.replace('x_', '');
-                if (!namespace) {
-                    namespace = 'x';
-                }
-            }
-            if (Name.startsWith(namespace)) {
-                Name = Name.replace(namespace + '_', '');
-                conf.Name = Name;
-            }
-            // XXX unHAX, conf is a big tangled mess
-            if (mode === 'regular') { // TODO finish
-                const { prefixAllSelectors } = modulo.registry.utils;
-                Content = prefixAllSelectors(namespace, Name, Content);
-            }
-        }
-        modulo.assets.registerStylesheet(Content);
-    }
+modulo.register('processor', function styleprebuild (modulo, conf, value) {
+      /*
+      //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
+      //    return;
+      //}
+      */
+      let { Content, Parent } = conf;
+      if (!Content) {
+          return;
+      }
+      if (Parent) {
+          let namespace, mode, Name;
+          ({ namespace, mode, Name } = modulo.definitions[Parent]);
+          // XXX HAX, conf is a big tangled mess
+          if (Name.startsWith('x_')) {
+              Name = Name.replace('x_', '');
+              if (!namespace) {
+                  namespace = 'x';
+              }
+          }
+          if (Name.startsWith(namespace)) {
+              Name = Name.replace(namespace + '_', '');
+              conf.Name = Name;
+          }
+          // XXX unHAX, conf is a big tangled mess
+          if (mode === 'regular') { // TODO finish
+              const { prefixAllSelectors } = modulo.registry.utils;
+              Content = prefixAllSelectors(namespace, Name, Content);
+          }
+      }
+      modulo.assets.registerStylesheet(Content);
+});
 
+modulo.register('cpart', class Style {
     initializedCallback(renderObj) {
         const { component, style } = renderObj;
         if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
@@ -1189,18 +1133,21 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+}, {
+    StylePrebuild: "yes",
+    DefBuilders: [ 'Src', 'StylePrebuild' ]
 });
 
 
-modulo.register('cpart', class Template {
-    static prebuildCallback(modulo, conf) {
-        modulo.assert(conf.Content, 'No Template Content specified.');
-        const engine = conf.engine || 'Templater';
-        const instance = new modulo.registry.engines[engine](modulo, conf);
-        conf.Hash = instance.Hash;
-        delete conf.Content;
-    }
+modulo.register('processor', function templateprebuild (modulo, conf, value) {
+    modulo.assert(conf.Content, 'No Template Content specified.');
+    const engine = conf.engine || 'Templater';
+    const instance = new modulo.registry.engines[engine](modulo, conf);
+    conf.Hash = instance.Hash;
+    delete conf.Content;
+});
 
+modulo.register('cpart', class Template {
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
         this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
@@ -1223,98 +1170,101 @@ modulo.register('cpart', class Template {
         if (!renderObj.component)renderObj.component={};// XXX fix
         renderObj.component.innerHTML = this.templater.render(renderObj);
     }
+}, {
+    TemplatePrebuild: "yes",
+    DefBuilders: [ 'Src', 'TemplatePrebuild' ]
+});
+
+
+modulo.register('processor', function contentcsv (modulo, conf, value) {
+    const js = JSON.stringify(conf.Content.split('\n').map(line => line.split(',')));
+    conf.Code = 'return ' + js;
+});
+
+modulo.register('processor', function contentjson (modulo, conf, value) {
+    conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content)) + ';';
+});
+
+modulo.register('processor', function contenttxt (modulo, conf, value) {
+    conf.Code = 'return ' + JSON.stringify(conf.Content);
+});
+
+modulo.register('processor', function datatype (modulo, conf, value) {
+    if (value === 'GUESS') {
+        value = conf.Src ? conf.Src.match(/(?<=\.)[a-z]+$/i)[0] : 'json';
+    }
+    conf['Content' + value.toUpperCase()] = value;
+});
+
+modulo.register('processor', function code (modulo, conf, value) {
+    modulo.assets.define(conf.DefinitionName, value);
 });
 
 modulo.register('cpart', class StaticData {
-    static prebuildCallback(modulo, conf) {
-        // TODO: Refactor all of this into preprocessors! E.g. JSON, TXT, and
-        // CSV would all be options and defined as confPreprocessors
-        // Only thing StaticData would do (maybe also via conf preprocessors)
-        // would guess as to what the best preproessor to use based on src
-        // extension, e.g. contentCSV, contentJSON, contentTXT
-        // Another IDEA! contentBinary ... will just do data64 on binary data,
-        // so it can be inserted as a string, and that way images etc can be
-        // imported as StaticData! (AND/OR, do |datauri as a filter)
-        const transforms = {
-            csv: s => JSON.stringify(s.split('\n').map(line => line.split(','))),
-            js: s => s,
-            json: s => JSON.stringify(JSON.parse(s)),
-            txt: s => JSON.stringify(s),
-        };
-        const transform = transforms[conf.type || 'js'];
-        const code = 'return ' + transform((conf.Content || '').trim()) + ';';
-        delete conf.Content;
-        conf.Hash = modulo.registry.utils.hash(code);
-        modulo.assets.define(conf.DefinitionName, code);
-        // TODO put into conf, make default to JSON, and make CSV actually
-        // correct + instantly useful (e.g. separate headers, parse quotes)
-        //Object.assign(conf, modulo.assets.define(conf.FullName, code)());
-    }
-
     static factoryCallback(renderObj, conf, modulo) {
-        // Now, actually run code in Script tag to do factory method. By
-        // putting this in factory, each Component that uses the same -src will
-        // NOT share the data, but within each Component it will.
+        // By putting this in factory, each Component that uses the same -src
+        // will NOT share the data instance, but within each Component it will.
         return modulo.assets.require(conf.DefinitionName);
     }
+}, {
+    DataType: 'GUESS',
+    DefLoaders: [ 'DefinedAs', 'DataType' ],
+    DefBuilders: [ 'Src', 'ContentCSV', 'ContentJSON', 'ContentTXT', 'Code' ],
 });
 
-modulo.register('cpart', class Configuration {
-    static prebuildCallback(modulo, conf) {
-        let code = (conf.Content || '').trim();
-        delete conf.Content;
-        const opts = { exports: 'script' };
-        //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
+modulo.register('processor', function configurationprebuild (modulo, conf, value) {
+    let code = (conf.Content || '').trim();
+    delete conf.Content;
+    const opts = { exports: 'script' };
+    //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
 
-        modulo.assets.define(conf.DefinitionName, code); // define & invoke
-        modulo.assets.mainRequire(conf.DefinitionName);
-        /*
-        // TODO: Possibly, add something like this to finish this CPart. Should
-        // be a helper, however -- maybe a confPreprocessor that applies to
-        // Library and Modulo as well?
-        for (const [ key, value ] of conf) {
-            if (key.includes('.')) {
-                modulo.utils.set(modulo.conf, key, value);
-            }
-        }
-        */
-    }
-});
-
-modulo.register('cpart', class Script {
-    static prebuildCallback(modulo, conf) {
-        const code = conf.Content || ''; // TODO: trim whitespace?
-        delete conf.Content;
-        let localVars = Object.keys(modulo.registry.dom);// TODO fix...
-        localVars.push('element'); // add in element as a local var
-        localVars.push('cparts'); // give access to CParts JS interface
-
-        // Combine localVars + fixed args into allArgs
-        const args = [ 'modulo', 'require' ];
-        let allArgs = args.concat(localVars.filter(n => !args.includes(n)));
-
-        const opts = { exports: 'script' };
-        if (!conf.Parent) {
-            localVars = [];
-            allArgs = [ 'modulo' ];
-            delete opts.exports;
-        }
-
-        const fullCode = modulo.registry.cparts.Script.nu_wrapFunctionText(code, localVars);
-        modulo.assets.define(conf.DefinitionName, fullCode);
-        conf.localVars = localVars;
-    }
-
+    modulo.assets.define(conf.DefinitionName, code); // define & invoke
+    modulo.assets.mainRequire(conf.DefinitionName);
     /*
-    static defineCallback(modulo, conf) {
-        if (!conf.Parent || ((conf.Parent === 'x_x' && conf.Hash) ||
-                             (conf.Parent === 'x_x' && conf.TmpRando))) {
-            //modulo.assets.mainRequire(conf.FullName);
-            modulo.assets.mainRequire(conf.TmpRando);
+    // TODO: Possibly, add something like this to finish this CPart. Should
+    // be a helper, however -- maybe a processor that applies to
+    // Library and Modulo as well?
+    for (const [ key, value ] of conf) {
+        if (key.includes('.')) {
+            modulo.utils.set(modulo.conf, key, value);
         }
     }
     */
+});
 
+modulo.register('cpart', class Configuration { }, {
+    ConfigurationPrebuild: "yes",
+    DefBuilders: [ 'Src', 'ConfigurationPrebuild' ]
+});
+
+modulo.register('processor', function scriptautoexport (modulo, conf, value) {
+    let text = conf.Content;
+    function getSymbolsAsObjectAssignment(contents) {
+        const regexpG = /(function|class)\s+(\w+)/g;
+        const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
+        const matches = contents.match(regexpG) || [];
+        return matches.map(s => s.match(regexp2)[2])
+            .filter(s => s && !Modulo.INVALID_WORDS.has(s))
+            .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
+            .join('');
+    }
+    let prefix = '';
+    let suffix = '';
+    let localVars = Object.keys(modulo.registry.dom);// TODO fix...
+    localVars.push('element'); // add in element as a local var
+    localVars.push('cparts'); // give access to CParts JS interface
+    const symbolsString = getSymbolsAsObjectAssignment(text);
+    // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
+    const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
+    prefix += `var script = { exports: {} }; `;
+    prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
+    prefix += `function __set(name, value) { ${ localVarsIfs } }`;
+    suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
+    conf.Code = `${prefix}\n${text}\n${suffix}`;
+    conf.localVars = localVars;
+});
+
+modulo.register('cpart', class Script {
     static factoryCallback(renderObj, conf, modulo) {
         const { Content, Hash, localVars } = conf;
         let results;
@@ -1434,6 +1384,9 @@ modulo.register('cpart', class Script {
             }
         }
     }
+}, {
+    ScriptAutoExport: 'auto',
+    DefBuilders: [ 'Src', 'ScriptAutoExport', 'Code' ],
 });
 
 modulo.register('cpart', class State {
