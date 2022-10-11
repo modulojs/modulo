@@ -576,20 +576,14 @@ modulo.register('cpart', class Component {
     DefFinalizers: [ 'MainRequire' ],
 });
 
-modulo.register('cpart', class Modulo {}, { DefBuilders: [ 'Src', 'Content' ] });
+modulo.register('cpart', class Modulo { }, {
+    DefBuilders: [ 'Src', 'Content' ]
+});
 
-modulo.register('cpart', class Library {
-    /*
-      <Library namespace="" -src="..."></Library>
-      Is shortcut for:
-
-      <Modulo -src="..">
-          <Configuration
-              component.namespace=""
-          ></Configuration>
-      </Modulo>
-    */
-}, { DefBuilders: [ 'Src', 'Content' ] });
+modulo.register('cpart', class Library { }, {
+    SetAttrs: 'conf.component',
+    DefBuilders: [ 'Src', 'SetAttrs', 'Content' ],
+});
 
 modulo.register('util', function keyFilter (obj, func) {
     const keys = func.call ? Object.keys(obj).filter(func) : func;
@@ -1190,7 +1184,7 @@ modulo.register('processor', function contenttxt (modulo, conf, value) {
 });
 
 modulo.register('processor', function datatype (modulo, conf, value) {
-    if (value === 'GUESS') {
+    if (value === '?') {
         value = conf.Src ? conf.Src.match(/(?<=\.)[a-z]+$/i)[0] : 'json';
     }
     conf['Content' + value.toUpperCase()] = value;
@@ -1200,6 +1194,15 @@ modulo.register('processor', function code (modulo, conf, value) {
     modulo.assets.define(conf.DefinitionName, value);
 });
 
+modulo.register('processor', function setattrs (modulo, conf, value) {
+    // TODO: Untested
+    for (const [ key, val ] of Object.entries(conf)) {
+        if (key.toLowerCase() === key && (key + value).includes('.')) {
+            modulo.utils.set(modulo, (key + '.' + value), val); // Set lower
+        }
+    }
+});
+
 modulo.register('cpart', class StaticData {
     static factoryCallback(renderObj, conf, modulo) {
         // By putting this in factory, each Component that uses the same -src
@@ -1207,35 +1210,21 @@ modulo.register('cpart', class StaticData {
         return modulo.assets.require(conf.DefinitionName);
     }
 }, {
-    DataType: 'GUESS',
+    DataType: '?', // Default behavior is to guess based on Src ext
     DefLoaders: [ 'DefinedAs', 'DataType' ],
     DefBuilders: [ 'Src', 'ContentCSV', 'ContentJSON', 'ContentTXT', 'Code' ],
 });
 
-modulo.register('processor', function configurationprebuild (modulo, conf, value) {
-    let code = (conf.Content || '').trim();
-    delete conf.Content;
-    const opts = { exports: 'script' };
-    //code = 'var exports = undefined;' + code; // XXX Remove the "exports = undefined;" only after testing with Handlebars demo
-
-    modulo.assets.define(conf.DefinitionName, code); // define & invoke
-    modulo.assets.mainRequire(conf.DefinitionName);
-    /*
-    // TODO: Possibly, add something like this to finish this CPart. Should
-    // be a helper, however -- maybe a processor that applies to
-    // Library and Modulo as well?
-    for (const [ key, value ] of conf) {
-        if (key.includes('.')) {
-            modulo.utils.set(modulo.conf, key, value);
-        }
-    }
-    */
-});
-
 modulo.register('cpart', class Configuration { }, {
-    ConfigurationPrebuild: "yes",
-    DefBuilders: [ 'Src', 'ConfigurationPrebuild' ]
+    SetAttrs: 'conf',
+    DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
 });
+
+/*
+// TODO: Possibly, add something like this to finish this CPart. Should
+// be a helper, however -- maybe a processor that applies to
+// Library and Modulo as well?
+*/
 
 modulo.register('processor', function scriptautoexport (modulo, conf, value) {
     let text = conf.Content;
