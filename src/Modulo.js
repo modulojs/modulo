@@ -11,6 +11,7 @@ window.Modulo = class Modulo {
         window._moduloID = (window._moduloID || 0) + 1; // Global ID
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
+        this._configSteps = 0;
 
         this.config = {};
         this.definitions = {};
@@ -119,12 +120,8 @@ window.Modulo = class Modulo {
             conf.DefinedAs = conf.Name || null; // -name only, null otherwise
             conf.DefName = conf.Name || null; // -name only, null otherwise
             conf.Parent = conf.Parent || parentName;
-            let changed = true;
-            while (changed) {
-                const list = conf.ConfLoaders || [ 'DefinedAs' ];
-                changed = this.applyPreprocessor(conf, list);
-            }
         }
+        this.repeatPreconf(partialConfs, 'ConfLoaders', [ 'DefinedAs' ]);
         return partialConfs;
     }
 
@@ -136,7 +133,9 @@ window.Modulo = class Modulo {
     }
 
     preprocessAndDefine() {
-        this.repeatPreconf(() => this.lifecycle([ 'prebuild', 'define' ]))
+        this.repeatPreconf(null, 'ConfPreprocessors', [ 'Src' ], () => {
+            this.lifecycle([ 'prebuild', 'define' ]);
+        });
     }
 
     loadString(text, parentFactoryName = null) {
@@ -183,24 +182,23 @@ window.Modulo = class Modulo {
         }
     }
 
-    repeatPreconf(cb) {
-        if (!this._configSteps) {
-            this._configSteps = 0;
-        }
+    repeatPreconf(confs, field, defaults, cb) {
         let changed = true; // Run at least once
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
-            for (const conf of Object.values(this.definitions)) {
-                const preprocessors = conf.ConfPreprocessors || [ 'Src' ];
+            for (const conf of confs || Object.values(this.definitions)) {
+                const preprocessors = conf[field] || defaults;
                 changed = changed || this.applyPreprocessor(conf, preprocessors);
             }
         }
-        if (Object.keys(this.fetchQueue.queue).length === 0) {
-            delete this._configSteps;
-            cb(); // Synchronous path
+        if (Object.keys(this.fetchQueue ? this.fetchQueue.queue : {}).length === 0) { // TODO: Remove ?: after core object refactor
+            if (cb) {
+                cb(); // Synchronous path
+            }
         } else {
-            this.fetchQueue.enqueueAll(() => this.repeatPreconf(cb));
+            const repeat = () => this.repeatPreconf(confs, field, defaults, cb);
+            this.fetchQueue.enqueueAll(repeat);
         }
     }
 
@@ -597,9 +595,6 @@ modulo.register('cpart', class Component {
 });
 
 modulo.register('cpart', class Modulo {}, { ConfPreprocessors: [ 'Src', 'Content' ] });
-
-//                v- Later put somewhere more appropriate
-//modulo.register('util', Modulo);
 
 modulo.register('cpart', class Library {
     // TODO:
