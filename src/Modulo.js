@@ -124,8 +124,9 @@ window.Modulo = class Modulo {
     }
 
     preprocessAndDefine() {
-        this.repeatProcessors(null, 'DefBuilders', [ 'Src' ],
-            () => this.repeatProcessors(null, 'DefFinalizers', [ ]));
+        modulo.fetchQueue.enqueueAll(
+            () => this.repeatProcessors(null, 'DefBuilders', [ 'Src' ],
+                () => this.repeatProcessors(null, 'DefFinalizers', [ ])));
     }
 
     loadString(text, parentFactoryName = null) {
@@ -1164,7 +1165,7 @@ modulo.register('processor', function contentcsv (modulo, conf, value) {
 
 modulo.register('processor', function contentjs (modulo, conf, value) {
     const tmpFunc = new Function('return ' + (conf.Content || 'null'));
-    conf.Code = 'return ' + tmpFunc() + ';'; // Evaluate immediately
+    conf.Code = 'return ' + JSON.stringify(tmpFunc()) + ';'; // Evaluate
 });
 
 modulo.register('processor', function contentjson (modulo, conf, value) {
@@ -1191,8 +1192,8 @@ modulo.register('processor', function code (modulo, conf, value) {
 modulo.register('processor', function setattrs (modulo, conf, value) {
     // TODO: Untested
     for (const [ key, val ] of Object.entries(conf)) {
-        if (key.toLowerCase() === key && (key + value).includes('.')) {
-            modulo.utils.set(modulo, (key + '.' + value), val); // Set lower
+        if (/^[a-z]/.test(key) && (value + key).includes('.')) { // Set anything with dots
+            modulo.utils.set(modulo, (value + '.' + key), val);
         }
     }
 });
@@ -1211,7 +1212,9 @@ modulo.register('cpart', class StaticData {
 
 modulo.register('cpart', class Configuration { }, {
     SetAttrs: 'conf',
-    DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
+    //DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
+    DefLoaders: [ 'SetAttrs', 'Src', 'DefiniedAs' ],
+    DefBuilders: [ 'Code', 'MainRequire' ],
 });
 
 modulo.register('processor', function scriptautoexport (modulo, conf, value) {
