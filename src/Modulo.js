@@ -19,7 +19,7 @@ window.Modulo = class Modulo {
         if (parentModulo) {
             this.parentModulo = parentModulo;
 
-            const { deepClone, cloneStub } = modulo.registry.utils;
+            const { deepClone } = modulo.registry.utils;
             this.config = deepClone(parentModulo.config, parentModulo);
             this.registry = deepClone(parentModulo.registry, parentModulo);
 
@@ -590,15 +590,6 @@ modulo.register('util', function keyFilter (obj, func) {
     return Object.fromEntries(keys.map(key => [ key, obj[key] ]));
 });
 
-modulo.register('util', function cloneStub (obj, stubFunc = null) {
-    const clone = {};
-    stubFunc = stubFunc || (() => ({}));
-    for (const key of Object.keys(obj)) {
-        clone[key] = stubFunc(obj);
-    }
-    return clone;
-});
-
 // TODO: pass in modulo more consistently
 modulo.register('util', function deepClone (obj, modulo) {
     if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
@@ -626,12 +617,6 @@ modulo.register('util', function resolveDataProp (key, elem, defaultVal) {
     }
     return elem.hasAttribute(key) ? elem.getAttribute(key) : defaultVal;
 });
-
-/*
-modulo.register('util', function subObject (obj, array) {
-    return Object.fromEntries(array.map(key => [ key, obj[key] ])); // TODO: rm
-});
-*/
 
 modulo.register('util', function cleanWord (text) {
     // todo: should merge with stripWord ? See if "strip" functionality is enough
@@ -1132,9 +1117,11 @@ modulo.register('cpart', class Style {
     DefBuilders: [ 'Src', 'StylePrebuild' ]
 });
 
-
 modulo.register('processor', function templateprebuild (modulo, conf, value) {
-    modulo.assert(conf.Content, 'No Template Content specified.');
+    if (!conf.Content) {
+        console.error('No Template Content specified:', conf.DefinitionName);
+        return;
+    }
     const engine = conf.engine || 'Templater';
     const instance = new modulo.registry.engines[engine](modulo, conf);
     conf.Hash = instance.Hash;
@@ -1171,12 +1158,18 @@ modulo.register('cpart', class Template {
 
 
 modulo.register('processor', function contentcsv (modulo, conf, value) {
-    const js = JSON.stringify(conf.Content.split('\n').map(line => line.split(',')));
+    const js = JSON.stringify((conf.Content || '').split('\n').map(line => line.split(',')));
     conf.Code = 'return ' + js;
 });
 
+modulo.register('processor', function contentjs (modulo, conf, value) {
+    const tmpFunc = new Function('return ' + (conf.Content || 'null'));
+    conf.Code = 'return ' + tmpFunc() + ';'; // Evaluate immediately
+});
+
 modulo.register('processor', function contentjson (modulo, conf, value) {
-    conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content)) + ';';
+    console.log('content', conf.Content);
+    conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content || '{}')) + ';';
 });
 
 modulo.register('processor', function contenttxt (modulo, conf, value) {
@@ -1185,7 +1178,8 @@ modulo.register('processor', function contenttxt (modulo, conf, value) {
 
 modulo.register('processor', function datatype (modulo, conf, value) {
     if (value === '?') {
-        value = conf.Src ? conf.Src.match(/(?<=\.)[a-z]+$/i)[0] : 'json';
+        const ext = conf.Src && conf.Src.match(/(?<=\.)[a-z]+$/i);
+        value = ext ? ext[0] : 'json';
     }
     conf['Content' + value.toUpperCase()] = value;
 });
@@ -1219,12 +1213,6 @@ modulo.register('cpart', class Configuration { }, {
     SetAttrs: 'conf',
     DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
 });
-
-/*
-// TODO: Possibly, add something like this to finish this CPart. Should
-// be a helper, however -- maybe a processor that applies to
-// Library and Modulo as well?
-*/
 
 modulo.register('processor', function scriptautoexport (modulo, conf, value) {
     let text = conf.Content;
@@ -1268,30 +1256,6 @@ modulo.register('cpart', class Script {
             modulo.assert(!conf.Parent, 'Falsy return for parented Script');
             return {};
         }
-    }
-
-    static nu_wrapFunctionText(text, localVars) {
-        let prefix = '';
-        let suffix = '';
-
-        function getSymbolsAsObjectAssignment(contents) {
-            const regexpG = /(function|class)\s+(\w+)/g;
-            const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
-            const matches = contents.match(regexpG) || [];
-            return matches.map(s => s.match(regexp2)[2])
-                .filter(s => s && !Modulo.INVALID_WORDS.has(s))
-                .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
-                .join('');
-        }
-
-        const symbolsString = getSymbolsAsObjectAssignment(text);
-        // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
-        const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-        prefix += `var script = { exports: {} }; `;
-        prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
-        prefix += `function __set(name, value) { ${ localVarsIfs } }`;
-        suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
-        return `${prefix}\n${text}\n${suffix}`;
     }
 
     getDirectives() {
@@ -2134,7 +2098,6 @@ modulo.register('engine', class Reconciler {
     }
 });
 
-
 modulo.register('util', function fetchBundleData(modulo, callback) {
     const query = 'script[src],link[rel=stylesheet]';
     const data = [];
@@ -2155,7 +2118,6 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
     }
     modulo.fetchQueue.enqueueAll(() => callback(data));
 });
-
 
 modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     // Scan document for modulo elements, attaching modulo-original-html=""
