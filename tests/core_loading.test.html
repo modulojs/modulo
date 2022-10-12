@@ -22,7 +22,7 @@
         window._loadString = function _loadString(str) {
             // Now, let's make a fresh modulo, and see if we can "load" the
             // build using this separate instance);
-            mod2 = window._newModulo();
+            const mod2 = window._newModulo();
             return mod2.loadString(str);
         }
 
@@ -68,7 +68,7 @@
 
 <Test name="Processor tests">
     <script name="modulo.preprocessAndDefine exists">
-        assert: modulo && modulo.preprocessAndDefine
+        assert: modulo && modulo.preprocessAndDefine && modulo.applyProcessors
     </script>
 
     <script name="Preprocesses an empty component with expected values">
@@ -99,6 +99,72 @@
         ];
         assert: JSON.stringify(expected) === JSON.stringify(actual);
     </script>
+
+    <script name="Applies processors as expected to an empty conf">
+        const mod = window._newModulo();
+        const result = mod.applyProcessors({ }, [ 'A', 'B', 'C' ]);
+        assert: result === false
+    </script>
+
+    <script name="Correctly applies one round of processors">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        const result = mod.applyProcessors({
+            TestA: 'eyy',
+            TestB: 'bee',
+            TestC: 'sea',
+        }, [ 'TestA', 'TestB' ]);
+        assert: result === true && runA === 'eyy' && runB === null && runC === null;
+    </script>
+
+    <script name="Correctly applies multiple rounds of processors">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        let conf = { TestA: 'eyy', TestB: 'bee', TestC: 'sea' };
+        let keepGoing = 0;
+        let results = [];
+        while (keepGoing++ < 5) {
+            results.push(mod.applyProcessors(conf, [ 'TestA', 'TestB' ]));
+        }
+        const expected = JSON.stringify({ TestC: 'sea' });
+        const actual = JSON.stringify(conf);
+        const expectedResults = JSON.stringify([ true, true, false, false, false ]);
+        const actualResults = JSON.stringify(results);
+        assert: actual === expected && actualResults === expectedResults && runA === 'eyy' && runB === 'bee' && runC === null;
+    </script>
+
+
+    <script name="Correctly handles aliases through multiple rounds">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        let conf = { TestA: 'eyy', TestB: 'bee', TestC: 'sea' };
+        let keepGoing = 0;
+        let results = [];
+        while (keepGoing++ < 5) {
+            results.push(mod.applyProcessors(conf, [ 'TestC|TestA', 'TestB' ]));
+        }
+        const expected = JSON.stringify({ TestA: 'eyy' });
+        const actual = JSON.stringify(conf);
+        const expectedResults = JSON.stringify([ true, true, false, false, false ]);
+        const actualResults = JSON.stringify(results);
+        assert: actual === expected && actualResults === expectedResults && runA === 'sea' && runB === 'bee' && runC === null;
+    </script>
+
 
 
 </TestSuite>

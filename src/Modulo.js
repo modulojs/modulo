@@ -106,6 +106,9 @@ window.Modulo = class Modulo {
             this.registry.dom[cls.name.toLowerCase()] = cls;
             this.config[cls.name.toLowerCase()].RenderObj = cls.name.toLowerCase();
         }
+        if (type === 'processors') {
+            this.registry.processors[cls.name.toLowerCase()] = cls;
+        }
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
@@ -232,13 +235,14 @@ window.Modulo = class Modulo {
         return config;
     }
 
-    applyProcessors(conf, preprocessorNames) {
-        for (const name of preprocessorNames) {
-            //const [ attrName, processorName ] = name.split(':'); // TODO: Optional alt syntax
-            if (name in conf) {
-                const value = conf[name];
-                delete conf[name];
-                this.registry.processors[name.toLowerCase()](this, conf, value);
+    applyProcessors(conf, processors) {
+        for (const name of processors) {
+            const [ attrName, aliasedName ] = name.split('|');
+            if (attrName in conf) {
+                const value = conf[attrName];
+                delete conf[attrName];
+                const funcName = (aliasedName || attrName).toLowerCase();
+                this.registry.processors[funcName](this, conf, value);
                 return true;
             }
         }
@@ -294,7 +298,7 @@ modulo.register('processor', function content (modulo, conf, value) {
     conf.Hash = modulo.registry.utils.hash(value);
 });
 
-modulo.register('processor', function definedas (modulo, conf, value) {
+modulo.register('processor', function definedAs (modulo, conf, value) {
     conf.Name = conf.Name || conf.name || conf.Type.toLowerCase();
     const parentPrefix = conf.Parent ? conf.Parent + '_' : '';
     conf.DefinitionName = parentPrefix + conf.Name;
@@ -368,7 +372,7 @@ modulo.register('processor', function prebuild (modulo, conf, value) {
     conf.MainRequire = conf.DefinitionName;
 });
 
-modulo.register('processor', function mainrequire (modulo, conf, value) {
+modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
@@ -1070,7 +1074,7 @@ modulo.register('cpart', class Props {
 });
 
 
-modulo.register('processor', function styleprebuild (modulo, conf, value) {
+modulo.register('processor', function stylePreBuild (modulo, conf, value) {
       /*
       //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
       //    return;
@@ -1118,7 +1122,7 @@ modulo.register('cpart', class Style {
     DefBuilders: [ 'Src', 'StylePrebuild' ]
 });
 
-modulo.register('processor', function templateprebuild (modulo, conf, value) {
+modulo.register('processor', function templatePreBuild (modulo, conf, value) {
     if (!conf.Content) {
         console.error('No Template Content specified:', conf.DefinitionName);
         return;
@@ -1158,26 +1162,25 @@ modulo.register('cpart', class Template {
 });
 
 
-modulo.register('processor', function contentcsv (modulo, conf, value) {
+modulo.register('processor', function contentCSV (modulo, conf, value) {
     const js = JSON.stringify((conf.Content || '').split('\n').map(line => line.split(',')));
     conf.Code = 'return ' + js;
 });
 
-modulo.register('processor', function contentjs (modulo, conf, value) {
+modulo.register('processor', function contentJS (modulo, conf, value) {
     const tmpFunc = new Function('return ' + (conf.Content || 'null'));
     conf.Code = 'return ' + JSON.stringify(tmpFunc()) + ';'; // Evaluate
 });
 
-modulo.register('processor', function contentjson (modulo, conf, value) {
-    console.log('content', conf.Content);
+modulo.register('processor', function contentJSON (modulo, conf, value) {
     conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content || '{}')) + ';';
 });
 
-modulo.register('processor', function contenttxt (modulo, conf, value) {
+modulo.register('processor', function contentTXT (modulo, conf, value) {
     conf.Code = 'return ' + JSON.stringify(conf.Content);
 });
 
-modulo.register('processor', function datatype (modulo, conf, value) {
+modulo.register('processor', function dataType (modulo, conf, value) {
     if (value === '?') {
         const ext = conf.Src && conf.Src.match(/(?<=\.)[a-z]+$/i);
         value = ext ? ext[0] : 'json';
@@ -1189,7 +1192,7 @@ modulo.register('processor', function code (modulo, conf, value) {
     modulo.assets.define(conf.DefinitionName, value);
 });
 
-modulo.register('processor', function setattrs (modulo, conf, value) {
+modulo.register('processor', function setAttrs (modulo, conf, value) {
     // TODO: Untested
     for (const [ key, val ] of Object.entries(conf)) {
         if (/^[a-z]/.test(key) && (value + key).includes('.')) { // Set anything with dots
@@ -1207,18 +1210,18 @@ modulo.register('cpart', class StaticData {
 }, {
     DataType: '?', // Default behavior is to guess based on Src ext
     DefLoaders: [ 'DefinedAs', 'DataType' ],
-    DefBuilders: [ 'Src', 'ContentCSV', 'ContentJSON', 'ContentTXT', 'Code' ],
+    DefBuilders: [ 'Src', 'ContentCSV', 'ContentTXT', 'ContentJSON', 'Code' ],
 });
 
 modulo.register('cpart', class Configuration { }, {
     SetAttrs: 'conf',
     //DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
-    DefLoaders: [ 'SetAttrs', 'Src', 'DefiniedAs' ],
+    DefLoaders: [ 'SetAttrs', 'Src' ],
     DefBuilders: [ 'Code', 'MainRequire' ],
 });
 
-modulo.register('processor', function scriptautoexport (modulo, conf, value) {
-    let text = conf.Content;
+modulo.register('processor', function scriptAutoExport (modulo, conf, value) {
+    let text = value;
     function getSymbolsAsObjectAssignment(contents) {
         const regexpG = /(function|class)\s+(\w+)/g;
         const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
@@ -1342,7 +1345,7 @@ modulo.register('cpart', class Script {
     }
 }, {
     ScriptAutoExport: 'auto',
-    DefBuilders: [ 'Src', 'ScriptAutoExport', 'Code' ],
+    DefBuilders: [ 'Src', 'Content|ScriptAutoExport', 'Code' ],
 });
 
 modulo.register('cpart', class State {
