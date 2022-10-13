@@ -22,15 +22,16 @@ it's job and set up for the next act.</p>
 phases. The lifecycle phases that a Modulo <em>Component</em> progresses
 through can be categorized into a few groups. One way to think of these phases
 is that typically, the "output" of a previous lifecycle phase in a group is the
-"input" of the next phase. As an example, <code>prebuild</code> generates a
-flat, serializable structure that <code>define</code> uses to instantiate more
-complicated JavaScript instances.  Similarly, <code>prepare</code> figures out
-the template variables, <code>render</code> causes the template to actually
-perform the render based on the variables in the previous phase, and
+"input" of the next phase. As an example,  <code>prepare</code> figures out the
+template variables, <code>render</code> causes the template to actually perform
+the render based on the variables in the previous phase, and
 <code>update</code> updates the HTML of the element based on the rendered
 output of the previous phase.</p>
 
-
+<!--<code>prebuild</code> generates a
+flat, serializable structure that <code>define</code> uses to instantiate more
+complicated JavaScript instances.  Similarly,-->
+<!--
 <h3>Global Modulo lifecycle phases</h3>
 
 <p>These phases happen <em>once per CPart definition</em>. These will happen
@@ -58,8 +59,12 @@ structure blueprint for component instances).</p>
 <p><strong>Note:</strong> "Modulo lifecycle phases" are only accessible to
 <em>CPart</em> developers, and <em>not</em> accessible to component developers
 using script tags.</p>
+-->
 
-<h3>Component lifecycle phases: Factory</h3>
+
+<mws-Section name="component">Component lifecycle</mws-Section>
+
+<h3>Factory</h3>
 
 <p>The factory phase happen <em>once per Component definition</em>. It will
 happen even if the component is never used or instantiated anywhere, but only
@@ -76,8 +81,6 @@ global phase of Modulo, and is invoked to prepare the Component definition.</p>
     after built JS files as well).</li>
 </ul>
 
-
-<mws-Section name="component">Component lifecycle</mws-Section>
 
 <h3>Construction and initialization lifecycle</h3>
 
