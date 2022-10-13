@@ -616,6 +616,7 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloTestNumber++;
 
     const namespace = 't' + window._moduloTestNumber;
+    componentFac.namespace = namespace;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
     let componentClass;
