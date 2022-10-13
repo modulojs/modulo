@@ -1,0 +1,15 @@
+
+<!-- (Hint: "|upper" is a "template filter" which modifies text) -->
+<h2>{{ props.label|upper }}</h2>
+
+<button @click:=script.increment>COUNT: {{ state.num }}</button>
+
+<!-- (Hint: Use "payload" to specify arguments to JS funcs) -->
+<button payload="ABC" @click:=script.addToList>Add "ABC"</button>
+<button payload="XYZ" @click:=script.addToList>Add "XYZ"</button>
+
+<!-- (Hint: "for" is a "template tag", which repeats HTML) -->
+{% for item in state.items %}
+    <span>{{ item }}</span>
+{% endfor %}
+

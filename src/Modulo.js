@@ -104,7 +104,8 @@ window.Modulo = class Modulo {
         }
         if (type === 'cparts') { // CParts get loaded from DOM
             this.registry.dom[cls.name.toLowerCase()] = cls;
-            this.config[cls.name.toLowerCase()].RenderObj = cls.name.toLowerCase();
+            this.config[cls.name.toLowerCase()].RenderObj = cls.name.toLowerCase(); // XXX rm
+            //this.config[cls.name.toLowerCase()].DefLoaders = [ 'DefinedAs', 'Src' ]; // daed
         }
         if (type === 'processors') {
             this.registry.processors[cls.name.toLowerCase()] = cls;
@@ -112,22 +113,28 @@ window.Modulo = class Modulo {
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const partialConfs = [];
-        const isModulo = node => (this.getNodeModuloType(node, quietErrors)
-                                  && !node.getAttribute('modulo-has-loaded'));
+        const { mergeAttrs } = this.registry.utils;
+        const isModulo = node => this.getNodeModuloType(node, quietErrors);
+        const defArray = [];
+        //                          && !node.getAttribute('modulo-has-loaded'));
         for (const node of Array.from(elem.children).filter(isModulo)) {
-            const conf = this.loadPartialConfigFromNode(node);
-            partialConfs.push(conf); // Push to return Array
-            conf.DefinedAs = conf.DefinedAs || null; // "false" default
-            conf.DefName = conf.Name || null; // -name only, null otherwise
-            conf.Parent = conf.Parent || parentName;
+            const partTypeLC = this.getNodeModuloType(node); // Lowercase
+            const def = mergeAttrs(node, this.config[partTypeLC]);
+            defArray.push(def);
+            if (partTypeLC in def && !def[partTypeLC]) {
+                delete def[partTypeLC]; // Remove attribute name used as type
+            }
+            def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
+            def.DefinedAs = def.DefinedAs || null; // defaults to: Name, Type
+            def.DefName = def.Name || null; // -name only, null otherwise
+            def.Parent = def.Parent || parentName;
         }
-        this.repeatProcessors(partialConfs, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
-        return partialConfs;
+        this.repeatProcessors(defArray, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
+        return defArray;
     }
 
     preprocessAndDefine() {
-        modulo.fetchQueue.enqueueAll(
+        this.fetchQueue.enqueueAll(
             () => this.repeatProcessors(null, 'DefBuilders', [ ],
                 () => this.repeatProcessors(null, 'DefFinalizers', [ ])));
     }
@@ -178,7 +185,6 @@ window.Modulo = class Modulo {
 
     repeatProcessors(confs, field, defaults, cb) {
         let changed = true; // Run at least once
-        const repeat = () => this.repeatProcessors(confs, field, defaults, cb);
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
@@ -187,6 +193,7 @@ window.Modulo = class Modulo {
                 changed = changed || this.applyProcessors(conf, processors);
             }
         }
+        const repeat = () => this.repeatProcessors(confs, field, defaults, cb);
         if (Object.keys(this.fetchQueue ? this.fetchQueue.queue : {}).length === 0) { // TODO: Remove ?: after core object refactor
             if (cb) {
                 cb(); // Synchronous path
@@ -222,17 +229,6 @@ window.Modulo = class Modulo {
             return null;
         }
         return cPartName;
-    }
-
-    loadPartialConfigFromNode(node) {
-        const { mergeAttrs } = this.registry.utils;
-        const partTypeLC = this.getNodeModuloType(node); // Lowercase
-        const config = mergeAttrs(node, this.config[partTypeLC]);
-        config.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
-        if (partTypeLC in config && !config[partTypeLC]) {
-            delete config[partTypeLC]; // Remove attribute name used as type
-        }
-        return config;
     }
 
     applyProcessors(conf, processors) {
@@ -274,17 +270,15 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('processor', function src (modulo, conf, value) {
+    console.log("SRC is sending", conf.DefinitionName, value);
     modulo.fetchQueue.enqueue(value, text => {
+        console.log("SRC is coming back", conf.DefinitionName, value);
         conf.Content = (text || '') + (conf.Content || '');
     });
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
     modulo.loadString(value, conf.DefinitionName);
-    if (value) {
-        conf.Prebuild = conf.DefinitionName; // XXX
-    }
-    conf.Hash = modulo.registry.utils.hash(value);
 });
 
 modulo.register('processor', function definedAs (modulo, def, value) {
@@ -417,9 +411,11 @@ modulo.config.reconciler = {
 modulo.config.component = {
     mode: 'regular',
     rerender: 'event',
-    engine: 'Reconciler',
+    engine: 'Reconciler', // TODO: 'Engine':, depends on Instbuilders
+    // namespace: 'x',
     CustomElement: 'window.HTMLElement',
     DefinedAs: 'name',
+    // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefBuilders: [ 'Src', 'Content', 'CustomElement', 'Code' ],
     DefFinalizers: [ 'MainRequire' ],
     //InstBuilders: [ 'CreateChildren' ],
@@ -640,12 +636,12 @@ modulo.register('cpart', class Component {
 });
 
 modulo.register('cpart', class Modulo { }, {
-    DefBuilders: [ 'Src', 'Content' ],
+    DefLoaders: [ 'Src', 'Content' ],
 });
 
 modulo.register('cpart', class Library { }, {
     SetAttrs: 'conf.component',
-    DefBuilders: [ 'Src', 'SetAttrs', 'Content' ],
+    DefLoaders: [ 'Src', 'SetAttrs', 'Content' ],
 });
 
 modulo.register('util', function keyFilter (obj, func) {
@@ -1068,18 +1064,19 @@ modulo.register('cpart', class Style {
         }
     }
 }, {
-    DefBuilders: [ 'Src', 'Content|PrefixCSS' ]
+    DefBuilders: [ 'Content|PrefixCSS' ]
 });
 
-modulo.register('processor', function templatePreBuild (modulo, conf, value) {
+modulo.register('processor', function templatePrebuild (modulo, conf, value) {
     if (!conf.Content) {
-        console.error('No Template Content specified:', conf.DefinitionName);
+        console.error('No Template Content specified:', conf.DefinitionName, JSON.stringify(conf));
         return;
     }
     const engine = conf.engine || 'Templater';
     const instance = new modulo.registry.engines[engine](modulo, conf);
     conf.Hash = instance.Hash;
     delete conf.Content;
+    delete conf.TemplatePrebuild;
 });
 
 modulo.register('cpart', class Template {
@@ -1107,7 +1104,7 @@ modulo.register('cpart', class Template {
     }
 }, {
     TemplatePrebuild: "yes",
-    DefBuilders: [ 'Src', 'TemplatePrebuild' ]
+    DefFinalizers: [ 'TemplatePrebuild' ]
 });
 
 modulo.register('processor', function contentCSV (modulo, conf, value) {
@@ -1137,8 +1134,9 @@ modulo.register('processor', function dataType (modulo, conf, value) {
 });
 
 modulo.register('processor', function code (modulo, conf, value) {
-    if (conf.Parent === 'modulo_mws_DocSidebar') {
-        console.log('thsi is it', JSON.stringify(conf));
+    if (conf.DefinitionName in modulo.assets.nameToHash) {
+        console.error("ERROR: Duped def:", conf.DefinitionName);
+        return;
     }
     modulo.assets.define(conf.DefinitionName, value);
 });
@@ -1160,8 +1158,9 @@ modulo.register('cpart', class StaticData {
     }
 }, {
     DataType: '?', // Default behavior is to guess based on Src ext
-    DefLoaders: [ 'DefinedAs', 'DataType' ],
-    DefBuilders: [ 'Src', 'ContentCSV', 'ContentTXT', 'ContentJSON', 'Code' ],
+    DefLoaders: [ 'DefinedAs', 'DataType', 'Src' ],
+    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'Code' ],
+    //DefFinalizers: [ 'Code' ],
 });
 
 modulo.register('cpart', class Configuration { }, {
@@ -1431,6 +1430,11 @@ modulo.register('engine', class Templater {
             this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
             const { hash } = this.modulo.registry.utils;
             this.Hash = 'T' + hash(this.compiledCode);
+            if (this.DefinitionName in this.modulo.assets.nameToHash) { // TODO RM
+                console.error("ERROR: Duped template:", conf.DefinitionName);
+                this.renderFunc = () => '';
+                return;
+            }
             this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
         }
     }

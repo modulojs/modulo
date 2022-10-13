@@ -73,7 +73,6 @@
 
     <script name="Preprocesses an empty component with expected values">
         const mod = window._newModulo();
-        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
         mod.assets = modulo.assets; // TODO rm
         const code = '<Component name="Testy"></Component>';
         const loaded = mod.loadString(code);
@@ -84,7 +83,6 @@
 
     <script name="Preprocess and define multiple components with content">
         const mod = window._newModulo();
-        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
         mod.assets = modulo.assets; // Copy over asset manager
         mod.assets.modulo = mod; // TODO Rethink these back references
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
