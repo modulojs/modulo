@@ -40,22 +40,22 @@
         const code = '<Component name="TestA"></Component>' + 
                       '<Component name="TestB"></Component>';
         const loaded = window._loadString(code);
-        const names = loaded.map(({ Name }) => Name);
+        const names = loaded.map(({ name }) => name);
         assert: loaded.length === 2 && names[0] === 'TestA' && names[1] === 'TestB'
     </script>
 
     <script name="loads single component with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>';
         const loaded = window._loadString(code);
-        const { Name, Content } = loaded.length ? loaded[0] : {};
-        assert: loaded.length === 1 && Name === 'TestA' && Content === '<template>aaa</template>';
+        const { name, Content } = loaded.length ? loaded[0] : {};
+        assert: loaded.length === 1 && name === 'TestA' && Content === '<template>aaa</template>';
     </script>
 
     <script name="loads multiple components with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
                       '<Component name="TestB"><Template>bbb</Template></Component>';
         const loaded = window._loadString(code);
-        const actual = loaded.map(({ Name, Content }) => ([ Name, Content ]));
+        const actual = loaded.map(({ name, Content }) => ([ name, Content ]));
         const expected = [
             [ 'TestA', '<template>aaa</template>'],
             [ 'TestB', '<template>bbb</template>'],
@@ -72,7 +72,7 @@
     </script>
 
     <script name="Preprocesses an empty component with expected values">
-        const mod = new Modulo(modulo);
+        const mod = window._newModulo();
         mod.fetchQueue = { queue: {} }; // Mock fetchQueue
         mod.assets = modulo.assets; // TODO rm
         const code = '<Component name="Testy"></Component>';
@@ -83,7 +83,7 @@
     </script>
 
     <script name="Preprocess and define multiple components with content">
-        const mod = new Modulo(modulo);
+        const mod = window._newModulo();
         mod.fetchQueue = { queue: {} }; // Mock fetchQueue
         mod.assets = modulo.assets; // Copy over asset manager
         mod.assets.modulo = mod; // TODO Rethink these back references
@@ -92,10 +92,10 @@
         const loaded = mod.loadString(code);
         mod.preprocessAndDefine();
         //const actual = loaded.map(({ Name, TagName, Hash }) => ([ Name, TagName, Hash ]));
-        const actual = loaded.map(({ DefName, Name, TagName }) => ([ DefName, Name, TagName ]));
+        const actual = loaded.map(({ DefName, Name, name, TagName }) => ([ DefName, Name, name, TagName ]));
         const expected = [
-            [ null, 'TestA', 'x-testa' ],
-            [ null, 'TestB', 'x-testb' ],
+            [ null, 'TestA', 'TestA', 'x-testa' ],
+            [ null, 'TestB', 'TestB', 'x-testb' ],
         ];
         assert: JSON.stringify(expected) === JSON.stringify(actual);
     </script>
