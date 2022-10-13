@@ -325,16 +325,24 @@ modulo.register('processor', function customElement (modulo, def, value) {
     if (!def.namespace || def.namespace === 'modulo') { def.namespace = 'x'; } // XXX Fix these two lines
     def.TagName = (def.TagName || `${ def.namespace }-${ def.Name }`).toLowerCase();
     def.MainRequire = def.DefinitionName;
-    def.Code = `const def = modulo.definitions['${ def.DefinitionName }'];
+    def.Code = `
+        const def = modulo.definitions['${ def.DefinitionName }'];
         class _${ def.Name }_ extends ${ value } {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
             }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElem(this.modulo, this);
+            }
         }
         modulo.registry.utils.initClass(modulo, def, _${ def.Name }_);
         window.customElements.define(def.TagName, _${ def.Name }_);
-        return _${ def.Name }_;`;
+        return _${ def.Name }_;
+    `;
 });
 
 modulo.register('util', function initElement (modulo, def, elem) {
@@ -358,68 +366,55 @@ modulo.register('util', function initClass (modulo, def, cls) {
     const initRenderObj = { elementClass: cls };
     modulo.applyPatches(factoryPatches, initRenderObj);
     cls.prototype.initRenderObj = initRenderObj;
+    // Alias a few methods from the component class
     cls.prototype.rerender = function (original = null) {
-        if (original) { // TODO: this logic needs refactor
-            if (this.originalHTML === null) {
-                this.originalHTML = original.innerHTML;
-            }
-            this.originalChildren = Array.from(original.hasChildNodes() ?
-                                               original.childNodes : []);
-        }
-        this.lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
-    }
+        this.cparts.component.rerender(original);
+    };
 
     cls.prototype.lifecycle = function (lcNames, rObj={}) {
-        this.renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
-        const patches = this.modulo.getLifecyclePatches(this.cparts, lcNames);
-        this.modulo.applyPatches(patches, this.renderObj);
-        //this.renderObj = null; // ?rendering is over, set to null
-    }
+        this.cparts.component.lifecycle(lcNames, rObj={});
+    };
 
     cls.prototype.getCurrentRenderObj = function () {
-        return (this.eventRenderObj || this.renderObj || this.initRenderObj);
+        return this.cparts.component.getCurrentRenderObj();
+    };
+});
+
+modulo.register('util', function mountElem (modulo, elem) {
+    let original = elem;
+    if (elem.hasAttribute('modulo-original-html')) {
+        original = modulo.registry.utils.makeDiv(elem.getAttribute('modulo-original-html'));
     }
 
-    cls.prototype.connectedCallback = function () {
-        if (!this.isMounted) {
-            window.setTimeout(() => this.parsedCallback(), 0);
-        }
+    ////////
+    // (legacy CPart setup -v)
+    const fullData = Array.from(elem.moduloChildrenData);
+    fullData.unshift(elem.moduloComponentConf); // Add in the Component def itself
+    const { cparts } = elem.modulo.registry;
+    const isLower = key => key[0].toLowerCase() === key[0];
+    for (const conf of fullData) {
+        const partObj = elem.initRenderObj[conf.RenderObj];
+        const instance = new cparts[conf.Type](elem.modulo, conf, elem);
+        instance.element = elem;
+        instance.modulo = elem.modulo;
+        instance.conf = conf;
+        instance.attrs = elem.modulo.registry.utils.keyFilter(conf, isLower);
+        elem.cparts[conf.RenderObj] = instance;
     }
+    ////////
 
-    cls.prototype.parsedCallback = function () {
-        let original = this;
-        if (this.hasAttribute('modulo-original-html')) {
-            original = modulo.registry.utils.makeDiv(this.getAttribute('modulo-original-html'));
-        }
-        this.legacySetupCParts();
-        this.lifecycle([ 'initialized' ]);
-        this.rerender(original); // render and re-mount it's own childNodes
-        // TODO - Needs refactor, should do this somewhere else:
-        if (this.hasAttribute('modulo-original-html')) {
-            const { reconciler } = this.cparts.component;
-            reconciler.patch = reconciler.applyPatch; // Apply patches immediately
-            reconciler.patchAndDescendants(this, 'Mount');
-            reconciler.patch = reconciler.pushPatch;
-        }
-        this.isMounted = true;
+    ////////
+    // First rerender
+    elem.lifecycle([ 'initialized' ]);
+    elem.rerender(original); // render and re-mount it's own childNodes
+    // TODO - Needs refactor, should do elem somewhere else:
+    if (elem.hasAttribute('modulo-original-html')) {
+        const { reconciler } = elem.cparts.component;
+        reconciler.patch = reconciler.applyPatch; // Apply patches immediately
+        reconciler.patchAndDescendants(elem, 'Mount');
+        reconciler.patch = reconciler.pushPatch;
     }
-
-    cls.prototype.legacySetupCParts = function () {
-        this.cparts = {};
-        const fullData = Array.from(this.moduloChildrenData);
-        fullData.unshift(this.moduloComponentConf); // Add in the Component def itself
-        const { cparts } = this.modulo.registry;
-        const isLower = key => key[0].toLowerCase() === key[0];
-        for (const conf of fullData) {
-            const partObj = this.initRenderObj[conf.RenderObj];
-            const instance = new cparts[conf.Type](this.modulo, conf, this);
-            instance.element = this;
-            instance.modulo = this.modulo;
-            instance.conf = conf;
-            instance.attrs = this.modulo.registry.utils.keyFilter(conf, isLower);
-            this.cparts[conf.RenderObj] = instance;
-        }
-    }
+    elem.isMounted = true;
 });
 
 modulo.register('processor', function mainRequire (modulo, conf, value) {
@@ -443,6 +438,7 @@ modulo.config.component = {
     DefFinalizers: [ 'MainRequire' ],
     //InstBuilders: [ 'CreateChildren' ],
 };
+
 modulo.register('cpart', class Component {
     /*
     static factoryCallback(modulo, conf) {
@@ -453,6 +449,28 @@ modulo.register('cpart', class Component {
         conf.uniqueId = ++factory.id;
     }
     */
+
+    rerender(original = null) {
+        if (original) { // TODO: this logic needs refactor
+            if (this.element.originalHTML === null) {
+                this.element.originalHTML = original.innerHTML;
+            }
+            this.element.originalChildren = Array.from(
+                original.hasChildNodes() ? original.childNodes : []);
+        }
+        this.lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
+    }
+
+    getCurrentRenderObj() {
+        return (this.element.eventRenderObj || this.element.renderObj || this.element.initRenderObj);
+    }
+
+    lifecycle(lcNames, rObj={}) {
+        this.element.renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
+        const patches = this.modulo.getLifecyclePatches(this.element.cparts, lcNames);
+        this.modulo.applyPatches(patches, this.element.renderObj);
+        //this.element.renderObj = null; // ?rendering is over, set to null
+    }
 
     headTagLoad({ el }) {
         //el.remove();
@@ -1068,37 +1086,14 @@ modulo.register('cpart', class Props {
 });
 
 
-modulo.register('processor', function stylePreBuild (modulo, conf, value) {
-      /*
-      //if (loadObj.component.attrs.mode === 'shadow') { // TODO finish
-      //    return;
-      //}
-      */
-      let { Content, Parent } = conf;
-      if (!Content) {
-          return;
-      }
-      if (Parent) {
-          let namespace, mode, Name;
-          ({ namespace, mode, Name } = modulo.definitions[Parent]);
-          // XXX HAX, conf is a big tangled mess
-          if (Name.startsWith('x_')) {
-              Name = Name.replace('x_', '');
-              if (!namespace) {
-                  namespace = 'x';
-              }
-          }
-          if (Name.startsWith(namespace)) {
-              Name = Name.replace(namespace + '_', '');
-              conf.Name = Name;
-          }
-          // XXX unHAX, conf is a big tangled mess
-          if (mode === 'regular') { // TODO finish
-              const { prefixAllSelectors } = modulo.registry.utils;
-              Content = prefixAllSelectors(namespace, Name, Content);
-          }
-      }
-      modulo.assets.registerStylesheet(Content);
+modulo.register('processor', function prefixCSS (modulo, def, value) {
+    const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
+    if (mode === 'regular') {
+        value = modulo.registry.utils.prefixAllSelectors(namespace, Name, value);
+    }
+    if (mode !== 'shadow') {
+        modulo.assets.registerStylesheet(value);
+    }
 });
 
 modulo.register('cpart', class Style {
@@ -1112,8 +1107,7 @@ modulo.register('cpart', class Style {
         }
     }
 }, {
-    StylePrebuild: "yes",
-    DefBuilders: [ 'Src', 'StylePrebuild' ]
+    DefBuilders: [ 'Src', 'Content|PrefixCSS' ]
 });
 
 modulo.register('processor', function templatePreBuild (modulo, conf, value) {
@@ -1154,7 +1148,6 @@ modulo.register('cpart', class Template {
     TemplatePrebuild: "yes",
     DefBuilders: [ 'Src', 'TemplatePrebuild' ]
 });
-
 
 modulo.register('processor', function contentCSV (modulo, conf, value) {
     const js = JSON.stringify((conf.Content || '').split('\n').map(line => line.split(',')));
