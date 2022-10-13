@@ -366,15 +366,10 @@ modulo.register('util', function initClass (modulo, def, cls) {
     const initRenderObj = { elementClass: cls };
     modulo.applyPatches(factoryPatches, initRenderObj);
     cls.prototype.initRenderObj = initRenderObj;
-    // Alias a few methods from the component class
+    // Alias a method from the component class (TODO rm at some point)
     cls.prototype.rerender = function (original = null) {
         this.cparts.component.rerender(original);
     };
-
-    cls.prototype.lifecycle = function (lcNames, rObj={}) {
-        this.cparts.component.lifecycle(lcNames, rObj={});
-    };
-
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
     };
@@ -405,7 +400,7 @@ modulo.register('util', function mountElem (modulo, elem) {
 
     ////////
     // First rerender
-    elem.lifecycle([ 'initialized' ]);
+    elem.cparts.component.lifecycle([ 'initialized' ]);
     elem.rerender(original); // render and re-mount it's own childNodes
     // TODO - Needs refactor, should do elem somewhere else:
     if (elem.hasAttribute('modulo-original-html')) {
@@ -605,10 +600,10 @@ modulo.register('cpart', class Component {
     }
 
     handleEvent(func, payload, ev) {
-        this.element.lifecycle([ 'event' ]);
+        this.lifecycle([ 'event' ]);
         const { value } = (ev.target || {}); // Get value if is <INPUT>, etc
         func.call(null, payload === undefined ? value : payload, ev);
-        this.element.lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
+        this.lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
         if (this.attrs.rerender !== 'manual') {
             this.element.rerender(); // always rerender after events
         }
@@ -1084,7 +1079,6 @@ modulo.register('cpart', class Props {
         return this.initializedCallback(renderObj);
     }
 });
-
 
 modulo.register('processor', function prefixCSS (modulo, def, value) {
     const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};

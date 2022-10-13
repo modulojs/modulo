@@ -17,7 +17,11 @@
                 const { innerHTML } = component
                 component.innerHTML = '<div id="test"><p>Abc</p></div>'
                 // Note: Need to change this if we ever change lc methods
-                element.lifecycle([ 'render', 'reconcile', 'update' ])
+                if (element.lifecycle) {
+                    element.lifecycle([ 'render', 'reconcile', 'update' ])
+                } else {
+                    element.cparts.component.lifecycle([ 'render', 'reconcile', 'update' ])
+                }
                 assert: innerHTML === null
             </script>
 
