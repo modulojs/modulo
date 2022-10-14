@@ -72,13 +72,6 @@ window.Modulo = class Modulo {
         }
     }
 
-    create(type, name, conf = null) {
-        type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
-        const instance = new this.registry[type][name](modulo, conf);
-        conf.Instance = instance;
-        return instance;
-    }
-
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
         this.assert(type in this.registry, 'Unknown registration type:', type);
@@ -134,9 +127,11 @@ window.Modulo = class Modulo {
     }
 
     preprocessAndDefine() {
-        this.fetchQueue.enqueueAll(
-            () => this.repeatProcessors(null, 'DefBuilders', [ ],
-                () => this.repeatProcessors(null, 'DefFinalizers', [ ])));
+        this.fetchQueue.wait(() => {
+            this.repeatProcessors(null, 'DefBuilders', [ ], () => {
+                this.repeatProcessors(null, 'DefFinalizers', [ ]);
+            });
+        });
     }
 
     loadString(text, parentFactoryName = null) {
@@ -177,6 +172,10 @@ window.Modulo = class Modulo {
     applyPatches(patches, renderObj = null) {
         for (const [ obj, methodName, conf ] of patches) {
             const result = obj[methodName].call(obj, renderObj || this, conf, this);
+            if (!conf) { // XXX remove this
+                console.log('WARNING: conf is falsy:', obj.conf.DefinitionName);
+                continue;
+            }
             if (renderObj && result && conf.RenderObj) {
                 renderObj[conf.RenderObj] = result;
             }
@@ -190,7 +189,13 @@ window.Modulo = class Modulo {
             changed = false;
             for (const conf of confs || Object.values(this.definitions)) {
                 const processors = conf[field] || defaults;
-                changed = changed || this.applyProcessors(conf, processors);
+                //changed = changed || this.applyProcessors(conf, processors);
+                const result = this.applyProcessors(conf, processors);
+                if (result === 'wait') {
+                    changed = false;
+                    break;
+                }
+                changed = changed || result;
             }
         }
         const repeat = () => this.repeatProcessors(confs, field, defaults, cb);
@@ -238,8 +243,8 @@ window.Modulo = class Modulo {
                 const value = conf[attrName];
                 delete conf[attrName];
                 const funcName = (aliasedName || attrName).toLowerCase();
-                this.registry.processors[funcName](this, conf, value);
-                return true;
+                const result = this.registry.processors[funcName](this, conf, value);
+                return result === true ? 'wait' : true;
             }
         }
         return false;
@@ -270,11 +275,10 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('processor', function src (modulo, conf, value) {
-    console.log("SRC is sending", conf.DefinitionName, value);
     modulo.fetchQueue.enqueue(value, text => {
-        console.log("SRC is coming back", conf.DefinitionName, value);
         conf.Content = (text || '') + (conf.Content || '');
     });
+    //return 'wait'; // Want to wait
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -416,7 +420,8 @@ modulo.config.component = {
     CustomElement: 'window.HTMLElement',
     DefinedAs: 'name',
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
-    DefBuilders: [ 'Src', 'Content', 'CustomElement', 'Code' ],
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+    DefBuilders: [ 'CustomElement', 'Code' ],
     DefFinalizers: [ 'MainRequire' ],
     //InstBuilders: [ 'CreateChildren' ],
 };
@@ -640,7 +645,7 @@ modulo.register('cpart', class Modulo { }, {
 });
 
 modulo.register('cpart', class Library { }, {
-    SetAttrs: 'conf.component',
+    SetAttrs: 'config.component',
     DefLoaders: [ 'Src', 'SetAttrs', 'Content' ],
 });
 
@@ -989,14 +994,15 @@ modulo.register('core', class FetchQueue {
 
     enqueueAll(callback) {
         const allQueues = Array.from(Object.values(this.queue));
-        let callbackCount = 0;
         if (allQueues.length === 0) {
             return callback();
         }
+        let callbackCount = 0;
         for (const queue of allQueues) {
             queue.push(() => {
                 callbackCount++;
                 if (callbackCount >= allQueues.length) {
+                    //console.log(Array.from(Object.values(this.queue)).length);
                     callback();
                 }
             });
@@ -1075,6 +1081,7 @@ modulo.register('processor', function templatePrebuild (modulo, conf, value) {
     const engine = conf.engine || 'Templater';
     const instance = new modulo.registry.engines[engine](modulo, conf);
     conf.Hash = instance.Hash;
+    //console.log('Template code:', conf.Content);
     delete conf.Content;
     delete conf.TemplatePrebuild;
 });
@@ -1113,11 +1120,12 @@ modulo.register('processor', function contentCSV (modulo, conf, value) {
 });
 
 modulo.register('processor', function contentJS (modulo, conf, value) {
-    const tmpFunc = new Function('return ' + (conf.Content || 'null'));
+    const tmpFunc = new Function('return (' + (conf.Content || 'null') + ');');
     conf.Code = 'return ' + JSON.stringify(tmpFunc()) + ';'; // Evaluate
 });
 
 modulo.register('processor', function contentJSON (modulo, conf, value) {
+    //console.log(conf.DefinitionName, 'thsi si ext', conf.Content); // XYZ
     conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content || '{}')) + ';';
 });
 
@@ -1142,32 +1150,36 @@ modulo.register('processor', function code (modulo, conf, value) {
 });
 
 modulo.register('processor', function setAttrs (modulo, conf, value) {
-    // TODO: Untested
     for (const [ key, val ] of Object.entries(conf)) {
         if (/^[a-z]/.test(key) && (value + key).includes('.')) { // Set anything with dots
-            modulo.utils.set(modulo, (value + '.' + key), val);
+            modulo.registry.utils.set(modulo, (value + '.' + key), val);
         }
     }
 });
 
+modulo.register('processor', function requireData (modulo, conf, value) {
+    conf.data = modulo.assets.require(conf[value]);
+});
+
 modulo.register('cpart', class StaticData {
     static factoryCallback(renderObj, conf, modulo) {
-        // By putting this in factory, each Component that uses the same -src
-        // will NOT share the data instance, but within each Component it will.
-        return modulo.assets.require(conf.DefinitionName);
+        return conf.data;
+    }
+    prepareCallback() { // XXX remove when fac gets to be default
+        return this.conf.data;
     }
 }, {
     DataType: '?', // Default behavior is to guess based on Src ext
+    RequireData: 'DefinitionName',
     DefLoaders: [ 'DefinedAs', 'DataType', 'Src' ],
-    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'Code' ],
-    //DefFinalizers: [ 'Code' ],
+    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
+    DefFinalizers: [ 'Code', 'RequireData' ],
 });
 
 modulo.register('cpart', class Configuration { }, {
-    SetAttrs: 'conf',
-    //DefBuilders: [ 'Src', 'SetAttrs', 'Code', 'MainRequire' ]
-    DefLoaders: [ 'SetAttrs', 'Src' ],
-    DefBuilders: [ 'Code', 'MainRequire' ],
+    SetAttrs: 'config',
+    DefLoaders: [ 'DefinedAs', 'SetAttrs', 'Src' ],
+    DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
 modulo.register('processor', function scriptAutoExport (modulo, conf, value) {
@@ -1295,7 +1307,7 @@ modulo.register('cpart', class Script {
     }
 }, {
     ScriptAutoExport: 'auto',
-    DefBuilders: [ 'Src', 'Content|ScriptAutoExport', 'Code' ],
+    DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
 });
 
 modulo.register('cpart', class State {
@@ -2127,7 +2139,7 @@ modulo.register('command', function build (modulo, opts = {}) {
     });
 });
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !window.moduloBuild) {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
         if (window.moduloBuild) {
             return;

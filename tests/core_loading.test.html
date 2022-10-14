@@ -47,20 +47,27 @@
     <script name="loads single component with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>';
         const loaded = window._loadString(code);
-        const { name, Content } = loaded.length ? loaded[0] : {};
-        assert: loaded.length === 1 && name === 'TestA' && Content === '<template>aaa</template>';
+        const { name, Name, DefinitionName, Content, ChildrenNames } = loaded.length ? loaded[0] : {};
+        // Content is "null" since we delete it when we recursing
+        //assert: loaded.length === 1 && name === 'TestA' && Content === '<template>aaa</template>';
+        const expected = JSON.stringify([ 1,     'TestA', 'TestA', 'TestA',        null, [ 'TestA_template' ] ]);
+        const actual = JSON.stringify([ loaded.length, name, Name, DefinitionName, Content, ChildrenNames ]);
+        assert: actual === expected
     </script>
 
     <script name="loads multiple components with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
                       '<Component name="TestB"><Template>bbb</Template></Component>';
         const loaded = window._loadString(code);
-        const actual = loaded.map(({ name, Content }) => ([ name, Content ]));
-        const expected = [
-            [ 'TestA', '<template>aaa</template>'],
-            [ 'TestB', '<template>bbb</template>'],
-        ];
-        assert: JSON.stringify(expected) === JSON.stringify(actual);
+        const actual = JSON.stringify(loaded.map(({ name, Content, ChildrenNames }) => ([ name, Content, ChildrenNames ])));
+        // Content is "null" since we delete it when recursing
+        const expected = JSON.stringify([
+            //[ 'TestA', '<template>aaa</template>'],
+            //[ 'TestB', '<template>bbb</template>'],
+            [ 'TestA', null, [ 'TestA_template' ] ],
+            [ 'TestB', null, [ 'TestB_template' ] ],
+        ]);
+        assert: actual === expected;
     </script>
 </Test>
 

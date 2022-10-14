@@ -587,15 +587,14 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
         console.log('%c FAILURE ', 'background-color: red');
         const compNames = failedComponents.map(({ Name }) => Name);
         console.log(`${failure} assertions failed. Failing components:`, compNames);
-        console.log(`${failure} assertions failed. Failing components:`, compNames);
         const getParams = String(modulo.globals.location ?
                                  modulo.globals.location.search : '').substr(1);
         if (!getParams.includes('stacktrace=y')) {
-            console.log(new (class RERUN_WITH {
-                get stack_trace() { window.location.href += '&stacktrace=y' }
+            console.log(new (class RERUN_TESTS_WITH_EXTRA_OPTIONS {
+                get enable_stack_trace() { window.location.href += '&stacktrace=y' }
             }));
         }
-        if (opts.callback) {
+        if (opts && opts.callback) {
             opts.callback(false);
         }
         return false;

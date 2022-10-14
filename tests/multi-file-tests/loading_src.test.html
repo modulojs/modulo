@@ -1,0 +1,70 @@
+<!--
+    These tests are useful as unit tests testing the loadString method &
+    loadFromDOM methods
+-->
+
+<Configuration
+    component.foo="bif"
+    component.bar="baf"
+></Configuration>
+
+<Configuration>
+    modulo.config.component.quux = 'mux';
+</Configuration>
+
+<Component name="LoadingSrc">
+
+<StaticData
+    -src="/demos/tests/multi-file-tests/loading_src_1.json"
+></StaticData>
+
+<Template
+    -src="/demos/tests/multi-file-tests/loading_src_2.html"
+></Template>
+
+<!-- testing can mix with embedded Content in same component -->
+<StaticData -data-type="js">
+{
+    anotherTest: 'abc',
+    jsSyntax: 'foo' + 'bar',
+}
+</StaticData>
+
+<TestSuite>
+    <Test name="Test StaticData and Template loaded">
+        <Script name="static data loaded">
+            const actual = JSON.stringify(staticdata);
+            const expected = JSON.stringify({ testing: 123 });
+            assert: actual === expected;
+        </Script>
+
+        <Template name="template loaded and rendered with static data">
+            template test abc123 "123"
+        </Template>
+
+        <Script name="embedded static data loaded">
+            const actual = JSON.stringify(staticdata1);
+            const expected = JSON.stringify({
+                anotherTest: 'abc',
+                jsSyntax: 'foo' + 'bar',
+            });
+            assert: actual === expected;
+        </Script>
+
+
+        <!--
+        <Script name="config properties got set">
+            const actual = JSON.stringify(modulo.config.component);
+            const expected = JSON.stringify({ foo: { bar: 124 } });
+            assert: actual === expected;
+        </Script>
+        -->
+
+        <Script name="config properties got set and code is executed">
+            const { foo, bar, quux } = modulo.config.component;
+            assert: foo === 'bif' && bar === 'baf' && quux == 'mux';
+        </Script>
+    </Test>
+</TestSuite>
+</Component>
+
