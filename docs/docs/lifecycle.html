@@ -180,15 +180,16 @@ it's job and set up for the next act.</p>
 phases. The lifecycle phases that a Modulo <em>Component</em> progresses
 through can be categorized into a few groups. One way to think of these phases
 is that typically, the "output" of a previous lifecycle phase in a group is the
-"input" of the next phase. As an example, <code>prebuild</code> generates a
-flat, serializable structure that <code>define</code> uses to instantiate more
-complicated JavaScript instances.  Similarly, <code>prepare</code> figures out
-the template variables, <code>render</code> causes the template to actually
-perform the render based on the variables in the previous phase, and
+"input" of the next phase. As an example,  <code>prepare</code> figures out the
+template variables, <code>render</code> causes the template to actually perform
+the render based on the variables in the previous phase, and
 <code>update</code> updates the HTML of the element based on the rendered
 output of the previous phase.</p>
 
-
+<!--<code>prebuild</code> generates a
+flat, serializable structure that <code>define</code> uses to instantiate more
+complicated JavaScript instances.  Similarly,-->
+<!--
 <h3>Global Modulo lifecycle phases</h3>
 
 <p>These phases happen <em>once per CPart definition</em>. These will happen
@@ -216,8 +217,15 @@ structure blueprint for component instances).</p>
 <p><strong>Note:</strong> "Modulo lifecycle phases" are only accessible to
 <em>CPart</em> developers, and <em>not</em> accessible to component developers
 using script tags.</p>
+-->
 
-<h3>Component lifecycle phases: Factory</h3>
+
+<mws-section name="component" modulo-original-html="Component lifecycle">
+        <a class="secanchor" title="Click to focus on this section." id="component" name="component" href="#component">#</a>
+        <h2>Component lifecycle</h2>
+    </mws-section>
+
+<h3>Factory</h3>
 
 <p>The factory phase happen <em>once per Component definition</em>. It will
 happen even if the component is never used or instantiated anywhere, but only
@@ -234,11 +242,6 @@ global phase of Modulo, and is invoked to prepare the Component definition.</p>
     after built JS files as well).</li>
 </ul>
 
-
-<mws-section name="component" modulo-original-html="Component lifecycle">
-        <a class="secanchor" title="Click to focus on this section." id="component" name="component" href="#component">#</a>
-        <h2>Component lifecycle</h2>
-    </mws-section>
 
 <h3>Construction and initialization lifecycle</h3>
 
@@ -652,44 +655,44 @@ Show messages in console</label>
 
 
 
-<script src="/_modulo/modulo-build-x15ti80v.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
-modulo.assets.require("modulo_configuration");
-modulo.assets.require("modulo_x_DemoModal");
-modulo.assets.require("modulo_x_DemoChart");
-modulo.assets.require("modulo_x_ExampleBtn");
-modulo.assets.require("modulo_x_DemoSelector");
-modulo.assets.require("modulo_mws_Page");
-modulo.assets.require("modulo_mws_ProjectInfo");
-modulo.assets.require("modulo_mws_DevLogNav");
-modulo.assets.require("modulo_mws_DocSidebar");
-modulo.assets.require("modulo_mws_Demo");
-modulo.assets.require("modulo_mws_AllExamples");
-modulo.assets.require("modulo_mws_Section");
-modulo.assets.require("modulo_docseg_Templating_1");
-modulo.assets.require("modulo_docseg_Templating_PrepareCallback");
-modulo.assets.require("modulo_docseg_Templating_Comments");
-modulo.assets.require("modulo_docseg_Templating_Escaping");
-modulo.assets.require("modulo_docseg_Tutorial_P1");
-modulo.assets.require("modulo_docseg_Tutorial_P2");
-modulo.assets.require("modulo_docseg_Tutorial_P2_filters_demo");
-modulo.assets.require("modulo_docseg_Tutorial_P3_state_demo");
-modulo.assets.require("modulo_docseg_Tutorial_P3_state_bind");
-modulo.assets.require("modulo_eg_Hello");
-modulo.assets.require("modulo_eg_Simple");
-modulo.assets.require("modulo_eg_ToDo");
-modulo.assets.require("modulo_eg_JSON");
-modulo.assets.require("modulo_eg_JSONArray");
-modulo.assets.require("modulo_eg_GitHubAPI");
-modulo.assets.require("modulo_eg_ColorSelector");
-modulo.assets.require("modulo_eg_DateNumberPicker");
-modulo.assets.require("modulo_eg_PrimeSieve");
-modulo.assets.require("modulo_eg_Scatter");
-modulo.assets.require("modulo_eg_FlexibleForm");
-modulo.assets.require("modulo_eg_FlexibleFormWithAPI");
-modulo.assets.require("modulo_eg_Components");
-modulo.assets.require("modulo_eg_OscillatingGraph");
-modulo.assets.require("modulo_eg_Search");
-modulo.assets.require("modulo_eg_SearchBox");
-modulo.assets.require("modulo_eg_WorldMap");
-modulo.assets.require("modulo_eg_Memory");
-modulo.assets.require("modulo_eg_ConwayGameOfLife");</script></body></html>
+<script src="/_modulo/modulo-build-xxj5c66o.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
+modulo.assets.require("configuration");
+modulo.assets.require("DemoModal");
+modulo.assets.require("DemoChart");
+modulo.assets.require("ExampleBtn");
+modulo.assets.require("DemoSelector");
+modulo.assets.require("Page");
+modulo.assets.require("ProjectInfo");
+modulo.assets.require("DevLogNav");
+modulo.assets.require("DocSidebar");
+modulo.assets.require("Demo");
+modulo.assets.require("AllExamples");
+modulo.assets.require("Section");
+modulo.assets.require("Templating_1");
+modulo.assets.require("Templating_PrepareCallback");
+modulo.assets.require("Templating_Comments");
+modulo.assets.require("Templating_Escaping");
+modulo.assets.require("Tutorial_P1");
+modulo.assets.require("Tutorial_P2");
+modulo.assets.require("Tutorial_P2_filters_demo");
+modulo.assets.require("Tutorial_P3_state_demo");
+modulo.assets.require("Tutorial_P3_state_bind");
+modulo.assets.require("Hello");
+modulo.assets.require("Simple");
+modulo.assets.require("ToDo");
+modulo.assets.require("JSON");
+modulo.assets.require("JSONArray");
+modulo.assets.require("GitHubAPI");
+modulo.assets.require("ColorSelector");
+modulo.assets.require("DateNumberPicker");
+modulo.assets.require("PrimeSieve");
+modulo.assets.require("Scatter");
+modulo.assets.require("FlexibleForm");
+modulo.assets.require("FlexibleFormWithAPI");
+modulo.assets.require("Components");
+modulo.assets.require("OscillatingGraph");
+modulo.assets.require("Search");
+modulo.assets.require("SearchBox");
+modulo.assets.require("WorldMap");
+modulo.assets.require("Memory");
+modulo.assets.require("ConwayGameOfLife");</script></body></html>

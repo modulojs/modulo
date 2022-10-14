@@ -6,7 +6,8 @@
     // of components specified by the path (sans TestSuites and <Component> def
     // itself). Used by <mws-Demo> and <mws-AllExamples> code snippets in site.
     function getComponentDefs(path) {
-        const confDef = modulo.definitions.modulo_configuration;
+        //const confDef = modulo.definitions.modulo_configuration;
+        const confDef = modulo.definitions.configuration;
         if (confDef.cachedComponentDefs) {
             // TODO: Introduce a more convenient way to access current conf,
             // specifically for static data like this

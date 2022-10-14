@@ -1,0 +1,85 @@
+<script src="/js/Modulo.js"></script>
+
+<script src="/demos/mdu/cparts/NodeRequire.js"></script>
+
+<template modulo-embed>
+    <Component name="Hello">
+        <NodeRequire
+            dependencies:='{
+                "tinytiny": "0.0.1"
+            }'
+        ></NodeRequire>
+        <Template>
+            Hello world
+            {{ noderequire|json }}
+        </Template>
+        <Script>
+            const TinyTiny = require('tinytiny');
+            const tt = TinyTiny('Look, {{ size }} {{ animal }}!');
+            const res = tt.render({ size: 10, animal: 'dogs' });
+            console.log(res);
+        </Script>
+    </Component>
+</template>
+
+<script> Modulo.defineAll() </script>
+
+<hr />
+<x-Hello></x-Hello>
+<hr />
+
+<h1>Custom CPart: NodeRequire Demo</h1>
+
+<p>This CPart brings NodeJS-style Require, which allows for any NPM module to
+be listed as a requirement (kind of like a "package.json" file), and then
+included with a "require()" function call within a Modulo script.</p>
+
+<p>If Babel is enabled on Modulo's AssetManager, then the dependencies will
+also be able to use Babel-style import / export syntax, which gets transpiled
+into NodeJS-style require() function calls. This allows for React components
+written in JSX to be directly imported and compiled right in the browser.  When
+Modulo's building / bundling, if configured correctly, neither the original
+source nor babel compiler itself will be included in the built bundle.</p>
+
+<p>NOTE: The top of scripts may get run extra times! See "Usage notes" for more
+info.</p>
+
+
+<hr />
+<pre>
+  Usage notes:
+
+    - It's very important that your requires (or imports) are ONLY at the top
+      of the script. This is because NodeRequire has to actually run the script
+      in order detect and enqueue the dependencies. If it is missing
+      dependencies, require() will raise an error, and then enqueue the missing
+      dependency, and try again only when that dependency is loaded.
+
+    - This is NOT the preferred way of including requirements in Modulo. Modulo
+      tries to follow simple HTML standards as much as possible, so CParts and
+      other extensions "made for" Modulo should be included simply with a
+      script tag, with no global pollution or compilation needed (e.g., like
+      how this file was written).
+
+    - Instead, the purpose of this file is to provide easier interoperability
+      with existing non-Modulo packages, such as importing React components. It
+      also enables Modulo to be a bit of a "glue framework", like Skate.js
+</pre>
+<hr />
+
+
+
+
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    Modulo.fetchQ.enqueue('.', text => {
+        this.nextSibling.textContent = text;
+        navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

@@ -1,0 +1,21 @@
+<!-- Include JS source, and define a button inline -->
+<script Modulo src="/js/Modulo.js">
+    <Component name="ButtonExample">
+        <Props
+            txt
+        ></Props>
+        <Template>
+            <button><em>{{ props.txt }}</em></button>
+        </Template>
+        <cpart Script>
+            console.log('script is getting run!');
+        </cpart>
+        <Style>
+            em { background-color: tomato }
+        </Style>
+    </Component>
+</script>
+
+<!-- Use it anywhere: -->
+<p><x-ButtonExample txt="Go"></x-ButtonExample></p>
+

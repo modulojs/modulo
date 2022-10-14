@@ -103,7 +103,8 @@ window.moduloBuild.nameToHash = {
                 elemClasses: {},
             };
             const setTimeout = cb => cb(); // Synchronous
-            const fakeWindow = { customElements, modulo: mod2, setTimeout };
+            const HTMLElement = window.HTMLElement;
+            const fakeWindow = { HTMLElement, customElements, modulo: mod2, setTimeout };
 
             // Patch appendToHead so it doesn't "escape" (TODO: Will not be necessary for ModuloVM)
             delete mod2.assets.appendToHead;

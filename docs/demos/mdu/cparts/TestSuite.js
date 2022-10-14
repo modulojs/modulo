@@ -236,7 +236,6 @@ modulo.register('cpart', class TestSuite {
             componentFac = testLoaderModulo.definitions[name];
         } else {
             testLoaderModulo.defs = deepClone(modulo.defs, modulo);
-            testLoaderModulo.setupParents();
             if (('x_' + name) in testLoaderModulo.defs) {
                 console.log('HACK: Fixing name', name);
                 name = 'x_' + name;
@@ -274,7 +273,6 @@ modulo.register('cpart', class TestSuite {
             }
             mod.assets = modulo.assets; // Copy over asset manager
             mod.assets.modulo = mod; // TODO Rethink these back references
-            mod.setupParents();
             return mod;
         }
 
@@ -589,15 +587,14 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
         console.log('%c FAILURE ', 'background-color: red');
         const compNames = failedComponents.map(({ Name }) => Name);
         console.log(`${failure} assertions failed. Failing components:`, compNames);
-        console.log(`${failure} assertions failed. Failing components:`, compNames);
         const getParams = String(modulo.globals.location ?
                                  modulo.globals.location.search : '').substr(1);
         if (!getParams.includes('stacktrace=y')) {
-            console.log(new (class RERUN_WITH {
-                get stack_trace() { window.location.href += '&stacktrace=y' }
+            console.log(new (class RERUN_TESTS_WITH_EXTRA_OPTIONS {
+                get enable_stack_trace() { window.location.href += '&stacktrace=y' }
             }));
         }
-        if (opts.callback) {
+        if (opts && opts.callback) {
             opts.callback(false);
         }
         return false;
@@ -618,6 +615,7 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloTestNumber++;
 
     const namespace = 't' + window._moduloTestNumber;
+    componentFac.namespace = namespace;
     componentFac.TagName = `${ namespace }-${ componentFac.Name }`.toLowerCase();
 
     let componentClass;

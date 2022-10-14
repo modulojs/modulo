@@ -82,6 +82,7 @@ function selectTab(newTitle) {
 }
 
 function toEmbedScript(text, selected) {
+    // TODO: Switch to <template Modulo> style
     const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
 
     // Escape all "script" tags, so it's safe according to HTML syntax:

@@ -9,14 +9,20 @@
         const originalRegistry = modulo.registry;
         const originalConfig = modulo.config;
         const { deepClone, cloneStub } = modulo.registry.utils;
-        window._loadString = function _prepIsolatedModulo(str) {
-            // Now, let's make a fresh modulo, and see if we can "load" the
-            // build using this separate instance
+
+        window._newModulo = function _newModulo() {
             const mod2 = new Modulo(null, [ ]);
             mod2.registry = originalRegistry;
             mod2.config = deepClone(originalConfig, modulo);
             mod2.assets = new mod2.registry.core.AssetManager(mod2);
             mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
+            return mod2
+        }
+
+        window._loadString = function _loadString(str) {
+            // Now, let's make a fresh modulo, and see if we can "load" the
+            // build using this separate instance);
+            const mod2 = window._newModulo();
             return mod2.loadString(str);
         }
 
@@ -34,40 +40,46 @@
         const code = '<Component name="TestA"></Component>' + 
                       '<Component name="TestB"></Component>';
         const loaded = window._loadString(code);
-        const names = loaded.map(({ Name }) => Name);
+        const names = loaded.map(({ name }) => name);
         assert: loaded.length === 2 && names[0] === 'TestA' && names[1] === 'TestB'
     </script>
 
     <script name="loads single component with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>';
         const loaded = window._loadString(code);
-        const { Name, Content } = loaded.length ? loaded[0] : {};
-        assert: loaded.length === 1 && Name === 'TestA' && Content === '<template>aaa</template>';
+        const { name, Name, DefinitionName, Content, ChildrenNames } = loaded.length ? loaded[0] : {};
+        // Content is "null" since we delete it when we recursing
+        //assert: loaded.length === 1 && name === 'TestA' && Content === '<template>aaa</template>';
+        const expected = JSON.stringify([ 1,     'TestA', 'TestA', 'TestA',        null, [ 'TestA_template' ] ]);
+        const actual = JSON.stringify([ loaded.length, name, Name, DefinitionName, Content, ChildrenNames ]);
+        assert: actual === expected
     </script>
 
     <script name="loads multiple components with content">
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
                       '<Component name="TestB"><Template>bbb</Template></Component>';
         const loaded = window._loadString(code);
-        const actual = loaded.map(({ Name, Content }) => ([ Name, Content ]));
-        const expected = [
-            [ 'TestA', '<template>aaa</template>'],
-            [ 'TestB', '<template>bbb</template>'],
-        ];
-        assert: JSON.stringify(expected) === JSON.stringify(actual);
+        const actual = JSON.stringify(loaded.map(({ name, Content, ChildrenNames }) => ([ name, Content, ChildrenNames ])));
+        // Content is "null" since we delete it when recursing
+        const expected = JSON.stringify([
+            //[ 'TestA', '<template>aaa</template>'],
+            //[ 'TestB', '<template>bbb</template>'],
+            [ 'TestA', null, [ 'TestA_template' ] ],
+            [ 'TestB', null, [ 'TestB_template' ] ],
+        ]);
+        assert: actual === expected;
     </script>
 </Test>
 
 
 
-<Test name="modulo.preprocessAndDefine tests">
-    <script name="modulo exists">
-        assert: modulo && modulo.preprocessAndDefine
+<Test name="Processor tests">
+    <script name="modulo.preprocessAndDefine exists">
+        assert: modulo && modulo.preprocessAndDefine && modulo.applyProcessors
     </script>
 
     <script name="Preprocesses an empty component with expected values">
-        const mod = new Modulo(modulo);
-        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
+        const mod = window._newModulo();
         mod.assets = modulo.assets; // TODO rm
         const code = '<Component name="Testy"></Component>';
         const loaded = mod.loadString(code);
@@ -77,8 +89,7 @@
     </script>
 
     <script name="Preprocess and define multiple components with content">
-        const mod = new Modulo(modulo);
-        mod.fetchQueue = { queue: {} }; // Mock fetchQueue
+        const mod = window._newModulo();
         mod.assets = modulo.assets; // Copy over asset manager
         mod.assets.modulo = mod; // TODO Rethink these back references
         const code = '<Component name="TestA"><Template>aaa</Template></Component>' + 
@@ -86,13 +97,79 @@
         const loaded = mod.loadString(code);
         mod.preprocessAndDefine();
         //const actual = loaded.map(({ Name, TagName, Hash }) => ([ Name, TagName, Hash ]));
-        const actual = loaded.map(({ DefName, Name, TagName }) => ([ DefName, Name, TagName ]));
+        const actual = loaded.map(({ DefName, Name, name, TagName }) => ([ DefName, Name, name, TagName ]));
         const expected = [
-            [ null, 'TestA', 'x-testa' ],
-            [ null, 'TestB', 'x-testb' ],
+            [ null, 'TestA', 'TestA', 'x-testa' ],
+            [ null, 'TestB', 'TestB', 'x-testb' ],
         ];
         assert: JSON.stringify(expected) === JSON.stringify(actual);
     </script>
+
+    <script name="Applies processors as expected to an empty conf">
+        const mod = window._newModulo();
+        const result = mod.applyProcessors({ }, [ 'A', 'B', 'C' ]);
+        assert: result === false
+    </script>
+
+    <script name="Correctly applies one round of processors">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        const result = mod.applyProcessors({
+            TestA: 'eyy',
+            TestB: 'bee',
+            TestC: 'sea',
+        }, [ 'TestA', 'TestB' ]);
+        assert: result === true && runA === 'eyy' && runB === null && runC === null;
+    </script>
+
+    <script name="Correctly applies multiple rounds of processors">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        let conf = { TestA: 'eyy', TestB: 'bee', TestC: 'sea' };
+        let keepGoing = 0;
+        let results = [];
+        while (keepGoing++ < 5) {
+            results.push(mod.applyProcessors(conf, [ 'TestA', 'TestB' ]));
+        }
+        const expected = JSON.stringify({ TestC: 'sea' });
+        const actual = JSON.stringify(conf);
+        const expectedResults = JSON.stringify([ true, true, false, false, false ]);
+        const actualResults = JSON.stringify(results);
+        assert: actual === expected && actualResults === expectedResults && runA === 'eyy' && runB === 'bee' && runC === null;
+    </script>
+
+
+    <script name="Correctly handles aliases through multiple rounds">
+        const mod = window._newModulo();
+        let runA = null;
+        let runB = null;
+        let runC = null;
+        mod.registry.processors.testa = function (m, k, v) { runA = v; }
+        mod.registry.processors.testb = function (m, k, v) { runB = v; }
+        mod.registry.processors.testc = function (m, k, v) { runC = v; }
+        let conf = { TestA: 'eyy', TestB: 'bee', TestC: 'sea' };
+        let keepGoing = 0;
+        let results = [];
+        while (keepGoing++ < 5) {
+            results.push(mod.applyProcessors(conf, [ 'TestC|TestA', 'TestB' ]));
+        }
+        const expected = JSON.stringify({ TestA: 'eyy' });
+        const actual = JSON.stringify(conf);
+        const expectedResults = JSON.stringify([ true, true, false, false, false ]);
+        const actualResults = JSON.stringify(results);
+        assert: actual === expected && actualResults === expectedResults && runA === 'sea' && runB === 'bee' && runC === null;
+    </script>
+
 
 
 </TestSuite>
