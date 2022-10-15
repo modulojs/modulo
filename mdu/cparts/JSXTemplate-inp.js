@@ -1,5 +1,3 @@
-// NOTE: This is written for an earlier version of Modulo
-
 /*
     React-style JSX Templates for Modulo 
 
@@ -8,7 +6,39 @@
     JavaScript code, just like in React.
 */
 
+modulo.register('confPreprocessor', function buildjsx(modulo, conf, value) {
+    console.log('TODO: Tst this');
+    //console.log('thsi si modulo', modulo, modulo.parentDefs[conf.Parent].Parent);
+    const DEFAULT_CONF = { presets: [ "env", "react" ] };
+    let { Content } = conf;
+    if (!conf.multiline) {
+        Content = `return (\n${Content}\n);`;
+    }
+    const opts = { babel: (conf.babel || DEFAULT_CONF) };
+
+    // TODO: Redo nameMap stuff once namespace stuff is finalized
+    const sibs = modulo.defs[modulo.parentDefs[conf.Parent].Parent];
+    const componentSibs = sibs.filter(({ Type }) => Type === 'Component');
+    //console.log('siblingComponents', componentSibs);
+
+
+    // Create map for: local name -> registered TagName
+    conf.nameMap = Object.fromEntries(componentSibs.map(
+            (({ name, Name, TagName }) => [ name || Name, TagName ])));
+    //console.log('conf.nameMap', conf.nameMap);
+
+    // Get all registered cparts with a configured RenderObj 
+    const getRO = ({ RenderObj }) => RenderObj;
+    const roArgs = Object.values(modulo.config).filter(getRO).map(getRO);
+    const args = [ 'React', ...roArgs, ...Object.keys(conf.nameMap) ];
+    // TODO: This uses registerFunction, which is a legacy method
+    const func = modulo.assets.registerFunction(args, Content, opts);
+    conf.Hash = modulo.assets.getHash(args, Content);
+    conf.renderArgs = args;
+});
+
 modulo.register('cpart', class JSXTemplate {
+    /*
     static prebuildCallback(modulo, conf) {
         //console.log('thsi si modulo', modulo, modulo.parentDefs[conf.Parent].Parent);
         const DEFAULT_CONF = { presets: [ "env", "react" ] };
@@ -38,6 +68,7 @@ modulo.register('cpart', class JSXTemplate {
         conf.Hash = modulo.assets.getHash(args, Content);
         conf.renderArgs = args;
     }
+    */
 
     initializedCallback() {
         this.renderFunc = this.modulo.assets.functions[this.conf.Hash];
@@ -119,5 +150,7 @@ modulo.register('cpart', class JSXTemplate {
         }
         renderObj.component.innerHTML = this.renderFunc.apply(null, values);
     }
+}, {
+    DefBuilders: [ 'Src', 'BuildJSX' ],
 });
 

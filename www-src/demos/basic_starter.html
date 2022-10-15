@@ -1,12 +1,10 @@
 <!--
-    This is a starter component which shows off common features and tasks, so
-    you can copy & paste it into your project to get started (and remember
-    syntax!). By itself, it doesn't do anything useful (it counts, and adds
-    nonsense to an array when buttons are clicked), but instead is intended to
-    be used as a reference to demonstrate common usage patterns.
+    This is a starter component which shows off common features and tasks to
+    make a simple shopping list, so you can copy & paste it into your project
+    to get started (and remember syntax!).
 -->
-<!--<script Modulo src="https://unpkg.com/mdu.js">-->
-<script Modulo src="/js/Modulo.js">
+<script src="https://unpkg.com/mdu.js"></script>
+<template Modulo>
   <Component name="HelloWorld">
     <Props
         label
@@ -14,20 +12,19 @@
 
     <!-- (Hint: Use https://modulojs.org/docs/templating-reference.html ) -->
     <Template>
-
         <!-- (Hint: "|upper" is a "template filter" which modifies text) -->
         <h2>{{ props.label|upper }}</h2>
 
-        <button @click:=script.increment>COUNT: {{ state.num }}</button>
+        <!-- (Hint: "for" is a "template tag", which repeats HTML) -->
+        <ol>
+        {% for item in state.items %}
+            <li>{{ item }}</li>
+        {% endfor %}
+        </ol>
 
         <!-- (Hint: Use "payload" to specify arguments to JS funcs) -->
-        <button payload="ABC" @click:=script.addToList>Add "ABC"</button>
-        <button payload="XYZ" @click:=script.addToList>Add "XYZ"</button>
-
-        <!-- (Hint: "for" is a "template tag", which repeats HTML) -->
-        {% for item in state.items %}
-            <span>{{ item }}</span>
-        {% endfor %}
+        <button payload="Milk" @click:=script.addToList>Add "Milk"</button>
+        <button payload="Bread" @click:=script.addToList>Add "Bread"</button>
     </Template>
 
     <!-- (Hint: The ="" syntax is for strings, while :='' is for other types) -->
@@ -38,45 +35,31 @@
         json:='{"more": "data"}'
     ></State>
 
-    <cpart Script>
-        // (Hint: All named functions defined at the top level will be exported)
+    <Script>
+        // (Hint: Define functions here to be referenced in "@" events)
         function addToList(payload) {
             state.items.push(payload);
         }
-        function increment() {
-            state.num++;
-        }
-    </cpart>
-
-    <!-- (Note: "cpart Script" and "/cpart" is necessary while embedded. When
-    you move to a seprate file, use simply "Script" and "/Script") -->
+    </Script>
 
     <Style>
-        /* (Hint: Use :host to reference the component itself) */
-        :host, button, span {
-            background-color: #B90183;
-            color: white;
-            margin: 20px;
-            border-radius: 5px;
+        :host { /* (Hint: Use :host to reference the component itself) */
+            padding: 50px;
             display: inline-block;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
-
-        /* (Hint: All selectors are automatically prefixed) */
         button {
-            padding: 5px;
-            border: 3px solid white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
     </Style>
   </Component>
-</script>
+</template>
 
 
-<!-- Use it anywhere, each instance is isolated: -->
-<hr />
-<x-HelloWorld label="Click to count:"></x-HelloWorld>
-<hr />
-<x-HelloWorld label="Another one:"></x-HelloWorld>
-<hr />
+<!-- Use it anywhere, as much as you'd like, each instance is isolated: -->
+<x-HelloWorld label="Shopping list"></x-HelloWorld>
 
 <!-- Remember - Move Component definitions to a library file later:
 <script Modulo

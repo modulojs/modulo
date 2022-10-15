@@ -10,8 +10,8 @@
     important for accessibility, see:
     https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/dialog.html
 -->
-<!--<script Modulo src="https://unpkg.com/mdu.js">-->
-<script Modulo src="/js/Modulo.js">
+<script src="https://unpkg.com/mdu.js"></script>
+<template Modulo>
   <Component name="Btn">
     <Style>
         :host {
@@ -78,8 +78,9 @@
   </Component>
 
 
-<Component name="Tabs">
+  <Component name="Tabs">
     <Template>
+        {# Create a button for each tab #}
         {% for tab in state.tabs %}
             <x-Btn
                 @click:=script.selectTab
@@ -95,7 +96,7 @@
         {% for tab in state.tabs %}
             <div role="tablist">
                 <slot
-                    name="Tab{{ tab }}"
+                    name="{{ tab }}"
                     id="Tab{{ tab }}"
                     role="tabpanel"
                     class="tab-body {% if tab == state.selected %}visible{% endif %}"
@@ -110,16 +111,18 @@
         selected=""
     ></State>
 
-    <cpart Script>
+    <Script>
         // (Hint: prepareCallback is invoked before every render)
         function prepareCallback(renderObj) {
             state.tabs = [];
+            // Loop through the original children passed to this element, and
+            // use their "slot=" information to create the tabs.
             for (const child of element.originalChildren) {
-                if (!child.hasAttribute || !child.hasAttribute('slot')) { // not a DOM node
-                    continue;
+                if (!child.hasAttribute || !child.hasAttribute('slot')) {
+                    continue; // not a DOM node, or correctly slotted
                 }
                 state.tabs.push(child.getAttribute('slot'));
-                if (!state.selected) { // Select the first one found
+                if (!state.selected) { // Select the first one on first render
                     state.selected = child.getAttribute('slot');
                 }
             }
@@ -128,7 +131,7 @@
         function selectTab(tabToSelect) {
             state.selected = tabToSelect;
         }
-    </cpart>
+    </Script>
 
     <Style>
         :host {
@@ -150,9 +153,9 @@
             border-color: white;
         }
     </Style>
-</Component>
+  </Component>
 
-<Component name="Modal">
+  <Component name="Modal">
     <Props
         button
         title
@@ -190,7 +193,7 @@
         width:=400
     ></State>
 
-    <cpart Script>
+    <Script>
         // (Hint: All named functions defined at the top level will be exported)
         function show() {
             state.visible = true;
@@ -198,7 +201,7 @@
         function hide() {
             state.visible = false;
         }
-    </cpart>
+    </Script>
 
     <Style>
         .modal-backdrop {
@@ -231,13 +234,11 @@
             color: white;
         }
     </Style>
-</Component>
-
-</script>
-
+  </Component>
+</template>
 
 
-
+<!-- Examine below to see how this component library can be used: -->
 <x-LayoutRow>
     <x-Card title="Some simple components">
         <x-Btn>Hello world!</x-Btn>
@@ -268,13 +269,11 @@
         const colors = ['#a15745', '#ec9747', '#4a3383', '#715ac4', '#a4e06b',
                         '#c29df2', '#a3134a', '#9af296', '#fc97c3', '#4ed8c3',
                         '#095363', '#e03e26']
-        const randIndex = Math.floor(Math.random() * colors.length)
-        const randColor = colors[randIndex];
+        const randColor = colors[Math.floor(Math.random() * colors.length)];
         document.documentElement.style.setProperty('--accent1', randColor);
     }
 </script>
-
-<!-- NOTE: To customize the accent color, delete the script tag and use CSS: -->
+<!-- NOTE: To save a color, delete the above script and use CSS: -->
 <style>/* :root { --accent1: #999; } */</style>
 
 

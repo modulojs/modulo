@@ -10,21 +10,16 @@
     definitions focused on presentation logic only, and possibly eliminates the
     need for a Script CPart in the Component definitions at all.
 -->
-
-
+<script src="https://unpkg.com/mdu.js"></script>
 <template Modulo>
     <!--
         Here we define a Component that uses the API. Note that it doesn't need
         to know very much about the internal workings of the API, or even any
-        custom Script code at all. This means, the developer of this Component
-        doesn't need to be comfortable with JavaScript to write components
-        interface with an intenral API.
+        custom Script code at all. This means that the developer of this
+        Component doesn't require as much familiarity with JavaScript to write
+        Components that interface with an internal API.
     -->
-
     <Component name="ExampleComponent">
-
-        <!-- Include ExampleAPI CPart, with default configuration -->
-        <ExampleAPI></ExampleAPI>
 
         <Template>
             <!-- The ExampleAPI CPart exposes ".error" to other CParts (e.g.
@@ -75,6 +70,9 @@
             </section>
         </Template>
 
+        <!-- Include ExampleAPI CPart, with default configuration -->
+        <ExampleAPI></ExampleAPI>
+
         <!-- Set up a simple state CPart (for data to be submitted) -->
         <State
             user="garibaldi"
@@ -96,21 +94,18 @@
             }
         </Style>
     </Component>
-
 </template>
 
-<script src="https://unpkg.com/mdu.js"></script>
-
-<!-- Here is how we define the CPart itself. For the example, we put it in
-embedded in a <script> so we can keep everything in one file. However, it's
-better to move it to a separate JS file included with a <script src="..."> tag
-(just like we include the Modulo.js file). -->
+<!-- Here is how we define the custom Component Part itself. For the example,
+we put it in embedded in a <script> so we can keep everything in one file.
+However, it's better to move it to a separate JS file included with a <script
+src="..."> tag (just like we include the Modulo.js file). -->
 <script>
     modulo.register('cpart', class ExampleAPI {
         constructor() {
             // Any data private to each component can be defined here. If you
-            // are already utilizing Redux or similar Stores with your API, you
-            // could attach or import necessary dependencies here.
+            // are already utilizing Redux or similar stores with your API, you
+            // could attach these, or import necessary dependencies here.
             // (Note that "this.data" has no special meaning, it is merely
             // convenient to store exposed data in a single object.)
             this.data = {
@@ -171,7 +166,6 @@ better to move it to a separate JS file included with a <script src="..."> tag
                 .then(results => {
                     // (The Typicode API doesn't actually save, so we use fakedPosts)
                     this.fakedPosts.push(results);
-                    console.log('result of post', results);
                     this.data.saveSuccess = true;
                     this.data.isLoading = false;
                     this.data.error = null;

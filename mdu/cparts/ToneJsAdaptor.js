@@ -10,7 +10,6 @@
           - on mouse down, show absolute slider over knob and focus, so it
             immediately starts drag motion
 
-
 ANOTHER IDEA:
 - Have parameters hook up directly with state properties, so turning knobs can
   be fast

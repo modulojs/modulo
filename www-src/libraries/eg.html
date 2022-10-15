@@ -383,14 +383,14 @@ the "ordering" and initial values get set via Props. -->
     <form>
         {% for field in state.fields %}
             <div class="field-pair">
-                <label for="{{ field }}_{{ component.uniqueId }}">
+                <label for="{{ field }}_{{ component.id }}">
                     <strong>{{ field|capfirst }}:</strong>
                 </label>
                 <input
                     [state.bind]
                     type="{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}"
                     name="{{ field }}"
-                    id="{{ field }}_{{ component.uniqueId }}"
+                    id="{{ field }}_{{ component.id }}"
                 />
             </div>
         {% endfor %}
@@ -418,14 +418,14 @@ APIs. Here we use a Typicode's placeholder API to make posts -->
     <form>
         {% for field in state.fields %}
             <div class="field-pair">
-                <label for="{{ field }}_{{ component.uniqueId }}">
+                <label for="{{ field }}_{{ component.id }}">
                     <strong>{{ field|capfirst }}:</strong>
                 </label>
                 <input
                     [state.bind]
                     type='{% if state|get:field|type == "number" %}number{% else %}text{% endif %}'
                     name="{{ field }}"
-                    id="{{ field }}_{{ component.uniqueId }}"
+                    id="{{ field }}_{{ component.id }}"
                 />
             </div>
         {% endfor %}
