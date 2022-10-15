@@ -1523,14 +1523,14 @@ return { "initializedCallback": typeof initializedCallback !== "undefined" ? ini
  setLocalVariable: __set, exports: script.exports}
 
 };
-window.moduloBuild.modules["xxd9oom7"] = function FlexibleFormWithAPI_template (modulo) {
+window.moduloBuild.modules["x16ihg4b"] = function FlexibleFormWithAPI_template (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n    <form>\n        "); // "<form>"
   var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
   OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
   OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
   OUT.push("\">\n                    <strong>"); // "\"><strong>"
   OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
   OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
@@ -1544,7 +1544,7 @@ return function (CTX, G) { var OUT=[];
   OUT.push("\" id=\""); // "\" id=\""
   OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
   OUT.push("\">\n            </div>\n        "); // "\"></div>"
   } // "endfor"
   OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
@@ -1561,14 +1561,14 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxb7eeji"] = function FlexibleForm_template (modulo) {
+window.moduloBuild.modules["x1ah1gte"] = function FlexibleForm_template (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n    <form>\n        "); // "<form>"
   var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
   OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
   OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
   OUT.push("\">\n                    <strong>"); // "\"><strong>"
   OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
   OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
@@ -1582,7 +1582,7 @@ return function (CTX, G) { var OUT=[];
   OUT.push("\" id=\""); // "\" id=\""
   OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.uniqueId)); // "component.uniqueId"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
   OUT.push("\">\n            </div>\n        "); // "\"></div>"
   } // "endfor"
   OUT.push("\n    </form>\n"); // "</form>"
@@ -1749,8 +1749,8 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxh77mhq"] = function JSON_staticdata (modulo) {
-return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2022-10-01T22:46:10Z","pushed_at":"2022-10-14T20:07:18Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":3884,"stargazers_count":1,"watchers_count":1,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":13,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":0,"open_issues":13,"watchers":1,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":0,"subscribers_count":1};
+window.moduloBuild.modules["xxsubqn0"] = function JSON_staticdata (modulo) {
+return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2022-10-01T22:46:10Z","pushed_at":"2022-10-15T03:20:52Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":4112,"stargazers_count":1,"watchers_count":1,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":13,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":0,"open_issues":13,"watchers":1,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":0,"subscribers_count":1};
 };
 window.moduloBuild.modules["x1lhd4rn"] = function JSON_template (modulo) {
 return function (CTX, G) { var OUT=[];
@@ -2141,8 +2141,8 @@ window.moduloBuild.modules["xx7g1u0l"] = function ProjectInfo (modulo) {
         return _ProjectInfo_;
     
 };
-window.moduloBuild.modules["xxdntnpa"] = function ProjectInfo_staticdata (modulo) {
-return {"name":"mdu.js","author":"michaelb","version":"0.0.17","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"devDependencies":{"complexity-report-html":"0.0.3","crypto-js":"4.1.1","docco-next":"0.9.8","jsdom":"16.4.0","sloc":"0.2.1","happy-dom":"2.55.0","linkedom":"0.14.5","xmldom":"0.4.0"},"peerDependencies":{"express":"^4.17.1","node-watch":"^0.7.2","puppeteer":"^13.5.2"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
+window.moduloBuild.modules["xxng4ngo"] = function ProjectInfo_staticdata (modulo) {
+return {"name":"mdu.js","author":"michaelb","version":"0.0.19","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"devDependencies":{"complexity-report-html":"0.0.3","crypto-js":"4.1.1","docco-next":"0.9.8","jsdom":"16.4.0","sloc":"0.2.1","happy-dom":"2.55.0","linkedom":"0.14.5","xmldom":"0.4.0"},"peerDependencies":{"express":"^4.17.1","node-watch":"^0.7.2","puppeteer":"^13.5.2"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
 };
 window.moduloBuild.modules["xx9t56li"] = function ProjectInfo_template (modulo) {
 return function (CTX, G) { var OUT=[];
@@ -15650,7 +15650,7 @@ window.moduloBuild.nameToHash = {
  "ExampleBtn_template": "xx5ann6n",
  "DemoSelector_template": "xxbjtni2",
  "Page_template": "xx7fpnr6",
- "ProjectInfo_staticdata": "xxdntnpa",
+ "ProjectInfo_staticdata": "xxng4ngo",
  "ProjectInfo_template": "xx9t56li",
  "DevLogNav_template": "xxivj2tr",
  "DocSidebar_template": "x1s9cikh",
@@ -15670,7 +15670,7 @@ window.moduloBuild.nameToHash = {
  "Simple_template": "xxl4an33",
  "ToDo_template": "xxbdh5fm",
  "JSON_template": "x1lhd4rn",
- "JSON_staticdata": "xxh77mhq",
+ "JSON_staticdata": "xxsubqn0",
  "JSONArray_template": "x1npfhrn",
  "JSONArray_staticdata": "xxgkj36u",
  "GitHubAPI_template": "x130qf1i",
@@ -15679,8 +15679,8 @@ window.moduloBuild.nameToHash = {
  "PrimeSieve_template": "xxn6m9dp",
  "Scatter_template": "x1ejsk79",
  "Scatter_staticdata": "x11t9udg",
- "FlexibleForm_template": "xxb7eeji",
- "FlexibleFormWithAPI_template": "xxd9oom7",
+ "FlexibleForm_template": "x1ah1gte",
+ "FlexibleFormWithAPI_template": "x16ihg4b",
  "Components_template": "x1gk8lc3",
  "OscillatingGraph_template": "xxqlg44u",
  "Search_template": "x1l103gn",
@@ -15703,7 +15703,6 @@ window.moduloBuild.definitions = {
    "Content|Code",
    "DefinitionName|MainRequire"
   ],
-  "RenderObj": "configuration",
   "DefName": null,
   "Parent": null,
   "Name": "configuration",
@@ -15719,8 +15718,8 @@ window.moduloBuild.definitions = {
     "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
     "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
     "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.uniqueId }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.uniqueId }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
+    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
+    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
     "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
     "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
     "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
@@ -15728,17 +15727,6 @@ window.moduloBuild.definitions = {
     "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
     "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
     "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   },
-   "/libraries/docseg.html": {
-    "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-    "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-    "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-    "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-    "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-    "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-    "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-    "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-    "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
    }
   }
  },
@@ -15746,6 +15734,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -15759,7 +15748,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "x",
   "name": "DemoModal",
   "DefName": null,
@@ -15779,6 +15767,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -15792,7 +15781,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "x",
   "name": "DemoChart",
   "DefName": null,
@@ -15811,6 +15799,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -15824,7 +15813,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "x",
   "name": "ExampleBtn",
   "DefName": null,
@@ -15842,6 +15830,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -15855,7 +15844,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "x",
   "name": "DemoSelector",
   "DefName": null,
@@ -15873,7 +15861,6 @@ window.moduloBuild.definitions = {
  },
  "DemoModal_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "button": "",
   "title": "",
   "Content": "",
@@ -15887,7 +15874,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DemoModal",
   "Name": "template",
@@ -15896,7 +15882,6 @@ window.moduloBuild.definitions = {
  },
  "DemoModal_state": {
   "Type": "State",
-  "RenderObj": "state",
   "visible": false,
   "Content": "",
   "DefName": null,
@@ -15911,7 +15896,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "DemoModal",
   "Name": "script",
@@ -15933,10 +15917,9 @@ window.moduloBuild.definitions = {
  },
  "DemoModal_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DemoModal",
   "Name": "style",
@@ -15944,7 +15927,6 @@ window.moduloBuild.definitions = {
  },
  "DemoChart_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "data": "",
   "animated": "",
   "Content": "",
@@ -15958,7 +15940,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DemoChart",
   "Name": "template",
@@ -15972,7 +15953,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "DemoChart",
   "Name": "script",
@@ -15994,10 +15974,9 @@ window.moduloBuild.definitions = {
  },
  "DemoChart_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DemoChart",
   "Name": "style",
@@ -16005,7 +15984,6 @@ window.moduloBuild.definitions = {
  },
  "ExampleBtn_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "label": "",
   "shape": "",
   "Content": "",
@@ -16019,7 +15997,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "ExampleBtn",
   "Name": "template",
@@ -16028,10 +16005,9 @@ window.moduloBuild.definitions = {
  },
  "ExampleBtn_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "ExampleBtn",
   "Name": "style",
@@ -16039,7 +16015,6 @@ window.moduloBuild.definitions = {
  },
  "DemoSelector_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "onchange": "",
   "options": "",
   "name": "",
@@ -16054,7 +16029,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DemoSelector",
   "Name": "template",
@@ -16063,7 +16037,6 @@ window.moduloBuild.definitions = {
  },
  "DemoSelector_state": {
   "Type": "State",
-  "RenderObj": "state",
   "value": "",
   "Content": "",
   "DefName": null,
@@ -16078,7 +16051,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "DemoSelector",
   "Name": "script",
@@ -16100,10 +16072,9 @@ window.moduloBuild.definitions = {
  },
  "DemoSelector_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DemoSelector",
   "Name": "style",
@@ -16113,6 +16084,7 @@ window.moduloBuild.definitions = {
   "mode": "vanish-into-document",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16126,7 +16098,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "Page",
   "DefName": null,
@@ -16145,6 +16116,7 @@ window.moduloBuild.definitions = {
   "mode": "vanish",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16158,7 +16130,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "ProjectInfo",
   "DefName": null,
@@ -16176,6 +16147,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16189,7 +16161,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "DevLogNav",
   "DefName": null,
@@ -16208,6 +16179,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16221,7 +16193,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "DocSidebar",
   "DefName": null,
@@ -16241,6 +16212,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16254,7 +16226,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "Demo",
   "DefName": null,
@@ -16274,6 +16245,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16287,7 +16259,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "AllExamples",
   "DefName": null,
@@ -16306,6 +16277,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16319,7 +16291,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "mws",
   "name": "Section",
   "DefName": null,
@@ -16335,7 +16306,6 @@ window.moduloBuild.definitions = {
  },
  "Page_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "navbar": "",
   "docbarselected": "",
   "pagetitle": "",
@@ -16347,10 +16317,9 @@ window.moduloBuild.definitions = {
  },
  "Page_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Page",
   "Name": "style",
@@ -16361,7 +16330,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Page",
   "Name": "template",
@@ -16375,7 +16343,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Page",
   "Name": "script",
@@ -16397,7 +16364,6 @@ window.moduloBuild.definitions = {
  },
  "ProjectInfo_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "version": "",
   "Content": "",
   "DefName": null,
@@ -16422,8 +16388,7 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
-  "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.17\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n        \"mdu-cli\": \"modulocli/modulocli.js\",\n        \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"devDependencies\": {\n    \"complexity-report-html\": \"0.0.3\",\n    \"crypto-js\": \"4.1.1\",\n    \"docco-next\": \"0.9.8\",\n    \"jsdom\": \"16.4.0\",\n    \"sloc\": \"0.2.1\",\n    \"happy-dom\": \"2.55.0\",\n    \"linkedom\": \"0.14.5\",\n    \"xmldom\": \"0.4.0\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.17.1\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.5.2\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
+  "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.19\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n        \"mdu-cli\": \"modulocli/modulocli.js\",\n        \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"devDependencies\": {\n    \"complexity-report-html\": \"0.0.3\",\n    \"crypto-js\": \"4.1.1\",\n    \"docco-next\": \"0.9.8\",\n    \"jsdom\": \"16.4.0\",\n    \"sloc\": \"0.2.1\",\n    \"happy-dom\": \"2.55.0\",\n    \"linkedom\": \"0.14.5\",\n    \"xmldom\": \"0.4.0\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.17.1\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.5.2\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
   "DefName": null,
   "Parent": "ProjectInfo",
   "Name": "staticdata",
@@ -16431,7 +16396,7 @@ window.moduloBuild.definitions = {
   "data": {
    "name": "mdu.js",
    "author": "michaelb",
-   "version": "0.0.17",
+   "version": "0.0.19",
    "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
    "homepage": "https://modulojs.org/",
    "main": "./src/Modulo.js",
@@ -16493,7 +16458,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "ProjectInfo",
   "Name": "template",
@@ -16502,7 +16466,6 @@ window.moduloBuild.definitions = {
  },
  "DevLogNav_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "fn": "",
   "Content": "",
   "DefName": null,
@@ -16515,7 +16478,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DevLogNav",
   "Name": "template",
@@ -16524,7 +16486,6 @@ window.moduloBuild.definitions = {
  },
  "DevLogNav_state": {
   "Type": "State",
-  "RenderObj": "state",
   "data": [
    [
     "2022-09",
@@ -16555,10 +16516,9 @@ window.moduloBuild.definitions = {
  },
  "DevLogNav_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DevLogNav",
   "Name": "style",
@@ -16566,7 +16526,6 @@ window.moduloBuild.definitions = {
  },
  "DocSidebar_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "path": "",
   "showall": "",
   "Content": "",
@@ -16580,7 +16539,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DocSidebar",
   "Name": "template",
@@ -16589,7 +16547,6 @@ window.moduloBuild.definitions = {
  },
  "DocSidebar_state": {
   "Type": "State",
-  "RenderObj": "state",
   "menu": [],
   "Content": "",
   "DefName": null,
@@ -16604,7 +16561,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "DocSidebar",
   "Name": "script",
@@ -16626,10 +16582,9 @@ window.moduloBuild.definitions = {
  },
  "DocSidebar_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DocSidebar",
   "Name": "style",
@@ -16637,7 +16592,6 @@ window.moduloBuild.definitions = {
  },
  "Demo_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "text": "",
   "text2": "",
   "text3": "",
@@ -16657,7 +16611,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Demo",
   "Name": "template",
@@ -16666,7 +16619,6 @@ window.moduloBuild.definitions = {
  },
  "Demo_state": {
   "Type": "State",
-  "RenderObj": "state",
   "tabs": [],
   "selected": null,
   "preview": "",
@@ -16691,7 +16643,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Demo",
   "Name": "script",
@@ -16713,10 +16664,9 @@ window.moduloBuild.definitions = {
  },
  "Demo_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Demo",
   "Name": "style",
@@ -16727,7 +16677,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "AllExamples",
   "Name": "template",
@@ -16736,7 +16685,6 @@ window.moduloBuild.definitions = {
  },
  "AllExamples_state": {
   "Type": "State",
-  "RenderObj": "state",
   "selected": "",
   "examples": [],
   "Content": "",
@@ -16752,7 +16700,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "AllExamples",
   "Name": "script",
@@ -16774,10 +16721,9 @@ window.moduloBuild.definitions = {
  },
  "AllExamples_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "AllExamples",
   "Name": "style",
@@ -16785,7 +16731,6 @@ window.moduloBuild.definitions = {
  },
  "Section_props": {
   "Type": "Props",
-  "RenderObj": "props",
   "name": "",
   "Content": "",
   "DefName": null,
@@ -16798,7 +16743,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Section",
   "Name": "template",
@@ -16807,10 +16751,9 @@ window.moduloBuild.definitions = {
  },
  "Section_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Section",
   "Name": "style",
@@ -16820,6 +16763,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16833,7 +16777,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Templating_1",
   "DefName": null,
@@ -16851,6 +16794,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16864,7 +16808,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Templating_PrepareCallback",
   "DefName": null,
@@ -16883,6 +16826,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16896,7 +16840,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Templating_Comments",
   "DefName": null,
@@ -16912,6 +16855,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16925,7 +16869,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Templating_Escaping",
   "DefName": null,
@@ -16943,6 +16886,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16956,7 +16900,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Tutorial_P1",
   "DefName": null,
@@ -16973,6 +16916,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -16986,7 +16930,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Tutorial_P2",
   "DefName": null,
@@ -17002,6 +16945,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17015,7 +16959,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Tutorial_P2_filters_demo",
   "DefName": null,
@@ -17031,6 +16974,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17044,7 +16988,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Tutorial_P3_state_demo",
   "DefName": null,
@@ -17062,6 +17005,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17075,7 +17019,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "docseg",
   "name": "Tutorial_P3_state_bind",
   "DefName": null,
@@ -17093,7 +17036,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Templating_1",
   "Name": "template",
@@ -17102,7 +17044,6 @@ window.moduloBuild.definitions = {
  },
  "Templating_1_state": {
   "Type": "State",
-  "RenderObj": "state",
   "count": 42,
   "articles": [
    {
@@ -17130,7 +17071,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Templating_1",
   "Name": "script",
@@ -17155,7 +17095,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Templating_PrepareCallback",
   "Name": "template",
@@ -17164,7 +17103,6 @@ window.moduloBuild.definitions = {
  },
  "Templating_PrepareCallback_state": {
   "Type": "State",
-  "RenderObj": "state",
   "perc": 50,
   "total": 30,
   "Content": "",
@@ -17180,7 +17118,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Templating_PrepareCallback",
   "Name": "script",
@@ -17202,10 +17139,9 @@ window.moduloBuild.definitions = {
  },
  "Templating_PrepareCallback_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Templating_PrepareCallback",
   "Name": "style",
@@ -17216,7 +17152,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Templating_Comments",
   "Name": "template",
@@ -17228,7 +17163,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Templating_Escaping",
   "Name": "template",
@@ -17237,7 +17171,6 @@ window.moduloBuild.definitions = {
  },
  "Templating_Escaping_state": {
   "Type": "State",
-  "RenderObj": "state",
   "username": "Little <Bobby> <Drop> &tables",
   "content": "\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    ",
   "Content": "",
@@ -17248,10 +17181,9 @@ window.moduloBuild.definitions = {
  },
  "Templating_Escaping_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Templating_Escaping",
   "Name": "style",
@@ -17262,7 +17194,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Tutorial_P1",
   "Name": "template",
@@ -17271,10 +17202,9 @@ window.moduloBuild.definitions = {
  },
  "Tutorial_P1_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Tutorial_P1",
   "Name": "style",
@@ -17285,7 +17215,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Tutorial_P2",
   "Name": "template",
@@ -17297,7 +17226,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Tutorial_P2_filters_demo",
   "Name": "template",
@@ -17309,7 +17237,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Tutorial_P3_state_demo",
   "Name": "template",
@@ -17318,7 +17245,6 @@ window.moduloBuild.definitions = {
  },
  "Tutorial_P3_state_demo_state": {
   "Type": "State",
-  "RenderObj": "state",
   "verb": "toot",
   "noun": "kazoo",
   "count": "two",
@@ -17330,10 +17256,9 @@ window.moduloBuild.definitions = {
  },
  "Tutorial_P3_state_demo_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Tutorial_P3_state_demo",
   "Name": "style",
@@ -17344,7 +17269,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Tutorial_P3_state_bind",
   "Name": "template",
@@ -17353,7 +17277,6 @@ window.moduloBuild.definitions = {
  },
  "Tutorial_P3_state_bind_state": {
   "Type": "State",
-  "RenderObj": "state",
   "opacity": "0.5",
   "color": "blue",
   "username": "Testing_Username",
@@ -17367,6 +17290,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17380,7 +17304,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Hello",
   "DefName": null,
@@ -17398,6 +17321,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17411,7 +17335,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Simple",
   "DefName": null,
@@ -17428,6 +17351,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17441,7 +17365,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "ToDo",
   "DefName": null,
@@ -17459,6 +17382,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17472,7 +17396,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "JSON",
   "DefName": null,
@@ -17489,6 +17412,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17502,7 +17426,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "JSONArray",
   "DefName": null,
@@ -17519,6 +17442,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17532,7 +17456,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "GitHubAPI",
   "DefName": null,
@@ -17550,6 +17473,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17563,7 +17487,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "ColorSelector",
   "DefName": null,
@@ -17580,6 +17503,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17593,7 +17517,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "DateNumberPicker",
   "DefName": null,
@@ -17612,6 +17535,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17625,7 +17549,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "PrimeSieve",
   "DefName": null,
@@ -17644,6 +17567,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17657,7 +17581,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Scatter",
   "DefName": null,
@@ -17675,6 +17598,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17688,7 +17612,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "FlexibleForm",
   "DefName": null,
@@ -17705,6 +17628,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17718,7 +17642,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "FlexibleFormWithAPI",
   "DefName": null,
@@ -17736,6 +17659,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17749,7 +17673,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Components",
   "DefName": null,
@@ -17765,6 +17688,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17778,7 +17702,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "OscillatingGraph",
   "DefName": null,
@@ -17797,6 +17720,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17810,7 +17734,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Search",
   "DefName": null,
@@ -17828,6 +17751,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17841,7 +17765,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "SearchBox",
   "DefName": null,
@@ -17861,6 +17784,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17874,7 +17798,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "WorldMap",
   "DefName": null,
@@ -17892,6 +17815,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17905,7 +17829,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "Memory",
   "DefName": null,
@@ -17924,6 +17847,7 @@ window.moduloBuild.definitions = {
   "mode": "regular",
   "rerender": "event",
   "engine": "Reconciler",
+  "RenderObj": "component",
   "DefLoaders": [
    "DefinedAs",
    "Src",
@@ -17937,7 +17861,6 @@ window.moduloBuild.definitions = {
    "MainRequire"
   ],
   "Type": "Component",
-  "RenderObj": "component",
   "namespace": "eg",
   "name": "ConwayGameOfLife",
   "DefName": null,
@@ -17957,7 +17880,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Hello",
   "Name": "template",
@@ -17966,7 +17888,6 @@ window.moduloBuild.definitions = {
  },
  "Hello_state": {
   "Type": "State",
-  "RenderObj": "state",
   "num": 42,
   "Content": "",
   "DefName": null,
@@ -17981,7 +17902,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Hello",
   "Name": "script",
@@ -18006,7 +17926,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Simple",
   "Name": "template",
@@ -18015,10 +17934,9 @@ window.moduloBuild.definitions = {
  },
  "Simple_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Simple",
   "Name": "style",
@@ -18029,7 +17947,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "ToDo",
   "Name": "template",
@@ -18038,7 +17955,6 @@ window.moduloBuild.definitions = {
  },
  "ToDo_state": {
   "Type": "State",
-  "RenderObj": "state",
   "list": [
    "Milk",
    "Bread",
@@ -18058,7 +17974,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "ToDo",
   "Name": "script",
@@ -18083,7 +17998,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "JSON",
   "Name": "template",
@@ -18107,8 +18021,7 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
-  "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2022-10-01T22:46:10Z\",\n  \"pushed_at\": \"2022-10-14T20:07:18Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 3884,\n  \"stargazers_count\": 1,\n  \"watchers_count\": 1,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"forks_count\": 0,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 13,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 0,\n  \"open_issues\": 13,\n  \"watchers\": 1,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 0,\n  \"subscribers_count\": 1\n}\n",
+  "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2022-10-01T22:46:10Z\",\n  \"pushed_at\": \"2022-10-15T03:20:52Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 4112,\n  \"stargazers_count\": 1,\n  \"watchers_count\": 1,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"forks_count\": 0,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 13,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 0,\n  \"open_issues\": 13,\n  \"watchers\": 1,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 0,\n  \"subscribers_count\": 1\n}\n",
   "DefName": null,
   "Parent": "JSON",
   "Name": "staticdata",
@@ -18181,13 +18094,13 @@ window.moduloBuild.definitions = {
    "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
    "created_at": "2022-09-28T16:20:49Z",
    "updated_at": "2022-10-01T22:46:10Z",
-   "pushed_at": "2022-10-14T20:07:18Z",
+   "pushed_at": "2022-10-15T03:20:52Z",
    "git_url": "git://github.com/modulojs/modulo.git",
    "ssh_url": "git@github.com:modulojs/modulo.git",
    "clone_url": "https://github.com/modulojs/modulo.git",
    "svn_url": "https://github.com/modulojs/modulo",
    "homepage": "https://modulojs.org/",
-   "size": 3884,
+   "size": 4112,
    "stargazers_count": 1,
    "watchers_count": 1,
    "language": "JavaScript",
@@ -18258,7 +18171,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "JSONArray",
   "Name": "template",
@@ -18282,7 +18194,6 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
   "Content": "[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"delectus aut autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"quis ut nam facilis et officia qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 3,\n    \"title\": \"fugiat veniam minus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 4,\n    \"title\": \"et porro tempora\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 5,\n    \"title\": \"laboriosam mollitia et enim quasi adipisci quia provident illum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 6,\n    \"title\": \"qui ullam ratione quibusdam voluptatem quia omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 7,\n    \"title\": \"illo expedita consequatur quia in\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 8,\n    \"title\": \"quo adipisci enim quam ut ab\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 9,\n    \"title\": \"molestiae perspiciatis ipsa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 10,\n    \"title\": \"illo est ratione doloremque quia maiores aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 11,\n    \"title\": \"vero rerum temporibus dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 12,\n    \"title\": \"ipsa repellendus fugit nisi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 13,\n    \"title\": \"et doloremque nulla\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 14,\n    \"title\": \"repellendus sunt dolores architecto voluptatum\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 15,\n    \"title\": \"ab voluptatum amet voluptas\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 16,\n    \"title\": \"accusamus eos facilis sint et aut voluptatem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 17,\n    \"title\": \"quo laboriosam deleniti aut qui\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 18,\n    \"title\": \"dolorum est consequatur ea mollitia in culpa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 19,\n    \"title\": \"molestiae ipsa aut voluptatibus pariatur dolor nihil\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 20,\n    \"title\": \"ullam nobis libero sapiente ad optio sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 21,\n    \"title\": \"suscipit repellat esse quibusdam voluptatem incidunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 22,\n    \"title\": \"distinctio vitae autem nihil ut molestias quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 23,\n    \"title\": \"et itaque necessitatibus maxime molestiae qui quas velit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 24,\n    \"title\": \"adipisci non ad dicta qui amet quaerat doloribus ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 25,\n    \"title\": \"voluptas quo tenetur perspiciatis explicabo natus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 26,\n    \"title\": \"aliquam aut quasi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 27,\n    \"title\": \"veritatis pariatur delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 28,\n    \"title\": \"nesciunt totam sit blanditiis sit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 29,\n    \"title\": \"laborum aut in quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 30,\n    \"title\": \"nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 31,\n    \"title\": \"repudiandae totam in est sint facere fuga\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 32,\n    \"title\": \"earum doloribus ea doloremque quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 33,\n    \"title\": \"sint sit aut vero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 34,\n    \"title\": \"porro aut necessitatibus eaque distinctio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 35,\n    \"title\": \"repellendus veritatis molestias dicta incidunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 36,\n    \"title\": \"excepturi deleniti adipisci voluptatem et neque optio illum ad\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 37,\n    \"title\": \"sunt cum tempora\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 38,\n    \"title\": \"totam quia non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 39,\n    \"title\": \"doloremque quibusdam asperiores libero corrupti illum qui omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 40,\n    \"title\": \"totam atque quo nesciunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 41,\n    \"title\": \"aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 42,\n    \"title\": \"rerum perferendis error quia ut eveniet\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 43,\n    \"title\": \"tempore ut sint quis recusandae\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 44,\n    \"title\": \"cum debitis quis accusamus doloremque ipsa natus sapiente omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 45,\n    \"title\": \"velit soluta adipisci molestias reiciendis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 46,\n    \"title\": \"vel voluptatem repellat nihil placeat corporis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 47,\n    \"title\": \"nam qui rerum fugiat accusamus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 48,\n    \"title\": \"sit reprehenderit omnis quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 49,\n    \"title\": \"ut necessitatibus aut maiores debitis officia blanditiis velit et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 50,\n    \"title\": \"cupiditate necessitatibus ullam aut quis dolor voluptate\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 51,\n    \"title\": \"distinctio exercitationem ab doloribus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 52,\n    \"title\": \"nesciunt dolorum quis recusandae ad pariatur ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 53,\n    \"title\": \"qui labore est occaecati recusandae aliquid quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 54,\n    \"title\": \"quis et est ut voluptate quam dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 55,\n    \"title\": \"voluptatum omnis minima qui occaecati provident nulla voluptatem ratione\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 56,\n    \"title\": \"deleniti ea temporibus enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 57,\n    \"title\": \"pariatur et magnam ea doloribus similique voluptatem rerum quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 58,\n    \"title\": \"est dicta totam qui explicabo doloribus qui dignissimos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 59,\n    \"title\": \"perspiciatis velit id laborum placeat iusto et aliquam odio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 60,\n    \"title\": \"et sequi qui architecto ut adipisci\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 61,\n    \"title\": \"odit optio omnis qui sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 62,\n    \"title\": \"et placeat et tempore aspernatur sint numquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 63,\n    \"title\": \"doloremque aut dolores quidem fuga qui nulla\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 64,\n    \"title\": \"voluptas consequatur qui ut quia magnam nemo esse\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 65,\n    \"title\": \"fugiat pariatur ratione ut asperiores necessitatibus magni\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 66,\n    \"title\": \"rerum eum molestias autem voluptatum sit optio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 67,\n    \"title\": \"quia voluptatibus voluptatem quos similique maiores repellat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 68,\n    \"title\": \"aut id perspiciatis voluptatem iusto\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 69,\n    \"title\": \"doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 70,\n    \"title\": \"ut sequi accusantium et mollitia delectus sunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 71,\n    \"title\": \"aut velit saepe ullam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 72,\n    \"title\": \"praesentium facilis facere quis harum voluptatibus voluptatem eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 73,\n    \"title\": \"sint amet quia totam corporis qui exercitationem commodi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 74,\n    \"title\": \"expedita tempore nobis eveniet laborum maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 75,\n    \"title\": \"occaecati adipisci est possimus totam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 76,\n    \"title\": \"sequi dolorem sed\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 77,\n    \"title\": \"maiores aut nesciunt delectus exercitationem vel assumenda eligendi at\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 78,\n    \"title\": \"reiciendis est magnam amet nemo iste recusandae impedit quaerat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 79,\n    \"title\": \"eum ipsa maxime ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 80,\n    \"title\": \"tempore molestias dolores rerum sequi voluptates ipsum consequatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 81,\n    \"title\": \"suscipit qui totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 82,\n    \"title\": \"voluptates eum voluptas et dicta\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 83,\n    \"title\": \"quidem at rerum quis ex aut sit quam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 84,\n    \"title\": \"sunt veritatis ut voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 85,\n    \"title\": \"et quia ad iste a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 86,\n    \"title\": \"incidunt ut saepe autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 87,\n    \"title\": \"laudantium quae eligendi consequatur quia et vero autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 88,\n    \"title\": \"vitae aut excepturi laboriosam sint aliquam et et accusantium\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 89,\n    \"title\": \"sequi ut omnis et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 90,\n    \"title\": \"molestiae nisi accusantium tenetur dolorem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 91,\n    \"title\": \"nulla quis consequatur saepe qui id expedita\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 92,\n    \"title\": \"in omnis laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 93,\n    \"title\": \"odio iure consequatur molestiae quibusdam necessitatibus quia sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 94,\n    \"title\": \"facilis modi saepe mollitia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 95,\n    \"title\": \"vel nihil et molestiae iusto assumenda nemo quo ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 96,\n    \"title\": \"nobis suscipit ducimus enim asperiores voluptas\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 97,\n    \"title\": \"dolorum laboriosam eos qui iure aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 98,\n    \"title\": \"debitis accusantium ut quo facilis nihil quis sapiente necessitatibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 99,\n    \"title\": \"neque voluptates ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 100,\n    \"title\": \"excepturi a et neque qui expedita vel voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 101,\n    \"title\": \"explicabo enim cumque porro aperiam occaecati minima\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 102,\n    \"title\": \"sed ab consequatur\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 103,\n    \"title\": \"non sunt delectus illo nulla tenetur enim omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 104,\n    \"title\": \"excepturi non laudantium quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 105,\n    \"title\": \"totam quia dolorem et illum repellat voluptas optio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 106,\n    \"title\": \"ad illo quis voluptatem temporibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 107,\n    \"title\": \"praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 108,\n    \"title\": \"a eos eaque nihil et exercitationem incidunt delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 109,\n    \"title\": \"autem temporibus harum quisquam in culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 110,\n    \"title\": \"aut aut ea corporis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 111,\n    \"title\": \"magni accusantium labore et id quis provident\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 112,\n    \"title\": \"consectetur impedit quisquam qui deserunt non rerum consequuntur eius\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 113,\n    \"title\": \"quia atque aliquam sunt impedit voluptatum rerum assumenda nisi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 114,\n    \"title\": \"cupiditate quos possimus corporis quisquam exercitationem beatae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 115,\n    \"title\": \"sed et ea eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 116,\n    \"title\": \"ipsa dolores vel facilis ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 117,\n    \"title\": \"sequi quae est et qui qui eveniet asperiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 118,\n    \"title\": \"quia modi consequatur vero fugiat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 119,\n    \"title\": \"corporis ducimus ea perspiciatis iste\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 120,\n    \"title\": \"dolorem laboriosam vel voluptas et aliquam quasi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 121,\n    \"title\": \"inventore aut nihil minima laudantium hic qui omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 122,\n    \"title\": \"provident aut nobis culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 123,\n    \"title\": \"esse et quis iste est earum aut impedit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 124,\n    \"title\": \"qui consectetur id\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 125,\n    \"title\": \"aut quasi autem iste tempore illum possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 126,\n    \"title\": \"ut asperiores perspiciatis veniam ipsum rerum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 127,\n    \"title\": \"voluptatem libero consectetur rerum ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 128,\n    \"title\": \"eius omnis est qui voluptatem autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 129,\n    \"title\": \"rerum culpa quis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 130,\n    \"title\": \"nulla aliquid eveniet harum laborum libero alias ut unde\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 131,\n    \"title\": \"qui ea incidunt quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 132,\n    \"title\": \"qui molestiae voluptatibus velit iure harum quisquam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 133,\n    \"title\": \"et labore eos enim rerum consequatur sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 134,\n    \"title\": \"molestiae doloribus et laborum quod ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 135,\n    \"title\": \"facere ipsa nam eum voluptates reiciendis vero qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 136,\n    \"title\": \"asperiores illo tempora fuga sed ut quasi adipisci\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 137,\n    \"title\": \"qui sit non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 138,\n    \"title\": \"placeat minima consequatur rem qui ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 139,\n    \"title\": \"consequatur doloribus id possimus voluptas a voluptatem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 140,\n    \"title\": \"aut consectetur in blanditiis deserunt quia sed laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 141,\n    \"title\": \"explicabo consectetur debitis voluptates quas quae culpa rerum non\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 142,\n    \"title\": \"maiores accusantium architecto necessitatibus reiciendis ea aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 143,\n    \"title\": \"eum non recusandae cupiditate animi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 144,\n    \"title\": \"ut eum exercitationem sint\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 145,\n    \"title\": \"beatae qui ullam incidunt voluptatem non nisi aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 146,\n    \"title\": \"molestiae suscipit ratione nihil odio libero impedit vero totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 147,\n    \"title\": \"eum itaque quod reprehenderit et facilis dolor autem ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 148,\n    \"title\": \"esse quas et quo quasi exercitationem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 149,\n    \"title\": \"animi voluptas quod perferendis est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 150,\n    \"title\": \"eos amet tempore laudantium fugit a\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 151,\n    \"title\": \"accusamus adipisci dicta qui quo ea explicabo sed vero\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 152,\n    \"title\": \"odit eligendi recusandae doloremque cumque non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 153,\n    \"title\": \"ea aperiam consequatur qui repellat eos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 154,\n    \"title\": \"rerum non ex sapiente\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 155,\n    \"title\": \"voluptatem nobis consequatur et assumenda magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 156,\n    \"title\": \"nam quia quia nulla repellat assumenda quibusdam sit nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 157,\n    \"title\": \"dolorem veniam quisquam deserunt repellendus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 158,\n    \"title\": \"debitis vitae delectus et harum accusamus aut deleniti a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 159,\n    \"title\": \"debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 160,\n    \"title\": \"et praesentium aliquam est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 161,\n    \"title\": \"ex hic consequuntur earum omnis alias ut occaecati culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 162,\n    \"title\": \"omnis laboriosam molestias animi sunt dolore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 163,\n    \"title\": \"natus corrupti maxime laudantium et voluptatem laboriosam odit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 164,\n    \"title\": \"reprehenderit quos aut aut consequatur est sed\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 165,\n    \"title\": \"fugiat perferendis sed aut quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 166,\n    \"title\": \"quos quo possimus suscipit minima ut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 167,\n    \"title\": \"et quis minus quo a asperiores molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 168,\n    \"title\": \"recusandae quia qui sunt libero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 169,\n    \"title\": \"ea odio perferendis officiis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 170,\n    \"title\": \"quisquam aliquam quia doloribus aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 171,\n    \"title\": \"fugiat aut voluptatibus corrupti deleniti velit iste odio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 172,\n    \"title\": \"et provident amet rerum consectetur et voluptatum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 173,\n    \"title\": \"harum ad aperiam quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 174,\n    \"title\": \"similique aut quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 175,\n    \"title\": \"laudantium eius officia perferendis provident perspiciatis asperiores\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 176,\n    \"title\": \"magni soluta corrupti ut maiores rem quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 177,\n    \"title\": \"et placeat temporibus voluptas est tempora quos quibusdam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 178,\n    \"title\": \"nesciunt itaque commodi tempore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 179,\n    \"title\": \"omnis consequuntur cupiditate impedit itaque ipsam quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 180,\n    \"title\": \"debitis nisi et dolorem repellat et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 181,\n    \"title\": \"ut cupiditate sequi aliquam fuga maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 182,\n    \"title\": \"inventore saepe cumque et aut illum enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 183,\n    \"title\": \"omnis nulla eum aliquam distinctio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 184,\n    \"title\": \"molestias modi perferendis perspiciatis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 185,\n    \"title\": \"voluptates dignissimos sed doloribus animi quaerat aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 186,\n    \"title\": \"explicabo odio est et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 187,\n    \"title\": \"consequuntur animi possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 188,\n    \"title\": \"vel non beatae est\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 189,\n    \"title\": \"culpa eius et voluptatem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 190,\n    \"title\": \"accusamus sint iusto et voluptatem exercitationem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 191,\n    \"title\": \"temporibus atque distinctio omnis eius impedit tempore molestias pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 192,\n    \"title\": \"ut quas possimus exercitationem sint voluptates\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 193,\n    \"title\": \"rerum debitis voluptatem qui eveniet tempora distinctio a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 194,\n    \"title\": \"sed ut vero sit molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 195,\n    \"title\": \"rerum ex veniam mollitia voluptatibus pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 196,\n    \"title\": \"consequuntur aut ut fugit similique\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 197,\n    \"title\": \"dignissimos quo nobis earum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 198,\n    \"title\": \"quis eius est sint explicabo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 199,\n    \"title\": \"numquam repellendus a magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 200,\n    \"title\": \"ipsam aperiam voluptates qui\",\n    \"completed\": false\n  }\n]",
   "DefName": null,
   "Parent": "JSONArray",
@@ -19496,7 +19407,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "GitHubAPI",
   "Name": "template",
@@ -19505,7 +19415,6 @@ window.moduloBuild.definitions = {
  },
  "GitHubAPI_state": {
   "Type": "State",
-  "RenderObj": "state",
   "search": "",
   "name": "",
   "location": "",
@@ -19523,7 +19432,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "GitHubAPI",
   "Name": "script",
@@ -19548,7 +19456,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "ColorSelector",
   "Name": "template",
@@ -19557,7 +19464,6 @@ window.moduloBuild.definitions = {
  },
  "ColorSelector_state": {
   "Type": "State",
-  "RenderObj": "state",
   "hue": 130,
   "sat": 50,
   "lum": 50,
@@ -19572,7 +19478,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "DateNumberPicker",
   "Name": "template",
@@ -19581,7 +19486,6 @@ window.moduloBuild.definitions = {
  },
  "DateNumberPicker_state": {
   "Type": "State",
-  "RenderObj": "state",
   "day": 1,
   "month": 1,
   "year": 2022,
@@ -19603,7 +19507,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "DateNumberPicker",
   "Name": "script",
@@ -19625,10 +19528,9 @@ window.moduloBuild.definitions = {
  },
  "DateNumberPicker_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "DateNumberPicker",
   "Name": "style",
@@ -19639,7 +19541,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "PrimeSieve",
   "Name": "template",
@@ -19648,7 +19549,6 @@ window.moduloBuild.definitions = {
  },
  "PrimeSieve_state": {
   "Type": "State",
-  "RenderObj": "state",
   "number": 64,
   "Content": "",
   "DefName": null,
@@ -19663,7 +19563,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "PrimeSieve",
   "Name": "script",
@@ -19685,10 +19584,9 @@ window.moduloBuild.definitions = {
  },
  "PrimeSieve_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "PrimeSieve",
   "Name": "style",
@@ -19699,7 +19597,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Scatter",
   "Name": "template",
@@ -19723,7 +19620,6 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
   "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
   "DefName": null,
   "Parent": "Scatter",
@@ -19964,10 +19860,9 @@ window.moduloBuild.definitions = {
  },
  "Scatter_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Scatter",
   "Name": "style",
@@ -19978,16 +19873,14 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "FlexibleForm",
   "Name": "template",
   "DefinitionName": "FlexibleForm_template",
-  "Hash": "Txxb7eeji"
+  "Hash": "Tx1ah1gte"
  },
  "FlexibleForm_state": {
   "Type": "State",
-  "RenderObj": "state",
   "name": "Spartacus",
   "topic": "On the treatment of Thracian gladiators",
   "subscribe": true,
@@ -20011,16 +19904,14 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "FlexibleFormWithAPI",
   "Name": "template",
   "DefinitionName": "FlexibleFormWithAPI_template",
-  "Hash": "Txxd9oom7"
+  "Hash": "Tx16ihg4b"
  },
  "FlexibleFormWithAPI_state": {
   "Type": "State",
-  "RenderObj": "state",
   "user": 1337,
   "topic": "On the treatment of Thracian gladiators",
   "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
@@ -20043,7 +19934,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "FlexibleFormWithAPI",
   "Name": "script",
@@ -20068,7 +19958,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Components",
   "Name": "template",
@@ -20080,7 +19969,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "OscillatingGraph",
   "Name": "template",
@@ -20089,7 +19977,6 @@ window.moduloBuild.definitions = {
  },
  "OscillatingGraph_state": {
   "Type": "State",
-  "RenderObj": "state",
   "playing": false,
   "speed": 10,
   "easing": "linear",
@@ -20113,7 +20000,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "OscillatingGraph",
   "Name": "script",
@@ -20135,10 +20021,9 @@ window.moduloBuild.definitions = {
  },
  "OscillatingGraph_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "OscillatingGraph",
   "Name": "style",
@@ -20149,7 +20034,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Search",
   "Name": "template",
@@ -20158,7 +20042,6 @@ window.moduloBuild.definitions = {
  },
  "Search_state": {
   "Type": "State",
-  "RenderObj": "state",
   "search": "the lord of the rings",
   "loading": false,
   "results": [],
@@ -20175,7 +20058,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Search",
   "Name": "script",
@@ -20200,7 +20082,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "SearchBox",
   "Name": "template",
@@ -20209,7 +20090,6 @@ window.moduloBuild.definitions = {
  },
  "SearchBox_state": {
   "Type": "State",
-  "RenderObj": "state",
   "search": "",
   "results": [],
   "loading": false,
@@ -20236,7 +20116,6 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
   "Content": "\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n",
   "DefName": null,
   "Parent": "SearchBox",
@@ -20255,7 +20134,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "SearchBox",
   "Name": "script",
@@ -20277,10 +20155,9 @@ window.moduloBuild.definitions = {
  },
  "SearchBox_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "SearchBox",
   "Name": "style",
@@ -20291,7 +20168,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "WorldMap",
   "Name": "template",
@@ -20315,7 +20191,6 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "RenderObj": "staticdata",
   "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
   "DefName": null,
   "Parent": "WorldMap",
@@ -20556,10 +20431,9 @@ window.moduloBuild.definitions = {
  },
  "WorldMap_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "WorldMap",
   "Name": "style",
@@ -20570,7 +20444,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "Memory",
   "Name": "template",
@@ -20579,7 +20452,6 @@ window.moduloBuild.definitions = {
  },
  "Memory_state": {
   "Type": "State",
-  "RenderObj": "state",
   "message": "Good luck!",
   "win": false,
   "cards": [],
@@ -20599,7 +20471,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "Memory",
   "Name": "script",
@@ -20621,10 +20492,9 @@ window.moduloBuild.definitions = {
  },
  "Memory_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "Memory",
   "Name": "style",
@@ -20635,7 +20505,6 @@ window.moduloBuild.definitions = {
   "DefFinalizers": [
    "TemplatePrebuild"
   ],
-  "RenderObj": "template",
   "DefName": null,
   "Parent": "ConwayGameOfLife",
   "Name": "template",
@@ -20644,7 +20513,6 @@ window.moduloBuild.definitions = {
  },
  "ConwayGameOfLife_state": {
   "Type": "State",
-  "RenderObj": "state",
   "playing": false,
   "speed": 3,
   "cells": {
@@ -20673,7 +20541,6 @@ window.moduloBuild.definitions = {
    "Content|ScriptAutoExport",
    "Code"
   ],
-  "RenderObj": "script",
   "DefName": null,
   "Parent": "ConwayGameOfLife",
   "Name": "script",
@@ -20695,10 +20562,9 @@ window.moduloBuild.definitions = {
  },
  "ConwayGameOfLife_style": {
   "Type": "Style",
-  "DefBuilders": [
+  "DefFinalizers": [
    "Content|PrefixCSS"
   ],
-  "RenderObj": "style",
   "DefName": null,
   "Parent": "ConwayGameOfLife",
   "Name": "style",
@@ -20805,7 +20671,6 @@ window.Modulo = class Modulo {
         }
         if (type === 'cparts') { // CParts get loaded from DOM
             this.registry.dom[cls.name.toLowerCase()] = cls;
-            this.config[cls.name.toLowerCase()].RenderObj = cls.name.toLowerCase(); // XXX rm
             //this.config[cls.name.toLowerCase()].DefLoaders = [ 'DefinedAs', 'Src' ]; // daed
         }
         if (type === 'processors') {
@@ -20817,7 +20682,6 @@ window.Modulo = class Modulo {
         const { mergeAttrs } = this.registry.utils;
         const isModulo = node => this.getNodeModuloType(node, quietErrors);
         const defArray = [];
-        //                          && !node.getAttribute('modulo-has-loaded'));
         for (const node of Array.from(elem.children).filter(isModulo)) {
             const partTypeLC = this.getNodeModuloType(node); // Lowercase
             const def = mergeAttrs(node, this.config[partTypeLC]);
@@ -20852,42 +20716,6 @@ window.Modulo = class Modulo {
         const div = this.reconciler.loadString(text, {});
         const result = this.loadFromDOM(div, parentFactoryName);
         return result;
-    }
-
-    getLifecyclePatches(lcObj, lifecycleNames, defArray = null) {
-        const patches = [];
-        // TODO: Make this configurable
-        const typeOrder = defArray ? Array.from(new Set(defArray.map(({ Type }) => Type)))
-                                   : Object.keys(lcObj);
-        for (const lifecycleName of lifecycleNames) {
-            const methodName = lifecycleName + 'Callback';
-            //for (const [ typeUpper, obj ] of Object.entries(lcObj)) {
-            for (const typeName of typeOrder) {
-                if (!(typeName in lcObj) || !(methodName in lcObj[typeName])) {
-                    continue; // Skip if obj has not registered callback
-                }
-                const isType = ({ Type }) => Type === typeName;
-                const defaultConf = this.config[typeName.toLowerCase()];
-                const confs = defArray ? defArray.filter(isType) : [ defaultConf ];
-                for (const conf of confs) {
-                    patches.push([ lcObj[typeName], methodName, conf ]);
-                }
-            }
-        }
-        return patches;
-    }
-
-    applyPatches(patches, renderObj = null) {
-        for (const [ obj, methodName, conf ] of patches) {
-            const result = obj[methodName].call(obj, renderObj || this, conf, this);
-            if (!conf) { // XXX remove this
-                console.log('WARNING: conf is falsy:', obj.conf.DefinitionName);
-                continue;
-            }
-            if (renderObj && result && conf.RenderObj) {
-                renderObj[conf.RenderObj] = result;
-            }
-        }
     }
 
     repeatProcessors(confs, field, defaults, cb) {
@@ -21019,6 +20847,17 @@ modulo.register('processor', function customElement (modulo, def, value) {
     }
     //if (def.namespace === 'modulo') { console.log("AWHAT modulo"); }
     //if (!def.namespace || def.namespace === 'modulo') { def.namespace = 'x'; }
+    /*
+    let s = '';
+    for (const child of def.ChildrenNames.map(n => modulo.definitions[n])) {
+        const cpName = def.RenderObj || def.Name;
+        s += `        this.cparts.${ cpName } = `;
+        s += `new modulo.registry.cparts.${ child.Type }(modulo, `;
+        s += `modulo.defs['${ child.DefinitionName }'], this);\n`;
+        s += `        this.cparts.${ cpName }.def = `
+        s += `modulo.defs['${ child.DefinitionName }'];\n`;
+    }
+    */
     def.namespace = def.namespace || 'x';
     def.name = def.name || def.DefName || def.Name;
     def.TagName = (def.TagName || `${ def.namespace }-${ def.name }`).toLowerCase();
@@ -21083,15 +20922,24 @@ modulo.register('util', function mountElement (modulo, def, elem) {
     const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
     const { cparts } = elem.modulo.registry;
     const isLower = key => key[0].toLowerCase() === key[0];
-    for (const conf of allNames.map(name => modulo.definitions[name])) {
-        const instance = new cparts[conf.Type](elem.modulo, conf, elem);
+    for (const def of allNames.map(name => modulo.definitions[name])) {
+        const instance = new cparts[def.Type](elem.modulo, def, elem);
         instance.element = elem;
         instance.modulo = elem.modulo;
-        instance.conf = conf;
-        instance.attrs = elem.modulo.registry.utils.keyFilter(conf, isLower);
-        // TODO: Fix the special rule for component
-        elem.cparts[conf.Type === 'Component' ? 'component' : conf.Name] = instance;
+        instance.conf = def;
+        instance.attrs = elem.modulo.registry.utils.keyFilter(def, isLower);
+        instance.id = ++window._moduloID;
+        elem.cparts[def.RenderObj || def.Name] = instance;
     }
+    /*
+    for (const instance of Object.values(elem.cparts)) {
+        instance.element = elem;
+        instance.modulo = elem.modulo;
+        instance.conf = def;
+        instance.attrs = elem.modulo.registry.utils.keyFilter(def, isLower);
+        elem.cparts[def.RenderObj || def.Name] = instance;
+    }
+    */
     ////////
 
     ////////
@@ -21127,6 +20975,7 @@ modulo.config.component = {
     // namespace: 'x',
     CustomElement: 'window.HTMLElement',
     DefinedAs: 'name',
+    RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
     DefBuilders: [ 'CustomElement', 'Code' ],
@@ -21144,7 +20993,6 @@ modulo.register('cpart', class Component {
         conf.uniqueId = ++factory.id;
     }
     */
-
     rerender(original = null) {
         if (original) { // TODO: this logic needs refactor
             if (this.element.originalHTML === null) {
@@ -21160,10 +21008,21 @@ modulo.register('cpart', class Component {
         return (this.element.eventRenderObj || this.element.renderObj || this.element.initRenderObj);
     }
 
-    lifecycle(lcNames, rObj={}) {
-        this.element.renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
-        const patches = this.modulo.getLifecyclePatches(this.element.cparts, lcNames);
-        this.modulo.applyPatches(patches, this.element.renderObj);
+    lifecycle(lifecycleNames, rObj={}) {
+        const renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
+        this.element.renderObj = renderObj;
+        for (const lifecycleName of lifecycleNames) {
+            const methodName = lifecycleName + 'Callback';
+            for (const [ name, obj ] of Object.entries(this.element.cparts)) {
+                if (!(methodName in obj)) {
+                    continue; // Skip if obj has not registered callback
+                }
+                const result = obj[methodName].call(obj, renderObj);
+                if (result) {
+                    renderObj[obj.conf.RenderObj || obj.conf.Name] = result;
+                }
+            }
+        }
         //this.element.renderObj = null; // ?rendering is over, set to null
     }
 
@@ -21206,6 +21065,11 @@ modulo.register('cpart', class Component {
         this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
     }
 
+    prepareCallback() {
+        const { originalHTML } = this.element;
+        return { originalHTML, innerHTML: null, patches: null, id: this.id };
+    }
+
     getDirectives() {
         const dirs = [
             'component.dataPropMount',
@@ -21226,11 +21090,6 @@ modulo.register('cpart', class Component {
             this.slotTagLoad = this.slotLoad.bind(this);
         }
         return dirs;
-    }
-
-    prepareCallback() {
-        const { originalHTML } = this.element;
-        return { originalHTML, innerHTML: null, patches: null };
     }
 
     reconcileCallback(renderObj) {
@@ -21585,10 +21444,8 @@ modulo.register('core', class AssetManager {
     }
 
     buildConfigDef() {
-        let s = '';
         const defs = JSON.stringify(this.modulo.definitions, null, 1);
-        s += `window.moduloBuild.definitions = ${ defs };\n`;
-        return s;
+        return `window.moduloBuild.definitions = ${ defs };\n`;
     }
 
     buildModuleDefs() {
@@ -21778,20 +21635,20 @@ modulo.register('cpart', class Style {
         }
     }
 }, {
-    DefBuilders: [ 'Content|PrefixCSS' ]
+    DefFinalizers: [ 'Content|PrefixCSS' ]
 });
 
-modulo.register('processor', function templatePrebuild (modulo, conf, value) {
-    if (!conf.Content) {
-        console.error('No Template Content specified:', conf.DefinitionName, JSON.stringify(conf));
+modulo.register('processor', function templatePrebuild (modulo, def, value) {
+    if (!def.Content) {
+        console.error('No Template Content specified:', def.DefinitionName, JSON.stringify(def));
         return;
     }
-    const engine = conf.engine || 'Templater';
-    const instance = new modulo.registry.engines[engine](modulo, conf);
-    conf.Hash = instance.Hash;
-    //console.log('Template code:', conf.Content);
-    delete conf.Content;
-    delete conf.TemplatePrebuild;
+    const engine = def.engine || 'Templater';
+    const instance = new modulo.registry.engines[engine](modulo, def);
+    def.Hash = instance.Hash;
+    //console.log('Template code:', def.Content);
+    delete def.Content;
+    delete def.TemplatePrebuild;
 });
 
 modulo.register('cpart', class Template {
@@ -21822,56 +21679,56 @@ modulo.register('cpart', class Template {
     DefFinalizers: [ 'TemplatePrebuild' ]
 });
 
-modulo.register('processor', function contentCSV (modulo, conf, value) {
-    const js = JSON.stringify((conf.Content || '').split('\n').map(line => line.split(',')));
-    conf.Code = 'return ' + js;
+modulo.register('processor', function contentCSV (modulo, def, value) {
+    const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
+    def.Code = 'return ' + js;
 });
 
-modulo.register('processor', function contentJS (modulo, conf, value) {
-    const tmpFunc = new Function('return (' + (conf.Content || 'null') + ');');
-    conf.Code = 'return ' + JSON.stringify(tmpFunc()) + ';'; // Evaluate
+modulo.register('processor', function contentJS (modulo, def, value) {
+    const tmpFunc = new Function('return (' + (def.Content || 'null') + ');');
+    def.Code = 'return ' + JSON.stringify(tmpFunc()) + ';'; // Evaluate
 });
 
-modulo.register('processor', function contentJSON (modulo, conf, value) {
-    //console.log(conf.DefinitionName, 'thsi si ext', conf.Content); // XYZ
-    conf.Code = 'return ' + JSON.stringify(JSON.parse(conf.Content || '{}')) + ';';
+modulo.register('processor', function contentJSON (modulo, def, value) {
+    //console.log(def.DefinitionName, 'thsi si ext', def.Content); // XYZ
+    def.Code = 'return ' + JSON.stringify(JSON.parse(def.Content || '{}')) + ';';
 });
 
-modulo.register('processor', function contentTXT (modulo, conf, value) {
-    conf.Code = 'return ' + JSON.stringify(conf.Content);
+modulo.register('processor', function contentTXT (modulo, def, value) {
+    def.Code = 'return ' + JSON.stringify(def.Content);
 });
 
-modulo.register('processor', function dataType (modulo, conf, value) {
+modulo.register('processor', function dataType (modulo, def, value) {
     if (value === '?') {
-        const ext = conf.Src && conf.Src.match(/(?<=\.)[a-z]+$/i);
+        const ext = def.Src && def.Src.match(/(?<=\.)[a-z]+$/i);
         value = ext ? ext[0] : 'json';
     }
-    conf['Content' + value.toUpperCase()] = value;
+    def['Content' + value.toUpperCase()] = value;
 });
 
-modulo.register('processor', function code (modulo, conf, value) {
-    if (conf.DefinitionName in modulo.assets.nameToHash) {
-        console.error("ERROR: Duped def:", conf.DefinitionName);
+modulo.register('processor', function code (modulo, def, value) {
+    if (def.DefinitionName in modulo.assets.nameToHash) {
+        console.error("ERROR: Duped def:", def.DefinitionName);
         return;
     }
-    modulo.assets.define(conf.DefinitionName, value);
+    modulo.assets.define(def.DefinitionName, value);
 });
 
-modulo.register('processor', function setAttrs (modulo, conf, value) {
-    for (const [ key, val ] of Object.entries(conf)) {
+modulo.register('processor', function setAttrs (modulo, def, value) {
+    for (const [ key, val ] of Object.entries(def)) {
         if (/^[a-z]/.test(key) && (value + key).includes('.')) { // Set anything with dots
             modulo.registry.utils.set(modulo, (value + '.' + key), val);
         }
     }
 });
 
-modulo.register('processor', function requireData (modulo, conf, value) {
-    conf.data = modulo.assets.require(conf[value]);
+modulo.register('processor', function requireData (modulo, def, value) {
+    def.data = modulo.assets.require(def[value]);
 });
 
 modulo.register('cpart', class StaticData {
-    static factoryCallback(renderObj, conf, modulo) {
-        return conf.data;
+    static factoryCallback(renderObj, def, modulo) {
+        return def.data;
     }
     prepareCallback() { // XXX remove when fac gets to be default
         return this.conf.data;
@@ -21890,7 +21747,7 @@ modulo.register('cpart', class Configuration { }, {
     DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
-modulo.register('processor', function scriptAutoExport (modulo, conf, value) {
+modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     let text = value;
     function getSymbolsAsObjectAssignment(contents) {
         const regexpG = /(function|class)\s+(\w+)/g;
@@ -21913,15 +21770,15 @@ modulo.register('processor', function scriptAutoExport (modulo, conf, value) {
     prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
     prefix += `function __set(name, value) { ${ localVarsIfs } }`;
     suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
-    conf.Code = `${prefix}\n${text}\n${suffix}`;
-    conf.localVars = localVars;
+    def.Code = `${prefix}\n${text}\n${suffix}`;
+    def.localVars = localVars;
 });
 
 modulo.register('cpart', class Script {
-    static factoryCallback(renderObj, conf, modulo) {
-        const { Content, Hash, localVars } = conf;
+    static factoryCallback(renderObj, def, modulo) {
+        const { Content, Hash, localVars } = def;
         let results;
-        results = modulo.assets.require(conf.DefinitionName);
+        results = modulo.assets.require(def.DefinitionName);
         // Now, actually run code in Script tag to do factory method
         //const results = func.call(null, modulo, this.require || null);
         if (results) {
@@ -21929,7 +21786,7 @@ modulo.register('cpart', class Script {
             modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
             return results;
         } else {
-            modulo.assert(!conf.Parent, 'Falsy return for parented Script');
+            modulo.assert(!def.Parent, 'Falsy return for parented Script');
             return {};
         }
     }
@@ -21956,7 +21813,7 @@ modulo.register('cpart', class Script {
 
     initializedCallback(renderObj) {
         let { script } = renderObj;
-        //let script = conf;
+        //let script = def;
         // Attach callbacks from script to this, to hook into lifecycle.
         const isCbRegex = /(Unmount|Mount|Callback)$/;
         const cbs = Object.keys(script).filter(key => key.match(isCbRegex));
@@ -22131,13 +21988,13 @@ modulo.register('cpart', class State {
 
 /* Implementation of Modulo Templating Language */
 modulo.register('engine', class Templater {
-    constructor(modulo, conf) {
+    constructor(modulo, def) {
         this.modulo = modulo;
-        this.setup(conf.Content, conf); // TODO, refactor
+        this.setup(def.Content, def); // TODO, refactor
     }
 
-    setup(text, conf) {
-        Object.assign(this, this.modulo.config.templater, conf);
+    setup(text, def) {
+        Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         if (this.Hash) {
@@ -22151,7 +22008,7 @@ modulo.register('engine', class Templater {
             const { hash } = this.modulo.registry.utils;
             this.Hash = 'T' + hash(this.compiledCode);
             if (this.DefinitionName in this.modulo.assets.nameToHash) { // TODO RM
-                console.error("ERROR: Duped template:", conf.DefinitionName);
+                console.error("ERROR: Duped template:", def.DefinitionName);
                 this.renderFunc = () => '';
                 return;
             }
@@ -22500,8 +22357,8 @@ modulo.register('engine', class DOMCursor {
 });
 
 modulo.register('engine', class Reconciler {
-    constructor(modulo, conf) {
-        this.constructor_old(conf);
+    constructor(modulo, def) {
+        this.constructor_old(def);
     }
     constructor_old(opts) {
         opts = opts || {};

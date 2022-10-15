@@ -2,10 +2,9 @@
     This example shows how to write a custom CPart to wrap the API for a jQuery
     plug-in.
 
-    (In this case FitText.js, a very simple (but also popular) jQuery plugin
-    that saw it's last update about 9 years ago, and is documented here)
+    (In this case FitText.js, a very simple (but also very popular) jQuery
+    plugin that saw it's last update about 9 years ago, and is documented here)
 -->
-
 
 <template Modulo>
     <!--
@@ -18,16 +17,16 @@
 
     <Component name="ExampleComponent">
 
-        <FitTextJQuery
-            selector="section > h1"
-            size:=0.4
-        ></FitTextJQuery>
-
         <Template>
             <section>
                 <h1>Big Test</h1>
             </section>
         </Template>
+
+        <FitTextJQuery
+            selector="section > h1"
+            size:=0.4
+        ></FitTextJQuery>
 
         <!-- Finally, sprinkle in a tiny bit of styling -->
         <Style>
@@ -40,12 +39,12 @@
             }
         </Style>
     </Component>
-
 </template>
 
+<!-- Load the libraries we intend to use -->
 <script src="https://unpkg.com/mdu.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.1.slim.js"></script>
-<script src="http://cdn.jsdelivr.net/gh/davatron5000/FitText.js/jquery.fittext.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/davatron5000/FitText.js/jquery.fittext.js"></script>
 
 <!-- Here is how we define the CPart itself. For the example, we put it in
 embedded in a <script> so we can keep everything in one file. However, it's
@@ -53,6 +52,14 @@ better to move it to a separate JS file included with a <script src="..."> tag
 (just like we included the Modulo.js and the jQuery plugins). -->
 <script>
     modulo.register('cpart', class FitTextJQuery {
+        // Called after updating the DOM, so that it's safe to activate the plugin
+        updateCallback() {
+            // Using element.querySelector limits within this component
+            const target = this.element.querySelector(this.conf.selector);
+            // Use the underlying jQuery plugin $()
+            $(target).fitText(this.conf.size || 1.0);
+        }
+
         /*
         // The other callbacks aren't useful for this particular wrapper, but
         // might be useful for other ones
@@ -61,14 +68,6 @@ better to move it to a separate JS file included with a <script src="..."> tag
         renderCallback() { } // Called during each rerender
         reconcileCallback() { } // Called after the reconciler has created patches
         */
-
-        // Called after applying patches, we can now activate the plugin
-        updateCallback() {
-            // By using element.querySelector, we limit the target to be within
-            // this component
-            const target = this.element.querySelector(this.conf.selector)
-            $(target).fitText(this.conf.size || 1.0);
-        }
     });
 </script>
 

@@ -18,9 +18,9 @@ standards:
   minification. Instead, keep it simple, clear, and self-documenting.
 - Avoid continuing long statements onto new lines. Instead, create
   descriptively named temporary variables.
-- For larger blocks of code, consider JS constructs such as `for..of` loops to
-  keep the code's logical flow clear and imperative, instead of chaining
-  methods such as `.forEach` or `.map`.
+- For complicated operations, use JS constructs such as `for..of` loops to keep
+  the code's logical flow clear and imperative, instead of chaining methods
+  such as `.forEach` or `.map`
 - Most operations should be synchronous, so they can finish before reflow (e.g.
   do not add unnecessary layers of callback indirection)
 
@@ -28,8 +28,8 @@ standards:
   linting rules are written, which will then be required for code to be
   accepted
 
-## Status: `alpha`
 
+## Statuses
 
 - prealpha - unreleased, keep an eye on it!
 - alpha - use it if you don't mind large bugs or incomplete docs if you stray
