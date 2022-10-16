@@ -1,0 +1,104 @@
+<test name="Renders based on state">
+    <template name="Ensure initial render is correct" test-values>
+        <p>Type a book name for "search as you type"
+        (e.g. try “the lord of the rings”)</p>
+        <input
+            [state.bind]
+            name="search"
+            @keyup:=script.typingCallback
+            value=""
+          />
+        <div class="results ">
+            <div class="results-container">
+                <p>No books found.</p>
+            </div>
+        </div>
+    </template>
+    <state
+        search="the lord of the rings"
+        loading:=true
+    ></state>
+
+    <template name="Shows loading when typing" test-values>
+        <p>Type a book name for "search as you type"
+        (e.g. try “the lord of the rings”)</p>
+        <input
+            [state.bind]
+            name="search"
+            @keyup:=script.typingCallback
+            value="the lord of the rings"
+        />
+        <div class="results visible ">
+            <div class="results-container">
+                <img
+                    src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif"
+                    alt="loading" />
+            </div>
+        </div>
+    </template>
+
+    <script name="load test data">
+        const fakeApiData ={
+            "numFound": 487,
+            "start": 0,
+            "numFoundExact": true,
+            "docs": [
+                {
+                    "title": "The Lord of the Rings",
+                    "cover_i": 9255566,
+                    "author_name": [ "J.R.R. Tolkien" ]
+                },
+                {
+                    "title": "The Fellowship of the Ring",
+                    "cover_i": 8474036,
+                    "author_name": [ "J.R.R. Tolkien" ]
+                },
+                {
+                    "title": "The Lord of the Rings Trilogy (Lord of the Rings)",
+                    "cover_i": 528867
+                },
+                {
+                    "title": "Lord of the Rings",
+                    "cover_i": 1454705,
+                    "author_name": [ "Cedco Publishing" ]
+                },
+                {
+                    "title": "Lord of the Rings",
+                    "cover_i": 2111453,
+                    "author_name": [ "Ernest Mathijs" ]
+                },
+                {
+                    "title": "Lords of the ring",
+                    "author_name": [ "Harry Lansdown", "Alex Spillius" ]
+                }
+            ],
+            "num_found": 487,
+            "q": "the lord of the rings",
+            "offset": null
+        }
+        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        script.dataBackCallback(fakeApiData)
+        assert: script.dataBackCallback
+    </script>
+
+    <script name="ensure no longer loading">
+        assert: state.loading === false
+    </script>
+
+    <template name="ensure rerender is as expected">
+      <p>Type a book name for "search as you type" (e.g. try “the lord of the rings”)</p>
+      <input [state.bind]="" name="search" @keyup:="script.typingCallback">
+      <div class="results visible ">
+        <div class="results-container">
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/9255566-S.jpg"><label>The Lord of the Rings</label></div>
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/8474036-S.jpg"><label>The Fellowship of the Ring</label></div>
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/528867-S.jpg"><label>The Lord of the Rings Trilogy (Lord of the Rings)</label></div>
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/1454705-S.jpg"><label>Lord of the Rings</label></div>
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/2111453-S.jpg"><label>Lord of the Rings</label></div>
+          <div class="result"><img src="https://covers.openlibrary.org/b/id/undefined-S.jpg"><label>Lords of the ring</label></div>
+        </div>
+      </div>
+    </template>
+</test>
+
+

@@ -2142,8 +2142,8 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
         const commandGetters = commandNames.map(cmd =>
             ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
-        const code = 'class COMMANDS {' + commandGetters.join('\n') + '}';
-        new Function(`console.log('%c%', '${ font }', new (${ code }))`)();
+        const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
+        new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
     }));
 }
 

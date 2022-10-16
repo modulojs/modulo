@@ -1,0 +1,28 @@
+<test name="Basic functionality">
+
+    <template name="Ensure initial render is correct" test-values>
+        <ol>
+            <li>Milk</li><li>Bread</li><li>Candy</li>
+            <li>
+                <input [state.bind] name="text" value="Beer" />
+                <button @click:="script.addItem">Add</button>
+            </li>
+        </ol>
+    </template>
+
+    <script>
+        event: click button
+        assert: state.list.length === 4
+    </script>
+
+    <template name="Ensure render after adding is fine" test-values>
+        <ol>
+            <li>Milk</li><li>Bread</li><li>Candy</li><li>Beer</li>
+            <li>
+                <input [state.bind] name="text" value="" />
+                <button @click:="script.addItem">Add</button>
+            </li>
+        </ol>
+    </template>
+</test>
+

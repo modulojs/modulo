@@ -1,0 +1,152 @@
+<test name="starts a game">
+    <template name="Ensure initial render is correct">
+        <h3>The Symbolic Memory Game</h3>
+        <p>Choose your difficulty:</p>
+        <button @click:=script.setup click.payload=8>2x4</button>
+        <button @click:=script.setup click.payload=16>4x4</button>
+        <button @click:=script.setup click.payload=36>6x6</button>
+    </template>
+
+    <!-- Ensure starting conditions are as expected -->
+    <script> assert: state.cards.length === 0 </script>
+    <script> assert: state.revealed.length === 0 </script>
+    <script> assert: state.message === "Good luck!" </script>
+    <script> assert: state.win === false </script>
+    <script> assert: state.lastflipped === null </script>
+
+    <script name="Click the first button">
+        event: click button:first-of-type
+    </script>
+
+    <script name="Ensure the state consists of expected symbols (sort to ignore order)">
+        const symbols = state.cards.map(({symbol}) => symbol);
+        symbols.sort();
+        const expected = ["!", "!", "#", "#", "%", "%", "@", "@"];
+        assert: JSON.stringify(symbols) === JSON.stringify(expected);
+    </script>
+
+    <script name="Ensure the state consists of expected IDs (sort to ignore order)">
+        const ids = state.cards.map(({id}) => id);
+        ids.sort();
+        const expected = [0, 1, 2, 3, 4, 5, 6, 7];
+        assert: JSON.stringify(ids) === JSON.stringify(expected);
+    </script>
+
+    <template name="Check tiles" string-count=8>
+          class="card "
+          style=" "
+          @click:="script.flip"
+    </template>
+</test>
+
+<test name="renders board and handles flips">
+    <state
+        message="Good luck!"
+        cards:='[
+          {"id": 0, "symbol": "A"},
+          {"id": 1, "symbol": "A"},
+          {"id": 2, "symbol": "B"},
+          {"id": 3, "symbol": "B"},
+          {"id": 4, "symbol": "C"},
+          {"id": 5, "symbol": "C"},
+          {"id": 6, "symbol": "D"},
+          {"id": 7, "symbol": "D"}
+        ]'
+        revealed:='[]'
+        lastflipped:=null
+        failedflip:=null
+    ></state>
+    <template name="Ensure board render is correct">
+        <div class="board ">
+            <div key="c0" class="card " style=" " @click:="script.flip" click.payload="0"></div>
+            <div key="c1" class="card " style=" " @click:="script.flip" click.payload="1"></div>
+            <div key="c2" class="card " style=" " @click:="script.flip" click.payload="2"></div>
+            <div key="c3" class="card " style=" " @click:="script.flip" click.payload="3"></div>
+            <div key="c4" class="card " style=" " @click:="script.flip" click.payload="4"></div>
+            <div key="c5" class="card " style=" " @click:="script.flip" click.payload="5"></div>
+            <div key="c6" class="card " style=" " @click:="script.flip" click.payload="6"></div>
+            <div key="c7" class="card " style=" " @click:="script.flip" click.payload="7"></div>
+        </div>
+        <p style=""> Good luck!</p>
+    </template>
+
+    <script>
+      event: click div.card:nth-of-type(1)
+    </script>
+
+    <template name="Check that first tile was revealed" string-count=1>
+        <div key="c0"
+            class="card flipped "
+            style=" "
+            @click:=script.flip
+            click.payload="0"> A </div>
+    </template>
+
+    <template name="Check that 7 other tiles are not revealed" string-count=7>
+          class="card "
+          style=" "
+          @click:="script.flip"
+    </template>
+    <script> assert: state.revealed.length === 1 </script>
+
+    <script name="Ensure nice match is shown">
+      event: click div.card:nth-of-type(2)
+      assert: state.message === "Nice match!"
+    </script>
+    <script> assert: state.revealed.length === 2 </script>
+
+    <template name="Check that 6 other tiles are not revealed" string-count=6>
+          class="card "
+          style=" "
+          @click:="script.flip"
+    </template>
+</test>
+
+<test name="Renders winning condition">
+    <state
+        message="Good luck!"
+        cards:='[
+            {"id": 0, "symbol": "A"},
+            {"id": 1, "symbol": "A"},
+            {"id": 2, "symbol": "B"},
+            {"id": 3, "symbol": "B"},
+            {"id": 4, "symbol": "C"},
+            {"id": 5, "symbol": "C"},
+            {"id": 6, "symbol": "D"},
+            {"id": 7, "symbol": "D"}
+        ]'
+        revealed:='[]'
+        lastflipped:=null
+        failedflip:=null
+    ></state>
+    <script name="When all cards are flipped, winning message is shown">
+        // "Reveal" all cards
+        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        script.flip(7);
+        script.flip(6);
+        script.flip(5);
+        script.flip(4);
+        script.flip(3);
+        script.flip(2);
+        script.flip(1);
+        script.flip(0);
+        assert: state.message === "You win!"
+    </script>
+
+    <template name="Reveals cards (A)" string-count=2>A</template>
+    <template name="Reveals cards (B)" string-count=2>B</template>
+    <template name="Reveals cards (C)" string-count=2>C</template>
+    <template name="Reveals cards (D)" string-count=2>D</template>
+
+    <template name="Show win message" string-count=1>
+        <p style=""> You win!</p>
+    </template>
+    <template name="Show flipping animation" string-count=8>
+        animation: flipping 0.5s infinite alternate;
+    </template>
+
+    <template name="Nothing unflipped" string-count=0>
+          class="card "
+    </template>
+</test>
+

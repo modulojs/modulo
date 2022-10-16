@@ -271,7 +271,7 @@ window.moduloBuild.nameToHash = {
         ]);
         const actualFns = JSON.stringify(files.map(({ filename }) => filename));
         const [ jsSize, cssSize, htmlSize ] = files.map(({ text }) => text.length).concat([-1, -1, -1]); // have -1 as placeholder
-        assert: expectedFns === actualFns && jsSize > 3000 && cssSize === 0 && htmlSize > 3000
+        assert: expectedFns === actualFns && jsSize > 2500 && cssSize === 0 && htmlSize > 2500
     </script>
 
     <script name="commands.build produces html file with expected content">

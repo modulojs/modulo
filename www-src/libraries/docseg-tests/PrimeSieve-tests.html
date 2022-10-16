@@ -1,0 +1,36 @@
+<test name="renders with search data">
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" whole ">2</div>
+    </template>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" number whole ">64</div>
+    </template>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" ">3</div>
+    </template>
+
+    <script>
+        // 20 is effectively 21 (since starts at 2)
+        event: mouseover div:nth-child(20)
+    </script>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" whole ">3</div>
+    </template>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" whole ">7</div>
+    </template>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" number whole ">21</div>
+    </template>
+
+    <script>
+        // 46 is effectively 47 (since starts at 2)
+        event: mouseover div:nth-child(46)
+    </script>
+    <template name="Ensure substrings of render" string-count=1>
+        <div @mouseover:="script.setNum" class=" number whole ">47</div>
+    </template>
+
+    <template name="Ensure only one whole number (since prime)"
+        string-count=1>whole</template>
+</test>
