@@ -2133,35 +2133,17 @@ modulo.register('command', function build (modulo, opts = {}) {
 
 if (typeof document !== 'undefined' && !window.moduloBuild) {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        if (window.moduloBuild) {
-            return;
-        }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-        // TODO: disable commands for built version somehow, as a safety
-        // precaution -- maybe another if statement down here, so this is
-        // "dev-mode", and there's "node-mode" and finally "build-mode"?
-        if (cmd) {
-            modulo.registry.commands[cmd](modulo);
-        } else {
-            // TODO: Make these link to ?mod-cmd=...
-            // and maybe a-tag / button to "force-refresh" after every command
-            // (e.g. [ build ] ./start.html)
-            const font = 'font-size: 30px; line-height: 0.7; padding: 5px; border: 3px solid black;';
-            console.log('%c%', font, (new (class COMMANDS {
-                get test() { window.location.href += '?mod-cmd=test' }
-                get build() { window.location.href += '?mod-cmd=build' }
-                get bundle() { window.location.href += '?mod-cmd=bundle' }
-            })));
-            //})).__proto__); // TODO: .__proto__ is better in firefox, saves one click, without is better in chrome
-            /*
-            const cmds = Object.keys(modulo.registry.commands);
-            new Function(`console.log('%c%', '${ font }, (new (class COMMANDS {
-                ${ cmds.map(cmd => `get ${ cmd } () {
-                    return modulo.registry.commands.test(modulo)
-                }
-            `)
-            */
-        }
+        if (cmd || window.moduloBuild) { // Command / already built: Run & exit
+            return cmd && modulo.registry.commands[cmd](modulo);
+        } // Else: Display "COMMANDS:" menu in console
+        const commandNames = Object.keys(modulo.registry.commands);
+        const href = 'window.location.href += ';
+        const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
+        const commandGetters = commandNames.map(cmd =>
+            ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
+        const code = 'class COMMANDS {' + commandGetters.join('\n') + '}';
+        new Function(`console.log('%c%', '${ font }', new (${ code }))`)();
     }));
 }
 
