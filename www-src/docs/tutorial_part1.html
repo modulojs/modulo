@@ -19,13 +19,6 @@ frameworks is helpful, but not required.</p></blockquote>
 <p>Welcome to the Modulo tutorial. By following this short tutorial, you can
 learn how to use Modulo in your own projects.</p>
 
-<!--
-<p>You'll also be creating a little "Hello World" program during this tutorial.
-The final version of the program is included below:</p>
-
-<x-HelloWorldFinal goal="100"></x-HelloWorldFinal>
--->
-
 <h3>When to use Modulo</h3>
 
 <p>Modulo is useful when using plain HTML and CSS is no longer sufficient. It
@@ -264,11 +257,6 @@ component definition is really just a collection of CPart definitions.
 "Under the hood" of your component, each CPart will have a different role
 to contribute to the functionality of your component.</p>
 
-<!--<p> When a component definition is later instantiated (i.e., when that
-component is used on the page), Modulo will in turn instantiate (i.e.
-create an instance of) a CPart for each of the CPart definitions contained
-in the component definition.</p>-->
-
 <p>Let's start with the two most basic CParts:</p>
 <ol>
     <li>
@@ -337,18 +325,13 @@ sample code editors only focus on the CPart definitions within.</p>
 <mws-Section name="load">3. Loading from files</mws-Section>
 
 <blockquote> <p><strong>Why use library files?</strong>
-<!-- Think of the <code>&lt;Library&gt;</code> tag as being analogous to the
-<code>&lt;link&gt;</code> tag, which lets multiple HTML files share the same
-CSS. -->
 The appeal of using a separate CSS file is sharing style across pages, as the
 <code>&lt;link&gt;</code> tag, which lets multiple HTML files share the same
 CSS. The same rationale applies here: Components are "write once, use
 everywhere", so the way we get access to them "everywhere" is by including them
 into each file that needs to use them. Finally, by putting your components in a
 separate file, you avoid some awkward HTML syntax issues, since it's impossible
-to "nest" <code>&lt;script&gt;</code> tags.</p>
-</blockquote>
-
+to "nest" <code>&lt;script&gt;</code> tags.</p></blockquote>
 
 
 <p>Up until now, we have practiced with a component embedded on the same page
@@ -372,20 +355,6 @@ the new file. See below:</p>
 whatever components you have defined in
 <code>/libraries/my_components.html</code>.
 This allows you to share the same components across multiple pages.</p>
-
-
-<!--
-
-&lt;Library
-    -src="/libraries/my-stuff.html"
-    namespace="coolstuff"&gt;
-&lt;/Library&gt;
-
-
-and then use the
-<code>&lt;Library&gt;</code> tag to import your components into every HTML file
-that needs them.</p>
--->
 
 
 <section class="Tutorial-tryit">
@@ -543,14 +512,17 @@ over. They all have dashes (<code>-</code>) in the name.</li>
 component is used. Useful for writing components that "wrap around" other
 content.</li>
 
+<li><strong>-src=</strong> - A special attribute that allows content in Modulo
+to be loaded from separate files, making it easier to manage as projects grow.</li>
+
 </ul>
 
 
 
-<p>In the subsequent tutorials we will go deeper: Explore the full
-capabilities of Templates, allow flexible and composable components with
-Props CPart, create custom behavior with Script CParts,  and finally create
-forms and interactive, changing components with the State CPart.</p>
+<p>In the subsequent tutorials we will go deeper: Explore the full capabilities
+of Templates, allow flexible and composable components with Props CPart, create
+custom behavior with Script CParts,  and finally create forms and interactive,
+changing components with the State CPart.</p>
 
 <p><a class="m-Btn" href="/docs/tutorial_part2.html">
     Part 2: Props, Templating, and Building &#187;
@@ -558,45 +530,3 @@ forms and interactive, changing components with the State CPart.</p>
 
 </mws-Page>
 
-
-<!--
-<Component name="HelloWorldFinal">
-    <Props
-        goal
-    ></Props>
-
-    <Template>
-        Hello <strong>Modulo</strong> World!
-        <p>Goal: {{ props.goal }}</p>
-        <p>Amount: {{ state.amount }}</p>
-        <button @click:=script.countUp>
-            Click to count to the goal!
-        </button>
-        {% if props.goal gt state.amount %}
-            <p>Amount is lower than goal</p>
-        {% else %}
-            <p>Amount is higher than goal</p>
-        {% endif %}
-    </Template>
-
-    <State
-        amount:=0
-    ></State>
-
-    <Script>
-        function countUp() {
-            console.log('button got clicked!');
-            state.amount++;
-        }
-    </Script>
-
-    <Style>
-        :host {
-            background: gray;
-            width: 100px;
-            height: 100px;
-            border: 1px dotted black;
-        }
-    </Style>
-</Component>
--->

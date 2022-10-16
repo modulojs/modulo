@@ -7,7 +7,7 @@ window.moduloPrevious = window.modulo;
 
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
-        // Note: parentModulo arg is being used by mws/Demo.js
+        // Note: parentModulo arg is still being used by mws/Demo.js
         window._moduloID = (window._moduloID || 0) + 1; // Global ID
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
@@ -74,7 +74,7 @@ window.Modulo = class Modulo {
 
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
-        this.assert(type in this.registry, 'Unknown registration type:', type);
+        this.assert(type in this.registry, 'Unknown registration type: ' + type);
         this.registry[type][cls.name] = cls;
 
         if (type === 'commands') { // Attach globally to 'm' alias
@@ -1597,7 +1597,7 @@ modulo.config.templater.filters = (function () {
         divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,
         dividedinto: (s, arg) => Math.ceil((s * 1) / (arg * 1)),
         escapejs: s => JSON.stringify(String(s)).replace(/(^"|"$)/g, ''),
-        first: s => s[0],
+        first: s => Array.from(s)[0],
         join: (s, arg) => (s || []).join(arg === undefined ? ", " : arg),
         json: (s, arg) => JSON.stringify(s, null, arg || undefined),
         last: s => s[s.length - 1],
@@ -1606,6 +1606,7 @@ modulo.config.templater.filters = (function () {
         multiply: (s, arg) => (s * 1) * (arg * 1),
         number: (s) => Number(s),
         pluralize: (s, arg) => (arg.split(',')[(s === 1) * 1]) || '',
+        skipfirst: (s, arg) => Array.from(s).slice(arg || 1),
         subtract: (s, arg) => s - arg,
         truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
         type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
