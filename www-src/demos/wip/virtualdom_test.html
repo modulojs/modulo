@@ -1,0 +1,71 @@
+<template Modulo>
+  <Component name="Tester">
+    <Template>
+        <h1 class="logo">Hello</h1>
+
+        <div class="controls" style="display: flex">
+            <p>How</p>
+            <p>goes</p>
+            <p>it</p>
+        </div>
+    </Template>
+  </Component>
+</template>
+
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/utils/vwindow.js"></script>
+
+<h1>vdom stuff</h1>
+<hr />
+
+<div style="background:gray">
+<x-Tester></x-Tester>
+</div>
+<hr />
+
+
+<script>
+
+setTimeout(() => {
+const vw = new modulo.registry.engines.VirtualWindow(modulo);
+//vw.customElements.elemClassesLC['x-tester'] = modulo.registry.elements.x_Tester;
+vw.loadHTML(`
+  <div>
+    <p>test</p>
+    <p>another <em>test</em> okay</p>
+    <x-Thing></x-Thing>
+    <x-Tester></x-Tester>
+  </div>
+`);
+console.log(vw.document.innerHTML);
+}, 500);
+
+/*
+vw.loadHTML(`
+  <template Modulo>
+    <Component name="Tester">
+      <Template>
+          <h1 class="logo">Hello</h1>
+
+          <div class="controls" style="display: flex">
+              <p>How</p>
+              <p>goes</p>
+              <p>it</p>
+          </div>
+      </Template>
+    </Component>
+  </template>
+
+  <script src="/js/Modulo.js"></s` + `cript>
+  <script src="/demos/mdu/utils/vwindow.js"></s` + `cript>
+
+  <h1>vdom stuff</h1>
+
+  <div style="background:gray">
+  <x-Tester></x-Tester>
+  </div>
+`)
+*/
+
+
+</script>

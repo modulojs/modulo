@@ -1,6 +1,3 @@
-const LEGACY = []; // TODO rm
-window.LEG = LEGACY;
-
 // Avoid overwriting other Modulo versions / instances
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
@@ -230,9 +227,8 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Create a new modulo instance to be the global default instance
 (new Modulo(null, [
-    'cparts', 'dom', 'utils', 'library', 'core', 'engines', 'commands',
-    'templateFilters', 'templateTags', 'directives', 'directiveShortcuts',
-    'loadDirectives', 'loadDirectiveShortcuts', 'processors',
+    'cparts', 'dom', 'utils', 'core', 'engines', 'commands', 'templateFilters',
+    'templateTags', 'processors', 'elements',
 ])).pushGlobal();
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
@@ -245,6 +241,13 @@ modulo.register('processor', function src (modulo, conf, value) {
 
 modulo.register('processor', function content (modulo, conf, value) {
     modulo.loadString(value, conf.DefinitionName);
+});
+
+modulo.register('processor', function directives (modulo, conf, value) {
+    for (const directive of value) {
+        const dirName = (def.RenderObj || def.Name) + '.' + value;
+        modulo.config.reconciler.directives.push(dirName);
+    }
 });
 
 modulo.register('processor', function definedAs (modulo, def, value) {
@@ -286,11 +289,12 @@ modulo.register('processor', function customElement (modulo, def, value) {
     */
     def.namespace = def.namespace || 'x';
     def.name = def.name || def.DefName || def.Name;
-    def.TagName = (def.TagName || `${ def.namespace }-${ def.name }`).toLowerCase();
+    def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
     def.MainRequire = def.DefinitionName;
+    const className =  `${ def.namespace }_${ def.name }`;
     def.Code = `
         const def = modulo.definitions['${ def.DefinitionName }'];
-        class _${ def.Name }_ extends ${ value } {
+        class ${ className } extends ${ value } {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -302,9 +306,9 @@ modulo.register('processor', function customElement (modulo, def, value) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, _${ def.Name }_);
-        window.customElements.define(def.TagName, _${ def.Name }_);
-        return _${ def.Name }_;
+        modulo.registry.utils.initClass(modulo, def, ${ className });
+        window.customElements.define(def.TagName, ${ className });
+        return ${ className };
     `;
 });
 
@@ -335,6 +339,7 @@ modulo.register('util', function initClass (modulo, def, cls) {
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
     };
+    modulo.register('element', cls);
 });
 
 modulo.register('util', function mountElement (modulo, def, elem) {
@@ -406,6 +411,7 @@ modulo.config.component = {
     DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
     DefBuilders: [ 'CustomElement', 'Code' ],
     DefFinalizers: [ 'MainRequire' ],
+    Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
     //InstBuilders: [ 'CreateChildren' ],
 };
 
@@ -481,11 +487,24 @@ modulo.register('cpart', class Component {
     }
 
     initializedCallback(renderObj) {
-        this.mode = 'regular';
+        this.mode = 'regular'; /// XXX rm
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
-            for (const directiveName of cPart.getDirectives ? cPart.getDirectives() : []) {
-                opts.directives[directiveName] = cPart;
+            const def = (cPart.def || cPart.conf);
+            for (const method of def.Directives || []) {
+                const dirName = (def.RenderObj || def.Name) + '.' + method;
+                opts.directives[dirName] = cPart;
+            }
+        }
+
+        // TODO: Refactor this:
+        if (this.attrs.mode === 'shadow') {
+            this.element.attachShadow({ mode: 'open' });
+        } else {
+            opts.directives.slot = this;
+            if (this.attrs.mode === 'vanish-into-document') {
+                Object.assign(opts.directives,
+                    { link: this, title: this, meta: this, script: this });
             }
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
@@ -496,31 +515,9 @@ modulo.register('cpart', class Component {
         return { originalHTML, innerHTML: null, patches: null, id: this.id };
     }
 
-    getDirectives() {
-        const dirs = [
-            'component.dataPropMount',
-            'component.dataPropUnmount',
-            'component.eventMount',
-            'component.eventUnmount',
-            'component.slotLoad',
-        ];
-        const vanishTags = [ 'link', 'title', 'meta', 'script' ];
-        if (this.attrs.mode === 'vanish-into-document') {
-            dirs.push(...vanishTags);
-        }
-        if (this.attrs.mode !== 'shadow') {
-            // TODO: clean up Load callbacks, either eliminate slotLoad (and
-            // discontinue [component.slot]) in favor of only slotTagLoad, or
-            // refactor somehow
-            dirs.push('slot');
-            this.slotTagLoad = this.slotLoad.bind(this);
-        }
-        return dirs;
-    }
-
     reconcileCallback(renderObj) {
         let { innerHTML, patches, root } = renderObj.component;
-        this.mode =this.attrs.mode || 'regular';
+        this.mode = this.attrs.mode || 'regular';
         if (innerHTML !== null) {
 
             // XXX ----------------
@@ -1175,12 +1172,15 @@ modulo.register('cpart', class Configuration { }, {
 
 modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     let text = value;
-    function getSymbolsAsObjectAssignment(contents) {
+    function getAutoExportNames(contents) {
         const regexpG = /(function|class)\s+(\w+)/g;
         const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
         const matches = contents.match(regexpG) || [];
         return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s))
+            .filter(s => s && !Modulo.INVALID_WORDS.has(s));
+    }
+    function getSymbolsAsObjectAssignment(contents) {
+        return getAutoExportNames(contents)
             .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
             .join('');
     }
@@ -1198,6 +1198,15 @@ modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
     def.Code = `${prefix}\n${text}\n${suffix}`;
     def.localVars = localVars;
+
+    // TODO: Fix
+    const isDirRegEx = /(Unmount|Mount)$/;
+    def.directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
+    /*
+    getFunctionSymbols.join
+        const regexpG = /function\s+(\w+Mount|\w+Unmount)/g;
+    */
+
 });
 
 modulo.register('cpart', class Script {
@@ -1215,16 +1224,6 @@ modulo.register('cpart', class Script {
             modulo.assert(!def.Parent, 'Falsy return for parented Script');
             return {};
         }
-    }
-
-    getDirectives() {
-        window.LEG.push('script.getDirectives');
-        let { script } = this.element.initRenderObj;
-        const isCbRegex = /(Unmount|Mount)$/;
-        if (!script) { script = {}; } // TODO XXX
-        return Object.keys(script)
-            .filter(key => key.match(isCbRegex))
-            .map(key => `script.${key}`);
     }
 
     cb(func) {
@@ -1302,11 +1301,6 @@ modulo.register('cpart', class Script {
 });
 
 modulo.register('cpart', class State {
-    getDirectives() {
-        window.LEG.push('state.getDirectives');
-        return [ 'state.bindMount', 'state.bindUnmount' ];
-    }
-
     initializedCallback(renderObj) {
         if (!this.data) {
             // Initialize with deep copy of attributes
@@ -1409,7 +1403,7 @@ modulo.register('cpart', class State {
         }
         this._oldData = null;
     }
-});
+}, { Directives: [ 'bindMount', 'bindUnmount' ] });
 
 
 /* Implementation of Modulo Templating Language */
@@ -1783,8 +1777,14 @@ modulo.register('engine', class DOMCursor {
     }
 });
 
+modulo.config.reconciler = {
+    directives: [],
+    directiveShortcuts: [ [ /^@/, 'component.event' ],
+                          [ /:$/, 'component.dataProp' ] ],
+};
 modulo.register('engine', class Reconciler {
     constructor(modulo, def) {
+        this.modulo = modulo;
         this.constructor_old(def);
     }
     constructor_old(opts) {
@@ -1794,11 +1794,8 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            window.LEG.push('this.directiveShortcuts.length === 0')
-            this.directiveShortcuts = [
-                [ /^@/, 'component.event' ],
-                [ /:$/, 'component.dataProp' ],
-            ];
+            //this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts;
+            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts;
         }
         this.patch = this.pushPatch;
         this.patches = [];

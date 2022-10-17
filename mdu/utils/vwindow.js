@@ -61,14 +61,14 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
         //splitAttrsTokenizer: /\s*([^=\s]+)\s*(=?)(['"]?)/gim,
     };
     */
-    const domParserTokenizer = /(?:<(\/?)([a-zA-Z][a-zA-Z0-9\:-]*)(?:\s([^>]*?))?((?:\s*\/)?)>|(<\!\-\-)([\s\S]*?)(\-\->)|(<\!\[CDATA\[)([\s\S]*?)(\]\]>))/gm,
+    const domParserTokenizer = /(?:<(\/?)([a-zA-Z][a-zA-Z0-9\:-]*)(?:\s([^>]*?))?((?:\s*\/)?)>|(<\!\-\-)([\s\S]*?)(\-\->)|(<\!\[CDATA\[)([\s\S]*?)(\]\]>))/gm;
 
     const { ownerDocument } = parentElem;
     const { HTMLElement } = modulo.registry.vwindow;
 
     let elemClassesLC = {};
-    if (ownerDocument.moduloVM.customElements) {
-        elemClassesLC = ownerDocument.moduloVM.customElements.elemClassesLC;
+    if (ownerDocument.moduloVirtualWindow.customElements) {
+        elemClassesLC = ownerDocument.moduloVirtualWindow.customElements.elemClassesLC;
     }
 
     const tagStack = [ parentElem ]; // put self at top of stack
@@ -88,6 +88,10 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
     for (const match of text.matchAll(domParserTokenizer)) {
         // TODO: Refactor this loop, there's low hanging fruit
         const topOfStack = tagStack[ tagStack.length - 1 ];
+        if (!topOfStack) {
+            console.error('Run out of stack!', match);
+            return;
+        }
         if (skipParsing !== null) {
             topOfStack._unparsedContent += text.slice(lastMatchEnd, match.index);
         } else {
@@ -308,7 +312,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         this._unparsedContent = '';
         if (this.tagName && this.tagName.toLowerCase() === 'script') {
             // If it's a script, evaluate immediately
-            this.ownerDocument.moduloVM.run(this._textContent);
+            this.ownerDocument.moduloVirtualWindow.exec(this._textContent);
         }
     }
 
@@ -335,11 +339,19 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         return name.toLowerCase() in this._attributeValues;
     }
 
+    _escapeText(text) {
+        if (text && text.safe) {
+            return text;
+        }
+        return (text + '').replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/'/g, '&#x27;').replace(/"/g, '&quot;');
+    }
+
     _makeAttributeString() {
         let s = '';
-        const { escapeText } = Modulo.templating.MTL.prototype;
         // TODO: Add single quotes for JSON strings for canonical formatting
-        const attrVal = v => /^[\w\.]+$/.test(v) ? v : `"${ escapeText(v) }"`;
+        const attrVal = v => /^[\w\.]+$/.test(v) ? v : `"${ this._escapeText(v) }"`;
         for (const attrName of this._attributeNames) {
             const value = this._attributeValues[attrName.toLowerCase()];
             s += ' ' + attrName + (value ? '=' + attrVal(value) : '');
@@ -352,7 +364,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
     }
 
     getAttributeNode(name) {
-        const { Attr } = Modulo.virtualdom;
+        const { Attr } = modulo.registry.vwindow; // TODO
         return new Attr({ name, value: this._attributeValues[name.toLowerCase()] });
     }
 
@@ -362,7 +374,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 
     set innerHTML(text) {
         this.childNodes = []; // clear contents
-        Modulo.virtualdom.parse(this, text);
+        modulo.registry.utils.parse(this, text);
     }
 
     _setAttrString(text) {
@@ -411,12 +423,14 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
     }
 
     get _moduloTagName() {
-        if (this.fullName) { // If it's a Modulo element
-            return this.fullName; // (todo: fix to new interface after cpartdef refactor)
+        console.log('i am modulo', this.isModulo);
+        if (this.isModulo && this.cparts && this.cparts.component) {
+            const def = this.cparts.component.def || this.cparts.component.conf;
+            return `${ def.namespace }-${ def.name }`;
         }
         const lc = this._lcName;
-        if (lc in Modulo.cparts) {
-            return Modulo.cparts[lc].name;
+        if (lc in modulo.registry.dom) {
+            return modulo.registry.dom[lc].name;
         }
         return lc;
     }
@@ -429,11 +443,10 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
             return this._unparsedContent;
         }
 
-        const { escapeText } = Modulo.templating.MTL.prototype;
         let s = '';
         for (const child of this.childNodes) {
             if (child.nodeType === 3) {  // Text node
-                s += escapeText(child.textContent);
+                s += this._escapeText(child.textContent);
             } else {
                 s += child.outerHTML;
             }
@@ -492,9 +505,10 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 }
 
 
-// ModuloVM
-modulo.register('engine', class ModuloVM {
-    constructor() {
+// Modulo Virtual Window
+modulo.register('engine', class VirtualWindow {
+    constructor(modulo) {
+        this.modulo = modulo;
         this.init(modulo.registry.vwindow);
     }
 
@@ -510,30 +524,32 @@ modulo.register('engine', class ModuloVM {
                 }
             }
 
-            document.moduloVM = this; // include back reference
+            document.moduloVirtualWindow = this; // include back reference
             document.createElement = tagName => new HTMLElement({ nodeType: 1, tagName });
             document.head = document.createElement('head');
             document.body = document.createElement('body');
             const titleNode = document.createElement('title');
             titleNode.textContent = title;
             document.head.append(titleNode);
+            document.childNodes.push(document.head, document.body);
 
             document.implementation = { createHTMLDocument };
             document.HTMLElement = HTMLElement;
-            document.documentElement = document; // not sure if i need this
+            document.documentElement = document;
+            document.ownerDocument = document;
             return document;
         };
-        const Modulo = {};
+        const modulo = {};
         const customElements = this.makeCustomElements();
         const document = createHTMLDocument('modulovm');
         const HTMLElement = document.HTMLElement;
-        const win = { document, HTMLElement, Modulo, customElements };
+        const win = { document, HTMLElement, modulo, customElements };
         Object.assign(this, win); // Expose some window properties at top as well
         this.window = Object.assign({}, vwindow, win); // Add in all vdom classes
-        Modulo.globals = this.window; // (todo: rm, not sure if necessary)
     }
 
     makeCustomElements() {
+        // TODO: Remove LC, since should be LC anyway
         const elemClasses = {};//[name, elemClass] = 
         const elemClassesLC = {};
         const define = (name, elemClass) => {
@@ -543,6 +559,7 @@ modulo.register('engine', class ModuloVM {
         return { elemClasses, elemClassesLC, define };
     }
 
+    /*
     loadBundle(onReady) {
         // Loads current page into the VM (using same settings as a bundle)
         Modulo.utils.fetchBundleData(opts => {
@@ -569,18 +586,37 @@ modulo.register('engine', class ModuloVM {
             }
         });
     }
+    */
 
+    //run(text, exportCode = '') {
+    exec(code) {
+        //const code = `${ text }\n\n return ${ exportCode };`;
+        const func = new Function('window', 'document', 'HTMLElement', code);
+        return func(this.window, this.document, this.HTMLElement);
+    }
+
+    navigate(url) {
+        window.fetch(url)
+            .then(response => response.text())
+            .then(this.loadHTML.bind(this))
+    }
+
+    loadHTML(htmlCode) {
+        this.document.innerHTML = htmlCode;
+    }
+
+    /*
     run(text, exportCode = '') {
         const args = [ 'Modulo', 'window', 'document', 'HTMLElement' ];
         const code = `${ text }\n\n return ${ exportCode };`;
-        const func = Modulo.assets.registerFunction(args, code);
+        const func = this.modulo.assets.registerFunction(args, code);
         if (exportCode === 'Modulo') {
             //console.log(func);
-            //const { escapeText } = Modulo.templating.MTL.prototype;
-            //document.body.innerHTML = '<pre>' + escapeText(func.toString()) + '</pre>';
+            //document.body.innerHTML = '<pre>' + this._escapeText(func.toString()) + '</pre>';
         }
         return func(this.Modulo, this.window, this.document, this.HTMLElement);
     }
+    */
 });
 
 /*
