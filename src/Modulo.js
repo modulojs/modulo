@@ -1,7 +1,6 @@
-// Avoid overwriting other Modulo versions / instances
-window.ModuloPrevious = window.Modulo;
+// Modulo.js - Copyright 2022 - LGPL 2.1 - https://modulojs.org/
+window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
-
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
         // Note: parentModulo arg is still being used by mws/Demo.js
@@ -236,18 +235,10 @@ modulo.register('processor', function src (modulo, conf, value) {
     modulo.fetchQueue.enqueue(value, text => {
         conf.Content = (text || '') + (conf.Content || '');
     });
-    //return 'wait'; // Want to wait
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
     modulo.loadString(value, conf.DefinitionName);
-});
-
-modulo.register('processor', function directives (modulo, conf, value) {
-    for (const directive of value) {
-        const dirName = (def.RenderObj || def.Name) + '.' + value;
-        modulo.config.reconciler.directives.push(dirName);
-    }
 });
 
 modulo.register('processor', function definedAs (modulo, def, value) {
@@ -416,15 +407,6 @@ modulo.config.component = {
 };
 
 modulo.register('cpart', class Component {
-    /*
-    static factoryCallback(modulo, conf) {
-        conf.directiveShortcuts = [
-            [ /^@/, 'component.event' ],
-            [ /:$/, 'component.dataProp' ],
-        ];
-        conf.uniqueId = ++factory.id;
-    }
-    */
     rerender(original = null) {
         if (original) { // TODO: this logic needs refactor
             if (this.element.originalHTML === null) {
@@ -458,27 +440,6 @@ modulo.register('cpart', class Component {
         //this.element.renderObj = null; // ?rendering is over, set to null
     }
 
-    headTagLoad({ el }) {
-        //el.remove();
-        // DAED CODE
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    metaTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    linkTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    titleTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
     scriptTagLoad({ el }) {
         const newScript = el.ownerDocument.createElement('script');
         newScript.src = el.src; // TODO: Possibly copy other attrs?
@@ -487,7 +448,6 @@ modulo.register('cpart', class Component {
     }
 
     initializedCallback(renderObj) {
-        this.mode = 'regular'; /// XXX rm
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
@@ -496,15 +456,18 @@ modulo.register('cpart', class Component {
                 opts.directives[dirName] = cPart;
             }
         }
-
-        // TODO: Refactor this:
+        const addHead = ({ el }) => this.element.ownerDocument.head.append(el);
         if (this.attrs.mode === 'shadow') {
             this.element.attachShadow({ mode: 'open' });
-        } else {
+        } else { // TODO: Refactor logic here
             opts.directives.slot = this;
+            this.slotTagLoad = this.slotLoad.bind(this); // TODO switch to only slotTagLoad
             if (this.attrs.mode === 'vanish-into-document') {
-                Object.assign(opts.directives,
-                    { link: this, title: this, meta: this, script: this });
+                opts.directives.script = this;
+                for (const headTag of [ 'link', 'title', 'meta' ]) {
+                    opts.directives[headTag] = this;
+                    this[headTag + 'TagLoad'] = addHead;
+                }
             }
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
@@ -572,7 +535,6 @@ modulo.register('cpart', class Component {
         const getSlot = c => c.getAttribute ? (c.getAttribute('slot') || null) : null;
         let childs = this.element.originalChildren;
         childs = childs.filter(child => getSlot(child) === chosenSlot);
-
         if (!el.moduloSlotHasLoaded) { // clear innerHTML if this is first load
             el.innerHTML = '';
             el.moduloSlotHasLoaded = true;
@@ -1201,7 +1163,7 @@ modulo.register('processor', function scriptAutoExport (modulo, def, value) {
 
     // TODO: Fix
     const isDirRegEx = /(Unmount|Mount)$/;
-    def.directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
+    def.Directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
     /*
     getFunctionSymbols.join
         const regexpG = /function\s+(\w+Mount|\w+Unmount)/g;
@@ -1778,7 +1740,6 @@ modulo.register('engine', class DOMCursor {
 });
 
 modulo.config.reconciler = {
-    directives: [],
     directiveShortcuts: [ [ /^@/, 'component.event' ],
                           [ /:$/, 'component.dataProp' ] ],
 };

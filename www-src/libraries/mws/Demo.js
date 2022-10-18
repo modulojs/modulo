@@ -11,11 +11,6 @@ function _setupGlobalVariables() {
     componentTexts = Object.assign({}, docseg, eg);
 }
 
-function tmpGetDirectives() {
-    console.count('DEPRECATED: Demo.js - tmpGetDirectives');
-    return [ 'script.codemirror' ];
-}
-
 function codemirrorMount({ el }) {
     el.innerHTML = ''; // clear inner HTML before mounting
     const demoType = props.demotype || 'snippet';

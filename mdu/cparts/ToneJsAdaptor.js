@@ -475,8 +475,6 @@ modulo.register('cpart', class ToneJsAdaptor {
             }
         }
     }
-
-    getDirectives() {  LEGACY.push('tonejsadaptor.getDirectives'); return []; }
 });
 
 // Add a "getval" filter (TODO: Make this component silo'ed)

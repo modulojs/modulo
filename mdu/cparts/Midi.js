@@ -158,7 +158,6 @@ modulo.register('cparts', class WebMidiAdaptor  {
         //this.data.noteOff = this.noteOff.bind(this);
         return this.data;
     }
-    getDirectives() {  LEGACY.push('midi.getDirectives'); return []; }
 });
 
 

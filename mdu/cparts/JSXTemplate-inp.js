@@ -135,8 +135,6 @@ modulo.register('cpart', class JSXTemplate {
         return result;
     }
 
-    getDirectives() {  LEGACY.push('jsxtemplate.getDirectives'); return []; }
-
     renderCallback(renderObj) {
         const values = [];
         for (const arg of this.renderArgs) {

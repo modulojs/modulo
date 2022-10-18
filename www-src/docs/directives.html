@@ -31,8 +31,8 @@ functions end with <code>Mount</code> and <code>Unmount</code>.</p>
 
 <h3>Built-in directives vs custom directives</h3>
 
-<p>Modulo ships with a total of 4 built-in directives, defined by the built-in
-<em>CParts</em> (1 from <em>State</em> and 3 from <em>Component</em>).
+<p>Modulo ships with a total of 3 built-in directives, defined by the built-in
+<em>CParts</em> (1 from <em>State</em> and 2 from <em>Component</em>).
 Typically, the built-in directives are all you need. However, just like with
 lifecycle functions, the <em>Script</em> CPart also exposes the directive
 interface to component developers. This is so that you can create custom
@@ -40,9 +40,6 @@ directives in a component to access the DOM after rendering.</p>
 
 
 <mws-Section name="builtin">Built-in directives</mws-Section>
-
-<p>Modulo ships with a total of 4 built-in directives, defined by the built-in
-<em>CParts</em> (1 from <em>State</em> and 3 from <em>Component</em>).</p>
 
 <ul>
     <li><code>[component.dataProp]</code> (<em>shortcut:</em> suffix <code>:</code>) -
@@ -82,16 +79,10 @@ directives in a component to access the DOM after rendering.</p>
         </ul>
     </li>
 
-    <li><code>[component.slot]</code> - Reattach the original child elements
-    that this component had when it was first mounted to a new DOM element.
-    (For React users, this is similar to doing
-    <code>{this.props.children}</code>.)</li>
-
     <li><code>[state.bind]</code> - Two-way binding with <em>State</em>
     data, with the key determined by the <code>name=</code> property of
     whatever it is attached to.</li>
 </ul>
-
 
 <p>Important directive facts: Directives are discovered during the
 <code>reconcile</code> lifecycle phase when DOM reconciliation is occurring, and
@@ -101,6 +92,12 @@ of the <em>Template</em> CPart: You can have a component that has no
 contents some other way.</p>
 
 
+<!--
+<li><code>[component.slot]</code> - Reattach the original child elements
+that this component had when it was first mounted to a new DOM element.
+(For React users, this is similar to doing
+<code>{this.props.children}</code>.)</li>
+-->
 
 
 <mws-Section name="custom">Custom directives</mws-Section>
@@ -121,12 +118,18 @@ document (<code>Unmount</code>). This allows you to do custom set-up or
 tear-down code for particular elements, such as to attach third-party
 JavaScript frameworks in a convenient manner.</p>
 
+<h3>Registering Mount callback</h3>
+
 <p>Custom directives can be easily registered in <em>Script</em> CParts simply
 by defining a function with a certain name. For example, for a directive called
 <code>myinput</code> directive, you can create a function called
-<code>function&nbsp;myinputMount(opts)&nbsp;{</code>. A full, working example
-is below, which uses a custom directive to focus on an input when a button is
-clicked:</p>
+<code>function&nbsp;myinputMount(opts)&nbsp;{</code>.  Similarly, If you want
+to register custom code when an element leaves the screen, such as to clean up
+references, you can register an Unmount callback:
+<code>function&nbsp;myinputUnmount(opts)&nbsp;{</code>.</p>
+
+<p>A full, working example is below, which uses a custom directive to focus on
+an input when a button is clicked:</p>
 
 <p><strong>Example custom directives:</strong></p>
 
@@ -148,12 +151,124 @@ text='
         // Try uncommenting the following to see data:
         //console.log("myinputMount:", mountOptions);
     }
+
     function showInfo(el) {
         alert("Focusing on:" + String(element.inputRef));
         element.inputRef.focus();
     }
 </Script>
 '></mws-Demo>
+
+<h3>Multiple directives</h3>
+
+<p>Multiple directives can be attached to the same attribute. For example,
+<code>@click:</code> has both a <code>component.event</code> directive
+(<code>@</code>) and a <code>component.dataProp</code> (<code>:</code>)
+directive. Similarly, multiple custom directives can be applied to the same
+attribute. For example: <code>[script.hook][script.setup]text="Hello"</code>
+would be a valid way to register two directives(the imaginary
+<code>script.hook</code> and <code>script.setup</code>  directives, in that
+order).</p>
+
+<h3>Mount and Unmount parameters</h3>
+
+<h4>Frequently used</h4>
+
+<ul>
+    <li><code>el</code> will contain a reference to the HTML element</li>
+    <li><code>value</code> will contain the value you are assigning to the
+    attribute, with any previous directives resolved (e.g. if you combine your
+    directive with a <code>:=</code> dataProp directive, you will already have
+    the "true value" be passed in.)</li>
+    <li><code>attrName</code> will contain the bare attribute name, e.g. the
+    portion of the attribute name (on the left side of the assignment) without
+    the directive syntax</li>
+</ul>
+
+<h4>Infrequently used</h4>
+<ul>
+    <li><code>name</code> contains contain the entirety of the attribute name,
+    directive syntax included</li>
+    <li><code>rawName</code> will typically be the same as <code>name</code>.
+    However, if shortcuts were applied, <code>rawName</code> will show the
+    previous, "unexpanded" verison of the name (e.g. without the regular
+    expression substitution applied).</li>
+    <li><code>directiveName</code> will contain the name of the current
+    directive being applied &mdash; typically not useful since we already know
+    that, it's the function's name!</li>
+</ul>
+
+
+
+<h4>Mount and Unmount and multiple directive demonstration</h4>
+
+<p>The following demonstration shows both Mount and Unmount callbacks in a
+script tag.  Note that in this demonstration, the "Mount count" and "Unmount
+count" values visually displayed in the <code>&lt;p&gt;</code> tags appear to
+"lag" behind the actual value &mdash; the number of times a Mount or Unmount
+callback was actually called.  This is because the Mount and Unmount happen
+<em>after</em> the rendering is complete, and thus the rendering can only
+"report" on the previous value.</p>
+
+<p>Uncommenting the "console.log" statements will reveal what arguments and
+information are sent along with the callback. </p>
+
+<mws-Demo demotype="minipreview"
+text='
+<Template>
+{% if state.visible %}
+    <h1 [script.thing][script.example]attr-name="value example">
+        Example H1
+    </h1>
+    <button @click:=script.hide>(Hide)</button>
+{% else %}
+    <button @click:=script.show>Show</button>
+{% endif %}
+<p>Mount count: {{ state.mcount }}</p>
+<p>Unmount count: {{ state.ucount }}</p>
+</Template>
+
+<State
+    visible:=true
+    mcount:=0
+    ucount:=0
+></State>
+
+<Script>
+    function show() {
+        state.visible = true;
+    }
+
+    function hide() {
+        state.visible = false;
+    }
+
+    function thingMount({ el, value, name, attrName, directiveName, rawName }) {
+        //console.log("Element is mounting (thing)");
+        //console.log({ el, value, name, attrName, directiveName, rawName });
+        state.mcount++;
+    }
+
+    function thingUnmount({ el, value, name, attrName, directiveName, rawName }) {
+        console.log("Element is unmounting (thing)");
+        console.log({ el, value, name, attrName, directiveName, rawName });
+        state.ucount++;
+    }
+
+    function exampleMount({ el, value, name, attrName, directiveName, rawName }) {
+        console.log("Element is mounting (example)");
+        console.log({ el, value, name, attrName, directiveName, rawName });
+        state.mcount++;
+    }
+
+    function exampleUnmount({ el, value, name, attrName, directiveName, rawName }) {
+        console.log("Element is unmounting (example)");
+        console.log({ el, value, name, attrName, directiveName, rawName });
+        state.ucount++;
+    }
+</Script>
+'></mws-Demo>
+
 
 
 
@@ -272,70 +387,5 @@ text='
     predictable in behavior, with no "hidden" functions getting attached.</p>
 
 </div>
-
-
-<!-- TODO The following documentation needs updating once we have a directives
-configuration interface ... -->
-
-<!--
-<h3>Registering CPart directives with shortcuts</h3>
-
-<p>If you are a CPart developer, you might want to register a shortcut along
-with your CPart's directive. Note that this only applies to CPart developers:
-Component developers should never create shortcuts for the script-tag based
-custom directives used (which should be avoided to begin with).</p>
-
-
-<p>See below for an example:</p>
-
-<mws-Demo demotype="minipreview"
-text='
-<Template>
-    Game Shop: 31 moneys<br />
-    Avg Movie Creeps: 10 moneys<br />
-    <button @click:=script.toggle>
-        {% if state.show %}
-        Hide controls (and trigger unmount callbacks)
-        {% else %}
-        Show controls (and trigger mount directive callbacks)
-        {% endif %}
-    </button> <br />
-    {% if state.show %}
-        <button %%%buy="GMC">(text is replaced)</button>
-        <button %%%sell="GMC"></button>
-        <button %%%long="AMC"></button>
-        <button %%%short="AMC"></button>
-    {% endif %}
-</Template>
-
-<State
-    show:=false
-></State>
-
-<Script>
-    function factoryCallback(partOptions, factory, loadObj)  {
-        loadObj.component.directiveShortcuts.push([/^%%%/, "script.example"]);
-    }
-
-    function exampleMount(info) {
-        console.log("Mounting directive:", info);
-        const {el, value, attrName, rawName} = info;
-        el.textContent = `${attrName} ${value}`;
-        el.onclick = () => alert(attrName + "ing " + value);
-    }
-    function exampleUnmount(info) {
-        console.log("Unmounting directive:", info);
-    }
-    function toggle() {
-        state.show = !state.show;
-    }
-</Script>
-'></mws-Demo>
-
-<p><strong>Note:</strong> "Do as I say, not as I do": To keep the previous
-example simple, we are demonstrating it's use within a script tag in a
-component, but in general shortcuts are only intended for CPart directives, not
-custom script tag directives.</p>
--->
 
 </mws-Page>
