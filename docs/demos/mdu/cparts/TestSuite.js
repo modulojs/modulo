@@ -17,8 +17,6 @@ modulo.register('cpart', class TestSuite {
     }
     */
 
-    getDirectives () { return []; } // TODO: RM, when conf is cleaned up
-
     static stateInit(modulo, element, conf) {
         const isLower = key => key[0].toLowerCase() === key[0];
         const attrs = modulo.registry.utils.keyFilter(conf, isLower);

@@ -1,0 +1,69 @@
+
+<!-- Due to bug with the test runner or testing framework, including this
+test will cause other tests to fail, but running it separately it succeeds. -->
+<test name="Misc sub-components correctly render">
+    <script>
+        element.cparts.template =
+            element.cpartSpares.template
+                .find(({attrs}) => attrs.name === 'comptest1')
+        assert: element.cparts.template
+    </script>
+
+    <template>
+        Testing
+        <x-Tutorial_P1>
+            Hello <strong>Modulo</strong> World!
+            <p class="neat">Any HTML can be here!</p>
+        </x-Tutorial_P1>
+        <x-templating_escaping>
+            <p>User "<em>Little &lt;Bobby&gt; &lt;Drop&gt;
+            &amp;tables</em>" sent a message:</p>
+            <div class="msgcontent">
+                I <i>love</i> the classic <a target="_blank"
+                href="https://xkcd.com/327/">xkcd #327</a> on
+                the risk of trusting <b>user inputted data</b>
+            </div>
+        </x-templating_escaping>
+    </template>
+</test>
+
+
+<test name="Button sub-component behavior">
+    <script>
+        element.cparts.template =
+            element.cpartSpares.template
+                .find(({attrs}) => attrs.name === 'comptest2')
+    </script>
+
+    <!--
+    <template name="Renders">
+        <x-TestBtn mytexty="Test text" myclicky:=script.gotClickies>
+            <button @click:=props.myclicky>Test text</button>
+        </x-TestBtn>
+        <p>state.a: 1</p>
+    </template>
+    -->
+
+    <script>
+        event: click button
+        assert: state.a === 1337
+    </script>
+
+    <!--
+    <template name="Renders after click">
+        <x-TestBtn mytexty="Test text" myclicky:=script.gotClickies>
+            <button @click:=props.myclicky>Test text</button>
+        </x-TestBtn>
+        <p>state.a: 1337</p>
+    </template>
+
+    <template name="Shouldn't show subcomp children" string-count=0>
+        IGNORED
+    </template>
+
+    -->
+</test>
+
+
+
+

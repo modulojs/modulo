@@ -1,6 +1,6 @@
 <!DOCTYPE HTML><html><head>
 
-<!-- Note: _part1.html is intententional, to un-collapse the top thing -->
+<!-- Note: _part1.html is intentional, to un-collapse the top thing -->
 <meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Part 2 - Tutorial - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-xx20qcng.css" /></head><body>
 
 
@@ -34,7 +34,7 @@
     <div class="Navbar-rightInfo">
         
         
-            v: 0.0.19<br>
+            v: 0.0.20<br>
             <!--SLOC: undefined lines<br />-->
             <a href="https://github.com/modulojs/modulo/">github</a> |
             <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
@@ -758,31 +758,6 @@ examples of the different template tags available.</p>
 
 
 
-<!--
-<section class="Tutorial-tryit">
-    <h4>Try it now</h4>
-    <p>Edit the component definition on the left, and click RUN to see the
-    results on the right!</p>
-
-    <ol>
-        <li>Practice modifying the <strong>Template</strong> CPart
-        (<code>&lt;Template&gt;</code>) to see how that affects the
-        output</li>
-        <li>Practice modifying the <strong>Style</strong> CPart
-        (<code>&lt;Style&gt;</code>) to add or modify CSS</li>
-        <li>Practice incorporating these CParts into your own components on
-        a real page by copying the code here and pasting it within your
-        component definition (that is, the one that you created in the
-        previous part of this tutorial)</p>
-    </ol>
-    <mws-Demo
-        demotype="minipreview"
-        fromlibrary="Tutorial_P2_filters_demo"
-    ></mws-Demo>
-</section>
--->
-
-
 
 <mws-section name="build" modulo-original-html="3. Build">
         <a class="secanchor" title="Click to focus on this section." id="build" name="build" href="#build">#</a>
@@ -807,19 +782,55 @@ experience for users. This is why building to one file is useful.</p>
 </blockquote>
 
 <p>We've got one more topic for <em>Part 2</em> of the Modulo tutorial:
-How to keep your project manageable and loading fast as <em>Component</em>
-definitions grow and larger.</p>
+How to keep your project manageable and loading fast as you accumulate more and
+more <em>Component</em> definitions, and they require more and more files.</p>
 
-<h3>Library tags with <code>-src=</code></h3>
+<h3>Library</h3>
 
-<p>"Library" tags look like the following:</p>
+<p>In Part 1, we learned we can use <code>-src=</code> to split
+<em>Template</em> and <em>Style</em> Component Parts into separate HTML and CSS
+files respectively. However, what if our component definition files themselves
+get too big to manage? That is, what if we define so many components, that we
+need to start organizing the components themselves?</p>
 
-<pre>&lt;Library
-    -src="./libraries/my-stuff.html"
-    namespace="coolstuff"&gt;
-&lt;/Library&gt;
+<p>This is where the <em>Library</em> definition tag becomes useful. It allows
+us to cluster our components into individual <em>Component Libraries</em>, that
+then get imported into different <em>Component namespaces</em>.</p>
+
+<p>First, re-examine our original <em>Modulo</em> import:</p>
+
+<pre>&lt;script Modulo
+    src="https://unpkg.com/mdu.js"
+    -src="/libraries/my-stuff.html"
+&gt;&lt;/script&gt;
 </pre>
 
+
+<p>To use a <em>Library</em> definition tag, we move the
+<code>-src="/libraries/my-stuff.html"</code> and add a
+<code>namespace</code>
+to one or more
+<code>&lt;Library&gt;</code> tags in the <em>Modulo</em> script tag. This ends
+up looking like the following:</p>
+
+<pre>&lt;script Modulo src="https://unpkg.com/mdu.js"&gt;
+    &lt;Library
+        -src="/libraries/my-stuff.html"
+        namespace="mylib"
+    &gt;&lt;/Library&gt;
+&lt;/script&gt;
+</pre>
+
+
+<blockquote>
+<p><strong>Why use namespaces?</strong>
+Namespaces allow different component library files to have
+conflicting component names. This is especially useful when using
+third-party component libraries or while working in a big team:
+That way, if both you and another developer define a component with
+some common name (eg <code>name="Button"</code>), there won't be a
+conflict as long as you load each into different namespaces.</p>
+</blockquote>
 <p>Let's break this down:</p>
 <ul>
 
@@ -838,29 +849,32 @@ definitions grow and larger.</p>
 
     <li>
 
-        <blockquote>
-        <p><strong>Why use namespaces?</strong>
-        Namespaces allow different component library files to have
-        conflicting component names. This is especially useful when using
-        third-party component libraries or while working in a big team:
-        That way, if both you and another developer define a component with
-        some common name (eg <code>name="Button"</code>), there won't be a
-        conflict as long as you load each into different namespaces.</p>
-        </blockquote>
-
-        <code>namespace="coolstuff"</code>
+        <code>namespace="mylib"</code>
         <p>The <code>namespace</code> attribute specifies the
         <em>namespace prefix</em>, which is combined with a dash and the
         component name in order to create the component's <em>full
         name</em>. </p>
         <p><strong>Example:</strong> If <code>my-stuff.html</code> has a component
         defined like <code>&lt;Component name="MyThing"&gt;</code>
-        imported with <code>namespace="coolstuff"</code>, then the
-        resulting full name would be <code>coolstuff-MyThing</code>, and
+        imported with <code>namespace="mylib"</code>, then the
+        resulting full name would be <code>mylib-MyThing</code>, and
         we'd use the component like<br>
-        <code>&lt;coolstuff-MyThing&gt;&lt;/coolstuff-MyThing&gt;</code>.</p>
+        <code>&lt;mylib-MyThing&gt;&lt;/mylib-MyThing&gt;</code>.</p>
     </li>
 
+
+    <li><strong>Multiple libraries:</strong> As we add more and more component
+    libraries to a project, we can simply add additional <em>Library</em>
+    definition tags into the <em>Modulo</em> script tag. If
+    we accumulate too many <em>Library</em> definition tags that it becomes
+    unmanageable to copy and paste them between HTML files, the solution is
+    simple: Go back to the same boilerplate you learned in Part 1 of the
+    tutorial, except point to a new file that in turn contains all your
+    libraries imported and set up as expected. In other words, the
+    <code>Modulo&nbsp;-src="/libraries/my-stuff.html"</code> can either point
+    to a file containing your components, or a file that contains
+    <em>Library</em> definition tags that point in turn to files containing
+    your components.</li>
 
     <li><strong>Where to put it:</strong> The Modulo tag can go anywhere in
     your HTML. For neatness, consider putting them either within the
@@ -869,6 +883,7 @@ definitions grow and larger.</p>
     put before the <code>&lt;/body&gt;</code>.</li>
 </ul>
 
+
 <p>However, there is a downside to splitting up your files: Each new file you
 create will require an additional request to load it. This means that each
 additional individual file you include in a page will cause the page to take a
@@ -876,47 +891,73 @@ little longer to loader. So, if <code>-src=</code> causes it to load slower, how
 can we stay neat during development, but still have a fast site? This is where
 "building" comes into play.</p>
 
-<h3>Modulo build: Packing it all up</h3>
+<h3>Building: Packing it all up</h3>
 
-<p>"Building" is a feature of Modulo where it will pack up all the components
-you have loaded on a particular page into a single JS file. This single JS
-file, called a <em>build</em>, will contain all the code from all your
-components (including CParts that were split off using <code>-src=</code>).
-Once the "build" file is included using a
-<code>&lt;script&nbsp;src="..."&gt;</code> tag, then all subsequent
-<code>&lt;Library&gt;</code> tags on that page will not actually fetch the
-original HTML file that they are pointed to, but instead load the "built"
-version from the JS file. It will also pre-compile the JavaScript, removing the
-need for "eval". This causes the page to load very quickly, even faster than
-during development.  Generally, developers create builds before "launching"
-their site to "production" (e.g.  publishing their site for the world to see),
-since it results in the fastest possible loading time. Note that you should
-only attempt to edit your original, source files: Builds are only for releasing
-or publishing, but not for editing.</p>
+<p>"Building" is a feature of Modulo where it packs up all the components,
+JavaScript, and CSS you have loaded on a particular page into single
+<code>.js</code> and <code>.css</code> files, respectively. This single file
+file, called a <em>build</em>, contains all the code from all your
+components (including CParts that were split off using <code>-src=</code>).</p>
+
+<p>These "builds" are fully independent: Once the "build" file is included
+using a <code>&lt;script&nbsp;src="..."&gt;</code>, all your components on that
+page will work, without any need for including Modulo or your libraries specifically.
+In other words, this tag replaces all the boilerplate you have on your page,
+and you can remove all the importing-type code (e.g.
+<code>&lt;script&nbsp;Modulo&gt;</code>) from your HTML files, replacing it
+only with the single script tag.  Not only that, it will also pre-compile
+JavaScript code, removing the need for "eval", and reducing file sizes. This
+causes the components to load much faster.</p>
+
+<p>Generally, developers create builds before "launching" their site to
+"production" (e.g. publishing their site for the world to see), since it
+results in the fastest possible loading time. Note that you should only attempt
+to edit your original, source files: Builds are only for releasing or
+publishing, but not for editing. Never directly edit builds; instead, create
+new ones.</p>
+
+
+<h3>Pre-rendering HTML for instant loading</h3>
+
+<blockquote>
+<p><strong>modulocli</strong> If you truly want to build using terminal or
+NPM-based tools, Modulo supports that as well with <code>modulocli</code>.
+However, Modulo is still in <em>alpha</em> stages, and so the browser-focused
+workflow is the best documented, tested, and least likely to change with
+updates. That said, it's usable: It's what was used to build this website! To
+get going, use the <em>create-modulo</em> scaffolding tool, by running the
+following: <code>npm&nbsp;init&nbsp;modulo</code></p> </blockquote>
 
 <p>Even with built JavaScript code, you might notice that there is a
 "flicker" effect, where the page remains unstructured and unstyled until all
 your components finish rendering their <em>Templates</em>. Depending on how
 complicated your page is, this could be brief and forgivable, or could take a
-while and create a bad user experience.</p>
+while and create a bad user experience.  One option is to add a "Spinner" to
+your page, that is removed once things are loaded. Another option is to use
+pre-rendered HTML.</p>
 
-<p>To prevent the flicker, whenever you <code>build</code> or <code>bundle</code>
-Modulo will also prerender the HTML as well, and output a brand new HTML file
-that can be published instead of your original one. A "prerendered HTML" file
-is a special, processed HTML file which basically "freezes" the result of
-loading the page for the first time. You can use this messy, processed HTML
-file as the replacement page when launching, as it will already have JavaScript
-and CSS tags included for your build or bundle!</p>
+<p>Modulo can pre-render HTML as well, and output a brand new HTML file that can
+be published instead of your original one. A "pre-rendered HTML" file is a
+special, processed HTML file which basically "freezes" the result of loading
+the page for the first time. You can use this messy, processed HTML file as a
+drop-in replacement to your previous HTML page when launching, as it will
+already have JavaScript and CSS tags included for your build!</p>
 
-<p>To build a project, we will need to run a <em>Modulo Command Menu</em>.
+<p>To build a project, we will need to use the <em>Modulo Command Menu</em>.
 The <em>console</em> is a feature of all web browsers. As a web developer you
 likely have used it: It's a panel, hidden by default, where JS, CSS, and other
 such error messages are displayed. While most JS frameworks require NPM-based
 tools to build, Modulo can be built right from your browser's console, simply
-clicking on the <code>build</code> or <code>bundle</code> commands in the
-<code>COMMAND</code> menu, that is visible in your browser developer tools
-console.</p>
+clicking on the <code>build</code> commands in the <code>COMMAND</code> menu,
+that is visible in your browser developer tools console.</p>
 
+<p>Build files will look like: <code>modulo-build-xx4bz9v4.js</code>,
+<code>modulo-build-x9f2za71.css</code>. Note the so-called "hash" (e.g.
+“xx4bz9v4”): These unique IDs identify each JS and CSS file that is
+generated by Modulo. If you change something in your components, you will
+cause one (or both) of these hashes to change, if they end up affecting the
+component's behavior (<code>.js</code>) or it's appearance
+(<code>.css</code>).</p>
 
 <section class="Tutorial-tryit">
     <h4>Try it now</h4>
@@ -943,14 +984,14 @@ console.</p>
         <li>Do you see a Modulo logo (<code>%</code>), with the word
         <code>COMMANDS</code>? Click on <code>COMMANDS</code>, and possibly one
         more time (on Firefox), and you should see a command menu, containing
-        commands like <code>build</code>, <code>bundle</code>, and <code>test</code>.
-        To build, simply click the "<code>build</code>" command.
+        commands like <code>build</code> and <code>test</code>.  To build,
+        simply click the "<code>build</code>" command.
 
-            <p>Note: Look in the upper-right hand of your browser. You might see a
-            warning, prompting you about "Allowing multiple downloads". You should
-            allow it, otherwise it will block the generated files from being
-            downloaded. If you see no warnings about this, then just continue to
-            the next step.</p>
+            <p>Note: Look in the upper-right hand of your browser. You might
+            see a warning, prompting you about "Allowing multiple downloads".
+            You should allow it, otherwise it will block the generated files
+            from being downloaded. If you see no warnings about this, then just
+            continue to the next step.</p>
         </li>
 
         <li>Your browser should reload, and then offer to download an HTML,
@@ -961,11 +1002,11 @@ console.</p>
 
         <li>The HTML "build" is a copy of the HTML page you were working on,
         with two important differences:
-            </li><li>Difference #1: It's been modified to include the built
-            versions of the CSS and JS: A link tag to include the CSS file is
-            inserted before the <code>&lt;/head&gt;</code>, and
-            a script tag inserted before the <code>&lt;/body&gt;</code> tag to
-            include the JS file.</li>
+            </li><li>Difference #1: It's been modified to include the built versions
+            of the CSS and JS: A link tag to include the CSS file is inserted
+            before the <code>&lt;/head&gt;</code>, and a script tag inserted
+            before the <code>&lt;/body&gt;</code> tag to include the JS
+            file.</li>
             <li>Difference #2: It contains the page's <em>current</em> state,
             e.g., the result of an initial render. This means that when that
             HTML page is loaded, it will be "prerendered", and thus appear to
@@ -983,13 +1024,6 @@ console.</p>
         another tab, and resuming work in another window. Then, to rebuild,
         simply switch back to this window, and either click the button or hit
         refresh!</p>
-
-        <li><em>Optional:</em> Time to validate that the "build" worked!
-        Navigate to the "Network" tab of your Development Console. Force
-        refresh your browser. You should now see no more extra "requests" being
-        sent for each HTML component library that needs to be loaded. Instead,
-        just the JS "build" file "preloads" all the individual files in one
-        go.</li>
     </ol>
 
 
@@ -1008,68 +1042,72 @@ console.</p>
 </section>
 
 
-<h3>Modulo bundle: Packing it all up in one go</h3>
-
+<h3>Integrating builds with existing projects</h3>
 
 <blockquote>
-<p><strong>Build vs bundle?</strong> Not sure which to use? Typically, "bundle"
-is the fastest and easiest. However, there are purposes for both.</p>
+<p><strong>What can Modulo integrate with?</strong> Modulo was developed to be
+easy-to-integrate with existing code. In other words, it doesn't matter if you
+use WordPress or Django, Drupal or Rails, Jekyll or Hugo, Modulo components can
+be embedded into your page to add JavaScript-based interactivity and more
+convenient HTML development. Although probably less useful, you could
+conceivably even use it with JavaScript-based generators, such as Next.js or
+Gatsby—in the end, as long as JS and HTML is getting sent to a browser,
+Modulo components can be in the mix!</p> </blockquote>
 
-<p>"Build" builds all loaded Components into JS and CSS files, pre-compiling
-Templates and JavaScript to avoid "eval". These JS and CSS files do not include
-Modulo, or any other JS or CSS. This is often good if you intend then to
-further pack these files using other tools, or if you want to more flexibly
-include different content between pages. Unlike bundles, builds will include
-the source code in the JS file, possibly resulting in a slightly larger
-file.</p>
+<p>If you are experienced with other JavaScript build systems, such as those
+that are NPM-based (e.g. Webpack, Parcel, Rollup), you might be curious as to
+how to practically use Modulo's browser-based build system. Even if you aren't
+familiar with other build systems, you might (correctly!) think that in
+practice it must get hard to keep track of which JS files, CSS files, and
+pre-rendered HTML files should be included in the published version of the
+site, and further more that re-building after every change on every single page
+on larger sites could get tedious. Also, you might wonder how to integrate this
+process with pre-existing web apps, or apply it in a real-life web development
+team, as we've thus far only been talking about developing Modulo components in
+isolation. This is where <em>workflow</em> comes into play, i.e. the patterns
+and procedures you follow to keep a project humming along.</p>
 
-<p>"Bundle" does all of the above, but instead of including files verbatim, it
-will omit the source code and include a "config bundle" that gets stored in
-literal data-structure in the JavaScript file. This can reduce total file size
-and make everything load faster.</p>
+<p>One useful workflow for integrating Modulo with existing projects is to have
+a sort of sandbox "testing page" or hidden internal-only "showcase" HTML page
+(i.e. similar to a "story book" or "design guide" of components). On this page,
+you develop and showcase your re-usable components, both to ease development,
+and also to serve as a demonstration for other members of your development team
+or organization.</p>
 
-<p>Bundle also combines all the JS and CSS, even files unrelated to Modulo.
-It's useful if if you want a "drop-in" portable set of JS and CSS files to use
-elsewhere with optimal speed. For example, you could have a "component
-development" HTML file which you run "bundle" on, and then you use that build
-throughout the rest of your site, even on pages which previously didn't use
-Modulo.</p>
-</blockquote>
+<p>From this "showcase" page, you can then run <code>build</code> to generate
+built JS files and CSS files whenever you have completed sufficient work on
+your components that you want to integrate and release into the rest of the
+project. The "self-packing" nature of these builds make the integration no
+harder than adding any other script or link tag. This works especially well for
+small projects, and avoids the need for a complicated automated build process
+for component libraries that you might only occasionally change. One downside
+of this workflow is that you might not be able to pre-render any of the pages
+you are integrating with, so there might be slight delays in mounting your
+components.</p>
 
-
-<p>So, we've learned how to "build" our components into a single JS file, which
-prevents extra requests. However, it doesn't solve the issue of having to do a
-separate request for the Modulo source code, or the possibly verbose or messy
-"boilerplate" which you need to copy between every HTML file. Furthermore, if
-you intend to incorporate more JS files or CSS libraries, we could end up
-making many requests again. This is where Modulo's "bundle" command comes into
-play.</p>
-
-<p>Modulo also has a "bundle" command. A "bundle" does everything a "build"
-does, but even more: A "bundle" will include the Modulo.js source code as well,
-along with any other JS or CSS files that are loaded. This will result in a
-much simpler built HTML file, clearing ALL the script tags, "Library" tags, and so
-on, and leaving only one single CSS file, one single JS file, and the
-pre-rendered HTML.</p>
-
-<h3>Using bundles elsewhere</h3>
-
-<p>This "bundle" can then be used on any page to immediately activate
-your components, using the same namespaces that you activated in the page that
-you built from, without any need of explicitly loading the library. In other
-words, the bundle command will "freeze" all the JS and CSS on the current page
-into single JS and CSS file that can be used anywhere, including in non-Modulo
-projects.</p>
-
-<p>See below for an example of including a bundle in another page:</p>
+<p>For example, see below for a complete page showing including a bundle in a
+hypothetical existing PHP project:</p>
 
 <mws-demo text="
-<!-- Include the output of the bundle command: -->
-<link rel=&quot;stylesheet&quot; href=&quot;./modulo-bundle.(some hash goes here).css&quot; />
-<script src=&quot;./modulo-bundle.(some hash goes here).js&quot;></script>
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <!-- Include the output of the bundle command: -->
+        <link rel=&quot;stylesheet&quot; href=&quot;./modulo-bundle.(some hash goes here).css&quot; />
+        <script async src=&quot;./modulo-bundle.(some hash goes here).js&quot;></script>
+    </head>
+    <body>
+        <!-- The components we define can be used just like before: -->
+        <x-HelloWorld goal=&quot;10&quot; ></x-HelloWorld>
 
-<!-- Now, the components we define can be used just like before: -->
-<x-HelloWorld goal=&quot;10&quot; amount=&quot;2&quot; ></x-HelloWorld>
+        <!-- We can also combine other language or templating features: -->
+        <?php
+            for ($i = 0; $i <= 10; $i++) {
+                echo &quot;<x-HelloWorld goal=\&quot;$i\&quot;></x-HelloWorld>&quot;;
+            } 
+        ?>
+   </body>
+</html>
 " modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
         
            demo-wrapper__clipboard  
@@ -1099,7 +1137,7 @@ projects.</p>
 
     <div class="side-by-side-panes">
         <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 0px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 717.578px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 152px; min-width: 717.578px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">&lt;!-- Include the output of the bundle command: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">link</span> <span class="cm-attribute">rel</span>=<span class="cm-string">"stylesheet"</span> <span class="cm-attribute">href</span>=<span class="cm-string">"./modulo-bundle.(some hash goes here).css"</span> <span class="cm-tag cm-bracket">/&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">script</span> <span class="cm-attribute">src</span>=<span class="cm-string">"./modulo-bundle.(some hash goes here).js"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">&lt;!-- Now, the components we define can be used just like before: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">x-HelloWorld</span> <span class="cm-attribute">goal</span>=<span class="cm-string">"10"</span> <span class="cm-attribute">amount</span>=<span class="cm-string">"2"</span> <span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">x-HelloWorld</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 152px;"></div><div class="CodeMirror-gutters" style="display: none; height: 202px;"></div></div></div></div>
+            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="bottom: 0px; width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 0px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 794.391px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 464px; min-width: 794.391px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-meta">&lt;!DOCTYPE HTML&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">html</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">head</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Include the output of the bundle command: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">link</span> <span class="cm-attribute">rel</span>=<span class="cm-string">"stylesheet"</span> <span class="cm-attribute">href</span>=<span class="cm-string">"./modulo-bundle.(some hash goes here).css"</span> <span class="cm-tag cm-bracket">/&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">script</span> <span class="cm-attribute">async</span> <span class="cm-attribute">src</span>=<span class="cm-string">"./modulo-bundle.(some hash goes here).js"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">head</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">body</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- The components we define can be used just like before: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">x-HelloWorld</span> <span class="cm-attribute">goal</span>=<span class="cm-string">"10"</span> <span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">x-HelloWorld</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- We can also combine other language or templating features: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-meta">&lt;?php</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-meta">for ($i = 0; $i &lt;= 10; $i++) {</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">                <span class="cm-meta">echo "&lt;x-HelloWorld goal=\"$i\"&gt;&lt;/x-HelloWorld&gt;";</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-meta">} </span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-meta">?&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">   <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">body</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">html</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 464px;"></div><div class="CodeMirror-gutters" style="display: none; height: 514px;"></div></div></div></div>
         </div>
 
         
@@ -1111,10 +1149,7 @@ projects.</p>
 
 </mws-demo>
 
-<p>Note that once you've bundled your scripts, there is no need for using
-<code>&lt;script Modulo ... &gt;</code> or <code>&lt;Library&gt;</code> tags.
-Everything is already "bundled" and automatically activating in that
-one single JS script.</p>
+
 
 
 <h3>Part 2: Summary</h3>
@@ -1139,12 +1174,21 @@ props.name }}</code>) mixed in with the HTML, and possibly modified or
 reformatted by attaching template filters (e.g. <code>{{ props.name|upper
 }}</code>)</li>
 
+<li><strong>Library</strong> - Allows grouping of Components into library files
+that can be "siloed" under a certain component namespace or configuration.</li>
+
+<li><strong>namespace</strong> - The prefix that replaces the default "x" and
+goes before the name of a component to form the complete component name, e.g.
+namespace <code>maps</code> joins with
+<code>&lt;Component&nbsp;name="India"&gt;</code> to form a
+<code>&lt;maps-India&gt;</code> component.</li>
+
 <li><strong>build</strong> - Combining all your JS and CSS together into a
-single file that loads faster, and prerender the HTML so there's no flicker.
+single file that loads faster, and pre-render the HTML so there's no
+flicker.</li>
 
-</li><li><strong>bundle</strong> - Do a build, but also auto-activate the components
-and include any extra, non-Modulo JS or CSS files as well.</li>
-
+<li><strong>hash</strong> - These unique IDs identify each JS and CSS file that
+is generated by Modulo.</li>
 </ul>
 
 
@@ -1153,12 +1197,12 @@ and include any extra, non-Modulo JS or CSS files as well.</li>
 <p>At this point, you've learned enough to be dangerous! If you intend to
 mostly use Modulo as a template developer, refactoring HTML into template-based
 web components, then you are all ready to get going.  Feel free to try using
-Modulo to refactor your HTML, be sure to test on all target browsers (Modulo is
-still under development, after all), and then finally use the self-packing
-feature to include a JS file that loads quickly. To improve your template
-development skills, you might want to skip learning about Script CParts, and
-instead read deeper on the capabilities of the <a href="/docs/templating.html">Modulo templating language</a>, which you can use
-to build more complicated re-usable HTML and CSS.</p>
+Modulo to refactor your HTML, and be sure to test on all target browsers
+(Modulo is still under development, after all), and then finally use the
+self-packing feature to include HTML/CSS/JS that loads quickly. To improve your
+template development skills, you might want to skip learning about Script
+CParts (Part 3), and instead read deeper on the capabilities of the <a href="/docs/templating.html">Modulo templating language</a>, which you can use
+to build more complicated re-usable HTML.</p>
 
 <p>However, if you are at least a little familiar with JavaScript and/or
 React-style SPA frameworks, and want to learn how to make more complex,
@@ -1182,7 +1226,7 @@ Scripting</a></p>
 
 
 
-<script src="/_modulo/modulo-build-x15uaun4.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
+<script src="/_modulo/modulo-build-x1indef0.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
 modulo.assets.require("configuration");
 modulo.assets.require("DemoModal");
 modulo.assets.require("DemoChart");

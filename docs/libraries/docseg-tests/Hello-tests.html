@@ -1,0 +1,45 @@
+<test name="Renders with different numbers">
+    <script name="Ensure state is initialized">
+        assert: state.num === 42
+    </script>
+
+    <template name="Ensure initial render is correct">
+        <button @click:="script.countUp">Hello 42</button>
+    </template>
+
+    <state
+        num:=100
+    ></state>
+
+    <template name="Ensure modifying state shows new content">
+        <button @click:="script.countUp">Hello 100</button>
+    </template>
+
+    <script name="Ensure count up function increments">
+        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        script.countUp();
+        assert: state.num === 101
+    </script>
+
+    <template name="Ensure re-render">
+        <button @click:="script.countUp">Hello 101</button>
+    </template>
+
+    <script name="Ensure click calls count up">
+        element.querySelector('button').click()
+        assert: state.num === 102
+    </script>
+
+    <template name="Ensure re-render 2">
+        <button @click:="script.countUp">Hello 102</button>
+    </template>
+
+    <script name="Ensure 2nd click still works (using event: macro)">
+        event: click button
+    </script>
+
+    <template name="Ensure re-render 3">
+        <button @click:="script.countUp">Hello 103</button>
+    </template>
+</test>
+

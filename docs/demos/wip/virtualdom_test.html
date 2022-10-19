@@ -1,4 +1,15 @@
-<template id="load_point">
+<template Modulo>
+  <Component name="Tester">
+    <Template>
+        <h1 class="logo">Hello</h1>
+
+        <div class="controls" style="display: flex">
+            <p>How</p>
+            <p>goes</p>
+            <p>it</p>
+        </div>
+    </Template>
+  </Component>
 </template>
 
 <script src="/js/Modulo.js"></script>
@@ -15,37 +26,19 @@
 
 <script>
 
-/*
-<template Modulo>
-  <Component name="Tester">
-    <Template>
-        <h1 class="logo">Hello</h1>
-        <div class="controls" style="display: flex">
-            <p>How</p>
-            <p>goes</p>
-            <p>it</p>
-        </div>
-    </Template>
-  </Component>
-</template>
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-const mod = new Modulo(modulo);
-const vw = new modulo.registry.engines.VirtualWindow(mod);
-/*
-<div>
-  <p>test</p>
-  <p>another <em>test</em> okay</p>
-  <x-Thing></x-Thing>
-  <x-Tester></x-Tester>
-</div>
-*/
-vw.document.body.innerHTML = `
-<script src="/js/Modulo.js"></sc` + `ript>
-`;
+setTimeout(() => {
+const vw = new modulo.registry.engines.VirtualWindow(modulo);
+//vw.customElements.elemClassesLC['x-tester'] = modulo.registry.elements.x_Tester;
+vw.loadHTML(`
+  <div>
+    <p>test</p>
+    <p>another <em>test</em> okay</p>
+    <x-Thing></x-Thing>
+    <x-Tester></x-Tester>
+  </div>
+`);
 console.log(vw.document.innerHTML);
-});
+}, 500);
 
 /*
 vw.loadHTML(`

@@ -1,0 +1,46 @@
+<test name="renders with search data">
+
+    <template name="Ensure initial render is correct">
+        <p> | </p>
+        <p></p>
+        <a href="https://github.com//" target="_blank"></a>
+        <input [state.bind] name="search"
+            placeholder="Type GitHub username" />
+        <button @click:="script.fetchGitHub">Get Info</button>
+    </template>
+
+    <state search="michaelpb"></state>
+
+    <template name="Ensure state from search box renders" test-values>
+        <p> | </p>
+        <p></p>
+        <a href="https://github.com/michaelpb/" target="_blank">
+          github.com/michaelpb/
+        </a>
+        <input [state.bind] name="search" value="michaelpb"
+            placeholder="Type GitHub username" />
+        <button @click:=script.fetchGitHub>Get Info</button>
+    </template>
+
+    <script>
+        const name = 'a b c'
+        const location = 'd e f'
+        const bio = 'h i j'
+        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        script.githubCallback({ name, location, bio })
+        assert: script.githubCallback
+    </script>
+
+    <template name="Ensure callback shows data in expected spots" test-values>
+        <p>a b c | d e f</p>
+        <p>h i j</p>
+        <a href="https://github.com/michaelpb/" target="_blank">
+          github.com/michaelpb/
+        </a>
+        <input [state.bind] name="search" value="michaelpb"
+            placeholder="Type GitHub username" />
+        <button @click:=script.fetchGitHub>Get Info</button>
+    </template>
+
+</test>
+

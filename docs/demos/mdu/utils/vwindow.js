@@ -1,4 +1,5 @@
 // WIP, mostly incomplete
+
 if (!modulo.registry.vwindow) {
     modulo.registry.vwindow = {};
 }
@@ -119,7 +120,6 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
                         new elemClassesLC[tagLC]() : // Invoke custom class
                         ownerDocument.createElement(tagLC);
             elem.tagName = tagLC.toUpperCase(); // hack
-            console.log(elem.constructor.name, elemClassesLC);
             /*
             if (elem.constructor.name === 'CustomElement') {
                 console.log('---------------')
@@ -328,26 +328,9 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         return this._attributeValues[name.toLowerCase()];
     }
 
-    _fetch(url, callback) {
-        const vw = this.ownerDocument.moduloVirtualWindow;
-        vw.window.fetch(url)
-            .then(response => response.text())
-            .then(callback);
-            /*
-            .catch(err => {
-                console.log(this);
-                console.error('Modulo VM - Could not fetch:', err);
-            });
-            */
-    }
-
     setAttribute(name, value) {
         if (!this.hasAttribute(name)) {
             this._attributeNames.push(name);
-            if ((this.tagName + '>' + name).toLowerCase() === 'script>src') {
-                const vw = this.ownerDocument.moduloVirtualWindow;
-                this._fetch(value, vw.exec.bind(vw));
-            }
         }
         this._attributeValues[name.toLowerCase()] = value;
     }
@@ -403,12 +386,9 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         };
         while (text) { // Stop when text is empty ('' is falsy)
             const [ name, match ] = nextToken(/\s*([= ])\s*(['"]?)/);
-            const value = !match[1] ? '' : // Attribute only
+            this._attributeNames.push(name); // Add to attr names list
+            this._attributeValues[name.toLowerCase()] = !match[1] ? '' : // Attribute only
                 nextToken(match[2] ? match[2] : ' ')[0]; // Quote or space delim
-            this.setAttribute(name, value);
-            // old optimization -v
-            //this._attributeNames.push(name); // Add to attr names list
-            //this._attributeValues[name.toLowerCase()] = value;
         }
     }
 
@@ -443,6 +423,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
     }
 
     get _moduloTagName() {
+        console.log('i am modulo', this.isModulo);
         if (this.isModulo && this.cparts && this.cparts.component) {
             const def = this.cparts.component.def || this.cparts.component.conf;
             return `${ def.namespace }-${ def.name }`;
@@ -558,16 +539,13 @@ modulo.register('engine', class VirtualWindow {
             document.ownerDocument = document;
             return document;
         };
-        //const modulo = {};
+        const modulo = {};
         const customElements = this.makeCustomElements();
         const document = createHTMLDocument('modulovm');
         const HTMLElement = document.HTMLElement;
-        const win = { document, HTMLElement, /*modulo,*/ customElements };
-        win.modulo = modulo; // ?? todo rm
+        const win = { document, HTMLElement, modulo, customElements };
         Object.assign(this, win); // Expose some window properties at top as well
         this.window = Object.assign({}, vwindow, win); // Add in all vdom classes
-        this.window.exec = this.exec.bind(this);
-        this.window.fetch = window.fetch.bind(window);
     }
 
     makeCustomElements() {
@@ -610,17 +588,21 @@ modulo.register('engine', class VirtualWindow {
     }
     */
 
-    navigate(url) {
-        window.fetch(url)
-            .then(response => response.text())
-            .then(this.execHTML.bind(this))
-    }
-
     //run(text, exportCode = '') {
     exec(code) {
         //const code = `${ text }\n\n return ${ exportCode };`;
         const func = new Function('window', 'document', 'HTMLElement', code);
         return func(this.window, this.document, this.HTMLElement);
+    }
+
+    navigate(url) {
+        window.fetch(url)
+            .then(response => response.text())
+            .then(this.loadHTML.bind(this))
+    }
+
+    loadHTML(htmlCode) {
+        this.document.innerHTML = htmlCode;
     }
 
     /*

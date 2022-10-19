@@ -1,0 +1,253 @@
+<Component namespace="eg" name="ModuloQuest">
+
+<Template>
+    {% if state.paused %}
+        <div class="menu">
+            <h1>Modulo Quest</h1>
+            <input [state.bind] name="speed" type="range" min="1000" max="10000" step="10" />
+            <button @click:=script.start class="play-button">
+                ▶ New Game
+            </button>
+        </div>
+    {% endif %}
+
+    <div class="map">
+        {% for tile in script.visibleTiles %}
+            <div style="background-color: {{ tile.color }}" class="{{ tile.effects|default:'' }}">
+                {% if tile.foe %}
+                    <span @click:=script.attackFoe payload:='{{ tile|json }}'>
+                        {{ tile.foe.symbol }}
+                    </span>
+                {% endif %}
+                {% if tile.effects %}<i class="{{ tile.effects }}"></i>{% endif %}
+                {{ tile.symbol }}
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if not state.paused %}
+        <div class="ui">
+            HP:&nbsp;&nbsp;{{ state.hp }}<br />
+            ATK:&nbsp;{{ state.atk }}<br />
+            <div class="compass">
+                <button @click:=script.move payload="N">N</button>
+                <button @click:=script.move payload="W">W</button>
+                <button @click:=script.move payload="S">S</button>
+                <button @click:=script.move payload="E">E</button>
+            </div>
+        </div>
+    {% endif %}
+</Template>
+
+<State
+    map:=null
+    paused:=true
+    hp:=1000
+    atk:=23
+    speed:=5000
+    view-x:=100
+    view-y:=100
+></State>
+
+<Script>
+    const mapHeight = 200;
+    const mapWidth = 200;
+    const visHeight = 12;
+    const visWidth = 12;
+    const ROCK_MONSTER = '⍾';
+    const MAGIC_ORB_MONSTER = '⍣';
+
+    function tick() {
+        for (const tile of state.visibleTiles) {
+            let newEffects = false;
+            if (tile.foe) {
+                // Possibly do attack animation
+                const random100 = Math.floor(Math.random() * 100);
+                if (random100 > 70) {
+                    tile.effects = 'attack';
+                    newEffects = true;
+                }
+            }
+
+            if (!newEffects) {
+                delete tile.effects;
+            }
+        }
+    }
+
+    function move(direction) {
+        if (direction === 'N') {
+            state.viewY -= 1;
+        } else if (direction === 'S') {
+            state.viewY += 1;
+        } else if (direction === 'W') {
+            state.viewX -= 1;
+        } else if (direction === 'E') {
+            state.viewX += 1;
+        }
+    }
+
+    function initializedCallback() {
+        if (state.map) {
+            return; // already set up!
+        }
+        state.map = {}; // Create an empty object, and fill with map
+        let y = 0;
+        while (y < mapHeight) {
+            let x = 0;
+            while (x < mapWidth) {
+                state.map[x + '.' + y] = generateTile(x, y);
+                x++;
+            }
+            y++;
+        }
+
+        // Add some littler monsters in
+        state.map['105.105'].foe = { symbol: '⍾', attack: 10, health: 30 };
+        state.map['106.107'].foe = { symbol: '⍣', attack: 40, health: 10 };
+        state.map['103.103'].foe = { symbol: '⍮', attack: 10, health: 100 };
+    }
+
+    function prepareCallback() {
+        const visibleTiles = [];
+        let y = state.viewY;
+        while (y < (state.viewY + visHeight)) {
+            let x = state.viewX;
+            while (x < (state.viewX + visWidth)) {
+                visibleTiles.push(state.map[x + '.' + y]);
+                x++;
+            }
+            y++;
+        }
+        return { visibleTiles };
+    }
+
+    const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+    function generateTile(x, y) {
+        const landSize = 10;
+        const circ = (x - 100) ** 2 + (y - 100) ** 2;
+        if (circ === landSize ** 2 || circ - 1 === landSize ** 2) {
+            return { symbol: ',', color: 'yellow' };
+        } else if (circ > landSize ** 2) {
+            return { symbol: '~', color: 'blue' };
+        }
+        const random100 = Math.floor(Math.random() * 100);
+        if (random100 < 90) {
+            return { symbol: '.', color: 'green' };
+        } else {
+            return { symbol: 'Δ', color: 'brown' };
+        }
+        //return tiles['' + (x % 3)];
+    }
+
+    //let interval = null;
+    function start() {
+        //pauseGame(); // ensure paused initially
+        state.paused = false;
+        //interval = window.setInterval(tick, state.speed);
+        element.addEventListener("keydown", (event) => {
+            if (event.isComposing || event.keyCode === 229) {
+                return;
+            }
+        });
+    }
+
+    function pause() {
+        /*if (interval) {
+            window.clearInterval(interval);
+        }*/
+        state.paused = true;
+    }
+</Script>
+
+<Style>
+    :host {
+        position: relative;
+        display: block;
+    }
+    .map {
+        display: grid;
+        grid-template-columns: repeat(12, 10px);
+    }
+    .map > div {
+        width: 10px;
+        height: 10px;
+        font-size: 10px;
+        text-align: center;
+    }
+    .map > div > span {
+        font-size: 13px;
+        top: -1px;
+        left: -1px;
+        border: 1px solid white;
+        background: white;
+        height: 10px;
+        width: 10px;
+        font-weight: 800;
+        color: black;
+        position: relative;
+        z-index: 1;
+    }
+
+    .ui {
+        position: absolute;
+        top: 10px;
+        left: 125px;
+        background: white;
+        font-size: 12px;
+        font-family: monospace;
+    }
+
+
+    .compass > button {
+        position: absolute;
+        height: 20px;
+        width: 20px;
+        padding: 0;
+    }
+    .compass :nth-child(1) {
+        top: 30px;
+        left: 10px;
+    }
+
+    .compass :nth-child(2) {
+        left: 0px;
+        top: 50px;
+    }
+
+    .compass :nth-child(3) {
+        left: 10px;
+        top: 70px;
+    }
+
+    .compass :nth-child(4) {
+        left: 20px;
+        top: 50px;
+    }
+
+    .menu {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        display: block;
+        width: 100px;
+        height: 100px;
+        z-index: 2;
+        text-align: center;
+    }
+    .menu h1 {
+        font-size: 17px;
+    }
+    input {
+        width: 50px;
+    }
+
+    i.attack {
+    }
+</Style>
+
+
+</Component>
+

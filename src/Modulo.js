@@ -8,19 +8,14 @@ window.Modulo = class Modulo {
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
         this._configSteps = 0;
-
         this.config = {};
         this.definitions = {};
-
         if (parentModulo) {
             this.parentModulo = parentModulo;
-
             const { deepClone } = modulo.registry.utils;
             this.config = deepClone(parentModulo.config, parentModulo);
             this.registry = deepClone(parentModulo.registry, parentModulo);
-
             this.assets = parentModulo.assetManager;
-            this.globals = parentModulo.globals;
         } else {
             this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
         }
@@ -43,26 +38,26 @@ window.Modulo = class Modulo {
         }
     }
 
-    start(moduloBuild = null) {
-        if (moduloBuild) {
-            if (moduloBuild.loadedBy) {
+    start(build = null) {
+        const elem = build && build.tagName ? build : window.document.head;
+        if (build && !elem) {
+            if (build.loadedBy) {
                 return;
             }
-            this.assets.modules = moduloBuild.modules;
-            this.assets.nameToHash = moduloBuild.nameToHash;
-            this.definitions = moduloBuild.definitions;
-            moduloBuild.loadedBy = this.id;
+            this.assets.modules = build.modules;
+            this.assets.nameToHash = build.nameToHash;
+            this.definitions = build.definitions;
+            build.loadedBy = this.id;
             return;
         }
-        // Loading <script Modulo> tag, meaning we want to run blocking
-        if (document.head.querySelector('script[modulo]')) {
-            this.loadFromDOM(document.head, null, true);
+        if (elem) { // Loadable tag exists, load sync/blocking
+            this.loadFromDOM(elem, null, true);
             this.preprocessAndDefine();
-        } else {
+        } else { // Doesn't exist, wait for page to load
             // TODO: Remove "else", so both sync and async paths happen, but
             // make loads always idempotent
-            document.addEventListener('DOMContentLoaded', () => {
-                this.loadFromDOM(document.head, null, true);
+            window.document.addEventListener('DOMContentLoaded', () => {
+                this.loadFromDOM(window.document.head, null, true);
                 this.preprocessAndDefine();
             });
         }
@@ -808,13 +803,13 @@ modulo.register('core', class AssetManager {
         return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
     }
 
-    define(moduleName, code) {
+    define(name, code) {
         const hash = this.modulo.registry.utils.hash(code);
-        this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
-        this.nameToHash[moduleName] = hash;
+        this.modulo.assert(!(name in this.nameToHash), `Duplicate: ${ name }`);
+        this.nameToHash[name] = hash;
         if (!(hash in this.modules)) {
             this.moduleSources[hash] = code;
-            const jsText = this.wrapDefine(hash, moduleName, code);
+            const jsText = this.wrapDefine(hash, name, code);
             this.modulo.assets = this;// TODO Should investigate why needed
             this.modulo.pushGlobal();
             this.appendToHead('script', '"use strict";' + jsText);
@@ -2089,8 +2084,8 @@ modulo.register('command', function build (modulo, opts = {}) {
     });
 });
 
-if (typeof document !== 'undefined' && !window.moduloBuild) {
-    document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
+if (typeof window.document !== 'undefined' && !window.moduloBuild) {
+    window.document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
         if (cmd || window.moduloBuild) { // Command / already built: Run & exit
             return cmd && modulo.registry.commands[cmd](modulo);
@@ -2106,10 +2101,8 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
 }
 
 if (typeof document !== 'undefined' && document.head) { // Browser environ
-    Modulo.globals = window; // TODO, remove?
-    modulo.globals = window;
-    window.hackCoreModulo = new Modulo(modulo); // XXX
-    modulo.start(window.moduloBuild);
+    window.hackCoreModulo = new Modulo(window.modulo); // XXX
+    window.modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }

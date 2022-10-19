@@ -1,13 +1,9 @@
-const LEGACY = []; // TODO rm
-window.LEG = LEGACY;
-
-// Avoid overwriting other Modulo versions / instances
-window.ModuloPrevious = window.Modulo;
+// Modulo.js - Copyright 2022 - LGPL 2.1 - https://modulojs.org/
+window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
-
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
-        // Note: parentModulo arg is being used by mws/Demo.js
+        // Note: parentModulo arg is still being used by mws/Demo.js
         window._moduloID = (window._moduloID || 0) + 1; // Global ID
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
@@ -74,7 +70,7 @@ window.Modulo = class Modulo {
 
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // plural / singular
-        this.assert(type in this.registry, 'Unknown registration type:', type);
+        this.assert(type in this.registry, 'Unknown registration type: ' + type);
         this.registry[type][cls.name] = cls;
 
         if (type === 'commands') { // Attach globally to 'm' alias
@@ -230,9 +226,8 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Create a new modulo instance to be the global default instance
 (new Modulo(null, [
-    'cparts', 'dom', 'utils', 'library', 'core', 'engines', 'commands',
-    'templateFilters', 'templateTags', 'directives', 'directiveShortcuts',
-    'loadDirectives', 'loadDirectiveShortcuts', 'processors',
+    'cparts', 'dom', 'utils', 'core', 'engines', 'commands', 'templateFilters',
+    'templateTags', 'processors', 'elements',
 ])).pushGlobal();
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
@@ -240,7 +235,6 @@ modulo.register('processor', function src (modulo, conf, value) {
     modulo.fetchQueue.enqueue(value, text => {
         conf.Content = (text || '') + (conf.Content || '');
     });
-    //return 'wait'; // Want to wait
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -286,11 +280,12 @@ modulo.register('processor', function customElement (modulo, def, value) {
     */
     def.namespace = def.namespace || 'x';
     def.name = def.name || def.DefName || def.Name;
-    def.TagName = (def.TagName || `${ def.namespace }-${ def.name }`).toLowerCase();
+    def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
     def.MainRequire = def.DefinitionName;
+    const className =  `${ def.namespace }_${ def.name }`;
     def.Code = `
         const def = modulo.definitions['${ def.DefinitionName }'];
-        class _${ def.Name }_ extends ${ value } {
+        class ${ className } extends ${ value } {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -302,9 +297,9 @@ modulo.register('processor', function customElement (modulo, def, value) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, _${ def.Name }_);
-        window.customElements.define(def.TagName, _${ def.Name }_);
-        return _${ def.Name }_;
+        modulo.registry.utils.initClass(modulo, def, ${ className });
+        window.customElements.define(def.TagName, ${ className });
+        return ${ className };
     `;
 });
 
@@ -335,6 +330,7 @@ modulo.register('util', function initClass (modulo, def, cls) {
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
     };
+    modulo.register('element', cls);
 });
 
 modulo.register('util', function mountElement (modulo, def, elem) {
@@ -406,19 +402,11 @@ modulo.config.component = {
     DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
     DefBuilders: [ 'CustomElement', 'Code' ],
     DefFinalizers: [ 'MainRequire' ],
+    Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
     //InstBuilders: [ 'CreateChildren' ],
 };
 
 modulo.register('cpart', class Component {
-    /*
-    static factoryCallback(modulo, conf) {
-        conf.directiveShortcuts = [
-            [ /^@/, 'component.event' ],
-            [ /:$/, 'component.dataProp' ],
-        ];
-        conf.uniqueId = ++factory.id;
-    }
-    */
     rerender(original = null) {
         if (original) { // TODO: this logic needs refactor
             if (this.element.originalHTML === null) {
@@ -452,27 +440,6 @@ modulo.register('cpart', class Component {
         //this.element.renderObj = null; // ?rendering is over, set to null
     }
 
-    headTagLoad({ el }) {
-        //el.remove();
-        // DAED CODE
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    metaTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    linkTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
-    titleTagLoad({ el }) {
-        // TODO: Refactor the following
-        this.element.ownerDocument.head.append(el); // move to head
-    }
-
     scriptTagLoad({ el }) {
         const newScript = el.ownerDocument.createElement('script');
         newScript.src = el.src; // TODO: Possibly copy other attrs?
@@ -481,11 +448,26 @@ modulo.register('cpart', class Component {
     }
 
     initializedCallback(renderObj) {
-        this.mode = 'regular';
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
-            for (const directiveName of cPart.getDirectives ? cPart.getDirectives() : []) {
-                opts.directives[directiveName] = cPart;
+            const def = (cPart.def || cPart.conf);
+            for (const method of def.Directives || []) {
+                const dirName = (def.RenderObj || def.Name) + '.' + method;
+                opts.directives[dirName] = cPart;
+            }
+        }
+        const addHead = ({ el }) => this.element.ownerDocument.head.append(el);
+        if (this.attrs.mode === 'shadow') {
+            this.element.attachShadow({ mode: 'open' });
+        } else { // TODO: Refactor logic here
+            opts.directives.slot = this;
+            this.slotTagLoad = this.slotLoad.bind(this); // TODO switch to only slotTagLoad
+            if (this.attrs.mode === 'vanish-into-document') {
+                opts.directives.script = this;
+                for (const headTag of [ 'link', 'title', 'meta' ]) {
+                    opts.directives[headTag] = this;
+                    this[headTag + 'TagLoad'] = addHead;
+                }
             }
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
@@ -496,31 +478,9 @@ modulo.register('cpart', class Component {
         return { originalHTML, innerHTML: null, patches: null, id: this.id };
     }
 
-    getDirectives() {
-        const dirs = [
-            'component.dataPropMount',
-            'component.dataPropUnmount',
-            'component.eventMount',
-            'component.eventUnmount',
-            'component.slotLoad',
-        ];
-        const vanishTags = [ 'link', 'title', 'meta', 'script' ];
-        if (this.attrs.mode === 'vanish-into-document') {
-            dirs.push(...vanishTags);
-        }
-        if (this.attrs.mode !== 'shadow') {
-            // TODO: clean up Load callbacks, either eliminate slotLoad (and
-            // discontinue [component.slot]) in favor of only slotTagLoad, or
-            // refactor somehow
-            dirs.push('slot');
-            this.slotTagLoad = this.slotLoad.bind(this);
-        }
-        return dirs;
-    }
-
     reconcileCallback(renderObj) {
         let { innerHTML, patches, root } = renderObj.component;
-        this.mode =this.attrs.mode || 'regular';
+        this.mode = this.attrs.mode || 'regular';
         if (innerHTML !== null) {
 
             // XXX ----------------
@@ -575,7 +535,6 @@ modulo.register('cpart', class Component {
         const getSlot = c => c.getAttribute ? (c.getAttribute('slot') || null) : null;
         let childs = this.element.originalChildren;
         childs = childs.filter(child => getSlot(child) === chosenSlot);
-
         if (!el.moduloSlotHasLoaded) { // clear innerHTML if this is first load
             el.innerHTML = '';
             el.moduloSlotHasLoaded = true;
@@ -1175,12 +1134,15 @@ modulo.register('cpart', class Configuration { }, {
 
 modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     let text = value;
-    function getSymbolsAsObjectAssignment(contents) {
+    function getAutoExportNames(contents) {
         const regexpG = /(function|class)\s+(\w+)/g;
         const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
         const matches = contents.match(regexpG) || [];
         return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s))
+            .filter(s => s && !Modulo.INVALID_WORDS.has(s));
+    }
+    function getSymbolsAsObjectAssignment(contents) {
+        return getAutoExportNames(contents)
             .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
             .join('');
     }
@@ -1198,6 +1160,15 @@ modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
     def.Code = `${prefix}\n${text}\n${suffix}`;
     def.localVars = localVars;
+
+    // TODO: Fix
+    const isDirRegEx = /(Unmount|Mount)$/;
+    def.Directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
+    /*
+    getFunctionSymbols.join
+        const regexpG = /function\s+(\w+Mount|\w+Unmount)/g;
+    */
+
 });
 
 modulo.register('cpart', class Script {
@@ -1215,16 +1186,6 @@ modulo.register('cpart', class Script {
             modulo.assert(!def.Parent, 'Falsy return for parented Script');
             return {};
         }
-    }
-
-    getDirectives() {
-        window.LEG.push('script.getDirectives');
-        let { script } = this.element.initRenderObj;
-        const isCbRegex = /(Unmount|Mount)$/;
-        if (!script) { script = {}; } // TODO XXX
-        return Object.keys(script)
-            .filter(key => key.match(isCbRegex))
-            .map(key => `script.${key}`);
     }
 
     cb(func) {
@@ -1302,11 +1263,6 @@ modulo.register('cpart', class Script {
 });
 
 modulo.register('cpart', class State {
-    getDirectives() {
-        window.LEG.push('state.getDirectives');
-        return [ 'state.bindMount', 'state.bindUnmount' ];
-    }
-
     initializedCallback(renderObj) {
         if (!this.data) {
             // Initialize with deep copy of attributes
@@ -1409,7 +1365,7 @@ modulo.register('cpart', class State {
         }
         this._oldData = null;
     }
-});
+}, { Directives: [ 'bindMount', 'bindUnmount' ] });
 
 
 /* Implementation of Modulo Templating Language */
@@ -1597,7 +1553,7 @@ modulo.config.templater.filters = (function () {
         divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,
         dividedinto: (s, arg) => Math.ceil((s * 1) / (arg * 1)),
         escapejs: s => JSON.stringify(String(s)).replace(/(^"|"$)/g, ''),
-        first: s => s[0],
+        first: s => Array.from(s)[0],
         join: (s, arg) => (s || []).join(arg === undefined ? ", " : arg),
         json: (s, arg) => JSON.stringify(s, null, arg || undefined),
         last: s => s[s.length - 1],
@@ -1606,6 +1562,7 @@ modulo.config.templater.filters = (function () {
         multiply: (s, arg) => (s * 1) * (arg * 1),
         number: (s) => Number(s),
         pluralize: (s, arg) => (arg.split(',')[(s === 1) * 1]) || '',
+        skipfirst: (s, arg) => Array.from(s).slice(arg || 1),
         subtract: (s, arg) => s - arg,
         truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
         type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
@@ -1782,8 +1739,13 @@ modulo.register('engine', class DOMCursor {
     }
 });
 
+modulo.config.reconciler = {
+    directiveShortcuts: [ [ /^@/, 'component.event' ],
+                          [ /:$/, 'component.dataProp' ] ],
+};
 modulo.register('engine', class Reconciler {
     constructor(modulo, def) {
+        this.modulo = modulo;
         this.constructor_old(def);
     }
     constructor_old(opts) {
@@ -1793,11 +1755,8 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            window.LEG.push('this.directiveShortcuts.length === 0')
-            this.directiveShortcuts = [
-                [ /^@/, 'component.event' ],
-                [ /:$/, 'component.dataProp' ],
-            ];
+            //this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts;
+            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts;
         }
         this.patch = this.pushPatch;
         this.patches = [];
@@ -2132,35 +2091,17 @@ modulo.register('command', function build (modulo, opts = {}) {
 
 if (typeof document !== 'undefined' && !window.moduloBuild) {
     document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        if (window.moduloBuild) {
-            return;
-        }
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-        // TODO: disable commands for built version somehow, as a safety
-        // precaution -- maybe another if statement down here, so this is
-        // "dev-mode", and there's "node-mode" and finally "build-mode"?
-        if (cmd) {
-            modulo.registry.commands[cmd](modulo);
-        } else {
-            // TODO: Make these link to ?mod-cmd=...
-            // and maybe a-tag / button to "force-refresh" after every command
-            // (e.g. [ build ] ./start.html)
-            const font = 'font-size: 30px; line-height: 0.7; padding: 5px; border: 3px solid black;';
-            console.log('%c%', font, (new (class COMMANDS {
-                get test() { window.location.href += '?mod-cmd=test' }
-                get build() { window.location.href += '?mod-cmd=build' }
-                get bundle() { window.location.href += '?mod-cmd=bundle' }
-            })));
-            //})).__proto__); // TODO: .__proto__ is better in firefox, saves one click, without is better in chrome
-            /*
-            const cmds = Object.keys(modulo.registry.commands);
-            new Function(`console.log('%c%', '${ font }, (new (class COMMANDS {
-                ${ cmds.map(cmd => `get ${ cmd } () {
-                    return modulo.registry.commands.test(modulo)
-                }
-            `)
-            */
-        }
+        if (cmd || window.moduloBuild) { // Command / already built: Run & exit
+            return cmd && modulo.registry.commands[cmd](modulo);
+        } // Else: Display "COMMANDS:" menu in console
+        const commandNames = Object.keys(modulo.registry.commands);
+        const href = 'window.location.href += ';
+        const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
+        const commandGetters = commandNames.map(cmd =>
+            ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
+        const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
+        new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
     }));
 }
 

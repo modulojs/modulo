@@ -1,13 +1,5 @@
-<script Modulo
-    src="/js/Modulo.js"
-></script>
-    <!-- 
-    -src="/demos/tests/core_functionality.test.html" 
-    -name="x"
-    -->
-
+<script Modulo src="/js/Modulo.js"></script>
 <script src="/demos/mdu/cparts/TestSuite.js"></script>
-
 <template id="modulo">
     <Component name="TestReporter">
         <Template>
@@ -26,7 +18,6 @@
             success:=null
         ></State>
         <Script>
-            console.log('Running factory for Script for test reporter');
             function doTests() {
                 if (state.success === null) { // prevent double runs
                     state.success = modulo.registry.commands.test(modulo);
@@ -45,40 +36,21 @@
     <Library -name="h" -src="/demos/tests/core_loading.test.html"></Library>
     <Library -name="i" -src="/demos/tests/asset_manager.test.html"></Library>
     <Library -name="j" -src="/demos/tests/multi-file-tests/loading_src.test.html"></Library>
-    <!--
-    Composition tests are disabled because:
-    1. Require component.slot to work 100%
-    2. Require <PassThrough to be rewritten as <x-PassThrough
-    <Library -name="h" -src="/demos/tests/composition.test.html"></Library>
-    -->
-
-    <!--
-    <Library -name="emblib" -src="/components/embeddedexampleslib.html"></Library>
-    -->
-
-    <!--
-    -->
-    <!--
-    <Library -src="/demos/tests/cparts/component_mode.test.html"></Library>
-    -->
-
-    <!-- Load tests for core Modulo.js library -->
-    <!--
-    <Library src="/demos/tests/reconciler1.test.html"></Library>
-    <Library src="/demos/tests/reconciler2.test.html"></Library>
-    <Library src="/demos/tests/reconciler3.test.html"></Library>
-    <Library src="/demos/tests/browser_build.test.html"></Library>
-    <Library src="/demos/tests/cparts/config.test.html"></Library>
-    -->
-
-    <!-- Load tests for documentation examples -->
-    <!--
-    <Library namespace="eglib" src="/components/examplelib.html"></Library>
-    <Library namespace="emblib" src="/components/embeddedexampleslib.html"></Library>
-    -->
-
-    <!-- TODO: Rename & reorg tests to be more clear what tests what -->
+    <Library -name="k" -src="/demos/tests/cparts/component_mode.test.html"></Library>
+    <Library -name="docseg" -src="/libraries/docseg.html"></Library>
+    <Library -name="eg" -src="/libraries/eg.html"></Library>
 </template>
+
+<!--
+Composition tests are disabled because:
+1. Require component.slot to work 100%
+2. Require <PassThrough to be rewritten as <x-PassThrough
+<Library -name="h" -src="/demos/tests/composition.test.html"></Library>
+<Library -src="/demos/tests/cparts/component_mode.test.html"></Library>
+<Library src="/demos/tests/reconciler1.test.html"></Library>
+<Library src="/demos/tests/reconciler2.test.html"></Library>
+<Library src="/demos/tests/reconciler3.test.html"></Library>
+-->
 
 <button onClick="this.textContent = 'Success: ' + modulo.registry.commands.test(modulo)">
    Run tests
@@ -87,8 +59,4 @@
     modulo.loadFromDOM(document.getElementById('modulo').content);
     modulo.preprocessAndDefine();
 </script>
-
-<!--
-<x-TestReporter></x-TestReporter>
--->
 
