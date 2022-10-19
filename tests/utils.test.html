@@ -156,7 +156,7 @@
 
     <script name="Can transform simple tag">
         const { transformTag } = modulo.registry.utils;
-        const doc = Modulo.globals.document;
+        const doc = window.document;
         element.innerHTML = '<p>Abc</p>';
         transformTag(element.querySelector('p'), 'span');
         assert: element.innerHTML === '<span>Abc</span>'
@@ -164,7 +164,7 @@
 
     <script name="Can transform complicated tag">
         const { transformTag } = modulo.registry.utils;
-        const doc = Modulo.globals.document;
+        const doc = window.document;
         element.innerHTML = `<div><span></span>
             <p id="para" class="Test" [b][c]d="DEFhij"></p>
         </div>`;
@@ -180,7 +180,7 @@
 
     <script name="Can transform complicated tag with chilren">
         const { transformTag } = modulo.registry.utils;
-        const doc = Modulo.globals.document;
+        const doc = window.document;
 
         const children = `<span>item
         </span>

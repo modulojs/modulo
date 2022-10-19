@@ -40,7 +40,7 @@ window.Modulo = class Modulo {
 
     start(build = null) {
         const elem = build && build.tagName ? build : window.document.head;
-        if (build && !elem) {
+        if (build) {
             if (build.loadedBy) {
                 return;
             }
@@ -49,8 +49,7 @@ window.Modulo = class Modulo {
             this.definitions = build.definitions;
             build.loadedBy = this.id;
             return;
-        }
-        if (elem) { // Loadable tag exists, load sync/blocking
+        } else if (elem) { // Loadable tag exists, load sync/blocking
             this.loadFromDOM(elem, null, true);
             this.preprocessAndDefine();
         } else { // Doesn't exist, wait for page to load
@@ -220,10 +219,10 @@ Modulo.INVALID_WORDS = new Set((`
 `).split(/\s+/ig));
 
 // Create a new modulo instance to be the global default instance
-(new Modulo(null, [
+window.modulo = (new Modulo(null, [
     'cparts', 'dom', 'utils', 'core', 'engines', 'commands', 'templateFilters',
     'templateTags', 'processors', 'elements',
-])).pushGlobal();
+]));//.pushGlobal();
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('processor', function src (modulo, conf, value) {
@@ -2084,7 +2083,7 @@ modulo.register('command', function build (modulo, opts = {}) {
     });
 });
 
-if (typeof window.document !== 'undefined' && !window.moduloBuild) {
+if (typeof document !== 'undefined' && !window.moduloBuild) {
     window.document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
         if (cmd || window.moduloBuild) { // Command / already built: Run & exit
@@ -2101,7 +2100,7 @@ if (typeof window.document !== 'undefined' && !window.moduloBuild) {
 }
 
 if (typeof document !== 'undefined' && document.head) { // Browser environ
-    window.hackCoreModulo = new Modulo(window.modulo); // XXX
+    //window.hackCoreModulo = new Modulo(window.modulo); // XXX
     window.modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };

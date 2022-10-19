@@ -116,7 +116,7 @@ modulo.register('cpart', class TestSuite {
             if (!element.querySelector('$2')) {
                 throw new Error('Event target not found: $2');
             }
-            element.querySelector('$2').dispatchEvent(new modulo.globals.Event('$1'));
+            element.querySelector('$2').dispatchEvent(new Event('$1'));
         `);
 
         const extra = { _reportValues, element, Modulo, modulo };
@@ -131,8 +131,8 @@ modulo.register('cpart', class TestSuite {
             return [false, `Error occured, cannot compile: ${err}`]
         }
 
-        const getParams = String(modulo.globals.location ?
-                                 modulo.globals.location.search : '').substr(1);
+        const getParams = String(window.location ?
+                                 window.location.search : '').substr(1);
 
         if (getParams.includes('stacktrace=y')) {
             // Let exceptions crash process and halt future tests, exposing
@@ -249,8 +249,8 @@ modulo.register('cpart', class TestSuite {
         let total = 0;
         let failure = 0;
 
-        const getParams = String(modulo.globals.location ?
-                                 modulo.globals.location.search : '').substr(1);
+        const getParams = String(window.location ?
+                                 window.location.search : '').substr(1);
         const useTry = getParams.includes('stacktrace=y');
 
         //const parentNode = componentFac.loader._stringToDom(content);
@@ -258,7 +258,6 @@ modulo.register('cpart', class TestSuite {
 
         function _newModulo() {
             const mod = new Modulo(null, []); // TODO
-            mod.globals = modulo.globals; // XXX
             mod.config = deepClone(modulo.config, modulo);
             mod.registry = modulo.registry;
             // Refresh queue & asset manager
@@ -309,8 +308,8 @@ modulo.register('cpart', class TestSuite {
             }
 
             // Ensure always a globally unique prefix:
-            modulo.globals._moduloTestNumber = (modulo.globals._moduloTestNumber || 0) + 1;
-            const prefix = 't' + modulo.globals._moduloTestNumber;
+            window._moduloTestNumber = (window._moduloTestNumber || 0) + 1;
+            const prefix = 't' + window._moduloTestNumber;
             const stepArray = testLoaderModulo.loadString(testNode.innerHTML, prefix, true);
             const testName = testNode.getAttribute('name') || '<test>';
             console.group('[%]', '         ? TEST', testName);
@@ -364,7 +363,7 @@ modulo.register('cpart', class TestSuite {
 
             // Do original saveas (except for simulating click)...
             const a = document.createElement('a');
-            const enc = encodeURIComponent(text); // TODO silo in globals
+            const enc = encodeURIComponent(text);
             a.setAttribute('href', 'data:text/plain;charset=utf-8,' + enc);
             a.setAttribute('download', filename);
             window._moduloMockDocument.body.appendChild(a);
@@ -585,8 +584,8 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
         console.log('%c FAILURE ', 'background-color: red');
         const compNames = failedComponents.map(({ Name }) => Name);
         console.log(`${failure} assertions failed. Failing components:`, compNames);
-        const getParams = String(modulo.globals.location ?
-                                 modulo.globals.location.search : '').substr(1);
+        const getParams = String(window.location ?
+                                 window.location.search : '').substr(1);
         if (!getParams.includes('stacktrace=y')) {
             console.log(new (class RERUN_TESTS_WITH_EXTRA_OPTIONS {
                 get enable_stack_trace() { window.location.href += '&stacktrace=y' }
@@ -602,7 +601,7 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
 
 // TODO attach somewhere else?
 modulo.register('util', function registerTestElement (modulo, componentFac) {
-    const doc = modulo.globals.document.implementation.createHTMLDocument('testworld');
+    const doc = window.document.implementation.createHTMLDocument('testworld');
     const head = doc.createElement('head'); // Mock head
     const body = doc.createElement('body'); // Mock body
     doc.documentElement.appendChild(head);

@@ -16,7 +16,13 @@
 <script>
 
 /*
-<template Modulo>
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+const mod = new Modulo(modulo);
+const vw = new modulo.registry.engines.VirtualWindow(mod);
+vw.document.body.innerHTML = `
+<script src="/js/Modulo.js">
   <Component name="Tester">
     <Template>
         <h1 class="logo">Hello</h1>
@@ -27,23 +33,18 @@
         </div>
     </Template>
   </Component>
-</template>
-*/
+</sc` + `ript>
 
-document.addEventListener('DOMContentLoaded', () => {
-const mod = new Modulo(modulo);
-const vw = new modulo.registry.engines.VirtualWindow(mod);
-/*
 <div>
   <p>test</p>
   <p>another <em>test</em> okay</p>
   <x-Thing></x-Thing>
   <x-Tester></x-Tester>
 </div>
-*/
-vw.document.body.innerHTML = `
-<script src="/js/Modulo.js"></sc` + `ript>
 `;
+
+//vw.exec('modulo.start(document.head)');
+
 console.log(vw.document.innerHTML);
 });
 

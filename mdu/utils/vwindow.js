@@ -119,7 +119,7 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
                         new elemClassesLC[tagLC]() : // Invoke custom class
                         ownerDocument.createElement(tagLC);
             elem.tagName = tagLC.toUpperCase(); // hack
-            console.log(elem.constructor.name, elemClassesLC);
+            //console.log(elem.constructor.name, elemClassesLC);
             /*
             if (elem.constructor.name === 'CustomElement') {
                 console.log('---------------')
@@ -190,6 +190,13 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
     }
 
     _appendNode(node) {
+        if (this._lcName === 'body') { // Move to head if this is body
+            const head = new Set([ 'title', 'link', 'meta', 'template' ]);
+            if (head.has(node._lcName)) {
+                return this.ownerDocument.head._appendNode(node);
+            }
+        }
+
         node.parentNode = this;
         //node._parentIndex = this.childNodes.length;
         this.childNodes.push(node);
@@ -391,7 +398,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 
     set innerHTML(text) {
         this.childNodes = []; // clear contents
-        modulo.registry.utils.parse(this, text);
+        modulo.registry.utils.parse(this, text); // GLOBAL XXX
     }
 
     _setAttrString(text) {
@@ -431,7 +438,8 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 
     _getSkipParsingUntil() {
         const lc = this._lcName;
-        return (lc === 'template' || lc === 'script') ? lc : null;
+        //return (lc === 'template' || lc === 'script') ? lc : null;
+        return lc === 'script' ? lc : null;
     }
 
     get _lcName() {
@@ -563,7 +571,7 @@ modulo.register('engine', class VirtualWindow {
         const document = createHTMLDocument('modulovm');
         const HTMLElement = document.HTMLElement;
         const win = { document, HTMLElement, /*modulo,*/ customElements };
-        win.modulo = modulo; // ?? todo rm
+        //win.modulo = modulo; // ?? todo rm
         Object.assign(this, win); // Expose some window properties at top as well
         this.window = Object.assign({}, vwindow, win); // Add in all vdom classes
         this.window.exec = this.exec.bind(this);

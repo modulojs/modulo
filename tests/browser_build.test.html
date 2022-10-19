@@ -52,21 +52,21 @@
 
 <test name="Test CommandMenu build">
     <script name="Setup & ensure CommandMenu exists">
-        let oldDoc = Modulo.globals.document;
+        let oldDoc = window.document;
         Modulo.cmd = new Modulo.CommandMenu();
         Modulo.assets = new Modulo.AssetManager();
         Modulo.cmd.setup = () => {
-            oldDoc = Modulo.globals.document;
+            oldDoc = window.document;
             const body = Modulo.utils.makeDiv('');
             body.removeChild = () => {}; // make no-op
-            Modulo.globals.document = {
+            window.document = {
                 body,
                 createElement: (...a) => oldDoc.createElement(...a),
             };
             return body;
         }
         Modulo.cmd.teardown = () => {
-            Modulo.globals.document = oldDoc;
+            window.document = oldDoc;
         }
 
         // New codepath: Already mocking the function
