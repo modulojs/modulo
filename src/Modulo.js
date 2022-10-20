@@ -40,7 +40,7 @@ window.Modulo = class Modulo {
 
     start(build = null) {
         const elem = build && build.tagName ? build : window.document.head;
-        if (build) {
+        if (build && !build.tagName) {
             if (build.loadedBy) {
                 return;
             }
@@ -48,13 +48,10 @@ window.Modulo = class Modulo {
             this.assets.nameToHash = build.nameToHash;
             this.definitions = build.definitions;
             build.loadedBy = this.id;
-            return;
         } else if (elem) { // Loadable tag exists, load sync/blocking
             this.loadFromDOM(elem, null, true);
             this.preprocessAndDefine();
         } else { // Doesn't exist, wait for page to load
-            // TODO: Remove "else", so both sync and async paths happen, but
-            // make loads always idempotent
             window.document.addEventListener('DOMContentLoaded', () => {
                 this.loadFromDOM(window.document.head, null, true);
                 this.preprocessAndDefine();
@@ -223,6 +220,10 @@ window.modulo = (new Modulo(null, [
     'cparts', 'dom', 'utils', 'core', 'engines', 'commands', 'templateFilters',
     'templateTags', 'processors', 'elements',
 ]));//.pushGlobal();
+
+if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
+    var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
+}
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('processor', function src (modulo, conf, value) {
@@ -605,7 +606,6 @@ modulo.register('util', function deepClone (obj, modulo) {
     if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
         return obj;
     }
-
     const { constructor } = obj;
     if (constructor.moduloClone) {
         // Use a custom modulo-specific cloning function
@@ -637,7 +637,6 @@ modulo.register('util', function stripWord (text) {
     return text.replace(/^[^a-zA-Z0-9$_\.]/, '')
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
 });
-
 
 modulo.register('util', function mergeAttrs (elem, defaults) {
     // TODO: Write unit tests for this
@@ -675,7 +674,6 @@ modulo.register('util', function makeDiv(html) {
     div.innerHTML = html;
     return div;
 });
-
 
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
@@ -736,7 +734,6 @@ modulo.register('util', function resolvePath(workingDir, relPath) {
     return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
 });
 
-
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     // NOTE - has old tests that can be resurrected
     const fullName = `${namespace}-${name}`;
@@ -770,7 +767,6 @@ modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     });
     return content;
 });
-
 
 modulo.register('core', class AssetManager {
     constructor (modulo) {
@@ -2100,8 +2096,7 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
 }
 
 if (typeof document !== 'undefined' && document.head) { // Browser environ
-    //window.hackCoreModulo = new Modulo(window.modulo); // XXX
-    window.modulo.start(window.moduloBuild);
+    modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const mod = new Modulo(modulo);
 const vw = new modulo.registry.engines.VirtualWindow(mod);
 vw.document.body.innerHTML = `
-<script src="/js/Modulo.js">
+<script Modulo src="/js/Modulo.js">
   <Component name="Tester">
     <Template>
         <h1 class="logo">Hello</h1>
@@ -43,9 +43,16 @@ vw.document.body.innerHTML = `
 </div>
 `;
 
-//vw.exec('modulo.start(document.head)');
+vw.exec(`
+    setTimeout(() => {
+        console.log(window); 
+        window.modulo.start(window.document.head);
+        document.moduloVirtualWindow.activateConnectedCallbacks();
+        console.log(window.document.body.innerHTML);
+    }, 1000)
+`);
 
-console.log(vw.document.innerHTML);
+//console.log(vw.customElements);
 });
 
 /*

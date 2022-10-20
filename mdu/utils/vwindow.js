@@ -111,7 +111,17 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
             topOfStack.childNodes.push(new HTMLElement({ nodeType: 8 }));
 
         } else if (match[1] === '/') { // CLOSE - Pop parent tag
-            tagStack.pop();
+            const elem = tagStack.pop();
+
+            // Handle Web Components connectedCallback, and Modulo's
+            // non-standard, synchronous "parsedCallback()"
+            if (elem.parsedCallback && !elem._hasFiredConnected) {
+                elem._hasFiredConnected = true;
+                elem.parsedCallback();
+            } else if (elem.connectedCallback && !elem._hasFiredConnected) {
+                elem._hasFiredConnected = true;
+                elem.connectedCallback();
+            }
 
         } else { // OPEN - construct new element
             const tagLC = match[2].toLowerCase();
@@ -173,11 +183,23 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
     remove() {
         // TODO: This is broken, should be similar to insertBefore
         if (this.parentNode) {
-            this.parentNode.childNodes.splice(this._parentIndex, 1);
-            this.parentNode._rebuildNodeIndices();
+            const pN = this.parentNode;
+            const nextNodes = pN.childNodes.slice(this._parentIndex); // After index
+            pN.childNodes = pN.childNodes.slice(0, this._parentIndex); // Before index
+            pN.childNodes.push(...nextNodes);
+            pN._rebuildNodeIndices();
             this.parentNode = null;
             this._parentIndex = -1;
         }
+    }
+
+    replaceWith(...items) {
+        if (this.parentNode) {
+            for (const item of items) {
+                this.parentNode.insertBefore(item, this);
+            }
+        }
+        this.remove();
     }
 
     append(...items) {
@@ -191,7 +213,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 
     _appendNode(node) {
         if (this._lcName === 'body') { // Move to head if this is body
-            const head = new Set([ 'title', 'link', 'meta', 'template' ]);
+            const head = new Set([ 'title', 'link', 'meta', 'template', 'script' ]);
             if (head.has(node._lcName)) {
                 return this.ownerDocument.head._appendNode(node);
             }
@@ -211,8 +233,8 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         if (nextSibling.parentNode !== this) {
             throw new Error('Invalid insertBefore')
         }
-        const nextNodes = this.childNodes.slice(_parentIndex); // After index
-        this.childNodes = this.childNodes.slice(0, _parentIndex); // Before index
+        const nextNodes = this.childNodes.slice(nextSibling._parentIndex); // After index
+        this.childNodes = this.childNodes.slice(0, nextSibling._parentIndex); // Before index
         this.childNodes.push(node);
         this.childNodes.push(...nextNodes);
         this._rebuildNodeIndices();
@@ -408,11 +430,13 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
             text = text.substr(match.index + match[0].length).trim(); // Consume
             return [ leadingText, match ]; // Return previous text and match
         };
+        let infini = 0;
         while (text) { // Stop when text is empty ('' is falsy)
             const [ name, match ] = nextToken(/\s*([= ])\s*(['"]?)/);
-            const value = !match[1] ? '' : // Attribute only
+            const value = !(match[1].trim()) ? '' : // Attribute only
                 nextToken(match[2] ? match[2] : ' ')[0]; // Quote or space delim
             this.setAttribute(name, value);
+            if (++infini > 1000) throw new Error('lol');
             // old optimization -v
             //this._attributeNames.push(name); // Add to attr names list
             //this._attributeValues[name.toLowerCase()] = value;
@@ -468,6 +492,9 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         // of misc funcs?
         if (this._unparsedContent) { // Return unparsed HTML if relevant
             return this._unparsedContent;
+        }
+        if (this._lcName === 'script') { // return text content
+            return this._textContent;
         }
 
         let s = '';
@@ -570,12 +597,17 @@ modulo.register('engine', class VirtualWindow {
         const customElements = this.makeCustomElements();
         const document = createHTMLDocument('modulovm');
         const HTMLElement = document.HTMLElement;
-        const win = { document, HTMLElement, /*modulo,*/ customElements };
+        const win = { document, HTMLElement, /*modulo,*/ customElements, _moduloID: this.modulo.id + 10000 };
         //win.modulo = modulo; // ?? todo rm
         Object.assign(this, win); // Expose some window properties at top as well
         this.window = Object.assign({}, vwindow, win); // Add in all vdom classes
         this.window.exec = this.exec.bind(this);
-        this.window.fetch = window.fetch.bind(window);
+        //this.window.fetch = window.fetch.bind(window);
+        this.window.fetch = this.fetch.bind(this);
+    }
+
+    fetch(...args) {
+        return window.fetch(...args);
     }
 
     makeCustomElements() {
@@ -585,38 +617,38 @@ modulo.register('engine', class VirtualWindow {
         const define = (name, elemClass) => {
             elemClasses[name] = elemClass;
             elemClassesLC[name.toLowerCase()] = elemClass;
+            this.activateConnectedCallbacks(); // Catch up with connected cbs
         };
         return { elemClasses, elemClassesLC, define };
     }
 
-    /*
-    loadBundle(onReady) {
-        // Loads current page into the VM (using same settings as a bundle)
-        Modulo.utils.fetchBundleData(opts => {
-
-            // Build bundled src into JavaScript text
-            const buildTemplate = new Modulo.templating.MTL(Modulo.jsBuildTemplate);
-            let jsTexts = opts.scriptSources;
-            jsTexts.sort((a, b) => { // TODO: Once we have stable builds, no longer needed
-                if (a.startsWith("'use strict';")) { return -1; }
-                if (b.startsWith("'use strict';")) { return 1; }
-                return a < b ? 1 : -1;
-            });
-            jsTexts.push(...Modulo.assets.getAssets('js'));
-            const combinedCtx = Object.assign({ jsTexts }, opts, Modulo);
-            const text = buildTemplate.render(combinedCtx);
-            //console.log('ths is text', text.substr(text.length-100))
-
-            // Run code "within" the "VM" and return Modulo object
-            this.Modulo = this.run(text, 'Modulo');
-            //console.log('Loaded!', this.Modulo);
-
-            if (onReady) {
-                this.Modulo.fetchQ.wait(onReady);
+    activateConnectedCallbacks() {
+        const classes = this.customElements.elemClassesLC;
+        const names = Object.keys(classes);
+        const elems = this.document.querySelectorAll(names.join(','));
+        for (const elem of elems) {
+            if (elem._hasFiredConnected || !(elem.tagName.toLowerCase() in classes)) {
+                continue; // skip
             }
-        });
+            elem._hasFiredConnected = true;
+            if (elem.parsedCallback) { // Modulo-style web component
+                elem.parsedCallback();
+            } else if (elem.connectedCallback) { // Generic web component
+                elem.connectedCallback();
+            } else {
+                // Need to upgrade into a web component
+                const newElem = new classes[elem.tagName.toLowerCase()]();
+                newElem.tagName = elem.tagName.toUpperCase();
+                elem.replaceWith(newElem);
+                newElem._hasFiredConnected = true;
+                if (newElem.parsedCallback) { // Modulo-style web component
+                    newElem.parsedCallback();
+                } else if (newElem.connectedCallback) { // Generic web component
+                    newElem.connectedCallback();
+                }
+            }
+        }
     }
-    */
 
     navigate(url) {
         window.fetch(url)
@@ -649,9 +681,37 @@ modulo.register('engine', class VirtualWindow {
 Modulo.utils.createTestDocument = function createTestDocument() {
       const doc = {};
       const win = { document: doc };
-      // TODO
       document.createElement = tagName => new win.HTMLElement(tagName);
       return doc; // later return win
+}
+*/
+
+/*
+loadBundle(onReady) {
+    // Loads current page into the VM (using same settings as a bundle)
+    Modulo.utils.fetchBundleData(opts => {
+
+        // Build bundled src into JavaScript text
+        const buildTemplate = new Modulo.templating.MTL(Modulo.jsBuildTemplate);
+        let jsTexts = opts.scriptSources;
+        jsTexts.sort((a, b) => { // TODO: Once we have stable builds, no longer needed
+            if (a.startsWith("'use strict';")) { return -1; }
+            if (b.startsWith("'use strict';")) { return 1; }
+            return a < b ? 1 : -1;
+        });
+        jsTexts.push(...Modulo.assets.getAssets('js'));
+        const combinedCtx = Object.assign({ jsTexts }, opts, Modulo);
+        const text = buildTemplate.render(combinedCtx);
+        //console.log('ths is text', text.substr(text.length-100))
+
+        // Run code "within" the "VM" and return Modulo object
+        this.Modulo = this.run(text, 'Modulo');
+        //console.log('Loaded!', this.Modulo);
+
+        if (onReady) {
+            this.Modulo.fetchQ.wait(onReady);
+        }
+    });
 }
 */
 
