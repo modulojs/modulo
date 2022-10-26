@@ -692,7 +692,7 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    // TODO:  It's get that should autobind functions!!
+    // TODO: It's get that should autobind functions!!
     return key.split('.').reduce((o, name) => o[name], obj);
 });
 
@@ -700,7 +700,6 @@ modulo.register('util', function set(obj, keyPath, val, ctx = null) {
     const index = keyPath.lastIndexOf('.') + 1; // 0 if not found
     const key = keyPath.slice(index);
     const path = keyPath.slice(0, index - 1); // exclude .
-    //const dataObj = index ? Modulo.utils.get(obj, path) : obj;
     const dataObj = index ? modulo.registry.utils.get(obj, path) : obj;
     dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
 });
@@ -735,6 +734,10 @@ modulo.register('util', function resolvePath(workingDir, relPath) {
 });
 
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
+    // TODO: Redo prefixAllSelectors to instead behave more like DataType,
+    // basically using "?" auto determines based on Component mode + TagName,
+    // allowing users to override if they want to intentionally silo their CSS
+    // some other way
     // NOTE - has old tests that can be resurrected
     const fullName = `${namespace}-${name}`;
     let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
