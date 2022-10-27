@@ -1,15 +1,4 @@
-<template Modulo>
-  <Component name="Tester">
-    <Template>
-        <h1 class="logo">Hello</h1>
-
-        <div class="controls" style="display: flex">
-            <p>How</p>
-            <p>goes</p>
-            <p>it</p>
-        </div>
-    </Template>
-  </Component>
+<template id="load_point">
 </template>
 
 <script src="/js/Modulo.js"></script>
@@ -26,19 +15,45 @@
 
 <script>
 
-setTimeout(() => {
-const vw = new modulo.registry.engines.VirtualWindow(modulo);
-//vw.customElements.elemClassesLC['x-tester'] = modulo.registry.elements.x_Tester;
-vw.loadHTML(`
-  <div>
-    <p>test</p>
-    <p>another <em>test</em> okay</p>
-    <x-Thing></x-Thing>
-    <x-Tester></x-Tester>
-  </div>
+/*
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+const mod = new Modulo(modulo);
+const vw = new modulo.registry.engines.VirtualWindow(mod);
+vw.document.body.innerHTML = `
+<script Modulo src="/js/Modulo.js">
+  <Component name="Tester">
+    <Template>
+        <h1 class="logo">Hello</h1>
+        <div class="controls" style="display: flex">
+            <p>How</p>
+            <p>goes</p>
+            <p>it</p>
+        </div>
+    </Template>
+  </Component>
+</sc` + `ript>
+
+<div>
+  <p>test</p>
+  <p>another <em>test</em> okay</p>
+  <x-Thing></x-Thing>
+  <x-Tester></x-Tester>
+</div>
+`;
+
+vw.exec(`
+    setTimeout(() => {
+        console.log(window); 
+        window.modulo.start(window.document.head);
+        document.moduloVirtualWindow.activateConnectedCallbacks();
+        console.log(window.document.body.innerHTML);
+    }, 1000)
 `);
-console.log(vw.document.innerHTML);
-}, 500);
+
+//console.log(vw.customElements);
+});
 
 /*
 vw.loadHTML(`

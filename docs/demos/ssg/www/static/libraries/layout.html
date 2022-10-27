@@ -1,0 +1,96 @@
+<Component name="Page" mode="vanish-into-document">
+    <Props
+        title
+        navselected
+    ></Props>
+
+    <Template
+        -src="/static/libraries/layout/Page.html"
+    ></Template>
+
+    <Style
+        -src="/static/libraries/layout/Page.css"
+    ></Style>
+
+    <Script>
+        function prepareCallback() {
+            // For now, store the navigation array and generate year in JS
+            return {
+                currentYear: (new Date()).getFullYear(),
+                navigation: [
+                    {
+                        title: "Home",
+                        file: "index.html",
+                    },
+                    {
+                        title: "About",
+                        file: "about.html",
+                    },
+                    {
+                        title: "Contact",
+                        file: "contact.html",
+                    },
+                ],
+            };
+        }
+    </Script>
+
+</Component>
+
+<Component name="ContactFormExample">
+    <!-- Here, we have a form that's easy to update. If this gets used more
+    than a couple times, it could be turned into a reusable component where
+    the "ordering" and initial values get set via Props. -->
+    <Template>
+        <form>
+            {% for field in state.fields %}
+                <div class="field-pair">
+                    <label for="{{ field }}_{{ component.uniqueId }}">
+                        <strong>{{ field|capfirst }}:</strong>
+                    </label>
+                    {% if field == "text" %}
+                        <textarea
+                            [state.bind]
+                            name="{{ field }}"
+                            for="{{ field }}_{{ component.uniqueId }}"
+                        ></textarea>
+                    {% else %}
+                        <input
+                            [state.bind]
+                            type="{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}"
+                            name="{{ field }}"
+                            id="{{ field }}_{{ component.uniqueId }}"
+                        />
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </form>
+    </Template>
+
+    <State
+        name=""
+        subject=""
+        subscribe:=true
+        text="Enter your comment text here!"
+        fields:='["name", "subject", "text", "subscribe"]'
+    ></State>
+
+    <Style>
+        .field-pair {
+            display: grid;
+            width: calc(100% - 10px);
+            grid-template-columns: 100px 1fr;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+            box-shadow: 3px 3px gray;
+            border-radius: 10px;
+        }
+
+        .field-pair > * {
+            border: none;
+            font-size: 15px;
+        }
+    </Style>
+</Component>
+

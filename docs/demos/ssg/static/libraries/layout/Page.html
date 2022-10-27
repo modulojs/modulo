@@ -1,0 +1,42 @@
+<head>
+    <title>{{ props.title }}</title>
+    <meta charset="utf8" />
+
+    <!--
+        Since this Component is "vanish-into-document", it's allowed to include
+        loose LINK and SCRIPT tags, which will be interpreted and built,
+        allowing you to more easily integrate existing HTML files here. E.g.:
+    -->
+    <link rel="stylesheet" href="/demos/ssg/static/css/site.css" />
+</head>
+<body>
+    <div class="Page-container">
+        <nav class="Page-nav">
+            <img src="/demos/ssg/static/images/example_logo.svg" />
+            <ul>
+                {% for page in script.navigation %}
+                    <li>
+                        <a href="/demos/ssg/src/{{ page.file }}"
+                            title="{{ page.title }}"
+                            class="
+                                Page-navLink
+                                {% if page.file == props.navselected %}Page-navLink--selected{% endif %}
+                            ">
+                            {{ page.title|upper }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <main class="Page-mainContent">
+            <slot></slot>
+        </main>
+    </div>
+
+    <footer class="Page-footer">
+        &copy; {{ script.currentYear }} | All Rights Reserved by Page Author
+        <!-- Feel free to delete this: -->
+        | <a href="https://modulojs.org/" title="Made with Modulo.js" target="_blank">%</a>
+    </footer>
+</body>

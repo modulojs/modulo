@@ -179,7 +179,7 @@
 
             <script name="Change event reflects in state">
                 element.querySelector('input:first-child').value = 'ok4';
-                const ev = new Modulo.globals.Event('keyup');
+                const ev = new window.Event('keyup');
                 element.querySelector('input:first-child').dispatchEvent(ev);
                 assert: state.tststring === 'ok4'
             </script>

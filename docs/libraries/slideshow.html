@@ -1,0 +1,147 @@
+<!-- Create a simple Markdown component, that wraps around snarkdown -->
+<Component name="Markdown">
+    <Script -src="https://unpkg.com/snarkdown">
+        // const { escapeText } = modulo.registry.engines.Templater.prototype;
+        function renderCallback(renderObj) {
+            const md = element.originalHTML
+                    .replace(/&gt;/gi, '>')
+                    .replace(/&lt;/gi, '<')
+            renderObj.component.innerHTML = snarkdown(md);
+        }
+    </Script>
+</Component>
+
+<!-- Create a simple slide-show component, which auto-adjusts font sizes and
+cycles through it's children -->
+<Component name="SlideShow">
+    <Props
+        theme
+    ></Props>
+    <Template>
+        <div
+            [script.slide]="{{ state.slideIndex }}"
+            class="slide-container theme-{{ props.theme|default:'simple' }}"
+        ></div>
+
+        <div class="buttons">
+            {% if state.slideIndex gt 0 %}
+                <button @click:=script.previousSlide>
+                    <div alt="Left arrow">⇐</div>
+                    Previous
+                </button>
+            {% endif %}
+            {% comment %}
+            <ol class="slide-list">
+                {% for slide in state.slides %}
+                    <li @click:=script.setSlide payload:={{slide.index}}>
+                        <a href="#{{ slide.index }}">{{ slide.textContent|truncate:20 }}</a>
+                    </li>
+                {% endfor %}
+            </ol>
+            {% endcomment %}
+            {% if state.slideIndex lt state.slides.length %}
+                <button @click:=script.nextSlide>
+                    <div alt="Right arrow">⇒</div>
+                    Next
+                </button>
+            {% endif %}
+        </div>
+    </Template>
+
+    <State
+        slide-index:=0
+        slide-count:=0
+        slides:=[]
+    ></State>
+
+    <Script>
+        function initializedCallback() {
+            document.addEventListener('keyup', _keyUp, false);
+        }
+
+        function _keyUp(e) {
+            if (e.key === ' ') {
+                nextSlide();
+                element.rerender();
+            } else {
+                console.log('unknown key', e.key);
+            }
+        }
+
+        function slideMount({ el, value, attrName }) {
+            const children = element.originalChildren.filter(c => c.tagName);
+            state.slideCount = children.length;
+            const selectedSlide = children[value];
+            selectedSlide.remove();
+            //console.log('slide mount happening', el.offsetWidth);
+            el.appendChild(selectedSlide);
+        }
+
+        function prepareCallback() {
+            const children = element.originalChildren.filter(c => c.tagName);
+            let index = 0;
+            while (index < children.length) {
+                const { innerHTML, textContent } = children[index];
+                state.slides.push({ innerHTML, textContent, index });
+                index++;
+            }
+            // TODO: remove state.slides, state should only store "selected"
+        }
+
+        function nextSlide() {
+            state.slideIndex++;
+        }
+
+        function previousSlide() {
+            state.slideIndex--;
+        }
+
+        function setSlide(value) {
+            state.slideIndex = value;
+        }
+    </Script>
+
+    <Style -src="/libraries/slideshow/SlideShow.css"></Style>
+</Component>
+
+
+
+<Component name="DemoSlide">
+    <Props
+        href
+    ></Props>
+    <Template>
+        <h1 class="backdrop">
+            ~ D E M O ~
+        </h1>
+        <br />
+        <x-Markdown>{{ component.originalHTML }}</x-Markdown>
+        {% if props.href %}
+            <iframe src="{{ props.href }}"></iframe>
+            <p><a target="_blank" href="{{ props.href }}">Try demo &rsaquo;</a></p>
+        {% endif  %}
+    </Template>
+    <Style>
+        :host {
+            text-align: center;
+        }
+        iframe {
+            width: 800px;
+            height: 500px;
+        }
+        h1.backdrop {
+            margin-top: 20px;
+            margin-left: 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            height: 90vh;
+            width: 90vw;
+            position: absolute;
+            z-index: -1;
+        }
+        br {
+            margin-top: 20px;
+        }
+    </Style>
+</Component>

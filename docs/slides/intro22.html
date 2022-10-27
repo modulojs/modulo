@@ -1,0 +1,110 @@
+<!DOCTYPE HTML><html><head>
+
+<link rel="stylesheet" href="/_modulo/modulo-build-x1spomm6.css" /></head><body><x-slideshow modulo-original-html="
+
+<x-markdown><h1>modulo.js</h1><blockquote><img src=&quot;https://modulojs.org/img/mono_logo_percent_only.png&quot; alt=&quot;&quot;> <h3><a href=&quot;https://modulojs.org&quot;>https://modulojs.org</a></h3><em>A newbie-friendly and dependency-free JavaScript framework</em></blockquote><h2><img src=&quot;https://media0.giphy.com/media/28NnCD7ZddZzYvf4cq/giphy.gif&quot; alt=&quot;modulojs&quot;></h2></x-markdown>
+
+
+
+<x-markdown><h1>Introducing: Presenter</h1><blockquote><img src=&quot;https://media.giphy.com/media/l3PEfygnpy7t7LSQWa/giphy.gif&quot; alt=&quot;Me teaching&quot;></blockquote><br><em>Michael Bethencourt (he/him)</em><h3>Current position</h3><ul><li>Curriculum dev + instruction</li><li>Kickstart Coding, a subscription-based coding school</li><li>Main challenge: Develop newbie-friendly curriculum</li><li>Also challenge: Keep useful for advanced as well</li></ul><h3>Previous positions</h3><ul><li>Industry: Experience at a various tech corps</li><li>Teaching: Lead classes at Trilogy / UC-Berkeley</li><li>Volunteer: Lead kid classes on Python, Scratch</li></ul></x-markdown>
+
+<x-markdown><h1>Introducing: This presentation</h1><ol><li>Introductions</li><li>Problems</li><li>Solutions</li><li>Demos</li><li>Future</li><li>Questions</li></ol></x-markdown>
+
+
+<x-markdown><h2>Problems</h2><h2>(aka, <em>Why yet another framework?</em>)</h2></x-markdown>
+
+
+<x-markdown><h1>Teaching is hard</h1>Pre-requisites of modern frameworks make it harder.<h3>Tech stack pre-reqs</h3><ul><li>Most suggested setups are &quot;all or nothing&quot; (no &quot;ramp-up&quot;)</li><li>Results in ubiquity of frameworks with easy ramp-up (e.g. jQuery, PHP)</li></ul><h3>Skill pre-reqs</h3><ul><li>Most are CLI-focused and require compilation for development</li><li>Results in requiring JS and CLI skill pre-reqs for HTML changes</li></ul><h3>Changing pre-reqs</h3><ul><li>Many frontend frameworks frequently switch syntaxes (JSX, TS, ES5), API changes, and terminology (e.g. especially jargon around async and state)</li><li>Results in fractured docs / tutorials and less transferable skills</li></ul></x-markdown>
+
+
+<x-markdown><h1>Frontend is hard</h1>Many popular frontend frameworks can be hard to use in certain situations.<h3>Dependencies galore</h3><ul><li>Heavy <code>node_modules</code>, and resource-intensive builds</li><li>Results in slower dev, un-auditable code, launch disasters (e.g. <code>left-pad</code>)</li></ul><h3>Difficulty with integration into backend apps</h3><ul><li>Hybrid apps are clunky to develop</li><li>Results in fragile mounting and build systems, perpetual SPA rewrites</li></ul><h3>Difficulty in project and team management</h3><ul><li>&quot;Mere mortals&quot; on-boarding problems with complex FE tech</li><li>Results in hard-to-fill roles and poor communication</li></ul></x-markdown>
+
+<x-markdown><h2>Observation: Both are hard for overlapping reasons</h2></x-markdown>
+
+<x-markdown><h2>Solution?</h2></x-markdown>
+
+<x-markdown><h1>Introducing: Modulo.js</h1><blockquote><h3>Approach</h3><ul><li>Declarative</li><li>Compositional</li><li>Middleware</li><li>Component</li><li>State management</li><li>Templating</li><li>Batteries included</li><li>HTML first</li></ul></blockquote><h3>Goals</h3><ul><li>Simple</li><li>Educational</li><li>Ramp up</li></ul><h3>Uses</h3><ul><li>Progressive enhancement for backend apps</li><li>Static site generation</li><li>&quot;Glue&quot; language</li><li>Quick data viz, live-coding</li><li>Single page apps</li></ul></x-markdown>
+
+
+<x-demoslide href=&quot;/demos/basic_starter.html&quot;>
+## Integrating
+</x-demoslide>
+
+<x-demoslide href=&quot;/demos/ssg/src/index.html&quot;>
+## Generating static sites (dev)
+
+Follow along with:
+
+```
+npm init modulo
+```
+</x-demoslide>
+
+
+<x-demoslide href=&quot;/demos/ssg/www/index.html&quot;>
+### Generating static sites (prerendered)
+
+Server-side render with:
+
+```
+npm run build
+```
+</x-demoslide>
+
+<x-demoslide href=&quot;/demos/intro22/glue.html&quot;>
+### As a glue language
+</x-demoslide>
+
+<x-demoslide href=&quot;/demos/tone_example.html&quot;>
+### Live-coding art and music
+</x-demoslide>
+
+
+<x-demoslide href=&quot;/demos/custom_cpart_for_api.html&quot;>
+## Single page apps
+</x-demoslide>
+
+
+
+<x-markdown><h1>Future</h1><h3>Modulo.js</h3><ul><li>Code needs clean-up, commenting, reduce back under 2k lines</li><li>Fix (or exclude) reconciler directives <code>key=</code> and <code>ignore</code></li></ul><h3>modulocli</h3><ul><li>Compatibility with JSDOM and other faster backends</li><li>Quality-of-life features like watching for updates and hot-reloading</li></ul><h3>Documentation</h3><ul><li>Provide Netlify and NetlifyCMS compatible SSG template</li><li>Document Component Part API, Library mechanics, modulocli, etc</li></ul><h3>Beyond</h3><ul><li>Many more examples and pre-made example components</li><li>&quot;Storybook-type&quot; auto-documentation support</li><li>GUI editor (Declarative format allows for Scratch-like &quot;no code&quot;)</li></ul></x-markdown>
+
+
+<x-markdown><h2>Questions?</h2></x-markdown>
+
+
+
+">
+        <div [script.slide]="0" class="slide-container theme-simple"><x-markdown modulo-original-html="
+# modulo.js
+
+
+&amp;gt; ![](https://modulojs.org/img/mono_logo_percent_only.png) 
+&amp;gt; ### [https://modulojs.org](https://modulojs.org)
+&amp;gt; *A newbie-friendly and dependency-free JavaScript framework*
+
+## ![modulojs](https://media0.giphy.com/media/28NnCD7ZddZzYvf4cq/giphy.gif)
+
+"><h1>modulo.js</h1><blockquote><img src="https://modulojs.org/img/mono_logo_percent_only.png" alt=""> <h3><a href="https://modulojs.org">https://modulojs.org</a></h3><em>A newbie-friendly and dependency-free JavaScript framework</em></blockquote><h2><img src="https://media0.giphy.com/media/28NnCD7ZddZzYvf4cq/giphy.gif" alt="modulojs"></h2></x-markdown></div>
+
+        <div class="buttons">
+            
+            
+            
+                <button @click:="script.nextSlide">
+                    <div alt="Right arrow">⇒</div>
+                    Next
+                </button>
+            
+        </div>
+    </x-slideshow>
+
+
+<!--
+<x-DemoSlide href="/demos/intro22/dataviz.html">
+### Data viz
+</x-DemoSlide>
+-->
+<script src="/_modulo/modulo-build-x1rplrtr.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
+modulo.assets.require("Markdown");
+modulo.assets.require("SlideShow");
+modulo.assets.require("DemoSlide");</script></body></html>

@@ -1,0 +1,168 @@
+x-SlideShow {
+    --top-margin: 30px;
+    --bottom-margin: 30px;
+    --left-margin: 30px;
+    --right-margin: 30px;
+    --color: #B90183;
+    --color-alt: #890163;
+    --color-alt: #a2e4b8;
+}
+
+x-SlideShow .slide-container {
+    /*border: 1px solid black;*/
+    box-sizing: border-box;
+    padding-left: 8px;
+    padding-right: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    width: calc(100vw - var(--left-margin) - var(--right-margin));
+    height: calc(100vh - var(--top-margin) - var(--bottom-margin));
+    margin: auto;
+    margin-top: var(--top-margin);
+    font-size: 2.5vw;
+}
+
+x-SlideShow .buttons {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    display: block;
+    max-width: 80%;
+    z-index: 10;
+    opacity: 0.3;
+}
+
+x-SlideShow blockquote {
+    float: right;
+    width: 30%;
+}
+
+x-SlideShow .buttons:hover {
+    opacity: 1;
+}
+x-SlideShow .buttons button {
+    font-size: 16px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    height: 100px;
+    width: 100px;
+    border-radius: 100px;
+    border: 1px solid black;
+    background: white;
+}
+x-SlideShow .buttons button > div {
+    font-size: 48px;
+    display: block;
+}
+
+x-SlideShow .buttons {
+    display: flex;
+}
+
+x-SlideShow .slide-list {
+    border: 1px;
+    font-size: 16px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    height: 100px;
+    width: 190px;
+    border: 1px solid black;
+    background: white;
+    overflow-y: auto;
+    padding-left: 20px;
+}
+
+x-SlideShow .theme-simple {
+    font-family: sans-serif;
+}
+
+/*
+x-SlideShow .theme-simple h1 {
+    color: white;
+    text-transform: uppercase;
+    text-shadow: -3px -3px 0 var(--color), 3px 3px 0 var(--color-alt);
+    box-shadow: -3px -3px 0 0 var(--color);
+    -webkit-text-stroke: 2px black;
+    text-stroke: 2px black;
+    border-bottom: 1px dashed var(--color);
+    border-right: 1px dashed var(--color);
+    text-align: center;
+    background: repeating-linear-gradient( 45deg, white, white 2rem, #eee 2rem, #eee 4rem);
+    margin-bottom: 0;
+}
+*/
+
+x-SlideShow .theme-simple h1 {
+    color: white;
+    /*text-transform: uppercase;*/
+    text-shadow: 
+      0 0 2px black
+      ,-3px -3px 1px var(--color)
+      ,3px 3px 1px var(--color-alt);
+    -webkit-text-stroke: 2px black;
+    text-stroke: 2px black;
+    /*text-align: center;*/
+    background: repeating-linear-gradient( 45deg, white, white 2rem, #fafafa 2rem, #fafafa 4rem);
+    margin: 5px -2px 10px -2px;
+    /*
+    border-radius: 100px 100px 0 0;
+    width: auto;
+    display: inline;
+    */
+    border-radius: 5px;
+    border: 2px solid black;
+    height: 1.7ex;
+    box-shadow:
+        -3px -3px 1px var(--color)
+        ,3px 3px 1px var(--color-alt)
+        ,0 0 15px inset rgba(0, 0, 0, 0.13)
+        ,10px 30px 50px inset rgba(255, 255, 255, 0.3)
+        ;
+}
+
+x-SlideShow .theme-simple h2 {
+    text-align: center;
+}
+x-SlideShow .theme-simple h2:not(h2 ~ h1) {
+    font-size: 8rem;
+}
+
+x-SlideShow .theme-simple p {
+    text-align: center;
+}
+
+x-SlideShow .theme-simple h3 {
+    margin: 0;
+    margin-top: 1rem;
+    margin-left: 1rem;
+}
+x-SlideShow .theme-simple h3 + ul,
+x-SlideShow .theme-simple h3 + ol {
+    margin-top: -0.2rem;
+    margin-left: 3rem;
+}
+
+
+
+x-DemoSlide {
+            text-align: center;
+        }
+x-DemoSlide iframe {
+            width: 800px;
+            height: 500px;
+        }
+x-DemoSlide h1.backdrop {
+            margin-top: 20px;
+            margin-left: 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            height: 90vh;
+            width: 90vw;
+            position: absolute;
+            z-index: -1;
+        }
+x-DemoSlide br {
+            margin-top: 20px;
+        }
+    

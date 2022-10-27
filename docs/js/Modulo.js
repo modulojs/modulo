@@ -8,19 +8,14 @@ window.Modulo = class Modulo {
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
         this._configSteps = 0;
-
         this.config = {};
         this.definitions = {};
-
         if (parentModulo) {
             this.parentModulo = parentModulo;
-
             const { deepClone } = modulo.registry.utils;
             this.config = deepClone(parentModulo.config, parentModulo);
             this.registry = deepClone(parentModulo.registry, parentModulo);
-
             this.assets = parentModulo.assetManager;
-            this.globals = parentModulo.globals;
         } else {
             this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
         }
@@ -43,26 +38,22 @@ window.Modulo = class Modulo {
         }
     }
 
-    start(moduloBuild = null) {
-        if (moduloBuild) {
-            if (moduloBuild.loadedBy) {
+    start(build = null) {
+        const elem = build && build.tagName ? build : window.document.head;
+        if (build && !build.tagName) {
+            if (build.loadedBy) {
                 return;
             }
-            this.assets.modules = moduloBuild.modules;
-            this.assets.nameToHash = moduloBuild.nameToHash;
-            this.definitions = moduloBuild.definitions;
-            moduloBuild.loadedBy = this.id;
-            return;
-        }
-        // Loading <script Modulo> tag, meaning we want to run blocking
-        if (document.head.querySelector('script[modulo]')) {
-            this.loadFromDOM(document.head, null, true);
+            this.assets.modules = build.modules;
+            this.assets.nameToHash = build.nameToHash;
+            this.definitions = build.definitions;
+            build.loadedBy = this.id;
+        } else if (elem) { // Loadable tag exists, load sync/blocking
+            this.loadFromDOM(elem, null, true);
             this.preprocessAndDefine();
-        } else {
-            // TODO: Remove "else", so both sync and async paths happen, but
-            // make loads always idempotent
-            document.addEventListener('DOMContentLoaded', () => {
-                this.loadFromDOM(document.head, null, true);
+        } else { // Doesn't exist, wait for page to load
+            window.document.addEventListener('DOMContentLoaded', () => {
+                this.loadFromDOM(window.document.head, null, true);
                 this.preprocessAndDefine();
             });
         }
@@ -225,10 +216,14 @@ Modulo.INVALID_WORDS = new Set((`
 `).split(/\s+/ig));
 
 // Create a new modulo instance to be the global default instance
-(new Modulo(null, [
+window.modulo = (new Modulo(null, [
     'cparts', 'dom', 'utils', 'core', 'engines', 'commands', 'templateFilters',
     'templateTags', 'processors', 'elements',
-])).pushGlobal();
+]));//.pushGlobal();
+
+if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
+    var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
+}
 
 // Reference global modulo instance in configuring core CParts, Utils, and Engines
 modulo.register('processor', function src (modulo, conf, value) {
@@ -611,7 +606,6 @@ modulo.register('util', function deepClone (obj, modulo) {
     if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
         return obj;
     }
-
     const { constructor } = obj;
     if (constructor.moduloClone) {
         // Use a custom modulo-specific cloning function
@@ -643,7 +637,6 @@ modulo.register('util', function stripWord (text) {
     return text.replace(/^[^a-zA-Z0-9$_\.]/, '')
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
 });
-
 
 modulo.register('util', function mergeAttrs (elem, defaults) {
     // TODO: Write unit tests for this
@@ -682,7 +675,6 @@ modulo.register('util', function makeDiv(html) {
     return div;
 });
 
-
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
@@ -700,7 +692,7 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    // TODO:  It's get that should autobind functions!!
+    // TODO: It's get that should autobind functions!!
     return key.split('.').reduce((o, name) => o[name], obj);
 });
 
@@ -708,7 +700,6 @@ modulo.register('util', function set(obj, keyPath, val, ctx = null) {
     const index = keyPath.lastIndexOf('.') + 1; // 0 if not found
     const key = keyPath.slice(index);
     const path = keyPath.slice(0, index - 1); // exclude .
-    //const dataObj = index ? Modulo.utils.get(obj, path) : obj;
     const dataObj = index ? modulo.registry.utils.get(obj, path) : obj;
     dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
 });
@@ -742,8 +733,11 @@ modulo.register('util', function resolvePath(workingDir, relPath) {
     return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
 });
 
-
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
+    // TODO: Redo prefixAllSelectors to instead behave more like DataType,
+    // basically using "?" auto determines based on Component mode + TagName,
+    // allowing users to override if they want to intentionally silo their CSS
+    // some other way
     // NOTE - has old tests that can be resurrected
     const fullName = `${namespace}-${name}`;
     let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
@@ -777,7 +771,6 @@ modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     return content;
 });
 
-
 modulo.register('core', class AssetManager {
     constructor (modulo) {
         this.modulo = modulo;
@@ -808,13 +801,13 @@ modulo.register('core', class AssetManager {
         return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
     }
 
-    define(moduleName, code) {
+    define(name, code) {
         const hash = this.modulo.registry.utils.hash(code);
-        this.modulo.assert(!(moduleName in this.nameToHash), `Duplicate module named: ${ moduleName }`);
-        this.nameToHash[moduleName] = hash;
+        this.modulo.assert(!(name in this.nameToHash), `Duplicate: ${ name }`);
+        this.nameToHash[name] = hash;
         if (!(hash in this.modules)) {
             this.moduleSources[hash] = code;
-            const jsText = this.wrapDefine(hash, moduleName, code);
+            const jsText = this.wrapDefine(hash, name, code);
             this.modulo.assets = this;// TODO Should investigate why needed
             this.modulo.pushGlobal();
             this.appendToHead('script', '"use strict";' + jsText);
@@ -2090,7 +2083,7 @@ modulo.register('command', function build (modulo, opts = {}) {
 });
 
 if (typeof document !== 'undefined' && !window.moduloBuild) {
-    document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
+    window.document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
         const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
         if (cmd || window.moduloBuild) { // Command / already built: Run & exit
             return cmd && modulo.registry.commands[cmd](modulo);
@@ -2106,9 +2099,6 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
 }
 
 if (typeof document !== 'undefined' && document.head) { // Browser environ
-    Modulo.globals = window; // TODO, remove?
-    modulo.globals = window;
-    window.hackCoreModulo = new Modulo(modulo); // XXX
     modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };

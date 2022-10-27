@@ -1,0 +1,117 @@
+<!DOCTYPE HTML><html><head>
+
+
+<title>Contact</title><meta charset="utf8"><link rel="stylesheet" href="./_modulo/modulo-build-xx6p8v38.css" /></head><body>
+    
+    
+
+    <!--
+        Since this Component is "vanish-into-document", it's allowed to include
+        loose LINK and SCRIPT tags, which will be interpreted and built,
+        allowing you to more easily integrate existing HTML files here. E.g.:
+    -->
+    
+
+
+    <div class="Page-container">
+        <nav class="Page-nav">
+            <img src="./static/images/example_logo.svg">
+            <ul>
+                
+                    <li>
+                        <a href="./index.html" title="Home" class="
+                                Page-navLink
+                                
+                            ">
+                            HOME
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="./about.html" title="About" class="
+                                Page-navLink
+                                
+                            ">
+                            ABOUT
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="./contact.html" title="Contact" class="
+                                Page-navLink
+                                Page-navLink--selected
+                            ">
+                            CONTACT
+                        </a>
+                    </li>
+                
+            </ul>
+        </nav>
+
+        <main class="Page-mainContent">
+            <slot>
+    <h1>Contact me</h1>
+
+    <p>I'm always down to hear feedback!</p>
+
+    <p>This example text is found in <code>src/contact.html</code>, while the
+    example form component is found in
+    <code>src/static/libraries/layout.html</code>.</p>
+
+    <x-contactformexample modulo-original-html="">
+        <form>
+            
+                <div class="field-pair">
+                    <label for="name_undefined">
+                        <strong>Name:</strong>
+                    </label>
+                    
+                        <input [state.bind]="" type="text" name="name" id="name_undefined">
+                    
+                </div>
+            
+                <div class="field-pair">
+                    <label for="subject_undefined">
+                        <strong>Subject:</strong>
+                    </label>
+                    
+                        <input [state.bind]="" type="text" name="subject" id="subject_undefined">
+                    
+                </div>
+            
+                <div class="field-pair">
+                    <label for="text_undefined">
+                        <strong>Text:</strong>
+                    </label>
+                    
+                        <textarea [state.bind]="" name="text" for="text_undefined"></textarea>
+                    
+                </div>
+            
+                <div class="field-pair">
+                    <label for="subscribe_undefined">
+                        <strong>Subscribe:</strong>
+                    </label>
+                    
+                        <input [state.bind]="" type="checkbox" name="subscribe" id="subscribe_undefined">
+                    
+                </div>
+            
+        </form>
+    </x-contactformexample>
+
+    <p>Note that this form does not work as-is, and must be integrated with an
+    API (e.g. Netlify's form API).</p>
+</slot>
+        </main>
+    </div>
+
+    <footer class="Page-footer">
+        © 2022 | All Rights Reserved by Page Author
+        <!-- Feel free to delete this: -->
+        | <a href="https://modulojs.org/" title="Made with Modulo.js" target="_blank">%</a>
+    </footer>
+
+<script src="./_modulo/modulo-build-xx76j67q.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
+modulo.assets.require("Page");
+modulo.assets.require("ContactFormExample");</script></body></html>
