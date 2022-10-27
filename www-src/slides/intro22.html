@@ -137,30 +137,89 @@ Many popular frontend frameworks can be hard to use in certain situations.
 - Progressive enhancement for backend apps
 - Static site generation
 - "Glue" language
-- Single page apps
 - Quick data viz, live-coding
+- Single page apps
 </x-Markdown>
 
 
-<x-DemoSlide href="/intro-demos/integrating.html">
+<x-DemoSlide href="/demos/basic_starter.html">
 ## Integrating
 </x-DemoSlide>
 
-<x-DemoSlide>
-## Generating static sites
+<x-DemoSlide href="/demos/ssg/src/index.html">
+## Generating static sites (dev)
+
+Follow along with:
+
+```
+npm init modulo
+```
 </x-DemoSlide>
 
+
+<x-DemoSlide href="/demos/ssg/www/index.html">
+### Generating static sites (prerendered)
+
+Server-side render with:
+
+```
+npm run build
+```
+</x-DemoSlide>
+
+<x-DemoSlide href="/demos/intro22/glue.html">
+### As a glue language
+</x-DemoSlide>
+
+<x-DemoSlide  href="/demos/tone_example.html">
+### Live-coding art and music
+</x-DemoSlide>
+
+
+<x-DemoSlide href="/demos/custom_cpart_for_api.html">
+## Single page apps
+</x-DemoSlide>
+
+
+
 <x-Markdown>
-## As a glue language
+# Future
+
+### Modulo.js
+
+- Code needs clean-up, commenting, reduce back under 2k lines
+- Fix (or exclude) reconciler directives `key=` and `ignore`
+
+### modulocli
+
+- Compatibility with JSDOM and other faster backends
+- Quality-of-life features like watching for updates and hot-reloading
+
+### Documentation
+
+- Provide Netlify and NetlifyCMS compatible SSG template
+- Document Component Part API, Library mechanics, modulocli, etc
+
+### Beyond
+
+- Many more examples and pre-made example components
+- "Storybook-type" auto-documentation support
+- GUI editor (Declarative format allows for Scratch-like "no code")
+
 </x-Markdown>
 
 
 <x-Markdown>
-## Live-coding
+## Questions?
 </x-Markdown>
-
 
 
 
 </x-SlideShow>
 
+
+<!--
+<x-DemoSlide href="/demos/intro22/dataviz.html">
+### Data viz
+</x-DemoSlide>
+-->

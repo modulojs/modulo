@@ -1,0 +1,105 @@
+/* Since this is a "vanishing" component, none of it's styles will be prefixed,
+** meaning we can set global styles here as well */
+html {
+    font-family: sans-serif;
+}
+
+html * {
+    box-sizing: border-box;
+}
+
+.Page-container {
+    display: grid;
+    grid-template-columns: 1fr 200px minmax(auto, 700px) 1fr;
+    min-height: calc(100vh - 120px); /* 100px for footer */
+}
+
+.Page-mainContent {
+    grid-column: 3;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: 5px 5px black;
+}
+
+.Page-mainContent h1 {
+    border-bottom: 1px dotted black;
+}
+.Page-mainContent code {
+    border-bottom: 1px dashed gray;
+}
+
+.Page-nav {
+    grid-column: 2;
+    text-align: right;
+}
+
+.Page-nav li {
+    list-style: none;
+    margin-top: 10px;
+}
+
+.Page-navLink {
+    color: black;
+    font-weight: bold;
+    font-size: 18px;
+    border: 2px solid black;
+    display: block;
+    padding: 5px;
+    text-decoration: none;
+    box-shadow: 5px 5px black;
+}
+
+.Page-navLink--selected {
+    background-color: #B90183;
+    color: white;
+}
+
+.Page-navLink:hover {
+    border-color: #B90183;
+}
+
+.Page-navLink--selected {
+}
+
+.Page-footer {
+    height: 100px;
+    text-align: center;
+    padding-top: 30px
+}
+
+@media (max-width: 576px) {
+    .Page-container {
+        display: block;
+    }
+}
+
+
+x-ContactFormExample .field-pair {
+            display: grid;
+            width: calc(100% - 10px);
+            grid-template-columns: 100px 1fr;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid black;
+            box-shadow: 3px 3px gray;
+            border-radius: 10px;
+        }
+
+x-ContactFormExample .field-pair > * {
+            border: none;
+            font-size: 15px;
+        }
+    
+/* You can put site-wide settings here. These will never be prefixed and
+** instead included verbatim. Component styles will be listed after. */
+
+html {
+    line-height: 1.15;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+}

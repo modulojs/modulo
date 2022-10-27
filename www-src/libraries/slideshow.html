@@ -30,6 +30,7 @@ cycles through it's children -->
                     Previous
                 </button>
             {% endif %}
+            {% comment %}
             <ol class="slide-list">
                 {% for slide in state.slides %}
                     <li @click:=script.setSlide payload:={{slide.index}}>
@@ -37,6 +38,7 @@ cycles through it's children -->
                     </li>
                 {% endfor %}
             </ol>
+            {% endcomment %}
             {% if state.slideIndex lt state.slides.length %}
                 <button @click:=script.nextSlide>
                     <div alt="Right arrow">⇒</div>
@@ -115,8 +117,8 @@ cycles through it's children -->
         <br />
         <x-Markdown>{{ component.originalHTML }}</x-Markdown>
         {% if props.href %}
-            <iframe src="/slides/{{ props.href }}"></iframe>
-            <p><a href="/slides/{{ props.href }}">Try demo &rsaquo;</a></p>
+            <iframe src="{{ props.href }}"></iframe>
+            <p><a target="_blank" href="{{ props.href }}">Try demo &rsaquo;</a></p>
         {% endif  %}
     </Template>
     <Style>
