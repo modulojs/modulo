@@ -109,7 +109,7 @@ of the Modulo `bundle` browser console command.
 
 ## License
 
-(C) 2022 - Michael Bethencourt
+(C) 2023 - Michael Bethencourt
 
 [LGPL-2.1](https://github.com/modulojs/modulo/blob/main/LICENSE)
 
