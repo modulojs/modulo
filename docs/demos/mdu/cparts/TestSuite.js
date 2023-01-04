@@ -228,7 +228,7 @@ modulo.register('cpart', class TestSuite {
         const testLoaderModulo = new Modulo(modulo); // "Fork" modulo obj
         let componentFac;
 
-        // REFACTOR this garbagee
+        // REFACTOR this garbage
         if (UNIFIED_DEFINITIONS) {
             testLoaderModulo.definitions = deepClone(modulo.definitions, modulo);
             componentFac = testLoaderModulo.definitions[name];

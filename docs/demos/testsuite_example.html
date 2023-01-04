@@ -4,7 +4,7 @@
     testing frameworks, but instead is intended for allowing quick development
     of unit-testing of components in particular.
 -->
-<template Modulo>
+<template id="Modulo">
     <Component name="ExampleClickingComponent">
         <Props
             txt
@@ -110,19 +110,33 @@
 </template>
 
 <!-- Linking to Modulo  -->
-<script src="https://unpkg.com/mdu.js"></script>
 <!-- Load the TestSuite CPart -->
+<!--
+<script src="https://unpkg.com/mdu.js"></script>
 <script src="https://unpkg.com/mdu.js@latest/mdu/cparts/TestSuite.js"></script>
+-->
+<script src="https://unpkg.com/mdu.js@0.0.21/src/Modulo.js"></script>
+<script src="https://unpkg.com/mdu.js@0.0.21/mdu/cparts/TestSuite.js"></script>
 
-<p>To run the tests, bring up your JavaScript Console, and click the "test"
-command from the COMMANDS menu (or type: <code>m.test()</code> as a
-shortcut)</p>
+<!--<p>To run the tests, bring up your JavaScript Console, and click the "test"
+command from the COMMANDS menu.</p>-->
 
-<p>
-    The component being tested is also mounted below, so you can examine it's
-    normal usage:
+<button onClick="this.textContent = 'Success: ' + modulo.registry.commands.test(modulo)">
+   Run tests
+</button>
+<script>
+    modulo.loadFromDOM(document.getElementById('Modulo').content);
+    modulo.preprocessAndDefine();
+</script>
+
+
+<div>
+    <p>The component being tested is also mounted below, so you can examine it's
+    normal usage:</p>
+    <hr />
     <x-ExampleClickingComponent txt="Hello"></x-ExampleClickingComponent>
-</p>
+    <hr />
+</div>
 
 
 <!-- Remember - Move Component definitions to a library file later:

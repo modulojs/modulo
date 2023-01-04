@@ -477,16 +477,6 @@ modulo.register('cpart', class Component {
         let { innerHTML, patches, root } = renderObj.component;
         this.mode = this.attrs.mode || 'regular';
         if (innerHTML !== null) {
-
-            // XXX ----------------
-            // HACK for vanish-into-document to preserve Modulo stuff
-            if (this.mode === 'vanish-into-document') {
-                const dE = this.element.ownerDocument.documentElement;
-                const elems = dE.querySelectorAll('template[modulo-embed],modulo');
-                this.element.ownerDocument.head.append(...Array.from(elems));
-            }
-            // XXX ----------------
-
             if (this.mode === 'regular' || this.mode === 'vanish') {
                 root = this.element; // default, use element as root
             } else if (this.mode === 'shadow') {
@@ -494,7 +484,7 @@ modulo.register('cpart', class Component {
             } else if (this.mode === 'vanish-into-document') {
                 root = this.element.ownerDocument.body; // render into body
             } else {
-                this.modulo.assert(this.mode === 'custom-root', 'Err:', this.mode);
+                this.modulo.assert(this.mode === 'custom-root', 'Invalid mode');
             }
             patches = this.reconciler.reconcile(root, innerHTML || '', this.localNameMap);// rm last arg
         }
@@ -511,7 +501,6 @@ modulo.register('cpart', class Component {
                                         this.mode === 'vanish-into-document')) {
             // First time initialized, and is one of the vanish modes
             this.element.replaceWith(...this.element.childNodes); // Replace self
-            this.element.remove(); // TODO: rm when fully tested
         }
     }
 
@@ -1068,7 +1057,6 @@ modulo.register('processor', function contentJS (modulo, def, value) {
 });
 
 modulo.register('processor', function contentJSON (modulo, def, value) {
-    //console.log(def.DefinitionName, 'thsi si ext', def.Content); // XYZ
     def.Code = 'return ' + JSON.stringify(JSON.parse(def.Content || '{}')) + ';';
 });
 

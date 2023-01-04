@@ -3,7 +3,6 @@
     make a simple shopping list, so you can copy & paste it into your project
     to get started (and remember syntax!).
 -->
-<script src="https://unpkg.com/mdu.js"></script>
 <template Modulo>
   <Component name="HelloWorld">
     <Props
@@ -57,13 +56,15 @@
   </Component>
 </template>
 
+<!-- Include Modulo.js, using latest version: -->
+<script src="https://unpkg.com/mdu.js"></script>
 
-<!-- Use it anywhere, as much as you'd like, each instance is isolated: -->
+<!-- Use the component, as much as you'd like, each instance is isolated: -->
 <x-HelloWorld label="Shopping list"></x-HelloWorld>
 
-<!-- Remember - Move Component definitions to a library file later:
+<!-- Remember - Specify version, and move components to a library file later:
 <script Modulo
-    src="https://unpkg.com/mdu.js"
+    src="https://unpkg.com/mdu.js@0.0.21/src/Modulo.js"
     -src="/static/libraries/all.html"
 ></script> -->
 
