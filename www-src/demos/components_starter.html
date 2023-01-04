@@ -10,7 +10,6 @@
     important for accessibility, see:
     https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/dialog.html
 -->
-<script src="https://unpkg.com/mdu.js"></script>
 <template Modulo>
   <Component name="Btn">
     <Style>
@@ -268,19 +267,22 @@
     window.onload = function () {
         const colors = ['#a15745', '#ec9747', '#4a3383', '#715ac4', '#a4e06b',
                         '#c29df2', '#a3134a', '#9af296', '#fc97c3', '#4ed8c3',
-                        '#095363', '#e03e26']
+                        '#095363', '#e03e26'];
         const randColor = colors[Math.floor(Math.random() * colors.length)];
         document.documentElement.style.setProperty('--accent1', randColor);
-    }
+    };
 </script>
 <!-- NOTE: To save a color, delete the above script and use CSS: -->
 <style>/* :root { --accent1: #999; } */</style>
 
 
-<!-- Remember - Move Component definitions to a library file later:
+<!-- Include Modulo.js, using latest version: -->
+<script src="https://unpkg.com/mdu.js"></script>
+
+<!-- Remember - Specify version, and move components to a library file later:
 <script Modulo
-    src="https://unpkg.com/mdu.js"
-    -src="./libraries/my_components.html"
+    src="https://unpkg.com/mdu.js@0.0.21/src/Modulo.js"
+    -src="/static/libraries/all.html"
 ></script> -->
 
 <!-- ######################################################################### -->
