@@ -1,0 +1,67 @@
+:host {
+    font-family: var(--m-font);
+    border-radius: 7px;
+    /*background-color: var(--m-white);*/
+    cursor: pointer;
+    color: var(--m-black);
+    font-size: 1.2rem;
+    display: block;
+    user-select: none;
+    margin-bottom: 3px;
+    padding: 5px;
+    transition: background-color 0.2s
+                ,box-shadow 0.5s
+                ,background-size 0.2s
+                ;
+    font-weight: 500;
+    border: 3px solid var(--m-black);
+    /*border: 3px solid var(--m-primary);*/
+    /* For a more isometric look: */
+    border-top-width: 2px;
+    border-bottom-width: 4px;
+    box-shadow: calc(var(--m-shadow-size) / -8) calc(var(--m-shadow-size) / -8) 0 inset var(--m-shadow);
+}
+
+:host:active {
+    box-shadow: calc(var(--m-shadow-size) / 2) calc(var(--m-shadow-size) / 2) 0 inset var(--m-shadow);
+}
+
+:host.actions {
+    font-size: 3.0rem;
+    line-height: 80px;
+    text-align: center;
+    border-radius: 100px;
+    margin-top: -6px;
+    margin-left: -6px;
+    width: 80px;
+    height: 80px;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: block;
+    padding: 0;
+    transition: background-size 0.2s;
+    transition-timing-function: ease-out;
+    background: radial-gradient(
+        circle at bottom,
+        var(--m-primary) 50%,
+        white 50.5%,
+        white 100%);
+    background-repeat: no-repeat;
+    background-size: 1% 1%;
+    background-position: top left;
+}
+
+:host.actions--tl {
+    background-position: bottom right;
+}
+
+:host.actions:hover,
+:host.actions:active {
+    color: black !important;
+    /*background-color: var(--m-green);*/
+    /*box-shadow: 0 0 0 5px var(--m-green);*/
+    font-weight: 700;
+    /*background-size: 197% 197%;*/
+    background-size: 127% 127%;
+}
+

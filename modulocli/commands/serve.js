@@ -1,6 +1,8 @@
 const { ssg } = require('./generate.js');
 const { doWatch } = require('./watch.js');
 
+const autogenMiddleware = require('../lib/autogenMiddleware.js');
+
 function _getModuloMiddleware(config, express) {
     let {
         serverAutoFixSlashes,
@@ -19,18 +21,35 @@ function _getModuloMiddleware(config, express) {
     };
     const staticMiddleware = express.static(config.output, staticSettings);
     log(`Express Static middleware options: ${staticSettings}`);
+
+    // Turning on autogens that are enabled
+    const serverAutogens = (config.serverAutoGens || '').split(' ');
+    const agEnabled = serverAutogens.length > 1 ? {} : null;
+    for (const name of serverAutogens) {
+        if (!name) {
+            continue;
+        }
+        agEnabled[name] = autogenMiddleware[name];
+        const type = typeof autogenMiddleware[name];
+        log(`Enabling autogen middleware "${ name }" (${ type })`);
+    }
+
     return (req, res, next) => {
         if (serverSetNoCache) {
             res.set('Cache-Control', 'no-store');
         }
         log(`${req.method} ${req.url}`);
-        staticMiddleware(req, res, next);
-
-        // TODO: Add in "/$username/" style wildcard matches, auto .html
-        //       prefixing, etc before static. Behavior is simple:
-        //       $username becomes Modulo.route.username for any generates
-        //       within this dir (or something similar)
-        //this._app.use(this.wildcardPatchMiddleware);
+        const agName = agEnabled && req.path.startsWith('__') &&
+                        req.path.substr(2).split('/')[0];
+        if (agName && agName in agEnabled) {
+            const path = req.path.substr(agName.length + 3);
+            agEnabled[agName](config, path, (data) => {
+                // TODO: Write data to file
+                staticMiddleware(req, res, next);
+            });
+        } else {
+            staticMiddleware(req, res, next);
+        }
     };
 }
 

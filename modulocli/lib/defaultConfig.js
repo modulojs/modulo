@@ -50,6 +50,9 @@ const defaultConfig = {
         // will find this file, require it, and then use whatever exported as
         // the server that Modulo attaches it's own middleware to.
 
+    serverAutogens: '',
+        // Enable "autogen" feature. Example, "dirlist"
+
     serverAppPath: 'srv/index.js',
         // This is the default value of serverApp if not specified, and
         // changing this behaves the same way with one exception: If it's not

@@ -1,0 +1,100 @@
+:host {
+    display: block;
+    position: relative;
+    --sidebar-width: 75px;
+}
+
+.upper-left-circle {
+    display: block;
+    width: 100px;
+    height: 100px;
+    background-color: var(--m-primary);
+    border-radius: 100px;
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    z-index: -1;
+    transition:
+        opacity 0.2s,
+        width 0.2s,
+        height 0.2s;
+}
+
+.left-square {
+    display: block;
+    width: 0;
+    height: 0;
+    background-color: var(--m-primary);
+    position: relative;
+}
+
+.left-square::before {
+    display: block;
+    content: ' ';
+    width: var(--sidebar-width);
+    height: 100px;
+    left: -10px;
+    position: relative;
+    background-color: var(--m-primary);
+    transition:
+        opacity 0.2s,
+        width 0.2s,
+        height 0.2s;
+}
+
+.menu-holder > x-Btn {
+    position: relative;
+    z-index: 2;
+    margin-top: 10px;
+}
+
+.tab-box {
+    border: 3px solid black;
+    padding: 20px;
+    display: block;
+    width: 100%;
+    box-shadow: var(--m-shadow-size) var(--m-shadow-size) 0 var(--m-shadow);
+    background: white;
+}
+
+.upper-left-circle.filled {
+    width: 200px;
+    height: 800px;
+    left: 100px;
+    opacity: 0;
+    border-radius: 0;
+    transition:
+        border-radius 0.3s,
+        opacity 1.0s,
+        width 0.2s,
+        height 0.2s,
+        left 0.2s;
+}
+
+.menu-button-holder {
+    position: relative;
+    z-index: 2;
+}
+
+.menu-wrapper {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 0 var(--sidebar-width) 1fr;
+}
+
+.tab-holder {
+    height: 100%;
+    transition: background-color 0.5s;
+    background-color: rgba(255, 255, 255, 0.0);
+    padding: 20px;
+    margin: -10px;
+}
+
+.menu-wrapper--visible .tab-holder--filled {
+    background-color: var(--m-primary);
+}
+
+.menu-holder {
+    padding-top: 100px;
+}

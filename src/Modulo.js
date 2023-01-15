@@ -1,4 +1,4 @@
-// Modulo.js - Copyright 2022 - LGPL 2.1 - https://modulojs.org/
+// Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
 window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {

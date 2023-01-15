@@ -1,0 +1,34 @@
+:host {
+}
+
+.file {
+    display: block;
+    border: 1px dotted rgba(0, 0, 0, 0.2);
+    padding: 2px;
+    margin: 2px;
+    font-family: monospace;
+    font-size: var(--base-font-size);
+}
+
+.file tt {
+    color: rgba(0, 0, 0, 0.01);
+}
+
+.file:hover tt {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.file:hover tt:hover {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+:host > h3 {
+    background: var(--m-black);
+    color: var(--m-white);
+    padding: 3px;
+    margin: -20px;
+    margin-top: -34px;
+    font-family: monospace;
+    font-weight: lighter;
+    margin-bottom: 0;
+}
