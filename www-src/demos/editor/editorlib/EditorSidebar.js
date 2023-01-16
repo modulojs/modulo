@@ -3,16 +3,27 @@ const ALLOW_NULL = false; // quick feature flag
 function initializedCallback () {
     state.tabs = [
         {
+            name: "help",
+            boxes: [
+                "<h3>modulo editor help</h3>",
+            ],
+            emoji: "ℹ",
+        },
+
+        {
             name: "files",
             boxes: [
                 "<x-FileBrowser></x-FileBrowser>",
             ],
-            emoji: "📂",
+            emoji: "📁",
+            emojiSelected: "📂",
         },
+
         {
             name: "options",
             boxes: [
-                "<x-EditorSettings></x-EditorSettings>",
+                "<x-LayoutSettings></x-LayoutSettings>",
+                "<x-FileEditorSettings></x-FileEditorSettings>",
             ],
             emoji: "🎨",
         },
@@ -21,6 +32,7 @@ function initializedCallback () {
         toggleTab('files');
     }
 }
+
 function toggleSidebar () {
     state.visible = !state.visible;
 }
@@ -32,6 +44,7 @@ function toggleTab (payload) {
         state.tab = payload;
     }
 
+    // Ensure boxes is up to date
     for (const tab of state.tabs) {
         if (state.tab === tab.name) {
             state.boxes = tab.boxes;

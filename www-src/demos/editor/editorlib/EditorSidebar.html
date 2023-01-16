@@ -28,15 +28,17 @@
                 class="actions"
                 payload="{{ tabInfo.name }}"
                 @click:=script.toggleTab
-            >{{ tabInfo.emoji }}</x-Btn>
+            >{% if state.tab == tabInfo.name %}{{ tabInfo.emojiSelected|default:tabInfo.emoji }}{% else %}{{ tabInfo.emoji }}{% endif %}</x-Btn>
         {% endfor %}
     </div>
     <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}"
         style="
             {% if state.visible %}
                 opacity: 1;
+                display: block;
             {% else %}
                 opacity: 0;
+                display: none;
             {% endif %}
         ">
         {% if state.tab %}

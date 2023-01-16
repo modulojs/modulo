@@ -5,6 +5,52 @@
     });
 </script>
 
+<Component name="ModuloEditor">
+    <Template>
+        <x-EditorSidebar></x-EditorSidebar>
+        <x-FileEditor
+            content="print('hello world')"
+            name="example.py"
+        ></x-FileEditor>
+    </Template>
+    <Style>
+        /* TODO: Need to implement and/or document global state binding (e.g. store), before this hacky settings system can be fixed */
+        :host { /* Center is default */
+            --editor-width: 750px;
+            display: grid;
+            height: calc(100vh - 20px);
+            box-sizing: border-box;
+            grid-gap: 15px;
+            grid-template-columns: 1fr var(--editor-width) 1fr;
+        }
+
+        :host.layout--wide {
+            --editor-width: calc(100vw - 500px);
+        }
+
+        :host.layout--full {
+            --editor-width: 100vw;
+            display: block;
+        }
+
+        :host.layout--full .menu-button-holder > x-Btn {
+            margin-bottom: -80px;
+            font-size: 12px;
+            text-shadow: none;
+            font-weight: 200;
+            line-height: 15px;
+            height: 20px;
+            width: 20px;
+            border-radius: 0;
+            background: white;
+        }
+
+        :host * {
+            box-sizing: border-box;
+        }
+    </Style>
+</Component>
+
 <Component name="FileBrowser">
     <Template
         -src="/demos/editor/editorlib/FileBrowser.html"
@@ -29,29 +75,6 @@
     <Style
         -src="/demos/editor/editorlib/Btn.css"
     ></Style>
-</Component>
-
-<Component name="ModuloEditor">
-    <Template>
-        <x-EditorSidebar></x-EditorSidebar>
-        <x-FileEditor
-            content="print('hello world')"
-            name="example.py"
-        ></x-FileEditor>
-    </Template>
-    <Style>
-        :host {
-            --editor-width: 700px;
-            display: grid;
-            height: calc(100vh - 20px);
-            box-sizing: border-box;
-            grid-gap: 15px;
-            grid-template-columns: 1fr var(--editor-width) 1fr;
-        }
-        :host * {
-            box-sizing: border-box;
-        }
-    </Style>
 </Component>
 
 <Component name="EditorSidebar">
@@ -95,64 +118,94 @@
         loading:=false
         err:=null
     ></State>
+    <Script
+        -src="/demos/editor/editorlib/FileEditor.js"
+    ></Script>
+    <Style
+        -src="/demos/editor/editorlib/FileEditor.css"
+    ></Style>
+</Component>
+
+<Component name="FileEditorSettings">
+    <Template
+        -src="/demos/editor/editorlib/FileEditorSettings.html"
+    ></Template>
+    <State
+        profiles:=[]
+        selected:=null
+    ></State>
+    <Script
+        -src="/demos/editor/editorlib/FileEditorSettings.js"
+    ></Script>
+    <Style
+        -src="/demos/editor/editorlib/FileEditorSettings.css"
+    ></Style>
+</Component>
+
+<Component name="Options">
+    <Props
+        options
+        onchange
+        value
+    ></Props>
+    <Template>
+        {% for opt in props.options %}
+            <div style="position: relative">
+                {% if props.value == opt.name %}
+                    <div class="right-square"></div>
+                {% endif %}
+                <x-Btn
+                    @click:=props.onchange
+                    payload="{{ opt.name }}"
+                    style="position: relative"
+                >{{ opt.name|capfirst }}</x-Btn>
+            </div>
+        {% endfor %}
+    </Template>
+</Component>
+
+
+<Component name="LayoutSettings">
+    <Template>
+        <h3>Layout</h3>
+        <x-Options
+            value="{{ state.layout }}"
+            onchange:=script.setLayout
+            options:=state.layouts
+        ></x-Options>
+    </Template>
+    <State
+        layout="center"
+        layouts:=[]
+    ></State>
     <Script>
-        const { getEditor } = modulo.registry.utils;
-
-        function fetchContent(state, element) {
-            state.loading = true;
-            fetch(props.url)
-                .then(response => response.text())
-                .then(text => {
-                    state.content = text;
-                    state.loading = false;
-                    element.rerender();
-                })
-                .catch(err => {
-                    state.err = err;
-                    element.rerender();
-                });
-        }
-
         function initializedCallback() {
-            if (!props.content) {
-                state.content = '';
-                // TODO: Better support /document multiple editors
-                fetchContent(state, element);
+            state.layouts.push(...[
+                { name: 'center' },
+                { name: 'wide' },
+                { name: 'full' },
+            ]);
+        }
+        function setLayout(payload) {
+            state.layout = payload;
+            // HACK!
+            const modEdit = document.querySelector('x-ModuloEditor');
+            for (const { name } of state.layouts) {
+                modEdit.classList.remove('layout--' + name);
             }
-        }
-        function editMount ({ el }) {
-            element.editor = getEditor(el);
-            element.editor.setTheme("ace/theme/monokai");
-            element.editor.session.setMode("ace/mode/python");
-        }
-
-        function editUnmount () {
-            element.editor.destroy();
+            modEdit.classList.add('layout--' + payload);
+            element.rerender(); // because is callback
         }
     </Script>
     <Style>
-        :host {
-            border: 3px solid black;
-            padding: 20px;
-            display: block;
-            width: 100%;
-            height: calc(100vh - 20px);
-            box-shadow: var(--m-shadow-size) var(--m-shadow-size) 0 var(--m-shadow);
-        }
-
-        #main_editor {
-            height: 100%;
-            width: 100%;
-        }
-
-        h3 {
-            background: var(--m-black);
-            color: var(--m-white);
-            padding: 3px;
-            margin: -20px;
-            font-family: monospace;
-            font-weight: lighter;
-            margin-bottom: 0;
+        .right-square {
+            position: absolute;
+            right: 10px;
+            top: -3px;
+            z-index: 0;
+            height: calc(100% + 6px);
+            width: 80px;
+            background: var(--m-highlight);
         }
     </Style>
 </Component>

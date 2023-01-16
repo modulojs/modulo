@@ -2,22 +2,7 @@
     display: block;
     position: relative;
     --sidebar-width: 75px;
-}
-
-.upper-left-circle {
-    display: block;
-    width: 100px;
-    height: 100px;
-    background-color: var(--m-primary);
-    border-radius: 100px;
-    position: absolute;
-    top: -50px;
-    left: -50px;
-    z-index: -1;
-    transition:
-        opacity 0.2s,
-        width 0.2s,
-        height 0.2s;
+    --tab-box-width: 400px;
 }
 
 .left-square {
@@ -42,19 +27,50 @@
         height 0.2s;
 }
 
+.menu-holder {
+    padding-top: 80px;
+}
+
 .menu-holder > x-Btn {
     position: relative;
     z-index: 2;
     margin-top: 10px;
+    text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0 var(--m-shadow);
 }
+
+.menu-holder > x-Btn:hover {
+    text-shadow: 0 0 5px var(--m-highlight);
+}
+/*
+.menu-holder > x-Btn:hover {
+    text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0px var(--m-highlight);
+}
+*/
 
 .tab-box {
     border: 3px solid black;
     padding: 20px;
     display: block;
     width: 100%;
+    max-width: var(--tab-box-width);
     box-shadow: var(--m-shadow-size) var(--m-shadow-size) 0 var(--m-shadow);
     background: white;
+}
+
+.upper-left-circle {
+    display: block;
+    width: 100px;
+    height: 100px;
+    background-color: var(--m-primary);
+    border-radius: 100px;
+    position: absolute;
+    top: -65px;
+    left: -65px;
+    z-index: -1;
+    transition:
+        opacity 0.2s,
+        width 0.2s,
+        height 0.2s;
 }
 
 .upper-left-circle.filled {
@@ -65,9 +81,9 @@
     border-radius: 0;
     transition:
         border-radius 0.3s,
-        opacity 1.0s,
-        width 0.2s,
-        height 0.2s,
+        opacity 0.3s,
+        width 0.5s,
+        height 0.5s,
         left 0.2s;
 }
 
@@ -95,6 +111,3 @@
     background-color: var(--m-primary);
 }
 
-.menu-holder {
-    padding-top: 100px;
-}

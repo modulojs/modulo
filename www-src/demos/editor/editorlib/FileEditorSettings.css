@@ -1,0 +1,36 @@
+ul, ol, li {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+    margin-bottom: 30px;
+    clear: both;
+}
+
+li input[type=radio] {
+    position: relative;
+    left: -40px;
+    top: 20px;
+}
+
+.left-emoji {
+    float: left;
+    font-size: 30px;
+    text-align: center;
+    display: inline-block;
+    border: 5px solid var(--m-shadow);
+    border-radius: 40px;
+    height: 55px;
+    width: 55px;
+    line-height: 45px;
+    padding: 0;
+    text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0 var(--m-shadow);
+    background: rgba(255, 255, 255, 0.0);
+    transition: background 0.3s;
+}
+
+.profile-selected .left-emoji {
+    background: var(--m-highlight);
+}
