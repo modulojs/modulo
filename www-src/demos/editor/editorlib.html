@@ -14,8 +14,7 @@
         ></x-FileEditor>
     </Template>
     <Style>
-        /* TODO: Need to implement and/or document global state binding (e.g. store), before this hacky settings system can be fixed */
-        :host { /* Center is default */
+        :host {
             --editor-width: 750px;
             display: grid;
             height: calc(100vh - 20px);
@@ -26,6 +25,7 @@
 
         :host.layout--wide {
             --editor-width: calc(100vw - 500px);
+            grid-gap: 0;
         }
 
         :host.layout--full {
