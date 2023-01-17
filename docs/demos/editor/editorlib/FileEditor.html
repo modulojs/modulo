@@ -1,6 +1,6 @@
 <h3>{{ props.name }}</h3>
 
-<div id="preview" [script.previewspot]></div>
+{#<div id="preview" [script.previewspot]></div> #}
 
 {% if state.err %}
     <p><strong>ERR:</strong> {{ state.err }}</p>
@@ -9,5 +9,4 @@
 {% else %}
     <div id="main_editor" [script.editspot]>{{ props.content }}</div>
 {% endif %}
-
 
