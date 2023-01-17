@@ -42,7 +42,6 @@ const PLAIN_TEXT = {
 };
 
 
-
 const BASIC = {
       // editor options
       selectionStyle: 'line',// "line"|"text"
@@ -114,13 +113,171 @@ const profiles = [
         options: BASIC,
         emoji: '🇸',
     },
+];
 
+
+const editorThemesLight = [
+    {
+      name: 'chrome',
+      label: 'Chrome'
+    },
+    {
+      name: 'clouds',
+      label: 'Clouds'
+    },
+    {
+      name: 'crimson_editor',
+      label: 'Crimson Editor'
+    },
+    {
+      name: 'dawn',
+      label: 'Dawn'
+    },
+    {
+      name: 'dreamweaver',
+      label: 'Dreamweaver'
+    },
+    {
+      name: 'eclipse',
+      label: 'Eclipse'
+    },
+    {
+      name: 'github',
+      label: 'GitHub'
+    },
+    {
+      name: 'iplastic',
+      label: 'IPlastic'
+    },
+    {
+      name: 'katzenmilch',
+      label: 'KatzenMilch'
+    },
+    {
+      name: 'kuroir',
+      label: 'Kuroir'
+    },
+    {
+      name: 'solarized_light',
+      label: 'Solarized Light'
+    },
+    {
+      name: 'sqlserver',
+      label: 'SQL Server'
+    },
+    {
+      name: 'textmate',
+      label: 'TextMate'
+    },
+    {
+      name: 'tomorrow',
+      label: 'Tomorrow'
+    },
+    {
+      name: 'xcode',
+      label: 'XCode'
+    }
+];
+
+
+
+const editorThemesDark = [
+    {
+      name: 'ambiance',
+      label: 'Ambiance'
+    },
+    {
+      name: 'chaos',
+      label: 'Chaos'
+    },
+    {
+      name: 'clouds_midnight',
+      label: 'Clouds Midnight'
+    },
+    {
+      name: 'cobalt',
+      label: 'Cobalt'
+    },
+    {
+      name: 'dracula',
+      label: 'Dracula'
+    },
+    {
+      name: 'gob',
+      label: 'Greeon on Black'
+    },
+    {
+      name: 'gruvbox',
+      label: 'Gruvbox'
+    },
+    {
+      name: 'idle_fingers',
+      label: 'idle Fingers'
+    },
+    {
+      name: 'kr_theme',
+      label: 'krTheme'
+    },
+    {
+      name: 'merbivore',
+      label: 'Merbivore'
+    },
+    {
+      name: 'merbivore_soft',
+      label: 'Merbivore Soft'
+    },
+    {
+      name: 'mono_industrial',
+      label: 'Mono Industrial'
+    },
+    {
+      name: 'monokai',
+      label: 'Monokai'
+    },
+    {
+      name: 'pastel_on_dark',
+      label: 'Pastel on Dark'
+    },
+    {
+      name: 'solarized_dark',
+      label: 'Solarized Dark'
+    },
+    {
+      name: 'terminal',
+      label: 'Terminal'
+    },
+    {
+      name: 'tomorrow_night',
+      label: 'Tomorrow Night'
+    },
+    {
+      name: 'tomorrow_night_blue',
+      label: 'Tomorrow Night Blue'
+    },
+    {
+      name: 'tomorrow_night_bright',
+      label: 'Tomorrow Night Bright'
+    },
+    {
+      name: 'tomorrow_night_eighties',
+      label: 'Tomorrow Night 80s'
+    },
+    {
+      name: 'twilight',
+      label: 'Twilight'
+    },
+    {
+      name: 'vibrant_ink',
+      label: 'Vibrant Ink',
+    }
 ];
 
 
 function prepareCallback() {
       if (!state.selected) {
           state.profiles = profiles;
+          state.editorThemesLight = editorThemesLight;
+          state.editorThemesDark = editorThemesDark;
           state.selected = profiles[0].name;
       }
       if (window.__AceEditor) {
@@ -128,9 +285,18 @@ function prepareCallback() {
       }
 }
 
+
+function setTheme(newTheme) {
+    state.theme = newTheme;
+    element.editor.setTheme('ace/theme/' + newTheme);
+    element.editor.setOptions({ fontSize: 18 });
+    props.onchange('editorTheme', newTheme);
+}
+
+
 function setProfile(profileName) {
     state.selected = profileName;
-    console.log('setting to', profileName);
+    props.onchange('editorProfile', profileName);
 
     let newOptions = {};
     for (const profile of state.profiles) {

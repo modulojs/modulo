@@ -1,4 +1,4 @@
-// Modulo.js - Copyright 2022 - LGPL 2.1 - https://modulojs.org/
+// Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
 window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -1001,6 +1001,18 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+    /*
+    renderCallback(renderObj) {
+        const patches = selector ? renderObj.component.patches : [];
+        for (const [ node ]  of Array.from(patches)) {
+            const cls = 'I__x__MyComponent';
+            const any = '*:not(.I__x_MyComponent):has(h1, p > strong, etc)';
+            if (node.matches && node.matches(any)) {
+                patches.append('attr-append', node, 'class', ' ' + className);
+            }
+        }
+    }
+    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });
@@ -1889,12 +1901,6 @@ modulo.register('engine', class Reconciler {
                     if (rival.hasAttribute('modulo-ignore')) {
                         //console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
-                        // TODO: Instead of having one big "rerender" patch,
-                        // maybe run a "rerender" right away, but collect
-                        // patches, then insert in the patch list here?
-                        // Could have renderObj = { component: renderContextRenderObj ... }
-                        // And maybe even then dataProps resolve like:
-                        // renderObj.component.renderContextRenderObj || renderObj;
                         // OR: Maybe even a simple way to reuse renderObj?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
@@ -1916,10 +1922,12 @@ modulo.register('engine', class Reconciler {
             node.nodeValue = arg;
         } else if (method === 'insertBefore') {
             node.insertBefore(arg, arg2); // Needs 2 arguments
+        } else if (method === 'attr-append') { // Append string to existing
+            node.setAttribute(arg, (node.getAttribute(arg) || '') + arg2); // TODO: DEAD CODE
         } else if (method.startsWith('directive-')) {
-            // TODO: Possibly, remove 'directive-' prefix
+            // TODO: Possibly, remove 'directive-' prefix, unnecessary
             method = method.substr('directive-'.length);
-            node[method].call(node, arg); // invoke method
+            node[method].call(node, arg); // invoke directive method
         } else {
             node[method].call(node, arg); // invoke method
         }

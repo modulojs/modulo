@@ -1,5 +1,20 @@
 <h3>Settings</h3>
 
+<h4>Themes: Light</h4>
+<x-Options
+    value="{{ state.theme }}"
+    onchange:=script.setTheme
+    options:=state.editorThemesLight
+></x-Options>
+
+
+<h4>Themes: Dark</h4>
+<x-Options
+    value="{{ state.theme }}"
+    onchange:=script.setTheme
+    options:=state.editorThemesDark
+></x-Options>
+
 <ul>
     {% for profile in state.profiles %}
         <li 

@@ -23,7 +23,7 @@ function initializedCallback () {
             name: "options",
             boxes: [
                 "<x-LayoutSettings></x-LayoutSettings>",
-                "<x-FileEditorSettings></x-FileEditorSettings>",
+                "<x-FileEditorSettings onchange:=script.onFileEditorOptionsChange></x-FileEditorSettings>",
             ],
             emoji: "🎨",
         },
@@ -31,6 +31,15 @@ function initializedCallback () {
     if (!ALLOW_NULL) {
         toggleTab('files');
     }
+}
+
+function onFileBrowserChange(payload) {
+    // NOTE: Dead code! FileBrowser will probably just be links...
+    console.log('onFileBrowserChange', payload);
+}
+
+function onFileEditorOptionsChange(setName, value) {
+    props.onoptionschange(setName, value);
 }
 
 function toggleSidebar () {

@@ -7,48 +7,32 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <x-EditorSidebar></x-EditorSidebar>
+        <x-EditorSidebar onoptionschange:=script.onOptionsChange></x-EditorSidebar>
         <x-FileEditor
             content="print('hello world')"
             name="example.py"
+            profile="{{ state.options.editorProfile|default:'syntax' }}"
+            theme="{{ state.options.editorTheme|default:'eclipse' }}"
         ></x-FileEditor>
     </Template>
-    <Style>
-        :host {
-            --editor-width: 750px;
-            display: grid;
-            height: calc(100vh - 20px);
-            box-sizing: border-box;
-            grid-gap: 15px;
-            grid-template-columns: 1fr var(--editor-width) 1fr;
-        }
 
-        :host.layout--wide {
-            --editor-width: calc(100vw - 500px);
-            grid-gap: 0;
-        }
+    <State
+        options:={}
+    ></State>
 
-        :host.layout--full {
-            --editor-width: 100vw;
-            display: block;
+    <Script>
+        function prepareCallback() {
+            // TODO
         }
+        function onOptionsChange(setting, newValue) {
+            state.options[setting] = newValue;
+            //element.rerender();
+        }
+    </Script>
 
-        :host.layout--full .menu-button-holder > x-Btn {
-            margin-bottom: -80px;
-            font-size: 12px;
-            text-shadow: none;
-            font-weight: 200;
-            line-height: 15px;
-            height: 20px;
-            width: 20px;
-            border-radius: 0;
-            background: white;
-        }
-
-        :host * {
-            box-sizing: border-box;
-        }
-    </Style>
+    <Style
+        -src="/demos/editor/editorlib/ModuloEditor.css"
+    ></Style>
 </Component>
 
 <Component name="FileBrowser">
@@ -78,6 +62,9 @@
 </Component>
 
 <Component name="EditorSidebar">
+    <Props
+        onoptionschange
+    ></Props>
     <Template
         -src="/demos/editor/editorlib/EditorSidebar.html"
     ></Template>
@@ -103,16 +90,9 @@
         path
         inode
     ></Props>
-    <Template>
-        <h3>{{ props.name }}</h3>
-        {% if state.err %}
-            <p><strong>ERR:</strong> {{ state.err }}</p>
-        {% elif state.loading %}
-            <p><em>Loading...</em></p>
-        {% else %}
-            <div id="main_editor" [script.edit]>{{ props.content }}</div>
-        {% endif %}
-    </Template>
+    <Template
+        -src="/demos/editor/editorlib/FileEditor.html"
+    ></Template>
     <State
         content=""
         loading:=false
@@ -127,12 +107,16 @@
 </Component>
 
 <Component name="FileEditorSettings">
+    <Props
+        onchange
+    ></Props>
     <Template
         -src="/demos/editor/editorlib/FileEditorSettings.html"
     ></Template>
     <State
         profiles:=[]
         selected:=null
+        theme:=null
     ></State>
     <Script
         -src="/demos/editor/editorlib/FileEditorSettings.js"
@@ -158,7 +142,7 @@
                     @click:=props.onchange
                     payload="{{ opt.name }}"
                     style="position: relative"
-                >{{ opt.name|capfirst }}</x-Btn>
+                >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
             </div>
         {% endfor %}
     </Template>
