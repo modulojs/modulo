@@ -1001,18 +1001,6 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
-    /*
-    renderCallback(renderObj) {
-        const patches = selector ? renderObj.component.patches : [];
-        for (const [ node ]  of Array.from(patches)) {
-            const cls = 'I__x__MyComponent';
-            const any = '*:not(.I__x_MyComponent):has(h1, p > strong, etc)';
-            if (node.matches && node.matches(any)) {
-                patches.append('attr-append', node, 'class', ' ' + className);
-            }
-        }
-    }
-    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });

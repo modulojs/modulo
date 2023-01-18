@@ -25,52 +25,53 @@ be used and reused anywhere on your site. Under the hood, it uses a widely
 compatible subset of the [customElements API](https://caniuse.com/custom-elementsv1).
 
 Modulo runs entirely in the browser, and can be incorporated with just a couple
-lines of code into any HTML file, **no terminal usage or `npm` necessary**.  To
-get started with creating a custom component, do the following 3 steps:
-
-1. Download
-[src/Modulo.js](https://github.com/modulojs/modulo/blob/main/src/Modulo.js)
-(the single file that contains all of Modulo) to wherever you put JS files for
-your website (for example, `/static/js/Modulo.js`). Or, skip downloading, and
-use a link to a CDN for the next step (`https://unpkg.com/mdu.js`)
+lines of code into any HTML file, **no terminal usage or `npm` necessary**. If,
+however, you do want to use NPM, read the "Modulo SSG" section below. However,
+the standard way to get started writing custom components requires just 3 steps:
 
 
-2. Include in your HTML file a reference to the script with a "Modulo"
-attribute, which we'll fill later with component definitions:
+1. Include in any HTML file the single Modulo JavaScript file loaded from a CDN:
 
 ```html
-<script Modulo src="/static/js/Modulo.js">
-</script>
+<script src="https://unpkg.com/mdu.js"></script>
 ```
 
 
-3. Now, inside this embedded script tag, we can define a Modulo Component. We
-can use "template", "cpart script", and "style" tags, to incorporate HTML,
-JavaScript, and CSS respectively into our component:
+2. Now define one or more Modulo web components (custom HTML elements).  First,
+use `<template Modulo>` and `</template>` to mark where in your HTML you are
+defining our components.  Then, add "Template", "Script", and "Style" tags, to
+incorporate HTML, JavaScript, and CSS respectively into your component. E.g.:
 
 ```html
-<script Modulo src="/static/js/Modulo.js">
+<template Modulo>
     <Component name="HelloWorld">
         <Template>
             Hello <strong>Modulo</strong> World!
         </Template>
-        <cpart Script>
+        <Script>
             console.log('Hello Modulo JS world!');
-        </cpart>
+        </Script>
         <Style>
             strong { color: purple; }
         </Style>
     </Component>
-</script>
+</template>
+<script src="https://unpkg.com/mdu.js"></script>
 ```
 
-Now, you can use and reuse your component wherever you want, just like any
-normal HTML tag:
+3. Now, you can use and reuse this new custom element wherever you want, just
+like any normal HTML tag. E.g.:
 
 ```html
 <x-HelloWorld></x-HelloWorld>
 <p>In a P tag: <x-HelloWorld></x-HelloWorld></p>
 ```
+
+
+* *(Optional)* Download
+  [src/Modulo.js](https://github.com/modulojs/modulo/blob/main/src/Modulo.js)
+  (the single file that contains all of Modulo) to wherever you put JS files
+  for your website (for example, `/static/js/Modulo.js`)
 
 
 * **Continue?** Want to try more? The tutorial picks up where this leaves off
