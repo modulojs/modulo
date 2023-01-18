@@ -64,6 +64,7 @@ const defaultConfig = {
         // /__dirlist/foo/bar.json will generate a listing of /input/foo/bar/
         // Example: "screenshot" for /__screenshot/foo/bar.html.png to get a
         // PNG screenshot of /input/foo/bar.html after it is loaded
+
     serverFramework: 'express',
         // Specify a package to be "required" to host the server. If you change
         // this from "express", the interface of this package should be

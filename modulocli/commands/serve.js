@@ -35,8 +35,8 @@ function _getModuloMiddleware(config, express) {
     // Resolve Server Autogens from config, and put them into agEnabled
     let autogens = null;
     const agEnabled = {};
-    if (config.serverAutoGens.trim()) {
-        autogens = config.serverAutoGens.split(' ').filter(s => s);
+    if (config.serverAutogens && config.serverAutogens.trim()) {
+        autogens = config.serverAutogens.split(' ').filter(s => s);
         for (const name of autogens) {
             agEnabled[name] = autogenMiddleware[name];
             log(`Enabling autogen "${ name }" (${ typeof agEnabled[name] })`);
