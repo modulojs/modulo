@@ -8,6 +8,8 @@ const { processBrowserConsoleLog } = require('./cliUtils');
 class ModuloBrowser {
     constructor(config) {
         this.config = config;
+        // TODO: Look for config flat to enable Modulo middleware to allow for
+        // autogens during SSG
         this.absoluteRoot = path.resolve(this.config.input);
         this.port = process.env.MODULO_BROWSER_E2E_PORT || 6627;
         const { verbose } = config

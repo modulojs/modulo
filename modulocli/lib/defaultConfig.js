@@ -50,15 +50,20 @@ const defaultConfig = {
         // will find this file, require it, and then use whatever exported as
         // the server that Modulo attaches it's own middleware to.
 
-    serverAutogens: '',
-        // Enable "autogen" feature. Example, "dirlist"
-
     serverAppPath: 'srv/index.js',
         // This is the default value of serverApp if not specified, and
         // changing this behaves the same way with one exception: If it's not
         // found, it will simply warn (in verbose mode) and move on. 
         // Typically this is not changed (instead you should change serverApp).
 
+    serverAutogens: '',
+        // Enable one or more "autogeneration" middleware, space separated.
+        // During development or (eventually) static site generation, GET
+        // requests to these will generate output files.
+        // Example: "dirlist" will provide an API where a GET request to
+        // /__dirlist/foo/bar.json will generate a listing of /input/foo/bar/
+        // Example: "screenshot" for /__screenshot/foo/bar.html.png to get a
+        // PNG screenshot of /input/foo/bar.html after it is loaded
     serverFramework: 'express',
         // Specify a package to be "required" to host the server. If you change
         // this from "express", the interface of this package should be
