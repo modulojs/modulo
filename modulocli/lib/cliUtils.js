@@ -88,14 +88,18 @@ async function mirrorMTimesAsync(inputPath, outputPath) {
 
 async function unlockToWrite(path, text, log) {
     mkdirToContain(path); // TODO: Switch with async
+    let exists = false;
     try {
         await fs.promises.chmod(path, 0777); // unlock, if exists
+        exists = true;
     } catch {
         log('Could not unlock ' + path);
     }
     if (text !== null) {
         await fs.promises.writeFile(path, text, 'utf8');
+        exists = true;
     }
+    return exists;
 }
 
 function walkSync(basePath, config) {

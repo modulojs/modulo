@@ -1,3 +1,5 @@
+const { unlockToWrite } = require('../lib/cliUtils');
+
 const { ssg } = require('./generate.js');
 const { doWatch } = require('./watch.js');
 
@@ -8,6 +10,7 @@ function _getModuloMiddleware(config, express) {
         serverAutoFixSlashes,
         serverAutoFixExtensions,
         serverSetNoCache,
+        serveInput,
         verbose,
     } = config;
     const log = msg => verbose ? console.log(`|%| - - SERVER: ${msg}`) : null;
@@ -19,19 +22,25 @@ function _getModuloMiddleware(config, express) {
         redirect: serverAutoFixSlashes,
         extensions: serverAutoFixExtensions,
     };
-    const staticMiddleware = express.static(config.output, staticSettings);
+
+    // Setup an output server, and possibly an input server
+    const outputStaticMiddleware = express.static(config.output, staticSettings);
+    let inputStaticMiddleware = null;
+    if (serveInput) {
+        inputStaticMiddleware = express.static(config.input, staticSettings);
+    }
+    const staticMiddleware = inputStaticMiddleware || outputStaticMiddleware;
     log(`Express Static middleware options: ${staticSettings}`);
 
-    // Turning on autogens that are enabled
-    const serverAutogens = (config.serverAutoGens || '').split(' ');
-    const agEnabled = serverAutogens.length > 1 ? {} : null;
-    for (const name of serverAutogens) {
-        if (!name) {
-            continue;
+    // Resolve Server Autogens from config, and put them into agEnabled
+    let autogens = null;
+    const agEnabled = {};
+    if (config.serverAutoGens.trim()) {
+        autogens = config.serverAutoGens.split(' ').filter(s => s);
+        for (const name of autogens) {
+            agEnabled[name] = autogenMiddleware[name];
+            log(`Enabling autogen "${ name }" (${ typeof agEnabled[name] })`);
         }
-        agEnabled[name] = autogenMiddleware[name];
-        const type = typeof autogenMiddleware[name];
-        log(`Enabling autogen middleware "${ name }" (${ type })`);
     }
 
     return (req, res, next) => {
@@ -39,14 +48,27 @@ function _getModuloMiddleware(config, express) {
             res.set('Cache-Control', 'no-store');
         }
         log(`${req.method} ${req.url}`);
-        const agName = agEnabled && req.path.startsWith('__') &&
-                        req.path.substr(2).split('/')[0];
+
+        // Check if an enabled server autogen matches. If so, try serving from
+        // output, and if this does not work, then generate and then serve
+        const agName = autogens && req.path.startsWith('/__') ?
+                        (req.path.substr(3).split('/')[0]) : false;
         if (agName && agName in agEnabled) {
-            const path = req.path.substr(agName.length + 3);
-            agEnabled[agName](config, path, (data) => {
-                // TODO: Write data to file
-                staticMiddleware(req, res, next);
-            });
+            const { generateToInput, input, output } = config;
+            const path = (generateToInput ? input : output) + req.path;
+            // TODO: change to async/await
+            agEnabled[agName](config, req.path, path)
+                .then(data => unlockToWrite(path, data, log))
+                .then(() => {
+                    // Serve up autogened file
+                    if (generateToInput && inputStaticMiddleware) {
+                        inputStaticMiddleware(req, res, next);
+                    } else if (!generateToInput && inputStaticMiddleware) {
+                        outputStaticMiddleware(req, res, next);
+                    } else {
+                        staticMiddleware(req, res, next);
+                    }
+                });
         } else {
             staticMiddleware(req, res, next);
         }
@@ -55,8 +77,9 @@ function _getModuloMiddleware(config, express) {
 
 function doServeSource(moduloWrapper, config, args) {
     const port = Number(config.port) + 1;
-    const output = config.input; // serve src, not output
-    const conf = Object.assign({}, config, { port, output })
+    //const output = config.input; // serve src, not output
+    //const conf = Object.assign({}, config, { port, output })
+    const conf = Object.assign({}, config, { port, serveInput: true })
 
     // And just do the serve, no need to do ssg / watch
     doServe(moduloWrapper, conf, args, true);

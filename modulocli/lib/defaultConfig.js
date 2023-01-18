@@ -146,6 +146,16 @@ const defaultConfig = {
 
     // Undocumented:
 
+    serveAll: false,
+        // (Used internally) Set to true to enable serving source on a port one
+        // higher than the normal port at the same time as serving the built
+        // version, e.g.  essentially the same as running both servesource and
+        // serve at the same time.
+
+    serveInput: false,
+        // (Used internally) Set to true to instead serve from source
+
+    // presently not used-v
     watchDelete: false,
         // Set to "true" to allow watch to DELETE files from the output
         // directory, when their counterpart is deleted in the input directory.
@@ -173,7 +183,6 @@ const defaultConfig = {
     fail: false,
         // Cause Modulo to fail on some recoverable errors
 
-    // presently not used-v
     rootPath: 'CWD',
         // Override the current working directory to specify a new base path.
         // This will be used when loading relative file paths from the file
@@ -201,12 +210,6 @@ const defaultConfig = {
         // revisited and get a script-tag inserted with the path to this file.
         // As with other BUILD paths, this path gets templated using MTL syntax
         // with the same variables available (see buildPath)
-
-    serveAll: false,
-        // Set to true to enable serving source on a port one higher than the
-        // normal port at the same time as serving the built version, e.g.
-        // essentially the same as running both servesource and serve at the
-        // same time.
 
     ssgRenderDepth: 10,
         // During the SSG step, this important setting specifies how many times

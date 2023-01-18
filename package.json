@@ -11,6 +11,7 @@
   },
   "scripts": {
     "serve": "npm run cli -- serve",
+    "srcserve": "npm run cli -- srcserve",
     "start": "npm run cli -- devserve",
     "build-docs": "npm run cli -- ssg",
     "cli": "node ./modulocli/modulocli.js",

@@ -13,32 +13,78 @@ async function getFiles(dir) {
     return files.reduce((a, f) => a.concat(f), []);
 }
 
-function dirlist(config, path, callback) {
+// TODO: convert this all to async
+async function dirlist(config, path) {
     if (!path.endsWith('.json')) {
-        return callback('{ "err": "Must end with .json" }');
+        return JSON.stringify({ err: 'Must end with .json' });
     }
-    const dirPath = path.substr(0, path.length - 5); // remove .json extension
+    // remove /__dirlist/ prefix and also .json extension
+    const dirPath = path.slice('/__dirlist/'.length, path.length - '.json'.length);
     if (!dirPath) {
-        return callback('{ "err": "dirPath is too short" }');
+        return JSON.stringify({ err: "dirPath is too short" });
     }
-    getFiles(resolve(config.input, dirPath))
-        .then(files => {
-            callback('{"files": ' + JSON.stringify(files) + '}');
-        })
-        .catch(err => {
-            callback('{"err": ' + err + '}');
-        });
+    const files = await getFiles(resolve(config.input, dirPath))
+    return JSON.stringify({ files });
 }
 
 
-function archive(config, path, callback) {
+async function archive(config, path, outputPath) {
     if (!path.endsWith('.zip')) {
-        return callback('{ "err": "Must end with .zip" }');
+        return '{ "err": "Must end with .zip" }';
     }
     // TODO finish!
-    return callback('{ "err": "Not implemented" }');
+    return '{ "err": "Not implemented" }';
 }
 
+async function screenshot(config, path, outputPath) {
+    const {
+        port,
+        host,
+        verbose,
+    } = config;
+    const log = msg => verbose ? console.log(`|%| - - ${msg}`) : null;
+    const URL_PREFIX = `http://${host}:${port}`;
 
-module.exports = { dirlist, archive };
+    if (!path.endsWith('.png')) {
+        return '{ "err": "Must end with .png" }';
+    }
+
+    // remove /__dirlist/ prefix and also .json extension
+    const urlPath = path.slice('/__screenshot/'.length, path.length - '.png'.length);
+
+    // require fs and puppeteer
+    const fs = require("fs");
+    const puppeteer = require("puppeteer");
+    const { unlockToWrite } = require('../lib/cliUtils');
+
+    let browser = null;
+    const info = { width: 1024, height: 768 }; // Thumb-size
+
+    try {
+        // launch headless Chromium browser
+        browser = await puppeteer.launch({ headless: true });
+
+        // create new page object
+        const page = await browser.newPage();
+
+        // set viewport width and height
+        await page.setViewport(info);
+
+        await page.goto(URL_PREFIX + '/' + urlPath, { waitUntil: 'networkidle0' });
+
+        await unlockToWrite(outputPath, null, log); // ensure ready for output
+
+        // capture screenshot and store it into screenshots directory.
+        await page.screenshot({ path: outputPath });
+    } catch (err) {
+        log(`Error: ${err.message}`);
+        return null;
+    } finally {
+        await browser.close();
+        log('Screenshot captured.');
+        return null;
+    }
+}
+
+module.exports = { dirlist, archive, screenshot };
 
