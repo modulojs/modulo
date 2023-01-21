@@ -1,79 +1,7 @@
-const { unlockToWrite } = require('../lib/cliUtils');
-
 const { ssg } = require('./generate.js');
 const { doWatch } = require('./watch.js');
 
-const autogenMiddleware = require('../lib/autogenMiddleware.js');
-
-function _getModuloMiddleware(config, express) {
-    let {
-        serverAutoFixSlashes,
-        serverAutoFixExtensions,
-        serverSetNoCache,
-        serveInput,
-        verbose,
-    } = config;
-    const log = msg => verbose ? console.log(`|%| - - SERVER: ${msg}`) : null;
-    if (serverAutoFixExtensions === true) {
-        serverAutoFixExtensions = ['html'];
-    }
-    const staticSettings = {
-        maxAge: 0,
-        redirect: serverAutoFixSlashes,
-        extensions: serverAutoFixExtensions,
-    };
-
-    // Setup an output server, and possibly an input server
-    const outputStaticMiddleware = express.static(config.output, staticSettings);
-    let inputStaticMiddleware = null;
-    if (serveInput) {
-        inputStaticMiddleware = express.static(config.input, staticSettings);
-    }
-    const staticMiddleware = inputStaticMiddleware || outputStaticMiddleware;
-    log(`Express Static middleware options: ${staticSettings}`);
-
-    // Resolve Server Autogens from config, and put them into agEnabled
-    let autogens = null;
-    const agEnabled = {};
-    if (config.serverAutogens && config.serverAutogens.trim()) {
-        autogens = config.serverAutogens.split(' ').filter(s => s);
-        for (const name of autogens) {
-            agEnabled[name] = autogenMiddleware[name];
-            log(`Enabling autogen "${ name }" (${ typeof agEnabled[name] })`);
-        }
-    }
-
-    return (req, res, next) => {
-        if (serverSetNoCache) {
-            res.set('Cache-Control', 'no-store');
-        }
-        log(`${req.method} ${req.url}`);
-
-        // Check if an enabled server autogen matches. If so, try serving from
-        // output, and if this does not work, then generate and then serve
-        const agName = autogens && req.path.startsWith('/__') ?
-                        (req.path.substr(3).split('/')[0]) : false;
-        if (agName && agName in agEnabled) {
-            const { generateToInput, input, output } = config;
-            const path = (generateToInput ? input : output) + req.path;
-            // TODO: change to async/await
-            agEnabled[agName](config, req.path, path)
-                .then(data => unlockToWrite(path, data, log))
-                .then(() => {
-                    // Serve up autogened file
-                    if (generateToInput && inputStaticMiddleware) {
-                        inputStaticMiddleware(req, res, next);
-                    } else if (!generateToInput && inputStaticMiddleware) {
-                        outputStaticMiddleware(req, res, next);
-                    } else {
-                        staticMiddleware(req, res, next);
-                    }
-                });
-        } else {
-            staticMiddleware(req, res, next);
-        }
-    };
-}
+const { getModuloMiddleware } = require('../lib/middlewareUtils.js');
 
 function doServeSource(moduloWrapper, config, args) {
     const port = Number(config.port) + 1;
@@ -119,7 +47,7 @@ function doServe(moduloWrapper, config, args, isSrcServe=false) {
         }
     }
 
-    moduloWrapper._app.use(_getModuloMiddleware(config, express));
+    moduloWrapper._app.use(getModuloMiddleware(config, express));
 
     const _server = moduloWrapper._app.listen(port, host, () => {
         console.log('|%|--------------');
