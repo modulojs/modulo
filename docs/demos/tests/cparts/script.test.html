@@ -1,0 +1,67 @@
+<Component name="ScriptCPart_TestLifecycle">
+    <State
+        lcinititalized:=false
+        lcprepare:=false
+        lcrender:=false
+        lcreconcile:=false
+        lcupdate:=false
+        lcorder:=[]
+    ></State>
+
+    <Script>
+        window.__staticScriptWasRun = true;
+    </Script>
+
+    <Script lifecycle="initialized" -name="scriptinit">
+        function testFunction() {
+            state.lcinititalized = true;
+            return true;
+        }
+    </Script>
+    <Script lifecycle="prepare" -name="scriptprep">
+        state.lcprepare = true;
+        state.lcorder.push('prepare');
+    </Script>
+    <Script lifecycle="render" -name="scriptrender">
+        state.lcrender = true;
+        state.lcorder.push('render');
+        component.innerHTML = '<p>abc</p><div>def</div>';
+    </Script>
+    <Script lifecycle="reconcile" -name="scriptreconcile">
+        state.lcreconcile = true;
+        state.lcorder.push('reconcile');
+    </Script>
+    <Script lifecycle="update" -name="scriptupdate">
+        state.lcupdate = true;
+        state.lcorder.push('update');
+        element.querySelector('p').setAttribute('id', 'hij');
+    </Script>
+
+    <TestSuite>
+
+        <Test name="Test lifecycle scripts execution order">
+            <script name="Static script gets run" skip-rerender>
+                assert: window.__staticScriptWasRun === true
+            </script>
+            <script name="Inititalized scripts get exported" skip-rerender>
+                assert: scriptinit.testFunction() && state.lcinititalized === true
+            </script>
+            <script name="Test all lifecycle methods were run at all" skip-rerender>
+                const { lcprepare, lcrender, lcreconcile, lcupdate }  = state;
+                assert: lcprepare && lcrender && lcreconcile && lcupdate
+            </script>
+            <script name="Test rendering methods were run exactly once in an expected order" skip-rerender>
+                const expected = JSON.stringify([ 'prepare', 'render', 'reconcile', 'update' ]);
+                const actual = JSON.stringify(state.lcorder);
+                assert: actual === expected
+            </script>
+        </Test>
+
+        <Test name="Test lifecycle scripts use cases">
+            <template name="Successfully renders and updates">
+                <p id="hij">abc</p><div>def</div>
+            </template>
+        </Test>
+
+    </TestSuite>
+</Component>

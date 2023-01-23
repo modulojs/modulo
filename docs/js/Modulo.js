@@ -1115,6 +1115,9 @@ modulo.register('cpart', class Configuration { }, {
 
 modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     let text = value;
+    if (def.lifecycle && def.lifecycle !== 'initialized') {
+        text = `function ${ def.lifecycle }Callback (renderObj) {${ text }}`;
+    }
     function getAutoExportNames(contents) {
         const regexpG = /(function|class)\s+(\w+)/g;
         const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
@@ -1145,20 +1148,21 @@ modulo.register('processor', function scriptAutoExport (modulo, def, value) {
     // TODO: Fix
     const isDirRegEx = /(Unmount|Mount)$/;
     def.Directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
-    /*
-    getFunctionSymbols.join
-        const regexpG = /function\s+(\w+Mount|\w+Unmount)/g;
-    */
-
 });
 
 modulo.register('cpart', class Script {
     static factoryCallback(renderObj, def, modulo) {
-        const { Content, Hash, localVars } = def;
-        let results;
-        results = modulo.assets.require(def.DefinitionName);
-        // Now, actually run code in Script tag to do factory method
-        //const results = func.call(null, modulo, this.require || null);
+        const { Content, Hash, localVars, lifecycle } = def;
+        let results = {};
+        //results = modulo.assets.require(def.DefinitionName);
+        //results = func.call(null, modulo, this.require || null);
+        const hash = modulo.assets.nameToHash[def.DefinitionName];
+        const func = () => modulo.assets.modules[hash].call(window, modulo);
+        if (lifecycle && lifecycle === 'initialized') { // Lifecycle specified
+            results[lifecycle + 'Callback'] = func; // Attach as callback
+        } else { // Otherwise, should run in static context (now)
+            results = func();
+        }
         if (results) {
             results.localVars = localVars;
             modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
@@ -1180,13 +1184,18 @@ modulo.register('cpart', class Script {
     }
 
     initializedCallback(renderObj) {
-        let { script } = renderObj;
-        //let script = def;
         // Attach callbacks from script to this, to hook into lifecycle.
+        let script = renderObj[this.conf.Name];
+
+        if (script.initializedCallback) {
+            this.prepLocalVars(renderObj); // Prep before (used by lc=false)
+            Object.assign(script, script.initializedCallback(renderObj));
+            this.prepLocalVars(renderObj); // Prep again (used by lc=initialize)
+        }
+
         const isCbRegex = /(Unmount|Mount|Callback)$/;
         const cbs = Object.keys(script).filter(key => key.match(isCbRegex));
-        //cbs.push('initializedCallback', 'eventCallback'); // always CBs for these
-        cbs.push('eventCallback'); // always CBs for these
+        cbs.push('eventCallback'); // Always want to prep before events
         for (const cbName of cbs) {
             if (cbName === 'initializedCallback') { // XXX refactor
                 continue;
@@ -1194,26 +1203,13 @@ modulo.register('cpart', class Script {
             this[cbName] = (arg) => {
                 // NOTE: renderObj is passed in for Callback, but not Mount
                 const renderObj = this.element.getCurrentRenderObj();
+                const script = renderObj[this.conf.Name]; // Get new render obj
                 this.prepLocalVars(renderObj); // always prep (for event CB)
                 if (cbName in script) { // if it's specified in script
-                    Object.assign(renderObj.script, script[cbName](arg));
+                    Object.assign(script, script[cbName](arg) || {});
                 }
             };
         }
-        if (script.initializedCallback) {
-            this.prepLocalVars(renderObj); // always prep (for event CB)
-            Object.assign(script.exports, script.initializedCallback(renderObj));
-        }
-
-        /*
-        const originalScript = Object.assign({}, script);
-        this[cbName] = script[cbName] = (renderObj => {
-            this.prepLocalVars(renderObj);
-            if (cbName in originalScript) {
-                originalScript[cbName](renderObj);
-            }
-        });
-        */
     }
 
     // ## prepLocalVars
@@ -1222,11 +1218,12 @@ modulo.register('cpart', class Script {
     // This is important: It's what enables us to avoid using the "this"
     // context, since the current element is set before any custom code is run.
     prepLocalVars(renderObj) {
-        if (!renderObj.script) {
+        let script = renderObj[this.conf.Name];
+        if (!script) {
             console.error('ERROR: Script CPart missing from renderObj:', renderObj);
             return false;
         }
-        const { setLocalVariable, localVars } = renderObj.script;
+        const { setLocalVariable, localVars } = script;
         if (setLocalVariable) { // (For autoexport:=false, there is no setLocalVar)
             setLocalVariable('element', this.element);
             setLocalVariable('cparts', this.element.cparts);
@@ -1239,6 +1236,7 @@ modulo.register('cpart', class Script {
         }
     }
 }, {
+    lifecycle: null,
     ScriptAutoExport: 'auto',
     DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
 });
