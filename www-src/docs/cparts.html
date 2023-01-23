@@ -385,7 +385,7 @@ text='
 <h4>Using within embedded component definitions</h4>
 
 <p>Problems arise when attempting to include a <em>Script</em> CPart within an
-embedded Component <code>&lt;script&nbsp;Modulo&gt;</code>definition, e.g. one
+embedded Component <code>&lt;script&nbsp;Modulo&gt;</code> definition, e.g. one
 that is being defined within the script tag of the same HTML file that it is
 being used on. This is because the <code>&lt;/Script&gt;</code> tag will end up
 closing off the outer <code>script</code> tag early, due to HTML syntax. The
@@ -421,7 +421,7 @@ text='
             console.log("Hello, world!");
         </Script>
     </Component>
-</script>
+</template>
 '></mws-Demo>
 
 <h3>Defining event callbacks</h3>
@@ -462,42 +462,18 @@ you should avoid direct DOM manipulation whenever you can, instead using a
 <em>Template</em> will override whatever direct manipulation you do!).</p>
 
 
-<h3>Static execution context</h3>
 
-<p>The contents of the script tag is executed <em>exactly once</em> during the
-"factory" phase that prepares a component class. This means that that any loose
-variables defined will be "static", or shared between all instances of that
-component.</p>
-
-<mws-Demo
-text='
-<Template>
-    <button @click:=script.increment>Click me</button>
-</Template>
-<Script>
-    // "Static" execution context. We only have access to global variables:
-    console.log("The global modulo instance is here:", modulo);
-    console.log("But element is undefined:", element);
-
-    // Variables defined in this "static" context are shared globally.
-    // Nonetheless, this is run in a function, so it still is private.
-    let count = 0;
-
-    function increment() {
-        count++;
-        console.log("Shared count between different components:", count);
-    }
-</Script>
-'></mws-Demo>
-
-
-
-<h3>Defining lifecycle or directive callbacks</h3>
+<h3>Defining lifecycle callbacks</h3>
 
 <p>By naming functions with certain names, you can "hook into" the component
-rendering lifecycle with callbacks. You can also create "custom directives"
-from within the Script tag. Read more about this in the section on <a
-href="/docs/directives.html">Lifecycle & Directives</a></p>
+rendering lifecycle with callbacks.</p>
+
+<p>You can define a function with any of the following names and expect it to
+be invoked during it's namesake lifecycle phase:
+    <code>initializedCallback</code>, <code>prepareCallback</code>,
+    <code>renderCallback</code>, <code>reconcileCallback</code>, and finally
+    <code>updateCallback</code>.
+</p>
 
 <p>See below for an example of defining a custom <code>prepareCallback</code>
 in order to "hook into" the component rendering lifecycle to execute custom
@@ -505,91 +481,182 @@ code. The return value of this function is available to the <em>Template</em>
 CPart when it renders during the <code>render</code> lifecycle.</p>
 
 <mws-Demo
-    demotype="minipreview"
-    fromlibrary="Templating_PrepareCallback"
-></mws-Demo>
-
-<p>All "group 2" and "group 3" lifecycle phase can be specified. This means
-you can define a function with any of the following names and expect it to be
-invoked during it's namesake lifecycle phase:
-    <code>initializedCallback</code>, <code>prepareCallback</code>,
-    <code>renderCallback</code>, <code>reconcileCallback</code>, and finally
-    <code>updateCallback</code>.
-</p>
-
-<p>Note that there is no "factory" callback, since the <code>factory</code>
-phase is when the code in the script tag itself gets executed. That is to say,
-the entire script tag is the factory phase. See previous section for more on
-this.</p>
-
-<h3>Callback execution context: The "callback wrapper"</h3>
-
-<blockquote>
-<p><strong>Implicit Script CPart</strong> Mostly, Modulo follows the rule:
-"Explicit is better than implicit".  The <em>Script</em> CPart, however, is an
-exception.  It has an implicit or "magical" feature of setting up execution
-context for each callback function before that callback function is run.</p>
-</blockquote></p>
-
-<p>The Script CPart's "callback wrapper" is what enables us to write
-<code>state.count</code> in the <code>countUp</code> function.  Magically, the
-"state" variable here refers to the state of that specific button, not of a
-global state between all buttons.</p>
-
-<p>By default, all public functions get implicitly "wrapped" with this callback
-wrapper right before being executed from an event, lifecycle phase, or another
-CPart. If the Script tag had not set up the <code>state</code> variable to
-refer to the state of the current, individual button, it would be undefined or,
-worse yet, refer to the state of a <em>different</em> button, such as one
-elsewhere on the page. This can effectively cause <strong>events from one
-component to modify the state of another component</strong>, causing a nasty
-bug of mismatching events.</p>
-
-<p>This "magic" only occurs in public functions that are called as events by
-other CParts. Asynchronous coding is already discouraged in <em>Script</em>
-tags, which means that's the only "magic" necessary. However, if there are
-asynchronous functions, it won't always correctly apply the "magic" setup
-beforehand.</p>
-<p>This means that <strong>the <em>Script</em> tag discourages use of
-asynchronous coding.</strong> If you must, wrap any asynchronous callback using
-<code>cparts.script.cb()</code> in order to provide that execution context, and
-use <code>element.rerender</code> to manually rerender. See below for an
-example of this:</p>
-
-
-<mws-Demo
 demotype="minipreview"
+ttitle="PrepareCallback"
 text='
 <Template>
-    API data: <pre>{{ state.data|json|truncate:80 }}</pre>
-    <button @click:=script.fetchMe>Get API data</button>
+    {% for item in script.data %}<p>{{ item }}</p>{% endfor %}
+    <p>(C) {{ script.year }} All Rights Reserved</p>
 </Template>
-
-<State
-    data:={}
-></State>
-
 <Script>
-    function fetchMe() {
-        fetch("https://api.github.com/users/modulojs")
-            .then(response => response.json())
-            .then(cparts.script.cb(data => {
-                // Note that this callback is "wrapped" with
-                // "cparts.script.cb(  ...  )"
-                state.data = data; // update state
-                element.rerender(); // force rerender
-            }));
+    function prepareCallback() {
+        return {
+            data: ["a", "b", "c"],
+            year: (new Date()).getFullYear(),
+        };
+    }
+</Script>
+'
+ttitle2="RenderAndUpdate"
+text2='
+<State
+    name="Ha-Joon Chang"
+></State>
+<Script>
+    // Less frequently used than prepare, you can hook into these as well
+    function renderCallback() {
+        // A "renderCallback" can do any by-hand HTML generation needed
+        component.innerHTML = `<p>Welcome: ${state.name}</p>`;
+    }
+    function updateCallback() {
+        // A "updateCallback" can do any by-hand DOM updates needed
+        element.querySelector("p").onclick = () => alert("example");
+    }
+</Script>
+'
+ttitle3="UpdateWithJQuery"
+text3='
+<Template>
+    <p>A</p> <p>B</p> <p>C</p> <p>D</p> <p>E</p>
+</Template>
+<Script -src="https://code.jquery.com/jquery-3.6.3.slim.min.js">
+    // updateCallback can be useful for quickly integrating third party JS that
+    // does DOM manipulation, such as many legacy JS libraries
+    function updateCallback() {
+        $(element).find("p").css("color", "blue");
     }
 </Script>
 '></mws-Demo>
 
 
-<p>Ideally, however, asynchronous coding should be written into the features of
-a custom CPart, that is then used in the script tag in a declarative,
-synchronous manner. The CPart API gives you low-level access, and makes no
-assumptions about using a synchronous or asynchronous coding style.</p>
+<h3>Defining directive callbacks</h3>
+
+<p>You can also create "custom directives"
+from within the Script tag. Read more about this in the section on <a
+href="/docs/directives.html">Directives</a></p>
 
 
+<h3>Execution context</h3>
+
+<h4>Static execution context (default)</h4>
+
+<p>By default, the <code>factory</code> phase is when the code in the script
+tag itself gets executed. That is, it is executed exactly once while the
+component class is being prepared, before anything is yet even mounted on the
+document. This means that that any loose variables defined will be "static", or
+shared between all instances of that component.</p>
+
+
+<p><strong>Static execution <em>Script</em> tags will only correctly isolate
+synchronous code.</strong> It is thus recommended to keep your <em>Script</em>
+tag to only contain synchronous code, that is, no async callbacks. This is an
+intentional limitation, as <em>Script</em> tags are intended for
+<em>synchronously</em> patching together behavior around potentially
+<em>asynchronous</em> CParts.  There is also a potential for a bug: If there
+are multiple instances of the same component on the same page, with async
+callbacks ready at the same time, it can cause the wrong state, props or other
+variables or CParts to get mixed up and go to the wrong component.
+Asynchronous coding should be thus moved to a custom CPart, that is then used
+in the script tag in a declarative, synchronous manner. The CPart API gives you
+low-level access, and makes no assumptions about using a synchronous or
+asynchronous coding style.</p>
+
+<p>That said, Modulo is intended to be useful as a glue language and it's
+common to find asynchronous snippets that you might want to quickly integrate
+into an existing component. Read on for a few ways to bend this rule in
+order to better integrate third party code.</p>
+
+<h4>Lifecycle execution context</h4>
+
+<h5>Per component: <code>lifecycle="initialized"</code></h5>
+
+<p>Setting <code>lifecycle="initialized"</code> behaves very similarly to the
+"static" execution context (the default): For both, functions defined there
+will be available to be attached to events, and you can define Callback and
+Mount and Unmount functions. However, there is one important difference: It
+will execute <em>each and every time</em> an instance of the component first
+mounts on the page. That is, it will run everything in that script tag once per
+component use. This keeps all the data in the script tag private to that
+component, allowing for asynchronous code.</p>
+
+<p>It also allows use of the private variables as a sort of state. That is not
+recommended usage, but might be useful for integrating with other JavaScript
+state or store management systems.</p>
+
+<h5>Per rerender: <code>lifecycle="prepare"</code>,
+<code>lifecycle="render"</code>, <code>lifecycle="reconcile"</code>, and
+<code>lifecycle="update"</code> </h5>
+
+
+<p>Less frequently used is the ability to attach the script to a certain
+lifecycle method. This is sometimes useful when you really want to only hook
+into a single method with some quick glue code that you want to reload with
+every rerender. This might also be useful if you are porting from or
+integrating with another framework that has a more "render-function" oriented
+structure (e.g. perhaps Svelte or hook-based React could be thought that way),
+or a more "update-DOM-directly" oriented structure (e.g. jQuery and
+similar).</p>
+
+<mws-Demo
+demotype="minipreview"
+ttitle="StaticContext"
+text='
+<Template>
+    <button @click:=script.increment>Click me</button>
+</Template>
+<Script>
+    // "Static" execution context. We only have access to global variables:
+    // console.log("StaticContext Example: Global modulo is available:", modulo);
+    // console.log("...but element / cparts are undefined:", element, template);
+    let count = 0; // And variables defined in this "static" context are shared
+    function increment() {
+        count++; // this will increment for ALL buttons
+        console.log("Shared count between different components:", count);
+    }
+</Script>
+'
+ttitle2="LifecycleInititalized"
+text2='
+<Template>
+    <button @click:=script.increment>Click me: {{ script.count }}</button>
+</Template>
+<Script lifecycle="initialized">
+    // Now, "count" is private to each instance of this component
+    // (Note: In most cases, State should be used for this)
+    let count = 0;
+    function prepareCallback() {
+        return { count };
+    }
+    function increment() {
+        count++;
+        console.log("My private count:", count);
+    }
+</Script>
+'
+ttitle3="LifecycleRerender"
+text3='
+<State
+    count:=3
+></State>
+<Script lifecycle="render">
+    // A "render" Script can become a custom, by-hand replacement for Template.
+    // (Note that in this particular case, is probably best to instead write a
+    // custom CPart or Templater engine before using this.)
+    component.innerHTML = "<ul>";
+    let i = 0;
+    while (i < state.count) {
+        component.innerHTML += `<li>Num: <em>${i}</em>`;
+        i++;
+    }
+    component.innerHTML += "</ul>";
+    component.innerHTML += `<input [state.bind] name="count" type="number" />`;
+</Script>
+<Script lifecycle="update">
+    // Similarly "update" Script can be useful for any direct DOM manipulation.
+    element.querySelector("ul").style.color = "green";
+    // $(element).each(function() ... ) // ...or for a jQuery integration
+</Script>
+'></mws-Demo>
 
 
 <h3>renderObj</h3>
