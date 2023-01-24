@@ -1022,21 +1022,9 @@ modulo.register('cpart', class Template {
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
         this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
+        const render = this.templater.render.bind(this.templater);
+        return { render }; // Expose render to include, renderas etc
     }
-
-    /*
-    prepareCallback(renderObj) {
-        // Exposes templates in render context, so stuff like
-        // "|renderas:template.row" works
-        const obj = {};
-        for (const template of this.element.cpartSpares.template) {
-            obj[template.attrs.name || 'regular'] = template;
-            //obj[template.name || 'regular'] = template;
-        }
-        return obj;
-    }
-    */
-
     renderCallback(renderObj) {
         if (!renderObj.component)renderObj.component={};// XXX fix
         renderObj.component.innerHTML = this.templater.render(renderObj);
@@ -1457,7 +1445,7 @@ modulo.config.templater.filters = (function () {
         subtract: (s, arg) => s - arg,
         truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
         type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
-        renderas: (rCtx, template) => safe(template.Instance.render(rCtx)),
+        renderas: (rCtx, template) => safe(template.render(rCtx)),
         reversed: s => Array.from(s).reverse(),
         upper: s => s.toUpperCase(),
     };
@@ -1480,6 +1468,7 @@ modulo.config.templater.tags = {
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
     'comment': () => ({ start: "/*", end: "*/"}),
+    'include': (text) => `CTX[${ text }].render(CTX)`,
     'for': (text, tmplt) => {
         // Make variable name be based on nested-ness of tag stack
         const { cleanWord } = modulo.registry.utils;
