@@ -1468,7 +1468,7 @@ modulo.config.templater.tags = {
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
     'comment': () => ({ start: "/*", end: "*/"}),
-    'include': (text) => `CTX[${ text }].render(CTX)`,
+    'include': (text) => `OUT.push(CTX.${ text.trim() }.render(CTX));`,
     'for': (text, tmplt) => {
         // Make variable name be based on nested-ness of tag stack
         const { cleanWord } = modulo.registry.utils;

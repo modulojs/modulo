@@ -72,8 +72,7 @@
     <script name="Filter arguments test 3">
         const context = {
             obj: {a: 'b', c: 'd'},
-            //testing: { instance: { render: arg => arg.c } },
-            testing: { Instance: { render: arg => arg.c } },
+            testing: { render: arg => arg.c },
         };
         const template = '{{ obj|renderas:testing }}';
         const expected = 'd';

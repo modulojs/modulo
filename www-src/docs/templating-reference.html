@@ -75,6 +75,32 @@ text='
 ></State>
 '></mws-Demo>
 
+
+<h3>include</h3>
+
+<p>Include another <em>Templater</em>, specified by it's name. It's useful for
+breaking up large and complicated templates into parts that are loaded
+independently.</p>
+
+
+<mws-Demo
+demotype="minipreview"
+text='
+<Template -name="other_template">
+    <p>{{ state.testing }}</p>
+</Template>
+
+<Template>
+    <h1>hello</h1>
+    {% include other_template %}
+</Template>
+
+<State
+    testing="hello world!"
+></State>
+'></mws-Demo>
+
+
 <h3>for</h3>
 
 <p>For-loops are for repeating the same HTML code multiple times. It will
@@ -811,7 +837,7 @@ text='
 <p>A highly useful filter that allows use of re-usable template snippets.</p>
 
 <p>Typically in the format of
-<code>{{ state.data|renderas:template.tableRow }}</code>,
+<code>{{ state.data|renderas:row }}</code>,
 where <code>state.data</code> is some Object, and there exists a template like
 with the name "tableRow" that renders that object.  The typical usage of this
 is refactoring templates to conveniently render complex data. This allows you
@@ -835,26 +861,23 @@ template, meaning you want the child template to behave just like the parent,
 and you want global variables available, just as they were available to the
 parent. To include another template without any sandboxing, consider using the
 <code>renderObj</code> template variable which contains the "global" template
-scope. For an example, if we have a <code>name="modalInfo"</code> template, we
-might write: <code>{{&nbsp;renderObj|renderas:template.modalInfo&nbsp;}}</code>
+scope. For an example, if we have a <code>-name="modalInfo"</code> template, we
+might write: <code>{{&nbsp;renderObj|renderas:modalInfo&nbsp;}}</code>
 
 
 <!--<mws-Demo demotype="minipreview"-->
 <mws-Demo
+demotype="minipreview"
 text='
-<Template name="trow">
-    <tr><td>{{ name }}</td> <td>{{ type }}</td> <td>{{ level }}</td></tr>
+<Template -name="trow">
+    <div>{{ name }}</div> <div>{{ type }}</div> <div>{{ level }}</div>
 </Template>
 
 <Template>
-    <table>
-        <thead><tr><th>Name</th> <th>Type</th> <th>Level</th></tr></thead>
-        <tbody>
-            {% for info in state.pokemon %}
-                {{ info|renderas:template.trow }}
-            {% endfor %}
-        </tbody>
-    </table>
+    <h3>Name</h3> <h3>Type</h3> <h3>Level</h3>
+    {% for info in state.pokemon %}
+        {{ info|renderas:trow }}
+    {% endfor %}
 </Template>
 
 <State
@@ -864,16 +887,24 @@ text='
         {"name": "Ghastly", "type": "Ghost", "level": 8}
     ]&apos;
 ></State>
+
+<Style>
+    :host {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr;
+    }
+</Style>
 '></mws-Demo>
 
 
+<!--
 <p>Tip: If you want to avoid sandboxing, you can use
 that object will populate the template variables for that template, meaning you
 can access them directly with <code>{{ varName }}</code> style syntax within
 that child template. Note that the child template will be isolated or
 "sandboxed" to <em>only</em> have access to properties of the specified
 object (state, props, etc will not be accessible).</p>
-
+-->
 
 
 
