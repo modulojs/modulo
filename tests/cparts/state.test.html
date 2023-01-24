@@ -1,4 +1,4 @@
-<Component name="StateCPart_TestSetting">
+<Component name="StateCPart_TestBindAndPropagation">
     <Template>
         {% if state.testdot %}
             {# TODO Once key= syntax settles, replace with this for forced replace #}
@@ -76,8 +76,7 @@
 
             <script name="Set can set values">
                 element.cparts.state.propagate('tststring', 'ok');
-                // Ensure propagate does not affect current state
-                assert: state.tststring === 'abc'
+                assert: state.tststring === 'ok'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -96,7 +95,7 @@
 
             <script name="Propagate method can use nested values">
                 element.cparts.state.propagate('obj2.prop2', 'ok');
-                assert: state.obj2.prop2 === 'def'
+                assert: state.obj2.prop2 === 'ok'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -122,7 +121,7 @@
 
             <script name="Propagate method can do single nested values">
                 element.cparts.state.propagate('obj3.prop2', 'ok');
-                assert: state.obj3.prop2 === 'B'
+                assert: state.obj3.prop2 === 'ok'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -136,7 +135,7 @@
 
             <script name="Propagate method can do non-nested values">
                 element.cparts.state.propagate('tststring', 'ok2');
-                assert: state.tststring === 'abc'
+                assert: state.tststring === 'ok2'
             </script>
 
             <template name="And non-nested reflected in DOM" test-values>
@@ -167,7 +166,7 @@
 
             <script name="Propagate method can do multi string value">
                 element.cparts.state.propagate('tststring', 'ok3');
-                assert: state.tststring === 'abc'
+                assert: state.tststring === 'ok3'
             </script>
 
             <template name="And non-nested reflected in DOM" test-values>
@@ -198,3 +197,230 @@
     </TestSuite>
 </Component>
 
+<Component name="StateCPart_TestBindMounting">
+    <Template>
+        {% if state.flaga %}
+            <p> <input [state.bind]targeta /> </p>
+        {% elif state.flagb %}
+            <p> <input name="fakeb" [state.bind]targetb /> </p>
+        {% elif state.flagc %}
+            <p> <input name="fakec" [state.bind]targetc.abc /> </p>
+        {% elif state.flagd %}
+            <p> <input name="faked" [state.bind]targetd.def="click" /> </p>
+        {% endif %}
+    </Template>
+
+    <State
+        flaga:=true
+        targeta="tA initial val"
+
+        flagb:=true
+        targetb="tB val"
+        fakeb="tB fake"
+
+        flagc:=true
+        targetc:={}
+        targetc.abc:=123
+        fakec="tC fake"
+
+        flagd:=true
+        targetd:={}
+        targetd.def:=456
+        faked="tD fake"
+    ></State>
+
+    <TestSuite>
+        <Test name="Test custom name binding worked">
+            <template name="Initial value worked" test-values>
+                <p> <input [state.bind]targeta value="tA initial val" /> </p>
+            </template>
+
+            <state flaga:=false></state>
+            <template name="attrName takes precidence" test-values>
+                <p> <input name="fakeb" [state.bind]targetb value="tB val" /> </p>
+            </template>
+
+            <state flagb:=false></state>
+            <template name="attrName can use dot syntax" test-values>
+                <p> <input name="fakec" [state.bind]targetc.abc value="123" /> </p>
+            </template>
+
+            <state flagc:=false></state>
+            <template name="Ensure initial value is correct when combined with other events" test-values>
+                <p> <input name="faked" [state.bind]targetd.def="click" value="456" /> </p>
+            </template>
+
+            <script name="Keyup event does not reflect">
+                element.querySelector('input:first-child').value = 'newvalD';
+                const ev = new window.Event('keyup');
+                element.querySelector('input:first-child').dispatchEvent(ev);
+                // Ensure the state is still the number
+                assert: state.targetd.def === 456
+            </script>
+
+            <template name="Ensure initial value has changed" test-values>
+                <p> <input name="faked" [state.bind]targetd.def="click" value="newvalD" /> </p>
+            </template>
+
+            <script name="Now ensure click event does reflect in state">
+                element.querySelector('input:first-child').value = 'newest_valD';
+                const ev = new window.Event('click');
+                element.querySelector('input:first-child').dispatchEvent(ev);
+                assert: state.targetd.def === 'newest_valD'
+            </script>
+
+        </Test>
+    </TestSuite>
+
+</Component>
+
+<Component namespace="testhelper" name="StateCPart_TestStore_ViewerComponent">
+    <Template>
+        <p>({{ state.flagc }}) ({{ state.targeta }}) ({{ state.targetc }})</p>
+    </Template>
+    <State
+        -store="testing_store"
+    ></State>
+    <Script>
+        // Hack to escape encapsulation that the TestSuite enforces in order to
+        // test state with store
+        if (!window.__testHelperModulo) { window.__testHelperModulo = modulo; }
+        function prepareCallback() {
+            if (window.__testHelperModulo) {
+                Object.assign(element.cparts.state, window.__testHelperModulo.stores.testing_store);
+                element.cparts.state.prepareCallback = () => element.cparts.state.data;
+            }
+        }
+    </Script>
+</Component>
+
+
+<Component namespace="testhelper" name="StateCPart_TestStore_SetterComponent">
+    <Template>
+        <input [state.bind] name="targetc" />
+    </Template>
+    <State
+        -store="testing_store"
+    ></State>
+    <Script>
+        // Hack to escape encapsulation that the TestSuite enforces in order to
+        // test state with store
+        if (!window.__testHelperModulo) { window.__testHelperModulo = modulo; }
+        function prepareCallback() {
+            if (window.__testHelperModulo) {
+                Object.assign(element.cparts.state, window.__testHelperModulo.stores.testing_store);
+                element.cparts.state.prepareCallback = () => element.cparts.state.data;
+            }
+        }
+    </Script>
+</Component>
+
+<Component name="StateCPart_TestStore">
+    <Template>
+        {% if state.flaga %}
+            <input [state.bind] name="targeta" />
+            <input [state.bind] name="targeta" />
+            <input [state.bind] name="targeta" />
+        {% elif state.flagb %}
+            <testhelper-StateCPart_TestStore_ViewerComponent></testhelper-StateCPart_TestStore_ViewerComponent>
+        {% elif state.flagc %}
+            <testhelper-StateCPart_TestStore_ViewerComponent></testhelper-StateCPart_TestStore_ViewerComponent>
+            <testhelper-StateCPart_TestStore_SetterComponent></testhelper-StateCPart_TestStore_SetterComponent>
+        {% endif %}
+    </Template>
+
+    <State
+        -store="testing_store"
+        flaga:=false
+        targeta="tA initial val"
+        flagb:=false
+        flagc:=false
+        targetc="tCinit"
+    ></State>
+
+    <Script>
+        // Hack to escape encapsulation that the TestSuite enforces in order to
+        // test state with store
+        function prepareCallback() {
+            if (window.__testHelperModulo) {
+                Object.assign(element.cparts.state, window.__testHelperModulo.stores.testing_store);
+                element.cparts.state.prepareCallback = () => element.cparts.state.data;
+            }
+        }
+    </Script>
+
+    <TestSuite>
+        <Test name="Store works with multiple binding">
+            <state flaga:=true></state>
+            <template name="Initial value worked" test-values>
+                <input [state.bind] name="targeta" value="tA initial val" />
+                <input [state.bind] name="targeta" value="tA initial val" />
+                <input [state.bind] name="targeta" value="tA initial val" />
+            </template>
+
+            <state flaga:=false flagb:=true></state>
+            <template name="Rendering default values of other component worked">
+                <testhelper-StateCPart_TestStore_ViewerComponent>
+                    <p>(false) (tA initial val) (tCinit)</p>
+                </testhelper-StateCPart_TestStore_ViewerComponent>
+            </template>
+
+            <state flaga:=true flagb:=false></state>
+            <script name="Change event in single elem reflects in state">
+                element.querySelector('input:first-child').value = 'newValA';
+                const ev = new window.Event('keyup');
+                element.querySelector('input:first-child').dispatchEvent(ev);
+                assert: state.targeta === 'newValA'
+            </script>
+
+            <template name="The change shows in the element" test-values>
+                <input [state.bind] name="targeta" value="newValA" />
+                <input [state.bind] name="targeta" value="newValA" />
+                <input [state.bind] name="targeta" value="newValA" />
+            </template>
+
+            <state flaga:=false flagb:=true></state>
+            <template name="The change gets reflected in other components connected to same store">
+                <testhelper-StateCPart_TestStore_ViewerComponent>
+                    <p>(false) (newValA) (tCinit)</p>
+                </testhelper-StateCPart_TestStore_ViewerComponent>
+            </template>
+        </Test>
+
+        <Test name="Store triggers refresh of sibling">
+            <!-- Ensure values are reset (due to breaking test encapsulation) -->
+            <state
+                flaga:=false
+                targeta="tA initial val"
+                flagb:=false
+                flagc:=true
+                targetc="tCinit"
+            ></state>
+
+            <template name="Initial values were set accross components" test-values>
+                <testhelper-StateCPart_TestStore_ViewerComponent>
+                    <p>(true) (tA initial val) (tCinit)</p>
+                </testhelper-StateCPart_TestStore_ViewerComponent>
+                <testhelper-StateCPart_TestStore_SetterComponent>
+                    <input [state.bind] name="targetc" value="tCinit" />
+                </testhelper-StateCPart_TestStore_SetterComponent>
+            </template>
+
+            <script name="Change event in sibling affects state" skip-rerender>
+                const elem = element.querySelector('testhelper-StateCPart_TestStore_SetterComponent input');
+                elem.value = 'NewValC';
+                elem.dispatchEvent(new window.Event('keyup'));
+                assert: state.targetc === 'NewValC'
+            </script>
+
+            <template name="And the change gets automatically rerendered" skip-rerender test-values>
+                <testhelper-StateCPart_TestStore_ViewerComponent>
+                    <p>(true) (tA initial val) (NewValC)</p>
+                </testhelper-StateCPart_TestStore_ViewerComponent>
+                <testhelper-StateCPart_TestStore_SetterComponent>
+                    <input [state.bind] name="targetc" value="NewValC" />
+                </testhelper-StateCPart_TestStore_SetterComponent>
+            </template>
+        </Test>
+    </TestSuite>
+</Component>

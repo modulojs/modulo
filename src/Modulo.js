@@ -10,6 +10,7 @@ window.Modulo = class Modulo {
         this._configSteps = 0;
         this.config = {};
         this.definitions = {};
+        this.stores = {};
         if (parentModulo) {
             this.parentModulo = parentModulo;
             const { deepClone } = modulo.registry.utils;
@@ -1169,56 +1170,53 @@ modulo.register('cpart', class Script {
 });
 
 modulo.register('cpart', class State {
-    initializedCallback(renderObj) {
-        if (!this.data) {
-            // Initialize with deep copy of attributes
-            let { attrs } = this;
-            if (attrs && attrs.attrs) { // TODO: Hack code here, not sure why its like this
-                attrs = attrs.attrs;
-            }
-            this.data = Object.assign({}, attrs);
-            // TODO: Need to do proper deep-copy... is this okay?
-            this.data = JSON.parse(JSON.stringify(this.data));
+    static factoryCallback(renderObj, def, modulo) {
+        const isLower = key => key[0].toLowerCase() === key[0];
+        const data = modulo.registry.utils.keyFilter(def, isLower);
+        if (def.Store) {
+            const newStore = { data: {}, boundElements: {}, subscribers: [] };
+            modulo.stores[def.Store] = modulo.stores[def.Store] || newStore;
+            Object.assign(modulo.stores[def.Store].data, data); // update store
         }
+        return data;
+    }
 
-        this.boundElements = {}; // initialize
+    initializedCallback(renderObj) {
+        // TODO 23: Next steps for Store feature:
+        // 3. Posislby Add in self as boundElement for propagation / stateChangeCallback
+        if (!this.def && this.conf) { this.def = this.conf; } // XXX rm
+        if (this.def.Store) {
+            // Ensure that we trigger refresh when a state changes
+            Object.assign(this, this.modulo.stores[this.def.Store]);
+            this.subscribers.push(this);
+        }
+        if (!this.data) {
+            this.data = JSON.parse(JSON.stringify(renderObj[this.def.Name]));
+            this.boundElements = {};
+            this.subscribers = [ this ];
+        }
         return this.data;
     }
 
     bindMount({ el, attrName, value }) {
-        // TODO: BUG: This should be attrName || el.getATtribute('name') (todo:
-        // write failing tests, then flip and see green)
-        const name = el.getAttribute('name') || attrName;
+        const name = attrName || el.getAttribute('name');
         const val = modulo.registry.utils.get(this.data, name);
         this.modulo.assert(val !== undefined, `state.bind "${name}" is undefined`);
-        const listen = () => {
-            // TODO: Refactor this function + propagate to be more consistent +
-            // extendable with types / conversions -- MAYBE even just attach it
-            // as stateChangeCallback!
-            let { value, type, checked, tagName } = el;
-            if (type && type === 'checkbox') {
-                value = !!checked;
-            } else if (type && (type === 'range' || type === 'number')) {
-                value = Number(value); // ensure ranges & numbers get evaled
-            }
-            modulo.registry.utils.set(this.data, name, value);
-            this.propagate(name, value, el);
-            this.element.rerender();
-        };
+        const listen = () => this.propagate(name, el.value, el);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
-        //assert(!this.boundElements[name], `[state.bind]: Duplicate "${name}"`);
-
         if (!(name in this.boundElements)) {
             this.boundElements[name] = [];
         }
+        // Bind the "listen" event to propagate to all, and also bind self
         this.boundElements[name].push([ el, evName, listen ]);
+        this.boundElements[name].push([ this, evName, null ]);
         el.addEventListener(evName, listen); // todo: make optional, e.g. to support cparts?
-        this.propagate(name, val); // trigger initial assignment(s)
+        this.propagate(name, val, this); // trigger initial assignment(s)
     }
 
     bindUnmount({ el, attrName }) {
-        const name = el.getAttribute('name') || attrName;
+        const name = attrName || el.getAttribute('name');
         const remainingBound = [];
         if (!(name in this.boundElements)) { // XXX HACK
             console.log('Modulo ERROR: Could not unbind', name);
@@ -1234,12 +1232,18 @@ modulo.register('cpart', class State {
         this.boundElements[name] = remainingBound;
     }
 
+    stateChangedCallback(name, value, el) {
+        modulo.registry.utils.set(this.data, name, value);
+        this.element.rerender();
+    }
+
     eventCallback() {
         this._oldData = Object.assign({}, this.data);
     }
 
     propagate(name, val, originalEl = null) {
-        for (const [ el, evName, cb ] of (this.boundElements[name] || [])) {
+        const all = (this.boundElements[name] || []).map(row => row[0]);
+        for (const el of this.subscribers.concat(all)) {
             if (originalEl && el === originalEl) {
                 continue; // don't propagate to self
             }
@@ -1266,7 +1270,7 @@ modulo.register('cpart', class State {
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ] });
+}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
 
 
 /* Implementation of Modulo Templating Language */
