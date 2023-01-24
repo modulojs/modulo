@@ -1022,21 +1022,9 @@ modulo.register('cpart', class Template {
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
         this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
+        const render = this.templater.render.bind(this.templater);
+        return { render }; // Expose render to include, renderas etc
     }
-
-    /*
-    prepareCallback(renderObj) {
-        // Exposes templates in render context, so stuff like
-        // "|renderas:template.row" works
-        const obj = {};
-        for (const template of this.element.cpartSpares.template) {
-            obj[template.attrs.name || 'regular'] = template;
-            //obj[template.name || 'regular'] = template;
-        }
-        return obj;
-    }
-    */
-
     renderCallback(renderObj) {
         if (!renderObj.component)renderObj.component={};// XXX fix
         renderObj.component.innerHTML = this.templater.render(renderObj);
@@ -1430,35 +1418,8 @@ modulo.config.templater.modes = {
 };
 
 modulo.config.templater.filters = (function () {
-    //const { get } = modulo.registry.utils; // TODO, fix this code duplciation
-    function get(obj, key) {
-        return obj[key];
-    }
-
-    function sorted(obj, arg) {
-        if (!obj) {
-            return obj;
-        }
-        // TODO Refactor or remove?
-        if (Array.isArray(obj)) {// && (!obj.length || typeof obj[0] !== 'object')) {
-            return obj.sort();
-        } else {
-            const keys = Array.from(Object.keys(obj)).sort(); // Loop through sorted
-            return keys.map(k => [k, obj[k]]);
-        }
-    }
-
-    const safe = s => Object.assign(new String(s), {safe: true});
-
-    //trim: s => s.trim(), // TODO: improve interface to be more useful
-    //invoke: (s, arg) => s(arg),
-    //getAttribute: (s, arg) => s.getAttribute(arg),
-
-    // Idea: Generalized "matches" filter that gets registered like such:
-    //     defaultOptions.filters.matches = {name: //ig}
-    // Then we could configure "named" RegExps in Script that get used in
-    // template
-
+    const { get } = modulo.registry.utils;
+    const safe = s => Object.assign(new String(s), { safe: true });
     const filters = {
         add: (s, arg) => s + arg,
         allow: (s, arg) => arg.split(',').includes(s) ? s : '',
@@ -1484,12 +1445,12 @@ modulo.config.templater.filters = (function () {
         subtract: (s, arg) => s - arg,
         truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
         type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
-        renderas: (rCtx, template) => safe(template.Instance.render(rCtx)),
+        renderas: (rCtx, template) => safe(template.render(rCtx)),
         reversed: s => Array.from(s).reverse(),
         upper: s => s.toUpperCase(),
     };
     const { values, keys, entries } = Object;
-    const extra = { get, safe, sorted, values, keys, entries };
+    const extra = { get, safe, values, keys, entries };
     return Object.assign(filters, extra);
 })();
 
@@ -1507,6 +1468,7 @@ modulo.config.templater.tags = {
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
     'comment': () => ({ start: "/*", end: "*/"}),
+    'include': (text) => `OUT.push(CTX.${ text.trim() }.render(CTX));`,
     'for': (text, tmplt) => {
         // Make variable name be based on nested-ness of tag stack
         const { cleanWord } = modulo.registry.utils;
@@ -1533,9 +1495,6 @@ modulo.config.templater.tags = {
     },
 };
 
-// TODO: 
-//  - Then, re-implement [component.key] and [component.ignore] as TagLoad
-//  - Possibly: Use this to then do granular patches (directiveMount etc)
 modulo.register('engine', class DOMCursor {
     constructor(parentNode, parentRival) {
         this.initialize(parentNode, parentRival);
@@ -1634,11 +1593,6 @@ modulo.register('engine', class DOMCursor {
     }
 
     getMatchedNode(elem, keyedElems, keyedOthers) {
-        // IDEA: Rewrite keying elements with this trick: - Use LoadTag
-        // directive, removed keyed rival from DOM
-        /// - Issue: Cursor is scoped per "layer", and non-recursive reconcile
-        //    not created yet, so reconciler will need to keep keyed elements
-        /// - Solution: Finish non-recursive reconciler
         const key = elem && elem.getAttribute && elem.getAttribute('key');
         if (!key) {
             return null;
@@ -1782,19 +1736,12 @@ modulo.register('engine', class Reconciler {
     reconcileChildren(childParent, rivalParent) {
         // Nonstandard nomenclature: "The rival" is the node we wish to match
         const cursor = new modulo.registry.engines.DOMCursor(childParent, rivalParent);
-
-        //console.log('Reconciling (1):', childParent.outerHTML);
-        //console.log('Reconciling (2):', rivalParent.outerHTML);
-
         while (cursor.hasNext()) {
             const [ child, rival ] = cursor.next();
-
-            //console.log('NEXT', child, rival, cursor.hasNext());
-            // Does this node to be swapped out? Swap if exist but mismatched
             const needReplace = child && rival && (
                 child.nodeType !== rival.nodeType ||
                 child.nodeName !== rival.nodeName
-            );
+            ); // Does this node to be swapped out? Swap if exist but mismatched
 
             if ((child && !rival) || needReplace) { // we have more rival, delete child
                 this.patchAndDescendants(child, 'Unmount');
@@ -1813,18 +1760,14 @@ modulo.register('engine', class Reconciler {
 
             if (child && rival && !needReplace) {
                 // Both exist and are of same type, let's reconcile nodes
-
-                //console.log('NODE', child.isEqualNode(rival), child.innerHTML, rival.innerHTML);
                 if (child.nodeType !== 1) { // text or comment node
                     if (child.nodeValue !== rival.nodeValue) { // update
                         this.patch(child, 'node-value', rival.nodeValue);
                     }
                 } else if (!child.isEqualNode(rival)) { // sync if not equal
-                    //console.log('NOT EQUAL', child, rival);
                     this.reconcileAttributes(child, rival);
-
                     if (rival.hasAttribute('modulo-ignore')) {
-                        //console.log('Skipping ignored node');
+                        // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
                         // OR: Maybe even a simple way to reuse renderObj?
                         this.patch(child, 'rerender', rival);

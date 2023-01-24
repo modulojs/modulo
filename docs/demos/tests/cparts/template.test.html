@@ -1,0 +1,40 @@
+<Component name="TemplateCPart_TestRenderas">
+    <Template -name="first_template">
+        <em>{{ a }} - {{ b }} - {{ c }}</em>
+    </Template>
+    <Template -name="other_template">
+        <strong>{{ state.first_data.b }}</strong>
+    </Template>
+    <Template>
+        {% if state.test == "a" %}
+            <p>abc {{ state.first_data|renderas:first_template }} def</p>
+        {% elif state.test == "b" %}
+            <p>abc {{ state.second_data|renderas:first_template }} def</p>
+        {% elif state.test == "c" %}
+            <div>{% include other_template %}</div>
+        {% endif %}
+    </Template>
+    <State
+        test="a"
+        first_data:='{"a": "X", "b": "Y", "c": "Z" }'
+        second_data:='{"a": "L", "b": "M", "c": "O" }'
+    ></State>
+
+    <TestSuite>
+
+        <Test name="Test rendersas and includes">
+            <template name="Successfully renders">
+                <p>abc <em>X - Y - Z</em> def</p>
+            </template>
+            <state test="b"></state>
+            <template name="Renders renderas difference">
+                <p>abc <em>L - M - O</em> def</p>
+            </template>
+            <state test="c"></state>
+            <template name="Renders includes">
+                <div><strong>Y</strong></div>
+            </template>
+        </Test>
+
+    </TestSuite>
+</Component>
