@@ -26,7 +26,7 @@
         const name = 'a b c'
         const location = 'd e f'
         const bio = 'h i j'
-        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        element.cparts.script.eventCallback({ state, script });
         script.githubCallback({ name, location, bio })
         assert: script.githubCallback
     </script>

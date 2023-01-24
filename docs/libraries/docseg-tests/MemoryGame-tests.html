@@ -121,7 +121,7 @@
     ></state>
     <script name="When all cards are flipped, winning message is shown">
         // "Reveal" all cards
-        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        element.cparts.script.eventCallback({ state, script });
         script.flip(7);
         script.flip(6);
         script.flip(5);

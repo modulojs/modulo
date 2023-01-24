@@ -16,7 +16,7 @@
     </template>
 
     <script name="Ensure count up function increments">
-        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        element.cparts.script.eventCallback({ state, script });
         script.countUp();
         assert: state.num === 101
     </script>

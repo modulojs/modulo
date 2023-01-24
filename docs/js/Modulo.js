@@ -1114,130 +1114,69 @@ modulo.register('cpart', class Configuration { }, {
 });
 
 modulo.register('processor', function scriptAutoExport (modulo, def, value) {
-    let text = value;
+    const { getAutoExportNames } = modulo.registry.utils;
     if (def.lifecycle && def.lifecycle !== 'initialized') {
-        text = `function ${ def.lifecycle }Callback (renderObj) {${ text }}`;
+        value = `function ${ def.lifecycle }Callback (renderObj) {${ value }}`;
     }
-    function getAutoExportNames(contents) {
-        const regexpG = /(function|class)\s+(\w+)/g;
-        const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
-        const matches = contents.match(regexpG) || [];
-        return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s));
-    }
-    function getSymbolsAsObjectAssignment(contents) {
-        return getAutoExportNames(contents)
-            .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
-            .join('');
-    }
-    let prefix = '';
-    let suffix = '';
-    let localVars = Object.keys(modulo.registry.dom);// TODO fix...
-    localVars.push('element'); // add in element as a local var
-    localVars.push('cparts'); // give access to CParts JS interface
-    const symbolsString = getSymbolsAsObjectAssignment(text);
-    // TODO test: localVars = localVars.filter(text.includes.bind(text)); // Slight optimization
-    const localVarsIfs = localVars.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-    prefix += `var script = { exports: {} }; `;
-    prefix += localVars.length ? `var ${ localVars.join(', ') };` : '';
-    prefix += `function __set(name, value) { ${ localVarsIfs } }`;
-    suffix = `return { ${symbolsString} setLocalVariable: __set, exports: script.exports}\n`;
-    def.Code = `${prefix}\n${text}\n${suffix}`;
-    def.localVars = localVars;
-
-    // TODO: Fix
     const isDirRegEx = /(Unmount|Mount)$/;
-    def.Directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
+    def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
+    const { ChildrenNames } = modulo.definitions[def.Parent] || { };
+    const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
+    sibNames.push('component', 'element', 'cparts'); // Add in extras
+    const varNames = sibNames.filter(name => value.includes(name));
+    // Build def.Code to wrap the user-provided code and export local vars
+    def.Code = `var script = { exports: {} }; `;
+    def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
+    def.Code += '\n' + value + '\nreturn {';
+    for (const s of getAutoExportNames(value)) {
+        def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
+    }
+    def.Code += `setLocalVariables: function(o) {`
+    def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
+    def.Code += `}, exports: script.exports }\n`
 });
 
 modulo.register('cpart', class Script {
     static factoryCallback(renderObj, def, modulo) {
-        const { Content, Hash, localVars, lifecycle } = def;
-        let results = {};
-        //results = modulo.assets.require(def.DefinitionName);
-        //results = func.call(null, modulo, this.require || null);
+        //modulo.assert(results || !def.Parent, 'Invalid script return');
         const hash = modulo.assets.nameToHash[def.DefinitionName];
         const func = () => modulo.assets.modules[hash].call(window, modulo);
-        if (lifecycle && lifecycle === 'initialized') { // Lifecycle specified
-            results[lifecycle + 'Callback'] = func; // Attach as callback
-        } else { // Otherwise, should run in static context (now)
-            results = func();
+        if (def.lifecycle === 'initialized') {
+            return { initializedCallback: func }; // Attach as callback
         }
-        if (results) {
-            results.localVars = localVars;
-            modulo.assert(!('factoryCallback' in results), 'factoryCallback LEGACY');
-            return results;
-        } else {
-            modulo.assert(!def.Parent, 'Falsy return for parented Script');
-            return {};
-        }
-    }
-
-    cb(func) {
-        // DEAD-ish CODE (used in documentation, needs replacement...)
-        const renderObj = this.element.getCurrentRenderObj();
-        return (...args) => {
-            this.prepLocalVars(renderObj);
-            func(...args);
-            //this.clearLocalVariables(renderObj); // should do, set to "Invalid wrapped"
-        };
+        return func(); // Otherwise, should run in static context (e.g. now)
     }
 
     initializedCallback(renderObj) {
-        // Attach callbacks from script to this, to hook into lifecycle.
-        let script = renderObj[this.conf.Name];
+        // Create all lifecycle callbacks, wrapping around the inner script
+        const script = renderObj[this.conf.Name];
+        this.eventCallback = (rObj) => { // Create eventCallback to set inner
+            const setLocal = script.setLocalVariables || (() => {});
+            const vars = { element: this.element, cparts: this.element.cparts };
+            setLocal(Object.assign(vars, rObj)); // Set inner vars (or no-op)
+        };
 
-        if (script.initializedCallback) {
-            this.prepLocalVars(renderObj); // Prep before (used by lc=false)
+        if (script.initializedCallback) { // If defined, trigger inner init
+            this.eventCallback(renderObj); // Prep before (used by lc=false)
             Object.assign(script, script.initializedCallback(renderObj));
-            this.prepLocalVars(renderObj); // Prep again (used by lc=initialize)
+            this.eventCallback(renderObj); // Prep again (used by lc=initialize)
         }
 
-        const isCbRegex = /(Unmount|Mount|Callback)$/;
-        const cbs = Object.keys(script).filter(key => key.match(isCbRegex));
-        cbs.push('eventCallback'); // Always want to prep before events
-        for (const cbName of cbs) {
-            if (cbName === 'initializedCallback') { // XXX refactor
-                continue;
+        const isCallback = /(Mount|Unmount|Callback)$/;
+        for (const cbName of Object.keys(script)) {
+            if (cbName === 'initializedCallback' || !cbName.match(isCallback)) {
+                continue; // Skip over initialized (already handled) and non-CBs
             }
-            this[cbName] = (arg) => {
-                // NOTE: renderObj is passed in for Callback, but not Mount
+            this[cbName] = (arg) => { // Arg: Either renderObj or directive obj
                 const renderObj = this.element.getCurrentRenderObj();
                 const script = renderObj[this.conf.Name]; // Get new render obj
-                this.prepLocalVars(renderObj); // always prep (for event CB)
-                if (cbName in script) { // if it's specified in script
-                    Object.assign(script, script[cbName](arg) || {});
-                }
+                this.eventCallback(renderObj); // Prep before lifecycle method
+                Object.assign(script, script[cbName](arg) || {});
             };
-        }
-    }
-
-    // ## prepLocalVars
-    // To allow for local variables access to APIs provided by other CParts,
-    // sets local variables equal to the data returned by their callbacks.
-    // This is important: It's what enables us to avoid using the "this"
-    // context, since the current element is set before any custom code is run.
-    prepLocalVars(renderObj) {
-        let script = renderObj[this.conf.Name];
-        if (!script) {
-            console.error('ERROR: Script CPart missing from renderObj:', renderObj);
-            return false;
-        }
-        const { setLocalVariable, localVars } = script;
-        if (setLocalVariable) { // (For autoexport:=false, there is no setLocalVar)
-            setLocalVariable('element', this.element);
-            setLocalVariable('cparts', this.element.cparts);
-            // TODO: Remove 'localVars' from configure script, clutters up build
-            for (const localVar of localVars) {
-                if (localVar in renderObj) {
-                    setLocalVariable(localVar, renderObj[localVar]);
-                }
-            }
         }
     }
 }, {
     lifecycle: null,
-    ScriptAutoExport: 'auto',
     DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
 });
 
@@ -1994,6 +1933,14 @@ modulo.register('engine', class Reconciler {
             }
         }
     }
+});
+
+modulo.register('util', function getAutoExportNames(contents) {
+    // TODO: Change exports/Directives/etc to def processor to better expose
+    const regexpG = /(function|class)\s+(\w+)/g;
+    const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
+    return (contents.match(regexpG) || []).map(s => s.match(regexp2)[2])
+        .filter(s => s && !Modulo.INVALID_WORDS.has(s));
 });
 
 modulo.register('util', function fetchBundleData(modulo, callback) {
