@@ -1201,7 +1201,9 @@ modulo.register('cpart', class State {
             } else if (type && (type === 'range' || type === 'number')) {
                 value = Number(value); // ensure ranges & numbers get evaled
             }
-            this.set(name, value, el);
+            modulo.registry.utils.set(this.data, name, value);
+            this.propagate(name, value, el);
+            this.element.rerender();
         };
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
@@ -1230,13 +1232,6 @@ modulo.register('cpart', class State {
             }
         }
         this.boundElements[name] = remainingBound;
-    }
-
-    set(name, value, originalEl) {
-        /* if (valueOrEv.target) { this.data[valueOrEv.target.name] = name; } else { } if ((name in this.boundElements) && this.boundElements[name].length > 1) { } */
-        modulo.registry.utils.set(this.data, name, value);
-        this.propagate(name, value, originalEl);
-        this.element.rerender();
     }
 
     eventCallback() {

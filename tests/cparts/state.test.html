@@ -69,14 +69,15 @@
         </Test>
 
 
-        <Test name="Testing set method & state form binding">
+        <Test name="Testing propagate method & state form binding">
             <template name="Initial value worked" test-values>
                 <div><input [state.bind] name="tststring" value="abc" /></div>
             </template>
 
             <script name="Set can set values">
-                element.cparts.state.set('tststring', 'ok');
-                assert: state.tststring === 'ok'
+                element.cparts.state.propagate('tststring', 'ok');
+                // Ensure propagate does not affect current state
+                assert: state.tststring === 'abc'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -84,7 +85,7 @@
             </template>
         </Test>
 
-        <Test name="Testing dot syntax set method & state form binding">
+        <Test name="Testing dot syntax propagate method & state form binding">
             <state
                 testdot:=true
             ></state>
@@ -93,9 +94,9 @@
                 <p><input [state.bind] name="obj2.prop2" value="def" /></p>
             </template>
 
-            <script name="Set method can set nested values">
-                element.cparts.state.set('obj2.prop2', 'ok');
-                assert: state.obj2.prop2 === 'ok'
+            <script name="Propagate method can use nested values">
+                element.cparts.state.propagate('obj2.prop2', 'ok');
+                assert: state.obj2.prop2 === 'def'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -119,9 +120,9 @@
                 </main>
             </template>
 
-            <script name="Set method can set single nested values">
-                element.cparts.state.set('obj3.prop2', 'ok');
-                assert: state.obj3.prop2 === 'ok'
+            <script name="Propagate method can do single nested values">
+                element.cparts.state.propagate('obj3.prop2', 'ok');
+                assert: state.obj3.prop2 === 'B'
             </script>
 
             <template name="And reflected in DOM" test-values>
@@ -133,9 +134,9 @@
                 </main>
             </template>
 
-            <script name="Set method can set non-nested values">
-                element.cparts.state.set('tststring', 'ok2');
-                assert: state.tststring === 'ok2'
+            <script name="Propagate method can do non-nested values">
+                element.cparts.state.propagate('tststring', 'ok2');
+                assert: state.tststring === 'abc'
             </script>
 
             <template name="And non-nested reflected in DOM" test-values>
@@ -164,9 +165,9 @@
                 </aside>
             </template>
 
-            <script name="Set method can set string value">
-                element.cparts.state.set('tststring', 'ok3');
-                assert: state.tststring === 'ok3'
+            <script name="Propagate method can do multi string value">
+                element.cparts.state.propagate('tststring', 'ok3');
+                assert: state.tststring === 'abc'
             </script>
 
             <template name="And non-nested reflected in DOM" test-values>
@@ -177,13 +178,12 @@
                 </aside>
             </template>
 
-            <script name="Change event reflects in state">
+            <script name="Change event in single elem reflects in state">
                 element.querySelector('input:first-child').value = 'ok4';
                 const ev = new window.Event('keyup');
                 element.querySelector('input:first-child').dispatchEvent(ev);
                 assert: state.tststring === 'ok4'
             </script>
-
 
             <template name="And gets propagated in DOM" test-values>
                 <aside>
