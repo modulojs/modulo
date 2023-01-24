@@ -76,7 +76,7 @@
             "q": "the lord of the rings",
             "offset": null
         }
-        element.cparts.script.prepLocalVars({ state, script }); // TODO: May need to delete or update this test when prepLocalVars interface changes
+        element.cparts.script.eventCallback({ state, script });
         script.dataBackCallback(fakeApiData)
         assert: script.dataBackCallback
     </script>

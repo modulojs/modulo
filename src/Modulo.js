@@ -1114,101 +1114,65 @@ modulo.register('cpart', class Configuration { }, {
 });
 
 modulo.register('processor', function scriptAutoExport (modulo, def, value) {
-    let text = value;
+    const { getAutoExportNames } = modulo.registry.utils;
     if (def.lifecycle && def.lifecycle !== 'initialized') {
-        text = `function ${ def.lifecycle }Callback (renderObj) {${ text }}`;
+        value = `function ${ def.lifecycle }Callback (renderObj) {${ value }}`;
     }
-    function getAutoExportNames(contents) {
-        const regexpG = /(function|class)\s+(\w+)/g;
-        const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
-        const matches = contents.match(regexpG) || [];
-        return matches.map(s => s.match(regexp2)[2])
-            .filter(s => s && !Modulo.INVALID_WORDS.has(s));
-    }
-    function getSymbolsAsObjectAssignment(contents) {
-        return getAutoExportNames(contents)
-            .map(s => `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined,\n`)
-            .join('');
-    }
-
-    const parentDef = modulo.definitions[def.Parent] || { ChildrenNames: [] };
-    const possible = parentDef.ChildrenNames.map(n => modulo.definitions[n].Name);
-    possible.push('component', 'element', 'cparts'); // Add in extras
-    const namesInUse = possible.filter(name => text.includes(name));
-    const symbolsString = getSymbolsAsObjectAssignment(text);
-    const localVarsIfs = namesInUse.map(n => `if (name === '${n}') ${n} = value;`).join(' ');
-    def.Code = `var script = { exports: {} }; `;
-    def.Code += namesInUse.length ? `var ${ namesInUse.join(', ') };` : '';
-    const localVarsSetters = namesInUse.map(n => `${n}=o.${n}`).join(';');
-    def.Code += `function __set(name, value) { ${ localVarsIfs } }`;
-    def.Code += `function __PLV(o) { ${ localVarsSetters } }`;
-    def.Code += '\n' + text + '\n';
-    def.Code += `return { ${symbolsString} setLocalVariable: __set, prepLocalVariables: __PLV, exports: script.exports}\n`
-
-    // TODO: Fix
     const isDirRegEx = /(Unmount|Mount)$/;
-    def.Directives = getAutoExportNames(text).filter(s => s.match(isDirRegEx));
+    def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
+    const { ChildrenNames } = modulo.definitions[def.Parent] || { };
+    const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
+    sibNames.push('component', 'element', 'cparts'); // Add in extras
+    const varNames = sibNames.filter(name => value.includes(name));
+    // Build def.Code to wrap the user-provided code and export local vars
+    def.Code = `var script = { exports: {} }; `;
+    def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
+    def.Code += '\n' + value + '\nreturn {';
+    for (const s of getAutoExportNames(value)) {
+        def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
+    }
+    def.Code += `setLocalVariables: function(o) {`
+    def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
+    def.Code += `}, exports: script.exports }\n`
 });
 
 modulo.register('cpart', class Script {
     static factoryCallback(renderObj, def, modulo) {
-        const { Content, Hash, lifecycle } = def;
-        let results = {};
+        //modulo.assert(results || !def.Parent, 'Invalid script return');
         const hash = modulo.assets.nameToHash[def.DefinitionName];
         const func = () => modulo.assets.modules[hash].call(window, modulo);
-        if (lifecycle && lifecycle === 'initialized') { // Lifecycle specified
-            results[lifecycle + 'Callback'] = func; // Attach as callback
-        } else { // Otherwise, should run in static context (now)
-            results = func();
+        if (def.lifecycle === 'initialized') {
+            return { initializedCallback: func }; // Attach as callback
         }
-        modulo.assert(results || !def.Parent, 'Invalid script return');
-        return results ? results : {}; // Default to empty obj if necessary
+        return func(); // Otherwise, should run in static context (e.g. now)
     }
 
     initializedCallback(renderObj) {
-        // Attach callbacks from script to "this", to hook into lifecycle.
+        // Create all lifecycle callbacks, wrapping around the inner script
         const script = renderObj[this.conf.Name];
-        if (script.initializedCallback) {
-            this.prepLocalVars(renderObj); // Prep before (used by lc=false)
+        this.eventCallback = (rObj) => { // Create eventCallback to set inner
+            const setLocal = script.setLocalVariables || (() => {});
+            const vars = { element: this.element, cparts: this.element.cparts };
+            setLocal(Object.assign(vars, rObj)); // Set inner vars (or no-op)
+        };
+
+        if (script.initializedCallback) { // If defined, trigger inner init
+            this.eventCallback(renderObj); // Prep before (used by lc=false)
             Object.assign(script, script.initializedCallback(renderObj));
-            this.prepLocalVars(renderObj); // Prep again (used by lc=initialize)
+            this.eventCallback(renderObj); // Prep again (used by lc=initialize)
         }
+
         const isCallback = /(Mount|Unmount|Callback)$/;
         for (const cbName of Object.keys(script)) {
             if (cbName === 'initializedCallback' || !cbName.match(isCallback)) {
-                continue;
+                continue; // Skip over initialized (already handled) and non-CBs
             }
-            this[cbName] = (arg) => {
-                // NOTE: renderObj is passed in for Callback, but not Mount
+            this[cbName] = (arg) => { // Arg: Either renderObj or directive obj
                 const renderObj = this.element.getCurrentRenderObj();
                 const script = renderObj[this.conf.Name]; // Get new render obj
-                this.prepLocalVars(renderObj); // Prep before lifecycle method
+                this.eventCallback(renderObj); // Prep before lifecycle method
                 Object.assign(script, script[cbName](arg) || {});
             };
-        }
-    }
-
-    eventCallback(renderObj) {
-        this.prepLocalVars(renderObj); // Always prep before events
-    }
-
-    prepLocalVars(renderObj) {
-        // Sets local variables equal to the values in the provided renderObj
-        const script = renderObj[this.conf.Name];
-        this.modulo.assert(script, `ERROR: Script missing ${ this.conf }`);
-        /*
-        const { setLocalVariable } = script;
-        if (setLocalVariable) { // (For autoexport:=false, this is undefined)
-            setLocalVariable('element', this.element);
-            setLocalVariable('cparts', this.element.cparts);
-            for (const key of Object.keys(renderObj)) {
-                setLocalVariable(key, renderObj[key]);
-            }
-        }
-        */
-        if (script.prepLocalVariables) {
-            const vars = { element: this.element, cparts: this.element.cparts };
-            script.prepLocalVariables(Object.assign(vars, renderObj));
         }
     }
 }, {
@@ -1969,6 +1933,14 @@ modulo.register('engine', class Reconciler {
             }
         }
     }
+});
+
+modulo.register('util', function getAutoExportNames(contents) {
+    // TODO: Change exports/Directives/etc to def processor to better expose
+    const regexpG = /(function|class)\s+(\w+)/g;
+    const regexp2 = /(function|class)\s+(\w+)/; // hack, refactor
+    return (contents.match(regexpG) || []).map(s => s.match(regexp2)[2])
+        .filter(s => s && !Modulo.INVALID_WORDS.has(s));
 });
 
 modulo.register('util', function fetchBundleData(modulo, callback) {
