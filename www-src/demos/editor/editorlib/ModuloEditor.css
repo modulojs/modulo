@@ -1,3 +1,7 @@
+.ModuloEditor * {
+    box-sizing: border-box;
+}
+
 .ModuloEditor {
     --editor-width: 750px;
     display: grid;
@@ -32,10 +36,6 @@
     box-shadow: none;
 }
 
-
-.ModuloEditor * {
-    box-sizing: border-box;
-}
 
 
 @media (max-width: 992px) {

@@ -2,39 +2,15 @@
 
 <h4>Themes: Light</h4>
 <x-Options
-    value="{{ state.theme }}"
-    onchange:=script.setTheme
-    options:=state.editorThemesLight
+    [state.bind]
+    name="themeLight"
+    options:=staticdata.editorThemesLight
 ></x-Options>
-
 
 <h4>Themes: Dark</h4>
 <x-Options
-    value="{{ state.theme }}"
-    onchange:=script.setTheme
-    options:=state.editorThemesDark
+    [state.bind]
+    name="themeDark"
+    options:=staticdata.editorThemesDark
 ></x-Options>
-
-<ul>
-    {% for profile in state.profiles %}
-        <li 
-            class="{% if state.selected == profile.name %}profile-selected{% endif %}"
-            payload="{{ profile.name }}"
-            @click:=script.setProfile>
-            <label class="left-emoji" for="profile_{{ profile.name }}">{{ profile.emoji }}</label>
-            <!--
-            <input
-                type="radio"
-                name="selected"
-                id="profile_{{ profile.name }}"
-                value="{{ profile.name }}"
-            />
-            -->
-            <label for="profile_{{ profile.name }}">
-                <p>{{ profile.name }}</p>
-            </label>
-        </li>
-    {% endfor %}
-</ul>
-
 

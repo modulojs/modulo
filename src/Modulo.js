@@ -580,8 +580,11 @@ modulo.register('cpart', class Component {
     }
 
     dataPropUnmount({ el, attrName, rawName }) {
-        delete el.dataProps[attrName];
-        delete el.dataPropsAttributeNames[rawName];
+        if (!el.dataProps) { console.log('Modulo ERROR: Could not Unmount', attrName, rawName, el); }
+        if (el.dataProps) {
+            delete el.dataProps[attrName];
+            delete el.dataPropsAttributeNames[rawName];
+        }
     }
 });
 

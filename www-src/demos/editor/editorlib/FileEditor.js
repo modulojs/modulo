@@ -20,9 +20,11 @@ function fetchContent(state, element) {
 function prepareCallback() {
     // TODO: Possibly add a component rerender mode feature for this, or make
     // this occur during manual rerender as well
-    //delete element.rerender; // eliminate rerendering
-    rerender = element.rerender.bind(element); // Stash away the real rerender
-    element.rerender = () => {}; // eliminate rerendering
+    if (!rerender) {
+        // First time rendering
+        rerender = element.rerender.bind(element); // Stash away the real rerender
+        element.rerender = () => {}; // eliminate rerendering
+    }
     // component._rerender = component.rerender.bind(component); // attaching hidden one
     if (!props.content) {
         state.content = '';
@@ -31,19 +33,28 @@ function prepareCallback() {
     }
 }
 
+// Subscribe to editor_options
+function stateChangedCallback(name, value) {
+    //element.editor.session.setMode("ace/mode/python");
+    //state.theme = newTheme;
+    console.log('stateChangedCallback', name, value);
+    if (name === 'themeDark' || name === 'themeLight' || name === 'theme') {
+        element.editor.setTheme('ace/theme/' + value);
+        //element.editor.setOptions({ fontSize: 18 });
+    }
+}
+modulo.stores.editor_options.subscribers.push({ stateChangedCallback });
+
 function editspotMount ({ el }) {
     element.editor = getEditor(el);
-    element.editor.setTheme("ace/theme/eclipse");
-    element.editor.session.setMode("ace/mode/python");
+    //element.editor.setTheme(optstate.theme || optstate.themeLight);
+    //element.editor.session.setMode("ace/mode/python");
     element.editor.setOptions({ fontSize: 18 });
-    // HACK: XXX
-    window.__AceEditor = element.editor;
 }
 
 function editspotUnmount () {
     element.editor.destroy();
 }
-
 
 function previewspotMount ({ el }) {
     console.log('mounting el', el);

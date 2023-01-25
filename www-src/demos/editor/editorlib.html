@@ -7,27 +7,22 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <div class="ModuloEditor layout--{{ opts.layout }}">
+        <div class="ModuloEditor layout--{{ state.layout }}">
             <x-EditorSidebar></x-EditorSidebar>
             <x-FileEditor
                 content="print('hello world')"
                 name="example.py"
-                profile="{{ opts.profile }}"
-                theme="{{ opts.theme }}"
             ></x-FileEditor>
         </div>
     </Template>
 
     <State
-        options:={}
-    ></State>
-
-    <State
-        -name="opts"
         -store="editor_options"
         layout="center"
         profile="syntax"
-        theme="eclipse"
+        theme="iplastic"
+        theme-dark="iplastic"
+        theme-light="iplastic"
     ></State>
 
     <State
@@ -91,6 +86,7 @@
         path
         inode
     ></Props>
+
     <Template
         -src="/demos/editor/editorlib/FileEditor.html"
     ></Template>
@@ -125,20 +121,23 @@
     <Props
         onchange
     ></Props>
-    <Template
-        -src="/demos/editor/editorlib/FileEditorSettings.html"
-    ></Template>
+    <Template>
+        <h3>Settings</h3>
+        <h4>Themes: Light</h4>
+        <x-Options [state.bind] name="themeLight"
+            options:=staticdata.editorThemesLight
+        ></x-Options>
+        <h4>Themes: Dark</h4>
+        <x-Options [state.bind] name="themeDark"
+            options:=staticdata.editorThemesDark
+        ></x-Options>
+    </Template>
     <State
-        profiles:=[]
-        selected:=null
-        theme:=null
+        -store="editor_options"
     ></State>
-    <Script
-        -src="/demos/editor/editorlib/FileEditorSettings.js"
-    ></Script>
-    <Style
-        -src="/demos/editor/editorlib/FileEditorSettings.css"
-    ></Style>
+    <StaticData
+        -src="/demos/editor/editorlib/options.js"
+    ></StaticData>
 </Component>
 
 <Component name="Options">
