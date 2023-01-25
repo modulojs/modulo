@@ -150,52 +150,24 @@
     <Template>
         {% for opt in props.options %}
             <div style="position: relative">
-                {% if props.value == opt.name %}
+                {% if state.value == opt.name %}
                     <div class="right-square"></div>
                 {% endif %}
                 <x-Btn
-                    @click:=props.onchange
+                    @click:=formhelper.setValue
                     payload="{{ opt.name }}"
                     style="position: relative"
                 >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
             </div>
         {% endfor %}
     </Template>
-</Component>
-
-
-<Component name="LayoutSettings">
-    <Template>
-        <h3>Layout</h3>
-        <x-Options
-            value="{{ state.layout }}"
-            onchange:=script.setLayout
-            options:=state.layouts
-        ></x-Options>
-    </Template>
     <State
-        layout="center"
-        layouts:=[]
+        value=""
     ></State>
-    <Script>
-        function initializedCallback() {
-            state.layouts.push(...[
-                { name: 'center' },
-                { name: 'wide' },
-                { name: 'full' },
-            ]);
-        }
-        function setLayout(payload) {
-            state.layout = payload;
-            // HACK!
-            const modEdit = document.querySelector('x-ModuloEditor');
-            for (const { name } of state.layouts) {
-                modEdit.classList.remove('layout--' + name);
-            }
-            modEdit.classList.add('layout--' + payload);
-            element.rerender(); // because is callback
-        }
-    </Script>
+    <Script
+        -name="formhelper"
+        -src="/demos/editor/editorlib/formHelper.js"
+    ></Script>
     <Style>
         .right-square {
             position: absolute;
@@ -207,5 +179,24 @@
             background: var(--m-highlight);
         }
     </Style>
+</Component>
+
+
+<Component name="LayoutSettings">
+    <Template>
+        <h3>Layout</h3>
+        <x-Options
+            [state.bind]
+            name="layout"
+            value="{{ state.layout }}"
+            options:=staticdata.layouts
+        ></x-Options>
+    </Template>
+    <State
+        -store="editor_options"
+    ></State>
+    <StaticData
+        -src="/demos/editor/editorlib/options.js"
+    ></StaticData>
 </Component>
 

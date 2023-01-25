@@ -55,7 +55,3 @@ function previewspotMount ({ el }) {
     console.log(element.iframe);
 }
 
-function previewspotUnmount () {
-}
-
-
