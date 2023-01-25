@@ -41,6 +41,20 @@
 .menu-holder > x-Btn:hover {
     text-shadow: 0 0 5px var(--m-highlight);
 }
+
+.menu-holder > x-Btn .btn-superimpose {
+    position: absolute;
+    top: 1px;
+    left: 11px;
+    z-index: 3;
+    opacity: 0.0;
+    transition: opacity 0.5s;
+}
+
+.menu-holder > x-Btn.menu--selected .btn-superimpose {
+    opacity: 1.0;
+}
+
 /*
 .menu-holder > x-Btn:hover {
     text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0px var(--m-highlight);

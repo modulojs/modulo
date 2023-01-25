@@ -7,13 +7,13 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <div class="ModuloEditor-wrapper">
+        <div class="ModuloEditor layout--{{ opts.layout }}">
             <x-EditorSidebar></x-EditorSidebar>
             <x-FileEditor
                 content="print('hello world')"
                 name="example.py"
-                profile="{{ state.options.editorProfile|default:'syntax' }}"
-                theme="{{ state.options.editorTheme|default:'eclipse' }}"
+                profile="{{ opts.profile }}"
+                theme="{{ opts.theme }}"
             ></x-FileEditor>
         </div>
     </Template>
@@ -23,8 +23,11 @@
     ></State>
 
     <State
+        -name="opts"
         -store="editor_options"
-        options:={}
+        layout="center"
+        profile="syntax"
+        theme="eclipse"
     ></State>
 
     <State
@@ -110,6 +113,7 @@
     ></State>
 
     <Script
+        lifecycle="initialized"
         -src="/demos/editor/editorlib/FileEditor.js"
     ></Script>
     <Style

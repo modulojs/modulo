@@ -1,4 +1,4 @@
-const ALLOW_NULL = false; // quick feature flag
+const ALLOW_NULL = false; // quick feature flag, later should be turned into option
 
 function initializedCallback () {
     state.tabs = [
@@ -7,7 +7,8 @@ function initializedCallback () {
             boxes: [
                 "<h3>modulo editor help</h3>",
             ],
-            emoji: "ℹ",
+            text: "?",
+            whenSelected: "-&nbsp;&nbsp;-",
         },
 
         {
@@ -15,8 +16,8 @@ function initializedCallback () {
             boxes: [
                 "<x-FileBrowser></x-FileBrowser>",
             ],
-            emoji: "📁",
-            emojiSelected: "📂",
+            text: "📁",
+            whenSelected: "📂",
         },
 
         {
@@ -25,7 +26,8 @@ function initializedCallback () {
                 "<x-LayoutSettings></x-LayoutSettings>",
                 "<x-FileEditorSettings></x-FileEditorSettings>",
             ],
-            emoji: "🎨",
+            text: "🎨",
+            whenSelected: "🖌️",
         },
     ];
     if (!ALLOW_NULL) {
