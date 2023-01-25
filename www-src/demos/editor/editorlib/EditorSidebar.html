@@ -31,16 +31,7 @@
             >{% if state.tab == tabInfo.name %}{{ tabInfo.emojiSelected|default:tabInfo.emoji }}{% else %}{{ tabInfo.emoji }}{% endif %}</x-Btn>
         {% endfor %}
     </div>
-    <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}"
-        style="
-            {% if state.visible %}
-                opacity: 1;
-                display: block;
-            {% else %}
-                opacity: 0;
-                display: none;
-            {% endif %}
-        ">
+    <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}">
         {% if state.tab %}
             {% for box in state.boxes %}
                 <div class="tab-box">

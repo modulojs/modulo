@@ -7,28 +7,29 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <x-EditorSidebar onoptionschange:=script.onOptionsChange></x-EditorSidebar>
-        <x-FileEditor
-            content="print('hello world')"
-            name="example.py"
-            profile="{{ state.options.editorProfile|default:'syntax' }}"
-            theme="{{ state.options.editorTheme|default:'eclipse' }}"
-        ></x-FileEditor>
+        <div class="ModuloEditor-wrapper">
+            <x-EditorSidebar></x-EditorSidebar>
+            <x-FileEditor
+                content="print('hello world')"
+                name="example.py"
+                profile="{{ state.options.editorProfile|default:'syntax' }}"
+                theme="{{ state.options.editorTheme|default:'eclipse' }}"
+            ></x-FileEditor>
+        </div>
     </Template>
 
     <State
         options:={}
     ></State>
 
-    <Script>
-        function prepareCallback() {
-            // TODO
-        }
-        function onOptionsChange(setting, newValue) {
-            state.options[setting] = newValue;
-            //element.rerender();
-        }
-    </Script>
+    <State
+        -store="editor_options"
+        options:={}
+    ></State>
+
+    <State
+        -store="editor_data"
+    ></State>
 
     <Style
         -src="/demos/editor/editorlib/ModuloEditor.css"
@@ -62,9 +63,6 @@
 </Component>
 
 <Component name="EditorSidebar">
-    <Props
-        onoptionschange
-    ></Props>
     <Template
         -src="/demos/editor/editorlib/EditorSidebar.html"
     ></Template>
@@ -93,11 +91,24 @@
     <Template
         -src="/demos/editor/editorlib/FileEditor.html"
     ></Template>
+
     <State
         content=""
         loading:=false
         err:=null
     ></State>
+
+    <State
+        -name="datastate"
+        -store="editor_data"
+        text=""
+    ></State>
+
+    <State
+        -name="optstate"
+        -store="editor_options"
+    ></State>
+
     <Script
         -src="/demos/editor/editorlib/FileEditor.js"
     ></Script>
