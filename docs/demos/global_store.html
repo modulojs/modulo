@@ -1,0 +1,99 @@
+<!--
+    This example shows how you can use the -store attribute to "share" state
+    across multiple components. This permits it being used to store shared API
+    results data, for example, and for one component's updating of it to
+    trigger updates across the page.
+-->
+<template Modulo>
+  <Component name="SharedInput">
+    <Template>
+        <label>
+            Enter text here:
+            <input [state.bind] name="example" />
+        </label>
+
+        <label>
+            (However, this text is bound to a private state:
+            <input [privstate.bind] name="foobar" />)
+        </label>
+    </Template>
+
+    <!-- Notice the -store. This is what assigns this state to be shared under
+    a global name (the "store" name) -->
+    <State
+        -store="sharedstuff"
+        example="SHARED"
+    ></State>
+
+    <!-- You can still have another state that is private, simply by giving it
+    a -name to differentiate it! -->
+    <State
+        -name="privstate"
+        foobar="private"
+    ></State>
+
+    <Style>
+        :host {
+            padding: 10px;
+            display: inline-block;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </Style>
+  </Component>
+
+  <Component name="SharedOutput">
+    <Template>
+        <h2>The text is: "{{ state.example }}"</h2>
+    </Template>
+
+    <State
+        -store="sharedstuff"
+    ></State>
+  </Component>
+
+</template>
+
+<!-- Include Modulo.js, using latest version: -->
+<!--<script src="https://unpkg.com/mdu.js"></script>-->
+<script src="/js/Modulo.js"></script>
+
+<hr />
+<x-SharedInput></x-SharedInput>
+<hr />
+<x-SharedOutput></x-SharedOutput>
+<x-SharedOutput></x-SharedOutput>
+<x-SharedOutput></x-SharedOutput>
+<hr />
+<x-SharedInput></x-SharedInput>
+<hr />
+
+<hr />
+<x-SharedInput></x-SharedInput>
+<hr />
+<x-SharedOutput></x-SharedOutput>
+<x-SharedOutput></x-SharedOutput>
+<x-SharedOutput></x-SharedOutput>
+<hr />
+<x-SharedInput></x-SharedInput>
+<hr />
+
+
+
+<!-- Remember - Specify version, and move components to a library file later:
+<script Modulo
+    src="https://unpkg.com/mdu.js@0.0.27/src/Modulo.js"
+    -src="/static/libraries/all.html"
+></script> -->
+
+<!-- ######################################################################### -->
+<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
+<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
+    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
+    modulo.fetchQueue.enqueue(String(location.href), text => {
+        this.nextSibling.textContent = text;
+        window.navigator.clipboard.writeText(text); 
+        this.textContent += '  [☑ Copied to clipboard!]';
+    })">COPY DEMO</a><pre></pre>
+</div>
+<!-- ######################################################################### -->
+

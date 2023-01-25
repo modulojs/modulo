@@ -10,6 +10,7 @@ window.Modulo = class Modulo {
         this._configSteps = 0;
         this.config = {};
         this.definitions = {};
+        this.stores = {};
         if (parentModulo) {
             this.parentModulo = parentModulo;
             const { deepClone } = modulo.registry.utils;
@@ -305,6 +306,14 @@ modulo.register('util', function initElement (modulo, def, elem) {
     elem.originalHTML = null;
     elem.originalChildren = [];
     elem.cparts = {};
+});
+
+modulo.register('util', function makeStore (modulo, def) {
+    const isLower = key => key[0].toLowerCase() === key[0];
+    const data = modulo.registry.utils.keyFilter(def, isLower);
+    const newStore = { boundElements: {}, subscribers: [] };
+    newStore.data = JSON.parse(JSON.stringify(data));
+    return newStore;
 });
 
 modulo.register('util', function initClass (modulo, def, cls) {
@@ -681,8 +690,10 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    // TODO: It's get that should autobind functions!!
-    return key.split('.').reduce((o, name) => o[name], obj);
+    if (key in obj) { // Shortcut for common case
+        return obj[key];
+    }
+    return (key + '').split('.').reduce((o, name) => o[name], obj);
 });
 
 modulo.register('util', function set(obj, keyPath, val, ctx = null) {
@@ -1139,8 +1150,8 @@ modulo.register('cpart', class Script {
         // Create all lifecycle callbacks, wrapping around the inner script
         const script = renderObj[this.conf.Name];
         this.eventCallback = (rObj) => { // Create eventCallback to set inner
-            const setLocal = script.setLocalVariables || (() => {});
             const vars = { element: this.element, cparts: this.element.cparts };
+            const setLocal = script.setLocalVariables || (() => {});
             setLocal(Object.assign(vars, rObj)); // Set inner vars (or no-op)
         };
 
@@ -1155,7 +1166,7 @@ modulo.register('cpart', class Script {
             if (cbName === 'initializedCallback' || !cbName.match(isCallback)) {
                 continue; // Skip over initialized (already handled) and non-CBs
             }
-            this[cbName] = (arg) => { // Arg: Either renderObj or directive obj
+            this[cbName] = arg => { // Arg: Either renderObj or directive obj
                 const renderObj = this.element.getCurrentRenderObj();
                 const script = renderObj[this.conf.Name]; // Get new render obj
                 this.eventCallback(renderObj); // Prep before lifecycle method
@@ -1169,59 +1180,47 @@ modulo.register('cpart', class Script {
 });
 
 modulo.register('cpart', class State {
-    initializedCallback(renderObj) {
-        if (!this.data) {
-            // Initialize with deep copy of attributes
-            let { attrs } = this;
-            if (attrs && attrs.attrs) { // TODO: Hack code here, not sure why its like this
-                attrs = attrs.attrs;
+    static factoryCallback(renderObj, def, modulo) {
+        if (def.Store) {
+            const store = modulo.registry.utils.makeStore(modulo, def);
+            if (!(def.Store in modulo.stores)) {
+                modulo.stores[def.Store] = store;
+            } else {
+                Object.assign(modulo.stores[def.Store].data, store.data);
             }
-            this.data = Object.assign({}, attrs);
-            // TODO: Need to do proper deep-copy... is this okay?
-            this.data = JSON.parse(JSON.stringify(this.data));
         }
+    }
 
-        this.boundElements = {}; // initialize
-        return this.data;
+    initializedCallback(renderObj) {
+        if (!this.def && this.conf) { this.def = this.conf; } // XXX rm
+        const store = this.def.Store ? this.modulo.stores[this.def.Store]
+                : this.modulo.registry.utils.makeStore(this.modulo, this.def);
+        store.subscribers.push(Object.assign(this, store));
+        return store.data;
     }
 
     bindMount({ el, attrName, value }) {
-        // TODO: BUG: This should be attrName || el.getATtribute('name') (todo:
-        // write failing tests, then flip and see green)
-        const name = el.getAttribute('name') || attrName;
+        const name = attrName || el.getAttribute('name');
         const val = modulo.registry.utils.get(this.data, name);
-        this.modulo.assert(val !== undefined, `state.bind "${name}" is undefined`);
-        const listen = () => {
-            // TODO: Refactor this function + propagate to be more consistent +
-            // extendable with types / conversions -- MAYBE even just attach it
-            // as stateChangeCallback!
-            let { value, type, checked, tagName } = el;
-            if (type && type === 'checkbox') {
-                value = !!checked;
-            } else if (type && (type === 'range' || type === 'number')) {
-                value = Number(value); // ensure ranges & numbers get evaled
-            }
-            this.set(name, value, el);
-        };
+        this.modulo.assert(val !== undefined, `state.bind "${name}" undefined`);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
-        //assert(!this.boundElements[name], `[state.bind]: Duplicate "${name}"`);
-
         if (!(name in this.boundElements)) {
             this.boundElements[name] = [];
         }
+        // Bind the "listen" event to propagate to all, and trigger initial vals
+        const listen = () => this.propagate(name, el.value, el);
         this.boundElements[name].push([ el, evName, listen ]);
         el.addEventListener(evName, listen); // todo: make optional, e.g. to support cparts?
-        this.propagate(name, val); // trigger initial assignment(s)
+        this.propagate(name, val, this); // trigger initial assignment(s)
     }
 
     bindUnmount({ el, attrName }) {
-        const name = el.getAttribute('name') || attrName;
-        const remainingBound = [];
+        const name = attrName || el.getAttribute('name');
         if (!(name in this.boundElements)) { // XXX HACK
-            console.log('Modulo ERROR: Could not unbind', name);
-            return;
+            return console.log('Modulo ERROR: Could not unbind', name);
         }
+        const remainingBound = [];
         for (const row of this.boundElements[name]) {
             if (row[0] === el) {
                 row[0].removeEventListener(row[1], row[2]);
@@ -1232,11 +1231,11 @@ modulo.register('cpart', class State {
         this.boundElements[name] = remainingBound;
     }
 
-    set(name, value, originalEl) {
-        /* if (valueOrEv.target) { this.data[valueOrEv.target.name] = name; } else { } if ((name in this.boundElements) && this.boundElements[name].length > 1) { } */
-        modulo.registry.utils.set(this.data, name, value);
-        this.propagate(name, value, originalEl);
-        this.element.rerender();
+    stateChangedCallback(name, value, el) {
+        this.modulo.registry.utils.set(this.data, name, value);
+        if (!this.def.Only || this.def.Only.includes(name)) { // TODO: Test & document
+            this.element.rerender();
+        }
     }
 
     eventCallback() {
@@ -1244,7 +1243,8 @@ modulo.register('cpart', class State {
     }
 
     propagate(name, val, originalEl = null) {
-        for (const [ el, evName, cb ] of (this.boundElements[name] || [])) {
+        const elems = (this.boundElements[name] || []).map(row => row[0]);
+        for (const el of this.subscribers.concat(elems)) {
             if (originalEl && el === originalEl) {
                 continue; // don't propagate to self
             }
@@ -1259,19 +1259,15 @@ modulo.register('cpart', class State {
     }
 
     eventCleanupCallback() {
-        // TODO: Instead, should JUST do _lastPropagated (isntead of _oldData)
-        // with each key from boundElements, and thus more efficiently loop
-        // through
         for (const name of Object.keys(this.data)) {
             this.modulo.assert(name in this._oldData, `There is no "state.${name}"`);
-            const val = this.data[name];
-            if (name in this.boundElements && val !== this._oldData[name]) {
-                this.propagate(name, val);
+            if (this.data[name] !== this._oldData[name]) {
+                this.propagate(name, this.data[name], this);
             }
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ] });
+}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null, Ignore: '' });
 
 
 /* Implementation of Modulo Templating Language */

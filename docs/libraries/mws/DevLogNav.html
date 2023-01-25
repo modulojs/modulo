@@ -2,7 +2,7 @@
     <h4>DEV LOG</h4>
 
     <ul>
-        {% for pair in state.data %}
+        {% for pair in state.nav %}
             <li>
                 {% if pair|get:0 == props.fn %}
                     <span style="text-decoration: overline underline;">
@@ -18,7 +18,7 @@
     </ul>
 </nav>
 
-{% for pair in state.data %}
+{% for pair in state.nav %}
     {% if pair|get:0 == props.fn %}
         <h1>{{ pair|get:1 }}</h1>
     {% endif %}
