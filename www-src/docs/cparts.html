@@ -717,16 +717,13 @@ an API, or data that represents UI flow changes, such as the visibility of a
 modal. For more discussion of State, see <a
 href="/docs/tutorial_part3.html#state">Tutorial Part 3</a>.</p>
 
-<p>State data is unique to every component instance, and components can never
-directly access each-others data. It is possible to indirectly reference it,
-however, by passing state data from a "parent" component to a "child"
-components within the parent by passing it via a <em>Props</em> attribute. In
-this case, the data should be considered read-only to the child component, like
-any other <em>Props</em> data. If you want to share data between components
-globally, such that any component can modify the data causing a re-render to
-all linked components, such as user log-in information or global state data,
-you should consider the <a href="#store">Store CPart (not yet implemented)</a>.</p>
-
+<p>By default (that is, with no <code>-store</code> attribute), state data is
+unique to every component instance, and components can never directly access
+sibling or parent data. It is possible to indirectly reference it, however, by
+passing state data from a "parent" component to a "child" components within the
+parent by passing it via a <em>Props</em> attribute. In this case, the data
+should be considered read-only to the child component, like any other
+<em>Props</em> data.</p>
 
 <h3>Definition</h3>
 
@@ -754,14 +751,24 @@ text='
     count:=1          (Number)
     ready:=true       (Boolean)
     speed:=null       (null value)
-    items:=&apos;[         (JSON Array)
+    items:=&apos;[    (JSON Array)
         "abc",
         "def"
     ]&apos;
-    data_obj:=&apos;{      (JSON Object)
+    obj:=&apos;{      (JSON Object)
         "a": "b",
         "c": "d"
     }&apos;
+></State>
+
+<!-- Example 3: Building up complicated JSON data with "." syntax -->
+<State
+    user:={}
+    user.name:=&apos;"gigasquid"&apos;
+    user.uid:=1313
+    user.address:={}
+    user.address.billable:=null
+    user.address.ready:=false
 ></State>
 '></mws-Demo>
 
@@ -769,6 +776,28 @@ text='
 okay to make the initial value be <code>null</code> (as in the "speed" example
 above), or other some placeholder that will later be replaced.</p>
 
+
+<h3>Linking State globally with stores</h3>
+
+<p>If you want to share data between components globally, such that any
+component can modify the data causing a re-render to all linked components,
+such as user log-in information or global state data, then you can use the
+powerful <code>-store</code> attribute.</p>
+
+<mws-Demo
+text='
+<State
+    -store="userinfo"
+    username="pombo"
+    tags:=&apos;["admin", "printing"]&apos;
+></State>
+'></mws-Demo>
+
+<p>With this, any state with the given store <em>throughout your
+application</em> will share state and subscriptions to updates.</p>
+
+<p>For a full example of <code>-store</code> in use, <a
+href="/demos/global_store.html">see the Global Store demo</a>.</p>
 
 <h3>CPart properties</h3>
 
