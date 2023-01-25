@@ -41,6 +41,20 @@
 .menu-holder > x-Btn:hover {
     text-shadow: 0 0 5px var(--m-highlight);
 }
+
+.menu-holder > x-Btn .btn-superimpose {
+    position: absolute;
+    top: 1px;
+    left: 11px;
+    z-index: 3;
+    opacity: 0.0;
+    transition: opacity 0.5s;
+}
+
+.menu-holder > x-Btn.menu--selected .btn-superimpose {
+    opacity: 1.0;
+}
+
 /*
 .menu-holder > x-Btn:hover {
     text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0px var(--m-highlight);
@@ -100,14 +114,32 @@
 }
 
 .tab-holder {
+    background: #fff;
     height: 100%;
-    transition: background-color 0.5s;
-    background-color: rgba(255, 255, 255, 0.0);
     padding: 20px;
     margin: -10px;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: clip;
+    transition: none;
+    opacity: 0;
 }
 
-.menu-wrapper--visible .tab-holder--filled {
-    background-color: var(--m-primary);
+.tab-holder > * {
+    display: none !important;
 }
+
+.tab-holder.tab-holder--filled {
+    /* Only transition TO, instantly disappear FROM */
+    transition: background 0.5s;
+}
+
+.menu-wrapper--visible  .tab-holder.tab-holder--filled {
+    background: var(--m-primary);
+    opacity: 1;
+}
+.menu-wrapper--visible .tab-holder.tab-holder--filled > * {
+    display: inherit !important;
+}
+
 

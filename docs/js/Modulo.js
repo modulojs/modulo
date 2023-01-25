@@ -580,8 +580,11 @@ modulo.register('cpart', class Component {
     }
 
     dataPropUnmount({ el, attrName, rawName }) {
-        delete el.dataProps[attrName];
-        delete el.dataPropsAttributeNames[rawName];
+        if (!el.dataProps) { console.log('Modulo ERROR: Could not Unmount', attrName, rawName, el); }
+        if (el.dataProps) {
+            delete el.dataProps[attrName];
+            delete el.dataPropsAttributeNames[rawName];
+        }
     }
 });
 
@@ -1196,7 +1199,7 @@ modulo.register('cpart', class State {
         const store = this.def.Store ? this.modulo.stores[this.def.Store]
                 : this.modulo.registry.utils.makeStore(this.modulo, this.def);
         store.subscribers.push(Object.assign(this, store));
-        return store.data;
+        return store.data; // TODO: Possibly, push ALL sibling CParts with stateChangedCallback
     }
 
     bindMount({ el, attrName, value }) {
@@ -1267,7 +1270,7 @@ modulo.register('cpart', class State {
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null, Ignore: '' });
+}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
 
 
 /* Implementation of Modulo Templating Language */
@@ -1422,9 +1425,8 @@ modulo.config.templater.filters = (function () {
         camelcase: s => s.replace(/-([a-z])/g, g => g[1].toUpperCase()),
         capfirst: s => s.charAt(0).toUpperCase() + s.slice(1),
         concat: (s, arg) => s.concat ? s.concat(arg) : s + arg,
-        //combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign(s, arg),
+        combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign({}, s, arg),
         default: (s, arg) => s || arg,
-        yesno: (s, arg) => ((arg || 'yes,no') + ',,').split(',')[s === null ? 2 : (1 - (1 * !s))],
         divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,
         dividedinto: (s, arg) => Math.ceil((s * 1) / (arg * 1)),
         escapejs: s => JSON.stringify(String(s)).replace(/(^"|"$)/g, ''),
@@ -1444,6 +1446,7 @@ modulo.config.templater.filters = (function () {
         renderas: (rCtx, template) => safe(template.render(rCtx)),
         reversed: s => Array.from(s).reverse(),
         upper: s => s.toUpperCase(),
+        yesno: (s, arg) => `${ arg || 'yes,no' },,`.split(',')[s ? 0 : s === null ? 2 : 1],
     };
     const { values, keys, entries } = Object;
     const extra = { get, safe, values, keys, entries };

@@ -25,22 +25,13 @@
                 <div class="left-square"></div>
             {% endif %}
             <x-Btn
-                class="actions"
+                class="actions {% if state.tab == tabInfo.name %}menu--selected{% endif %}"
                 payload="{{ tabInfo.name }}"
                 @click:=script.toggleTab
-            >{% if state.tab == tabInfo.name %}{{ tabInfo.emojiSelected|default:tabInfo.emoji }}{% else %}{{ tabInfo.emoji }}{% endif %}</x-Btn>
+            >{{ tabInfo.text }}<span class="btn-superimpose">{{ tabInfo.whenSelected|default:""|safe }}</span></x-Btn>
         {% endfor %}
     </div>
-    <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}"
-        style="
-            {% if state.visible %}
-                opacity: 1;
-                display: block;
-            {% else %}
-                opacity: 0;
-                display: none;
-            {% endif %}
-        ">
+    <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}">
         {% if state.tab %}
             {% for box in state.boxes %}
                 <div class="tab-box">

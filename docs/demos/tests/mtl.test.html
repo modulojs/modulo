@@ -5,7 +5,7 @@
         //const { MTL } = Modulo.templating;
         // Attach simple helper function used below
         // TODO: Replace this window. silliness with a way to register helpers,
-        // maybe a script SetupScript CPart?
+        // maybe something exposed to Configuration
         window._uudn = 0;
         window._r = (tText, context) => {
             const conf = {
@@ -17,6 +17,37 @@
         }
         assert: modulo.registry.engines.Templater && window._r
     </script>
+</test>
+
+<test name="Built-in filters">
+    <script name="combine">
+        const context = {
+            str1: 'ab', str2: 'cd',
+            arr1: [1, 2], arr2: [3, 4],
+            obj1: { a: 1 }, obj2: { b: 2 },
+        };
+        const template = 'str:{{str1|combine:str2}},arr:{{ arr1|combine:arr2|json|safe }},obj:{{ obj1|combine:obj2|json|safe }},'
+        const expected = 'str:abcd,arr:[1,2,3,4],obj:{"a":1,"b":2},'
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
+    <script name="yesno (with defaults)">
+        const context = { a: 1, b: false, c: null };
+        const template = 'a:{{ a|yesno }},b:{{ b|yesno }},c:{{ c|yesno }},';
+        const expected = 'a:yes,b:no,c:,';
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
+    <script name="yesno (with custom)">
+        const context = { a: 1, b: false, c: null };
+        const template = 'a:{{ a|yesno:"sim,não,nulo" }},b:{{ b|yesno:"sim,não,nulo" }},c:{{ c|yesno:"sim,não,nulo" }},';
+        const expected = 'a:sim,b:não,c:nulo,';
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
 </test>
 
 <test name="Template values and filters">

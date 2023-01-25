@@ -1,4 +1,4 @@
-const ALLOW_NULL = false; // quick feature flag
+const ALLOW_NULL = false; // quick feature flag, later should be turned into option
 
 function initializedCallback () {
     state.tabs = [
@@ -7,7 +7,8 @@ function initializedCallback () {
             boxes: [
                 "<h3>modulo editor help</h3>",
             ],
-            emoji: "ℹ",
+            text: "?",
+            whenSelected: "-&nbsp;&nbsp;-",
         },
 
         {
@@ -15,31 +16,23 @@ function initializedCallback () {
             boxes: [
                 "<x-FileBrowser></x-FileBrowser>",
             ],
-            emoji: "📁",
-            emojiSelected: "📂",
+            text: "📁",
+            whenSelected: "📂",
         },
 
         {
             name: "options",
             boxes: [
                 "<x-LayoutSettings></x-LayoutSettings>",
-                "<x-FileEditorSettings onchange:=script.onFileEditorOptionsChange></x-FileEditorSettings>",
+                "<x-FileEditorSettings></x-FileEditorSettings>",
             ],
-            emoji: "🎨",
+            text: "🎨",
+            whenSelected: "🖌️",
         },
     ];
     if (!ALLOW_NULL) {
         toggleTab('files');
     }
-}
-
-function onFileBrowserChange(payload) {
-    // NOTE: Dead code! FileBrowser will probably just be links...
-    console.log('onFileBrowserChange', payload);
-}
-
-function onFileEditorOptionsChange(setName, value) {
-    props.onoptionschange(setName, value);
 }
 
 function toggleSidebar () {

@@ -7,28 +7,27 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <x-EditorSidebar onoptionschange:=script.onOptionsChange></x-EditorSidebar>
-        <x-FileEditor
-            content="print('hello world')"
-            name="example.py"
-            profile="{{ state.options.editorProfile|default:'syntax' }}"
-            theme="{{ state.options.editorTheme|default:'eclipse' }}"
-        ></x-FileEditor>
+        <div class="ModuloEditor layout--{{ state.layout }}">
+            <x-EditorSidebar></x-EditorSidebar>
+            <x-FileEditor
+                content="print('hello world')"
+                name="example.py"
+            ></x-FileEditor>
+        </div>
     </Template>
 
     <State
-        options:={}
+        -store="editor_options"
+        layout="center"
+        profile="syntax"
+        theme="iplastic"
+        theme-dark="iplastic"
+        theme-light="iplastic"
     ></State>
 
-    <Script>
-        function prepareCallback() {
-            // TODO
-        }
-        function onOptionsChange(setting, newValue) {
-            state.options[setting] = newValue;
-            //element.rerender();
-        }
-    </Script>
+    <State
+        -store="editor_data"
+    ></State>
 
     <Style
         -src="/demos/editor/editorlib/ModuloEditor.css"
@@ -62,9 +61,6 @@
 </Component>
 
 <Component name="EditorSidebar">
-    <Props
-        onoptionschange
-    ></Props>
     <Template
         -src="/demos/editor/editorlib/EditorSidebar.html"
     ></Template>
@@ -90,15 +86,30 @@
         path
         inode
     ></Props>
+
     <Template
         -src="/demos/editor/editorlib/FileEditor.html"
     ></Template>
+
     <State
         content=""
         loading:=false
         err:=null
     ></State>
+
+    <State
+        -name="datastate"
+        -store="editor_data"
+        text=""
+    ></State>
+
+    <State
+        -name="optstate"
+        -store="editor_options"
+    ></State>
+
     <Script
+        lifecycle="initialized"
         -src="/demos/editor/editorlib/FileEditor.js"
     ></Script>
     <Style
@@ -110,20 +121,23 @@
     <Props
         onchange
     ></Props>
-    <Template
-        -src="/demos/editor/editorlib/FileEditorSettings.html"
-    ></Template>
+    <Template>
+        <h3>Settings</h3>
+        <h4>Themes: Light</h4>
+        <x-Options [state.bind] name="themeLight"
+            options:=staticdata.editorThemesLight
+        ></x-Options>
+        <h4>Themes: Dark</h4>
+        <x-Options [state.bind] name="themeDark"
+            options:=staticdata.editorThemesDark
+        ></x-Options>
+    </Template>
     <State
-        profiles:=[]
-        selected:=null
-        theme:=null
+        -store="editor_options"
     ></State>
-    <Script
-        -src="/demos/editor/editorlib/FileEditorSettings.js"
-    ></Script>
-    <Style
-        -src="/demos/editor/editorlib/FileEditorSettings.css"
-    ></Style>
+    <StaticData
+        -src="/demos/editor/editorlib/options.js"
+    ></StaticData>
 </Component>
 
 <Component name="Options">
@@ -135,52 +149,24 @@
     <Template>
         {% for opt in props.options %}
             <div style="position: relative">
-                {% if props.value == opt.name %}
+                {% if state.value == opt.name %}
                     <div class="right-square"></div>
                 {% endif %}
                 <x-Btn
-                    @click:=props.onchange
+                    @click:=formhelper.setValue
                     payload="{{ opt.name }}"
                     style="position: relative"
                 >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
             </div>
         {% endfor %}
     </Template>
-</Component>
-
-
-<Component name="LayoutSettings">
-    <Template>
-        <h3>Layout</h3>
-        <x-Options
-            value="{{ state.layout }}"
-            onchange:=script.setLayout
-            options:=state.layouts
-        ></x-Options>
-    </Template>
     <State
-        layout="center"
-        layouts:=[]
+        value=""
     ></State>
-    <Script>
-        function initializedCallback() {
-            state.layouts.push(...[
-                { name: 'center' },
-                { name: 'wide' },
-                { name: 'full' },
-            ]);
-        }
-        function setLayout(payload) {
-            state.layout = payload;
-            // HACK!
-            const modEdit = document.querySelector('x-ModuloEditor');
-            for (const { name } of state.layouts) {
-                modEdit.classList.remove('layout--' + name);
-            }
-            modEdit.classList.add('layout--' + payload);
-            element.rerender(); // because is callback
-        }
-    </Script>
+    <Script
+        -name="formhelper"
+        -src="/demos/editor/editorlib/formHelper.js"
+    ></Script>
     <Style>
         .right-square {
             position: absolute;
@@ -192,5 +178,24 @@
             background: var(--m-highlight);
         }
     </Style>
+</Component>
+
+
+<Component name="LayoutSettings">
+    <Template>
+        <h3>Layout</h3>
+        <x-Options
+            [state.bind]
+            name="layout"
+            value="{{ state.layout }}"
+            options:=staticdata.layouts
+        ></x-Options>
+    </Template>
+    <State
+        -store="editor_options"
+    ></State>
+    <StaticData
+        -src="/demos/editor/editorlib/options.js"
+    ></StaticData>
 </Component>
 

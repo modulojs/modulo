@@ -1,4 +1,8 @@
-:host {
+.ModuloEditor * {
+    box-sizing: border-box;
+}
+
+.ModuloEditor {
     --editor-width: 750px;
     display: grid;
     height: calc(100vh - 20px);
@@ -7,19 +11,19 @@
     grid-template-columns: 1fr var(--editor-width) 1fr;
 }
 
-:host.layout--wide {
+.ModuloEditor.layout--wide {
     --editor-width: calc(100vw - 500px);
     grid-gap: 0;
 }
 
-:host.layout--full {
+.ModuloEditor.layout--full {
     display: block;
     margin-left: -11px;
     margin-top: -3px;
     margin-right: 13px;
 }
 
-:host.layout--full .menu-button-holder > x-Btn {
+.ModuloEditor.layout--full .menu-button-holder > x-Btn {
     margin-top: -10px;
     margin-bottom: -70px;
     font-size: 16px;
@@ -33,13 +37,9 @@
 }
 
 
-:host * {
-    box-sizing: border-box;
-}
-
 
 @media (max-width: 992px) {
-    :host {
+    .ModuloEditor {
         display: block;
     }
 
