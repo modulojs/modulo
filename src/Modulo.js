@@ -308,6 +308,14 @@ modulo.register('util', function initElement (modulo, def, elem) {
     elem.cparts = {};
 });
 
+modulo.register('util', function makeStore (modulo, def) {
+    const isLower = key => key[0].toLowerCase() === key[0];
+    const data = modulo.registry.utils.keyFilter(def, isLower);
+    const newStore = { boundElements: {}, subscribers: [] };
+    newStore.data = JSON.parse(JSON.stringify(data));
+    return newStore;
+});
+
 modulo.register('util', function initClass (modulo, def, cls) {
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
@@ -682,8 +690,10 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    // TODO: It's get that should autobind functions!!
-    return key.split('.').reduce((o, name) => o[name], obj);
+    if (key in obj) { // Shortcut for common case
+        return obj[key];
+    }
+    return (key + '').split('.').reduce((o, name) => o[name], obj);
 });
 
 modulo.register('util', function set(obj, keyPath, val, ctx = null) {
@@ -1140,8 +1150,8 @@ modulo.register('cpart', class Script {
         // Create all lifecycle callbacks, wrapping around the inner script
         const script = renderObj[this.conf.Name];
         this.eventCallback = (rObj) => { // Create eventCallback to set inner
-            const setLocal = script.setLocalVariables || (() => {});
             const vars = { element: this.element, cparts: this.element.cparts };
+            const setLocal = script.setLocalVariables || (() => {});
             setLocal(Object.assign(vars, rObj)); // Set inner vars (or no-op)
         };
 
@@ -1156,7 +1166,7 @@ modulo.register('cpart', class Script {
             if (cbName === 'initializedCallback' || !cbName.match(isCallback)) {
                 continue; // Skip over initialized (already handled) and non-CBs
             }
-            this[cbName] = (arg) => { // Arg: Either renderObj or directive obj
+            this[cbName] = arg => { // Arg: Either renderObj or directive obj
                 const renderObj = this.element.getCurrentRenderObj();
                 const script = renderObj[this.conf.Name]; // Get new render obj
                 this.eventCallback(renderObj); // Prep before lifecycle method
@@ -1171,57 +1181,46 @@ modulo.register('cpart', class Script {
 
 modulo.register('cpart', class State {
     static factoryCallback(renderObj, def, modulo) {
-        const isLower = key => key[0].toLowerCase() === key[0];
-        const data = modulo.registry.utils.keyFilter(def, isLower);
         if (def.Store) {
-            const newStore = { data: {}, boundElements: {}, subscribers: [] };
-            modulo.stores[def.Store] = modulo.stores[def.Store] || newStore;
-            Object.assign(modulo.stores[def.Store].data, data); // update store
+            const store = modulo.registry.utils.makeStore(modulo, def);
+            if (!(def.Store in modulo.stores)) {
+                modulo.stores[def.Store] = store;
+            } else {
+                Object.assign(modulo.stores[def.Store].data, store.data);
+            }
         }
-        return data;
     }
 
     initializedCallback(renderObj) {
-        // TODO 23: Next steps for Store feature:
-        // 3. Posislby Add in self as boundElement for propagation / stateChangeCallback
         if (!this.def && this.conf) { this.def = this.conf; } // XXX rm
-        if (this.def.Store) {
-            // Ensure that we trigger refresh when a state changes
-            Object.assign(this, this.modulo.stores[this.def.Store]);
-            this.subscribers.push(this);
-        }
-        if (!this.data) {
-            this.data = JSON.parse(JSON.stringify(renderObj[this.def.Name]));
-            this.boundElements = {};
-            this.subscribers = [ this ];
-        }
-        return this.data;
+        const store = this.def.Store ? this.modulo.stores[this.def.Store]
+                : this.modulo.registry.utils.makeStore(this.modulo, this.def);
+        store.subscribers.push(Object.assign(this, store));
+        return store.data;
     }
 
     bindMount({ el, attrName, value }) {
         const name = attrName || el.getAttribute('name');
         const val = modulo.registry.utils.get(this.data, name);
-        this.modulo.assert(val !== undefined, `state.bind "${name}" is undefined`);
-        const listen = () => this.propagate(name, el.value, el);
+        this.modulo.assert(val !== undefined, `state.bind "${name}" undefined`);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
         if (!(name in this.boundElements)) {
             this.boundElements[name] = [];
         }
-        // Bind the "listen" event to propagate to all, and also bind self
+        // Bind the "listen" event to propagate to all, and trigger initial vals
+        const listen = () => this.propagate(name, el.value, el);
         this.boundElements[name].push([ el, evName, listen ]);
-        this.boundElements[name].push([ this, evName, null ]);
         el.addEventListener(evName, listen); // todo: make optional, e.g. to support cparts?
         this.propagate(name, val, this); // trigger initial assignment(s)
     }
 
     bindUnmount({ el, attrName }) {
         const name = attrName || el.getAttribute('name');
-        const remainingBound = [];
         if (!(name in this.boundElements)) { // XXX HACK
-            console.log('Modulo ERROR: Could not unbind', name);
-            return;
+            return console.log('Modulo ERROR: Could not unbind', name);
         }
+        const remainingBound = [];
         for (const row of this.boundElements[name]) {
             if (row[0] === el) {
                 row[0].removeEventListener(row[1], row[2]);
@@ -1233,8 +1232,10 @@ modulo.register('cpart', class State {
     }
 
     stateChangedCallback(name, value, el) {
-        modulo.registry.utils.set(this.data, name, value);
-        this.element.rerender();
+        this.modulo.registry.utils.set(this.data, name, value);
+        if (!this.def.Only || this.def.Only.includes(name)) { // TODO: Test & document
+            this.element.rerender();
+        }
     }
 
     eventCallback() {
@@ -1242,8 +1243,8 @@ modulo.register('cpart', class State {
     }
 
     propagate(name, val, originalEl = null) {
-        const all = (this.boundElements[name] || []).map(row => row[0]);
-        for (const el of this.subscribers.concat(all)) {
+        const elems = (this.boundElements[name] || []).map(row => row[0]);
+        for (const el of this.subscribers.concat(elems)) {
             if (originalEl && el === originalEl) {
                 continue; // don't propagate to self
             }
@@ -1258,19 +1259,15 @@ modulo.register('cpart', class State {
     }
 
     eventCleanupCallback() {
-        // TODO: Instead, should JUST do _lastPropagated (isntead of _oldData)
-        // with each key from boundElements, and thus more efficiently loop
-        // through
         for (const name of Object.keys(this.data)) {
             this.modulo.assert(name in this._oldData, `There is no "state.${name}"`);
-            const val = this.data[name];
-            if (name in this.boundElements && val !== this._oldData[name]) {
-                this.propagate(name, val);
+            if (this.data[name] !== this._oldData[name]) {
+                this.propagate(name, this.data[name], this);
             }
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
+}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null, Ignore: '' });
 
 
 /* Implementation of Modulo Templating Language */
