@@ -25,6 +25,11 @@
     grid-template-columns: 1fr var(--editor-width) 1fr;
 }
 
+.ModuloEditor.layout--showPreview {
+    grid-template-columns: 1fr calc(var(--editor-width) / 2) calc(var(--editor-width) / 2) 1fr;
+}
+
+
 .ModuloEditor.layout--wide {
     --editor-width: calc(100vw - 500px);
     grid-gap: 0;
@@ -35,6 +40,20 @@
     margin-left: -11px;
     margin-top: -3px;
     margin-right: 13px;
+}
+
+/* full + showPreview combo */
+.ModuloEditor.layout--full.layout--showPreview x-EditorSidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    background: var(--m-white);
+}
+
+.ModuloEditor.layout--full.layout--showPreview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
 .ModuloEditor.layout--full .menu-button-holder > x-Btn {

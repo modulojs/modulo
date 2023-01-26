@@ -1,3 +1,9 @@
+<Component name="Btn">
+    <Style
+        -src="/demos/editor/editorlib/Btn.css"
+    ></Style>
+</Component>
+
 <Component name="Options">
     <Props
         options
@@ -41,21 +47,31 @@
 
 <Component name="Checkbox">
     <Props
-        value
+        label
+        name
     ></Props>
     <Template>
-        {% for opt in props.options %}
-            <div style="position: relative">
-                {% if state.value == opt.name %}
-                    <div class="right-square"></div>
-                {% endif %}
+        <div style="position: relative">
+            {% if state.value %}
+                <div class="right-square"></div>
+            {% endif %}
+            {% if state.value %}
+                <input type="checkbox" id="checkbox{{ component.id }}"
+                    @change:=formhelper.setValue checked />
+            {% else %}
+                <input type="checkbox" id="checkbox{{ component.id }}"
+                    @change:=formhelper.setValue />
+            {% endif %}
+            <div class="label-group">
+                <label for="checkbox{{ component.id }}">
+                    {{ props.label }}
+                </label>
                 <x-Btn
                     @click:=formhelper.setValue
-                    payload="{{ opt.name }}"
-                    style="position: relative"
-                >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
+                    class="u-checkbtn"
+                >{% if state.value %}✓{% else %}&nbsp;{% endif %}</x-Btn>
             </div>
-        {% endfor %}
+        </div>
     </Template>
     <State
         value:=false
@@ -65,13 +81,38 @@
         -src="/demos/editor/editorlib/formHelper.js"
     ></Script>
     <Style>
+        label {
+            position: relative;
+            text-align: right;
+            margin: 10px;
+            padding: 10px;
+            border-bottom: 1px dotted var(--m-black);
+            user-select: none;
+        }
+        input {
+            display: none;
+        }
+        .u-checkbtn {
+            font-size: 30px;
+            line-height: 40px;
+            padding-top: 5px;
+            height: 50px;
+            position: relative;
+            margin-top: 10px;
+            text-align: center;
+            box-shadow: calc(var(--m-shadow-size) / 8) calc(var(--m-shadow-size) / 8) 0 inset var(--m-shadow);
+        }
+        .label-group {
+            display: grid;
+            grid-template-columns: 1fr 50px;
+        }
         .right-square {
             position: absolute;
-            right: 10px;
-            top: -3px;
+            right: -10px;
+            top: 20px;
             z-index: 0;
-            height: calc(100% + 6px);
-            width: 80px;
+            height: calc(100% - 30px);
+            width: 70px;
             background: var(--m-highlight);
         }
     </Style>

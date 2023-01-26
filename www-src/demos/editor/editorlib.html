@@ -11,13 +11,23 @@
 
 <Component name="ModuloEditor">
     <Template>
-        <div class="ModuloEditor layout--{{ state.layout }} theme--{{ state.colorScheme }}">
+        <div class="
+                ModuloEditor
+                layout--{{ state.layout }}
+                theme--{{ state.colorScheme }}
+                {% if state.showPreview %}
+                    layout--showPreview
+                {% endif %}
+            ">
             <x-EditorSidebar></x-EditorSidebar>
             <x-FileEditor
                 content="print('hello world')"
                 name="example.py"
                 mode="python"
             ></x-FileEditor>
+            {% if state.showPreview %}
+                <x-EditorPreview></x-EditorPreview>
+            {% endif %}
         </div>
     </Template>
 
@@ -25,6 +35,7 @@
         -store="editor_options"
         layout="center"
         color-scheme="l-mintygoo"
+        show-preview:=false
         profile="syntax"
         font-size:=18
         syntax-mode="text"
@@ -40,6 +51,17 @@
     <Style
         -src="/demos/editor/editorlib/ModuloEditor.css"
     ></Style>
+</Component>
+
+<Component name="EditorPreview">
+    <Template>
+        <h3>preview</h3>
+    </Template>
+
+    <Style
+        -src="/demos/editor/editorlib/FileEditor.css"
+    ></Style>
+
 </Component>
 
 <Component name="FileBrowser">
@@ -59,12 +81,6 @@
 
     <Style
         -src="/demos/editor/editorlib/FileBrowser.css"
-    ></Style>
-</Component>
-
-<Component name="Btn">
-    <Style
-        -src="/demos/editor/editorlib/Btn.css"
     ></Style>
 </Component>
 
@@ -155,49 +171,14 @@
     ></StaticData>
 </Component>
 
-<Component name="Options">
-    <Props
-        options
-        onchange
-        value
-    ></Props>
-    <Template>
-        {% for opt in props.options %}
-            <div style="position: relative">
-                {% if state.value == opt.name %}
-                    <div class="right-square"></div>
-                {% endif %}
-                <x-Btn
-                    @click:=formhelper.setValue
-                    payload="{{ opt.name }}"
-                    style="position: relative"
-                >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
-            </div>
-        {% endfor %}
-    </Template>
-    <State
-        value=""
-    ></State>
-    <Script
-        -name="formhelper"
-        -src="/demos/editor/editorlib/formHelper.js"
-    ></Script>
-    <Style>
-        .right-square {
-            position: absolute;
-            right: 10px;
-            top: -3px;
-            z-index: 0;
-            height: calc(100% + 6px);
-            width: 80px;
-            background: var(--m-highlight);
-        }
-    </Style>
-</Component>
-
 
 <Component name="LayoutSettings">
     <Template>
+        <h3>Preview</h3>
+        <x-Checkbox [state.bind]
+            name="showPreview"
+            label="Show file preview"
+        ></x-Checkbox>
         <h3>Theme</h3>
         <x-Options [state.bind] name="colorScheme"
             options:=staticdata.colorSchemes
