@@ -4,7 +4,7 @@
     display: block;
     width: 100%;
     height: calc(100vh - 20px);
-    box-shadow: var(--m-shadow-size) var(--m-shadow-size) 0 var(--m-shadow);
+    box-shadow: var(--m-shadow-size) var(--m-shadow-size)  var(--m-shadow-spread) var(--m-shadow);
 }
 
 #main_editor {

@@ -1,19 +1,14 @@
 <div
     class="upper-left-circle {% if state.visible %}filled{% endif %}"
 ></div>
-<div class="
-    menu-wrapper
-    {% if state.visible %}
-    menu-wrapper--visible
-    {% endif %}
-">
+<div class="menu-wrapper {% if state.visible %} menu-wrapper--visible {% endif %}">
     <div class="menu-button-holder">
         <x-Btn
             class="actions {% if state.visible %}actions--tl{% endif %}"
             @click:=script.toggleSidebar
         >☰</x-Btn>
     </div>
-    <div class="menu-holder" style="
+    <div class="menu-holder {% if state.tab == null %}menu-holder--null{% endif %}" style="
             {% if state.visible %}
                 display: block;
             {% else %}

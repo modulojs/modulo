@@ -45,8 +45,8 @@
     background: radial-gradient(
         circle at bottom,
         var(--m-primary) 50%,
-        white 50.5%,
-        white 100%);
+        var(--m-white) 50.5%,
+        var(--m-white) 100%);
     background-repeat: no-repeat;
     background-size: 1% 1%;
     background-position: top left;
@@ -58,7 +58,7 @@
 
 :host.actions:hover,
 :host.actions:active {
-    color: black !important;
+    color: var(--m-black) !important;
     /*background-color: var(--m-green);*/
     /*box-shadow: 0 0 0 5px var(--m-green);*/
     font-weight: 700;

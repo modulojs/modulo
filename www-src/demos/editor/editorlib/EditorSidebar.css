@@ -29,13 +29,21 @@
 
 .menu-holder {
     padding-top: 80px;
+    background-color: #ffffff00;
+    transition: background-color 0.1s;
+}
+
+.menu-holder.menu-holder--null {
+    /* In null state (tab not selected, but visible -- may not be available
+    ** depending on conf) */
+    background-color: var(--m-primary);
 }
 
 .menu-holder > x-Btn {
     position: relative;
     z-index: 2;
     margin-top: 10px;
-    text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) 0 var(--m-shadow);
+    text-shadow: var(--m-icon-shadow-size) var(--m-icon-shadow-size) var(--m-shadow-spread) var(--m-shadow);
 }
 
 .menu-holder > x-Btn:hover {
@@ -62,13 +70,41 @@
 */
 
 .tab-box {
-    border: 3px solid black;
+    border: 3px solid var(--m-black);
     padding: 20px;
     display: block;
     width: 100%;
     max-width: var(--tab-box-width);
-    box-shadow: var(--m-shadow-size) var(--m-shadow-size) 0 var(--m-shadow);
-    background: white;
+    box-shadow: var(--m-shadow-size) var(--m-shadow-size)  var(--m-shadow-spread) var(--m-shadow);
+    background: var(--m-white);
+    margin-bottom: 10px;
+}
+
+.tab-box > h3 {
+    background: var(--m-black);
+    color: var(--m-white);
+    padding: 3px;
+    margin: -20px;
+    margin-top: -34px;
+    font-family: monospace;
+    font-weight: lighter;
+    margin-bottom: 0;
+}
+
+.tab-box > * > h3 {
+    background: var(--m-black);
+    color: var(--m-white);
+    padding: 3px;
+    margin: 0;
+    font-weight: lighter;
+    margin-bottom: 5px;
+    margin-top: 20px;
+}
+.tab-box > * > h3:first-child {
+    margin-top: -20px;
+    box-shadow:
+        20px 0 0 0 var(--m-black),
+        -20px 0 0 0 var(--m-black);
 }
 
 .upper-left-circle {
@@ -80,7 +116,7 @@
     position: absolute;
     top: -65px;
     left: -65px;
-    z-index: -1;
+    z-index: 0;
     transition:
         opacity 0.2s,
         width 0.2s,
@@ -114,7 +150,7 @@
 }
 
 .tab-holder {
-    background: #fff;
+    background: var(--m-white);
     height: 100%;
     padding: 20px;
     margin: -10px;

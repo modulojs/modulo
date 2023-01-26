@@ -5,13 +5,18 @@
     });
 </script>
 
+<Library
+    -src="/demos/editor/widgetslib.html"
+></Library>
+
 <Component name="ModuloEditor">
     <Template>
-        <div class="ModuloEditor layout--{{ state.layout }}">
+        <div class="ModuloEditor layout--{{ state.layout }} theme--{{ state.colorScheme }}">
             <x-EditorSidebar></x-EditorSidebar>
             <x-FileEditor
                 content="print('hello world')"
                 name="example.py"
+                mode="python"
             ></x-FileEditor>
         </div>
     </Template>
@@ -19,10 +24,13 @@
     <State
         -store="editor_options"
         layout="center"
+        color-scheme="l-mintygoo"
         profile="syntax"
-        theme="iplastic"
-        theme-dark="iplastic"
-        theme-light="iplastic"
+        font-size:=18
+        syntax-mode="text"
+        theme="eclipse"
+        theme-dark="vibrant_ink"
+        theme-light="eclipse"
     ></State>
 
     <State
@@ -84,7 +92,7 @@
         url
         name
         path
-        inode
+        mode
     ></Props>
 
     <Template
@@ -122,7 +130,14 @@
         onchange
     ></Props>
     <Template>
-        <h3>Settings</h3>
+        <h3>Syntax highlighting</h3>
+        <x-Options [state.bind] name="syntaxMode"
+            options:=staticdata.modes.options
+        ></x-Options>
+        <h3>Appearance</h3>
+        <x-Options [state.bind] name="fontSize"
+            options:=staticdata.editorFontSizes
+        ></x-Options>
         <h4>Themes: Light</h4>
         <x-Options [state.bind] name="themeLight"
             options:=staticdata.editorThemesLight
@@ -183,10 +198,12 @@
 
 <Component name="LayoutSettings">
     <Template>
+        <h3>Theme</h3>
+        <x-Options [state.bind] name="colorScheme"
+            options:=staticdata.colorSchemes
+        ></x-Options>
         <h3>Layout</h3>
-        <x-Options
-            [state.bind]
-            name="layout"
+        <x-Options [state.bind] name="layout"
             value="{{ state.layout }}"
             options:=staticdata.layouts
         ></x-Options>

@@ -40,16 +40,36 @@ function stateChangedCallback(name, value) {
     console.log('stateChangedCallback', name, value);
     if (name === 'themeDark' || name === 'themeLight' || name === 'theme') {
         element.editor.setTheme('ace/theme/' + value);
-        //element.editor.setOptions({ fontSize: 18 });
+        optstate.theme = value; // ensure theme gets set always
+    } else if (name == 'fontSize') { // later look in set, etc
+        const newOpts = {};
+        newOpts[name] = Number(value);
+        element.editor.setOptions(newOpts);
+
+    } else if (name == 'syntaxMode') {
+        element.editor.session.setMode('ace/mode/' + value);
+
+    // Make the editor theme match the colors scheme that was just set
+    } else if (name == 'colorScheme') {
+        if (value.startsWith('d')) {
+            if (optstate.themeDark && optstate.theme !== optstate.themeDark) {
+                optstate.theme = optstate.themeDark;
+            }
+        } else {
+            if (optstate.themeLight && optstate.theme !== optstate.themeLight) {
+                optstate.theme = optstate.themeLight;
+            }
+        }
+        element.editor.setTheme('ace/theme/' + optstate.theme);
     }
 }
 modulo.stores.editor_options.subscribers.push({ stateChangedCallback });
 
 function editspotMount ({ el }) {
     element.editor = getEditor(el);
-    //element.editor.setTheme(optstate.theme || optstate.themeLight);
-    //element.editor.session.setMode("ace/mode/python");
-    element.editor.setOptions({ fontSize: 18 });
+    element.editor.setTheme('ace/theme/' + optstate.theme || optstate.themeLight);
+    element.editor.session.setMode("ace/mode/" + props.mode);
+    element.editor.setOptions({ fontSize: optstate.fontSize });
 }
 
 function editspotUnmount () {

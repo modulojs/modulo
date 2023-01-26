@@ -2,18 +2,25 @@
 
 # Modulo
 
-Full getting started guide on Modulo's website: <https://modulojs.org/start.html>
+- Get started in NPM with `npm init modulo`
+
+- Full getting started guide on Modulo's website: <https://modulojs.org/start.html>
+
+----
+
+# About
 
 **A concise JavaScript Component framework**
 
-- [X] A single file with about 2000 lines as a thin layer over vanilla Custom Web Components
+- [X] A single file with fewer than 2000 lines as a thin layer over vanilla
+  Custom Web Components
 - [X] Components system inspired by React, Svelte, and Polymer
 - [X] Modular with opinionated defaults and few assumptions
 - [X] A "no fuss" drop-in to add JS to existing web apps
 
-
 - **Status**: `alpha` *(use it if you don't mind large bugs or incomplete docs
   if you stray too far beyond the examples)*
+
 
 -----
 

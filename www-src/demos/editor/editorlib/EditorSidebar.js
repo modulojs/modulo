@@ -1,4 +1,5 @@
-const ALLOW_NULL = false; // quick feature flag, later should be turned into option
+//const ALLOW_NULL = false; // quick feature flag, later should be turned into option
+const ALLOW_NULL = true; // quick feature flag, later should be turned into option
 
 function initializedCallback () {
     state.tabs = [

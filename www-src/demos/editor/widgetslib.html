@@ -1,0 +1,78 @@
+<Component name="Options">
+    <Props
+        options
+        onchange
+        value
+    ></Props>
+    <Template>
+        {% for opt in props.options %}
+            <div style="position: relative">
+                {% if state.value == opt.name %}
+                    <div class="right-square"></div>
+                {% endif %}
+                <x-Btn
+                    @click:=formhelper.setValue
+                    payload="{{ opt.name }}"
+                    style="position: relative"
+                >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
+            </div>
+        {% endfor %}
+    </Template>
+    <State
+        value=""
+    ></State>
+    <Script
+        -name="formhelper"
+        -src="/demos/editor/editorlib/formHelper.js"
+    ></Script>
+    <Style>
+        .right-square {
+            position: absolute;
+            right: 10px;
+            top: -3px;
+            z-index: 0;
+            height: calc(100% + 6px);
+            width: 80px;
+            background: var(--m-highlight);
+        }
+    </Style>
+</Component>
+
+
+<Component name="Checkbox">
+    <Props
+        value
+    ></Props>
+    <Template>
+        {% for opt in props.options %}
+            <div style="position: relative">
+                {% if state.value == opt.name %}
+                    <div class="right-square"></div>
+                {% endif %}
+                <x-Btn
+                    @click:=formhelper.setValue
+                    payload="{{ opt.name }}"
+                    style="position: relative"
+                >{{ opt.label|default:opt.name|capfirst }}</x-Btn>
+            </div>
+        {% endfor %}
+    </Template>
+    <State
+        value:=false
+    ></State>
+    <Script
+        -name="formhelper"
+        -src="/demos/editor/editorlib/formHelper.js"
+    ></Script>
+    <Style>
+        .right-square {
+            position: absolute;
+            right: 10px;
+            top: -3px;
+            z-index: 0;
+            height: calc(100% + 6px);
+            width: 80px;
+            background: var(--m-highlight);
+        }
+    </Style>
+</Component>
