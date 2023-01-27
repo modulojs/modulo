@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 
     <!--src="https://unpkg.com/mdu.js@0.0.28/src/Modulo.js"-->
-<script Modulo
-    src="/js/Modulo.js"
-    -src="/demos/editor/editorlib.html"
-></script>
+<script Modulo src="/js/Modulo.js">
+    <Library
+        -src="/demos/mdu/libraries/editorlib.html" 
+    ></Library>
+    <Library
+        -src="/demos/mdu/libraries/widgetslib.html" 
+    ></Library>
+</script>
 
 <style>
+    /*
     :root {
         --m-font: sans-serif;
         --m-black: #050505;
@@ -19,13 +24,15 @@
         --m-shadow-size: 15px;
         --m-icon-shadow-size: 2px;
     }
+    */
     body {
         height: 100vh;
         width: 100vw;
         overflow: hidden;
+        margin: 0;
+        padding: 0;
     }
 </style>
 
 <x-ModuloEditor></x-ModuloEditor>
-
 

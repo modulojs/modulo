@@ -1,0 +1,39 @@
+<div
+    class="upper-left-circle {% if state.visible %}filled{% endif %}"
+></div>
+<div class="menu-wrapper {% if state.visible %} menu-wrapper--visible {% endif %}">
+    <div class="menu-button-holder">
+        <x-Btn
+            class="actions {% if state.visible %}actions--tl{% endif %}"
+            @click:=script.toggleSidebar
+        >☰</x-Btn>
+    </div>
+    <div class="menu-holder {% if state.tab == null %}menu-holder--null{% endif %}" style="
+            {% if state.visible %}
+                display: block;
+            {% else %}
+                display: none;
+            {% endif %}
+        ">
+        {% for tabInfo in state.tabs %}
+            {% if state.tab == tabInfo.name %}
+                <div class="left-square"></div>
+            {% endif %}
+            <x-Btn
+                class="actions {% if state.tab == tabInfo.name %}menu--selected{% endif %}"
+                payload="{{ tabInfo.name }}"
+                @click:=script.toggleTab
+            >{{ tabInfo.text }}<span class="btn-superimpose">{{ tabInfo.whenSelected|default:""|safe }}</span></x-Btn>
+        {% endfor %}
+    </div>
+    <div class="tab-holder {% if state.tab %}tab-holder--filled{% endif %}">
+        {% if state.tab %}
+            {% for box in state.boxes %}
+                <div class="tab-box">
+                    {{ box|safe }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+

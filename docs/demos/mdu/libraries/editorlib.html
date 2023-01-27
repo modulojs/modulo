@@ -1,0 +1,195 @@
+<script Configuration -src="https://unpkg.com/ace-builds">
+    modulo.register('util', function getEditor(elem) {
+        ace.config.set('basePath', 'https://unpkg.com/ace-builds/src-min-noconflict');
+        return ace.edit(elem);
+    });
+</script>
+
+<Component name="ModuloEditor">
+    <Template>
+        <div class="
+                ModuloEditor
+                layout--{{ state.layout }}
+                theme--{{ state.colorScheme }}
+                {% if state.showPreview %}
+                    layout--showPreview
+                {% endif %}
+            ">
+            <x-EditorSidebar></x-EditorSidebar>
+            <x-FileEditor
+                content="print('hello world')"
+                name="example.py"
+                mode="python"
+            ></x-FileEditor>
+            {% if state.showPreview %}
+                <x-EditorPreview></x-EditorPreview>
+            {% endif %}
+        </div>
+    </Template>
+
+    <State
+        -store="editor_options"
+        layout="center"
+        color-scheme="l-mintygoo"
+        show-preview:=false
+        profile="syntax"
+        font-size:=18
+        syntax-mode="text"
+        theme="eclipse"
+        theme-dark="vibrant_ink"
+        theme-light="eclipse"
+    ></State>
+
+    <State
+        -store="editor_data"
+    ></State>
+
+    <Style
+        -src="/demos/mdu/libraries/editorlib/ModuloEditor.css"
+    ></Style>
+</Component>
+
+<Component name="EditorPreview">
+    <Template>
+        <h3>preview</h3>
+    </Template>
+
+    <Style
+        -src="/demos/mdu/libraries/editorlib/FileEditor.css"
+    ></Style>
+
+</Component>
+
+<Component name="FileBrowser">
+    <Template
+        -src="/demos/mdu/libraries/editorlib/FileBrowser.html"
+    ></Template>
+
+    <State
+        files:=[]
+        all-files:=[]
+        chroot
+    ></State>
+
+    <Script
+        -src="/demos/mdu/libraries/editorlib/FileBrowser.js"
+    ></Script>
+
+    <Style
+        -src="/demos/mdu/libraries/editorlib/FileBrowser.css"
+    ></Style>
+</Component>
+
+<Component name="EditorSidebar">
+    <Template
+        -src="/demos/mdu/libraries/editorlib/EditorSidebar.html"
+    ></Template>
+    <State
+        visible:=false
+        tab:=null
+        tabs:=[]
+        boxes:=[]
+    ></State>
+    <Script
+        -src="/demos/mdu/libraries/editorlib/EditorSidebar.js"
+    ></Script>
+    <Style
+        -src="/demos/mdu/libraries/editorlib/EditorSidebar.css"
+    ></Style>
+</Component>
+
+<Component name="FileEditor" rerender="manual">
+    <Props
+        content
+        url
+        name
+        path
+        mode
+    ></Props>
+
+    <Template
+        -src="/demos/mdu/libraries/editorlib/FileEditor.html"
+    ></Template>
+
+    <State
+        content=""
+        loading:=false
+        err:=null
+    ></State>
+
+    <State
+        -name="datastate"
+        -store="editor_data"
+        text=""
+    ></State>
+
+    <State
+        -name="optstate"
+        -store="editor_options"
+    ></State>
+
+    <Script
+        lifecycle="initialized"
+        -src="/demos/mdu/libraries/editorlib/FileEditor.js"
+    ></Script>
+    <Style
+        -src="/demos/mdu/libraries/editorlib/FileEditor.css"
+    ></Style>
+</Component>
+
+<Component name="FileEditorSettings">
+    <Props
+        onchange
+    ></Props>
+    <Template>
+        <h3>Syntax highlighting</h3>
+        <x-Options [state.bind] name="syntaxMode"
+            options:=staticdata.modes.options
+        ></x-Options>
+        <h3>Appearance</h3>
+        <x-Options [state.bind] name="fontSize"
+            options:=staticdata.editorFontSizes
+        ></x-Options>
+        <h4>Themes: Light</h4>
+        <x-Options [state.bind] name="themeLight"
+            options:=staticdata.editorThemesLight
+        ></x-Options>
+        <h4>Themes: Dark</h4>
+        <x-Options [state.bind] name="themeDark"
+            options:=staticdata.editorThemesDark
+        ></x-Options>
+    </Template>
+    <State
+        -store="editor_options"
+    ></State>
+    <StaticData
+        -src="/demos/mdu/libraries/editorlib/options.js"
+    ></StaticData>
+</Component>
+
+
+<Component name="LayoutSettings">
+    <Template>
+        <h3>Preview</h3>
+        <x-Checkbox [state.bind]
+            name="showPreview"
+            label="Show file preview"
+        ></x-Checkbox>
+        <h3>Theme</h3>
+        <x-Options [state.bind] name="colorScheme"
+            options:=staticdata.colorSchemes
+        ></x-Options>
+        <h3>Layout</h3>
+        <x-Options [state.bind] name="layout"
+            value="{{ state.layout }}"
+            options:=staticdata.layouts
+        ></x-Options>
+    </Template>
+    <State
+        -store="editor_options"
+    ></State>
+    <StaticData
+        -src="/demos/mdu/libraries/editorlib/options.js"
+    ></StaticData>
+</Component>
+

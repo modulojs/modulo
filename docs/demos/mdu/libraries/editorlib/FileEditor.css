@@ -1,0 +1,24 @@
+
+:host {
+    border: 3px solid black;
+    display: block;
+    width: 100%;
+    height: calc(100vh - 20px);
+    box-shadow: var(--m-shadow-size) var(--m-shadow-size)  var(--m-shadow-spread) var(--m-shadow);
+}
+
+#main_editor {
+    height: 100%;
+    width: 100%;
+}
+
+h3 {
+    background: var(--m-black);
+    color: var(--m-white);
+    padding: 3px;
+    padding-left: 50px;
+    margin: 0;
+    font-family: monospace;
+    font-weight: lighter;
+    margin-bottom: 0;
+}

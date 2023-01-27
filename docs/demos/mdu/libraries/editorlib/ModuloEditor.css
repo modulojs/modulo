@@ -1,0 +1,188 @@
+:host {
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+    display: block;
+    --m-shadow-spread: 0; /* default value */
+}
+
+.ModuloEditor * {
+    box-sizing: border-box;
+}
+
+.ModuloEditor {
+    font-family: var(--m-font);
+    padding-top: 10px;
+    padding-left: 5px;
+    --editor-width: 750px;
+    display: grid;
+    /*height: calc(100vh - 20px);*/
+    height: 100vh;
+    width: 100vw;
+    color: var(--m-black);
+    box-sizing: border-box;
+    grid-gap: 15px;
+    grid-template-columns: 1fr var(--editor-width) 1fr;
+}
+
+.ModuloEditor.layout--showPreview {
+    grid-template-columns: 1fr calc(var(--editor-width) / 2) calc(var(--editor-width) / 2) 1fr;
+}
+
+
+.ModuloEditor.layout--wide {
+    --editor-width: calc(100vw - 500px);
+    grid-gap: 0;
+}
+
+.ModuloEditor.layout--full {
+    display: block;
+    margin-left: -11px;
+    margin-top: -3px;
+    margin-right: 13px;
+}
+
+/* full + showPreview combo */
+.ModuloEditor.layout--full.layout--showPreview x-EditorSidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    background: var(--m-white);
+}
+
+.ModuloEditor.layout--full.layout--showPreview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.ModuloEditor.layout--full .menu-button-holder > x-Btn {
+    margin-top: -10px;
+    margin-bottom: -70px;
+    font-size: 16px;
+    text-shadow: none;
+    line-height: 25px;
+    height: 70px;
+    width: 50px;
+    border-radius: 0;
+    background: var(--m-white);
+    box-shadow: none;
+}
+
+.ModuloEditor.theme--l-mintygoo {
+    --m-font: sans-serif;
+    --m-black: #050505;
+    --m-white: #fefefe;
+    --m-shadow: rgba(0, 0, 0, 0.2);
+    --primary: #a2e4b8;
+    --m-primary: #a2e4b8;
+    --m-highlight: #B90183;
+    --base-font-size: 20px;
+    --m-shadow-size: 15px;
+    --m-icon-shadow-size: 2px;
+    background: white;
+    font-size: 20px;
+}
+
+.ModuloEditor.theme--l-crisp {
+    --m-font: serif;
+    --m-black: #333;
+    --m-white: #fff;
+    --white: #fff;
+    /*--m-shadow: rgba(0, 0, 0, 0.8);*/
+    /*--m-shadow: #d5d5ff;*/
+    --m-shadow: #00000055;
+    --primary: #d5d5ff;
+    --m-primary:  #d5d5ff;
+    --m-highlight: #F8D784;
+    --base-font-size: 22px;
+    --m-shadow-size: 5px;
+    --m-shadow-spread: 5px;
+    --m-icon-shadow-size: 1px;
+    background: white;
+    font-size: 22px;
+}
+
+.ModuloEditor.theme--l-crisp h3,
+.ModuloEditor.theme--l-crisp h4,
+.ModuloEditor.theme--l-crisp h5 {
+    font-weight: lighter;
+    background: var(--m-white);
+    color: var(--m-black);
+    box-shadow: none !important;
+}
+
+/*
+.ModuloEditor.theme--l-crisp .tab-box > * > h3:first-child {
+    box-shadow:
+        20px 0 0 0 var(--m-primary),
+        -20px 0 0 0 var(--m-primary);
+}
+*/
+
+.ModuloEditor.theme--d-gooeymint {
+    --m-font: sans-serif;
+    --m-black: #ffffffaa;
+    --m-white: #000000aa;
+    --white: #000000dd;
+    --m-shadow: rgba(255, 255, 255, 0.5);
+    --m-primary: #B90183ee;
+    --primary: #B90183ee;
+    --m-highlight: #a2e4b8ee;
+    /*--base-font-size: 22px;*/
+    --m-shadow-size: 5px;
+    --m-icon-shadow-size: 1px;
+    background: black;
+    font-size: 22px;
+}
+
+.ModuloEditor.theme--d-curses {
+    --m-font: monospace;
+    --m-black: #aeaeae;
+    --m-white: #000000;
+    --white: #000000;
+    /*--m-shadow: rgba(0, 0, 0, 0.8);*/
+    --m-shadow: #E099DFBB;
+    /*--primary: #03A470;
+    --m-primary:  #03A470;*/
+    --primary: #03A470;
+    --m-primary:  #03A470;
+    --m-highlight: #03A470;
+    --base-font-size: 19px;
+    --m-shadow-size: 10px;
+    --m-icon-shadow-size: 10px;
+    background: black;
+    font-size: 19px;
+}
+
+
+.ModuloEditor.theme--d-curses h3,
+.ModuloEditor.theme--d-curses h4,
+.ModuloEditor.theme--d-curses h5 {
+    text-transform: uppercase;
+}
+
+.ModuloEditor.theme--d-gooeymint h3,
+.ModuloEditor.theme--d-gooeymint h4,
+.ModuloEditor.theme--d-gooeymint h5 {
+    text-align: center;
+}
+
+@media (max-width: 992px) {
+    .ModuloEditor {
+        display: block;
+    }
+
+    .menu-button-holder > x-Btn {
+        margin-top: -10px;
+        margin-bottom: -70px;
+        font-size: 16px;
+        text-shadow: none;
+        line-height: 25px;
+        height: 70px;
+        width: 50px;
+        border-radius: 0;
+        background: var(--m-white);
+        box-shadow: none;
+    }
+}

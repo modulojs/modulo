@@ -1,0 +1,12 @@
+<!--<x-Btn>Click me</x-Btn>-->
+<h3>{{ state.chroot }}</h3>
+{% for file in state.files %}
+    <div class="file">
+        {% if file.hint == "dir" %}
+            {% if file.expandedChildren.length gt 0 %}
+                -
+            {% endif %}
+        {% endif %}
+        <tt>{{ file.parentPath }}</tt>{{ file.name }}
+    </div>
+{% endfor %}
