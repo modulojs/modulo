@@ -1,4 +1,5 @@
 // Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
+const FLAG_RELPATHS = true;
 window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -226,11 +227,19 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
 
-// Reference global modulo instance in configuring core CParts, Utils, and Engines
-modulo.register('processor', function src (modulo, conf, value) {
-    modulo.fetchQueue.enqueue(value, text => {
-        conf.Content = (text || '') + (conf.Content || '');
-    });
+modulo.register('processor', function src (modulo, def, value) {
+    if (FLAG_RELPATHS) {
+        const { getParentDefPath, resolvePath } = modulo.registry.utils;
+        def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
+        modulo.fetchQueue.fetch(def.Source).then(text => {
+            def.Content = (text || '') + (def.Content || '');
+        });
+    } else {
+        const conf = def;
+        modulo.fetchQueue.enqueue(value, text => {
+            conf.Content = (text || '') + (conf.Content || '');
+        });
+    }
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -707,6 +716,13 @@ modulo.register('util', function set(obj, keyPath, val, ctx = null) {
     dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
 });
 
+modulo.register('util', function getParentDefPath(modulo, def) {
+    const { getParentDefPath } = modulo.registry.utils; // Use to recurse
+    const pDef = def.Parent ? modulo.definitions[def.Parent] : null;
+    const url = String(window.location).split('?')[0]; // Remove ? and #
+    return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
+});
+
 modulo.register('util', function dirname(path) {
     return (path || '').match(/.*\//);
 });
@@ -734,6 +750,23 @@ modulo.register('util', function resolvePath(workingDir, relPath) {
     const prefix = workingDir.startsWith('/') ? '/' : '';
     return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
 });
+
+/*
+modulo.register('util', function resolvePath(workingDir, relPath) {
+    if (relPath.toLowerCase().startsWith('http')) {
+        return relPath; // already absolute
+    }
+    const newPath = [];
+    for (const pathPart of relPath.split('/').filter(s => s !== '.')) {
+        if (pathPart === '..') { // Trim one directory away
+            workingDir = workingDir.replace(/[^\/]+\/?$/, '');
+        } else if (pathPart) { // If non-zero length string
+            workingDir = workingDir.replace(/\/$/, '') + '/' + pathPart;
+        }
+    }
+    return workingDir;
+});
+*/
 
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     // TODO: Redo prefixAllSelectors to instead behave more like DataType,
@@ -893,6 +926,26 @@ modulo.register('core', class FetchQueue {
         this.queue = {};
         this.data = {};
         this.waitCallbacks = [];
+    }
+
+    fetch(src) {
+        const label = 'testlabel'; // XXX rm label concept
+        if (src in this.data) { // Already found, resolve immediately
+            const then = resolve => resolve(this.data[src], basePath, src);
+            return { then, catch: () => {} }; // Return synchronous Then-able
+        }
+        return new Promise((resolve, reject) => {
+            if (!(src in this.queue)) { // First time, make queue
+                this.queue[src] = [ resolve ];
+                // TODO: Think about if we want to keep cache:no-store
+                window.fetch(src, { cache: 'no-store' })
+                    .then(response => response.text())
+                    .then(text => this.receiveData(text, label, src))
+                    .catch(reject);
+            } else {
+                this.queue[src].push(resolve); // add to end of src queue
+            }
+        });
     }
 
     enqueue(fetchObj, callback, basePath = null) {
@@ -1891,10 +1944,18 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
         elem.remove();
         // TODO: Add support for inline script tags..?
         data.push(dataItem);
-        modulo.fetchQueue.enqueue(dataItem.src, text => {
-            delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-            dataItem.content = text;
-        });
+        if (FLAG_RELPATHS) {
+            modulo.fetchQueue.fetch(dataItem.src).then(text => {
+                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
+                dataItem.content = text;
+            });
+        } else {
+            modulo.fetchQueue.enqueue(dataItem.src, text => {
+                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
+                dataItem.content = text;
+                console.log('this is text old flag', text);
+            });
+        }
     }
     modulo.fetchQueue.enqueueAll(() => callback(data));
 });
