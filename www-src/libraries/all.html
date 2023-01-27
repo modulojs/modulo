@@ -8,14 +8,12 @@
     function getComponentDefs(path) {
         //const confDef = modulo.definitions.modulo_configuration;
         const confDef = modulo.definitions.configuration;
-        if (confDef.cachedComponentDefs) {
-            // TODO: Introduce a more convenient way to access current conf,
-            // specifically for static data like this
 
+        // XXX Hacky code here, should introduce a more convenient / reusable
+        // way to access current conf, specifically for static data like this
+        if (confDef.cachedComponentDefs) {
             if (!(path in confDef.cachedComponentDefs)) {
-                console.log('cachedComponentDefs - not found inititially', path);
                 for (const realPath of Object.keys(confDef.cachedComponentDefs).sort()) {
-                    console.log('realPath-', realPath, realPath.endsWith(path));
                     if (realPath.endsWith(path)) {
                         path = realPath; // always end with longest match, hence sort
                     }
