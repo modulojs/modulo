@@ -412,7 +412,7 @@ modulo.config.component = {
 
 modulo.register('cpart', class Component {
     rerender(original = null) {
-        if (original) { // TODO: this logic needs refactor
+        if (original) {
             if (this.element.originalHTML === null) {
                 this.element.originalHTML = original.innerHTML;
             }
@@ -683,7 +683,7 @@ modulo.register('util', function normalize(html) {
 
 modulo.register('util', function saveFileAs(filename, text) {
     const element = window.document.createElement('a');
-    const enc = encodeURIComponent(text); // TODO silo in globals
+    const enc = window.encodeURIComponent(text);
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + enc);
     element.setAttribute('download', filename);
     window.document.body.appendChild(element);
@@ -712,7 +712,6 @@ modulo.register('util', function dirname(path) {
 });
 
 modulo.register('util', function resolvePath(workingDir, relPath) {
-    // TODO: Fix, refactor
     if (!workingDir) {
         console.log('Warning: Blank workingDir:', workingDir);
     }
@@ -877,10 +876,9 @@ modulo.register('core', class AssetManager {
     appendToHead(tagName, codeStr) {
         const doc = window.document;
         const elem = doc.createElement(tagName);
-        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
+        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset"
         if (doc.head === null) {
-            // TODO: NOTE: this is still broken, can still trigger before head
-            // is created!
+            console.log('Modulo WARNING: Head not ready.');
             setTimeout(() => doc.head.append(elem), 0);
         } else {
             doc.head.append(elem);
@@ -906,8 +904,7 @@ modulo.register('core', class FetchQueue {
     }
 
     _enqueue(src, label, callback) {
-        if (this.basePath && !this.basePath.endsWith('/')) {
-            // <-- TODO rm & straighten this stuff out
+        if (this.basePath && !this.basePath.endsWith('/')) { // <-- XXX rm & straighten this stuff out
             this.basePath = this.basePath + '/'; // make sure trails '/'
         }
 
@@ -920,7 +917,6 @@ modulo.register('core', class FetchQueue {
         } else if (!(src in this.queue)) {
             this.queue[src] = [ callback ];
             // TODO: Think about if we want to keep cache:no-store
-            //console.log('FETCH', src);
             window.fetch(src, { cache: 'no-store' })
                 .then(response => response.text())
                 .then(text => this.receiveData(text, label, src))
@@ -1067,7 +1063,7 @@ modulo.register('processor', function contentTXT (modulo, def, value) {
 });
 
 modulo.register('processor', function dataType (modulo, def, value) {
-    if (value === '?') {
+    if (value === '?') { // '?' means determine based on extension
         const ext = def.Src && def.Src.match(/(?<=\.)[a-z]+$/i);
         value = ext ? ext[0] : 'json';
     }
@@ -1277,7 +1273,7 @@ modulo.register('cpart', class State {
 modulo.register('engine', class Templater {
     constructor(modulo, def) {
         this.modulo = modulo;
-        this.setup(def.Content, def); // TODO, refactor
+        this.setup(def.Content, def);
     }
 
     setup(text, def) {
@@ -1316,7 +1312,6 @@ modulo.register('engine', class Templater {
     }
 
     compile(text) {
-        // const prepComment = token => truncate(escapejs(trim(token)), 80);
         const { normalize } = this.modulo.registry.utils;
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
@@ -1325,7 +1320,7 @@ modulo.register('engine', class Templater {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
-                    const comment = JSON.stringify(normalize(token).trim()); // TODO: maybe collapse all ws?
+                    const comment = JSON.stringify(normalize(token).trim());
                     this.output += `  ${result} // ${ comment }\n`;
                 }
             }
@@ -1626,8 +1621,7 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            //this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts;
-            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts;
+            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts; // TODO global modulo
         }
         this.patch = this.pushPatch;
         this.patches = [];
@@ -1768,7 +1762,6 @@ modulo.register('engine', class Reconciler {
                     if (rival.hasAttribute('modulo-ignore')) {
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
-                        // OR: Maybe even a simple way to reuse renderObj?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
