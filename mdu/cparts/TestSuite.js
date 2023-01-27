@@ -440,7 +440,10 @@ modulo.register('command', function test(modulo, opts) {
         if (!UNIFIED_DEFINITIONS) {
             if ('Src' in suite) {
                 throw new Error('Not expecting a Src still here');
-                modulo.fetchQueue.enqueue(suite.Src, text => {
+                /*modulo.fetchQueue.enqueue(suite.Src, text => {
+                    suite.Content = (text || '') + (suite.Content || '');
+                });*/
+                modulo.fetchQueue.fetch(suite.Src).then(text => {
                     suite.Content = (text || '') + (suite.Content || '');
                 });
             }
