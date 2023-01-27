@@ -12,11 +12,10 @@
 
 
 <p>Modulo's templating language comes with a standard library of filters and
-template-tags, modeled to be similar to the behavior of Django's templating language
-library. Although in general Django's has more features, some Django
-templates will work as Modulo templates without modification (just include it
-with "src="!). In fact, there's such large overlap that some of this very
-documentation was <a
+template-tags, modeled to be similar to the behavior of Django's templating
+language library. Although in general Django's has more features, some Django
+templates might work as Modulo templates with a few tweaks. In fact, there's
+such large overlap that some of this very documentation was <a
 href="https://docs.djangoproject.com/en/3.2/ref/templates/language/">copied and
 arranged just like Django's own</a>, to be instantly more familiar to
 developers. Thanks, Django!</p>
@@ -24,7 +23,6 @@ developers. Thanks, Django!</p>
 
 
 <mws-Section name="templatetags">Built-in Template Tags</mws-Section>
-
 
 <h3>comment</h3>
 
@@ -837,12 +835,13 @@ text='
 <p>A highly useful filter that allows use of re-usable template snippets.</p>
 
 <p>Typically in the format of
-<code>{{ state.data|renderas:row }}</code>,
+<code>{{ state.data|renderas:trow }}</code>,
 where <code>state.data</code> is some Object, and there exists a template like
-with the name "tableRow" that renders that object.  The typical usage of this
-is refactoring templates to conveniently render complex data. This allows you
-to take complicated bits of template code and refactor it into another smaller,
-helper, "child" template that is then used within the main template.</p>
+with the <code>-name</code> "trow" that renders that object.  The typical usage
+of this is refactoring templates to conveniently render complex data. This
+allows you to take complicated bits of template code and refactor it into
+another smaller, helper, "child" template that is then used within the main
+template.</p>
 
 <p>The "input" to renderas should always be an Object. The keys and values of
 that object will populate the "template variables" for that template, meaning
@@ -860,26 +859,21 @@ read. However, sometimes you just want to quickly spit up and refactor a
 template, meaning you want the child template to behave just like the parent,
 and you want global variables available, just as they were available to the
 parent. To include another template without any sandboxing, consider using the
-<code>renderObj</code> template variable which contains the "global" template
-scope. For an example, if we have a <code>-name="modalInfo"</code> template, we
-might write: <code>{{&nbsp;renderObj|renderas:modalInfo&nbsp;}}</code>
+<code>include</code> template-tag.</p>
 
-
-<!--<mws-Demo demotype="minipreview"-->
-<mws-Demo
-demotype="minipreview"
+<mws-Demo demotype="minipreview"
 text='
 <Template -name="trow">
     <div>{{ name }}</div> <div>{{ type }}</div> <div>{{ level }}</div>
 </Template>
-
 <Template>
-    <h3>Name</h3> <h3>Type</h3> <h3>Level</h3>
-    {% for info in state.pokemon %}
-        {{ info|renderas:trow }}
-    {% endfor %}
+    <details>
+        <h3>Name</h3> <h3>Type</h3> <h3>Level</h3>
+        {% for info in state.pokemon %}
+            {{ info|renderas:trow }}
+        {% endfor %}
+    </details>
 </Template>
-
 <State
     pokemon:=&apos;[
         {"name": "Jigglypuff", "type": "Normal", "level": 13},
@@ -887,24 +881,14 @@ text='
         {"name": "Ghastly", "type": "Ghost", "level": 8}
     ]&apos;
 ></State>
-
 <Style>
-    :host {
+    details {
         display: grid;
         grid-template-columns: 2fr 2fr 1fr;
     }
 </Style>
 '></mws-Demo>
 
-
-<!--
-<p>Tip: If you want to avoid sandboxing, you can use
-that object will populate the template variables for that template, meaning you
-can access them directly with <code>{{ varName }}</code> style syntax within
-that child template. Note that the child template will be isolated or
-"sandboxed" to <em>only</em> have access to properties of the specified
-object (state, props, etc will not be accessible).</p>
--->
 
 
 
