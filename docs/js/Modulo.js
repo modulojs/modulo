@@ -723,11 +723,11 @@ modulo.register('util', function getParentDefPath(modulo, def) {
     return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
 });
 
-modulo.register('util', function dirname(path) {
+modulo.register('util', function dirname(path) { // XXX DEAD CODE
     return (path || '').match(/.*\//);
 });
 
-modulo.register('util', function resolvePath(workingDir, relPath) {
+modulo.register('util', function resolvePath(workingDir, relPath) { // XXX DEAD CODE
     if (!workingDir) {
         console.log('Warning: Blank workingDir:', workingDir);
     }
@@ -930,12 +930,16 @@ modulo.register('core', class FetchQueue {
 
     fetch(src) {
         const label = 'testlabel'; // XXX rm label concept
-        if (src in this.data) { // Already found, resolve immediately
-            const then = resolve => resolve(this.data[src], basePath, src);
-            return { then, catch: () => {} }; // Return synchronous Then-able
-        }
-        return new Promise((resolve, reject) => {
-            if (!(src in this.queue)) { // First time, make queue
+        //if (src in this.data) { // Already found, resolve immediately
+        //    const then = resolve => resolve(this.data[src], label, src);
+        //    return { then, catch: () => {} }; // Return synchronous Then-able
+        //}
+        //return new Promise((resolve, reject) => {
+        //});
+        return { then : (resolve, reject) => {
+            if (src in this.data) { // Already found, resolve immediately
+                resolve(this.data[src], label, src);
+            } else if (!(src in this.queue)) { // First time, make queue
                 this.queue[src] = [ resolve ];
                 // TODO: Think about if we want to keep cache:no-store
                 window.fetch(src, { cache: 'no-store' })
@@ -945,7 +949,7 @@ modulo.register('core', class FetchQueue {
             } else {
                 this.queue[src].push(resolve); // add to end of src queue
             }
-        });
+        }};
     }
 
     enqueue(fetchObj, callback, basePath = null) {

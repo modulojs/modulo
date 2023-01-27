@@ -1,8 +1,132 @@
 <!DOCTYPE HTML><html><head>
 
-<link rel="stylesheet" href="/_modulo/modulo-build-xxxxxxx0.css" /></head><body><mws-page pagetitle="Alpha Reached - DevLog - 2022-09" navbar="about">
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Alpha Reached - DevLog - 2022-09 - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-xx20qcng.css" /></head><body>
 
-<mws-devlognav fn="2022-09"></mws-devlognav>
+
+    
+    
+    
+    
+
+    <!-- Some global CSS that is not tied to any component: -->
+    
+
+
+
+<slot name="above-navbar"></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about" class="Navbar--selected">About</a>
+        </li>
+        <li>
+            <a href="/start.html">Start</a>
+        </li>
+        <li>
+            <a href="/docs/">Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        
+        
+            v: 0.0.31<br>
+            <!--SLOC: undefined lines<br />-->
+            <a href="https://github.com/modulojs/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
+        
+    
+        <!--
+        
+            <a href="https://github.com/modulojs/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        
+        -->
+    </div>
+</nav>
+
+
+    <main class="Main">
+        <slot>
+
+<mws-devlognav fn="2022-09" modulo-original-html=""><nav style="border-bottom: none">
+    <h4>DEV LOG</h4>
+
+    <ul>
+        
+            <li>
+                
+                    <a href="/devlog/2022-12.html">
+                        2022-12&nbsp;(Intro slides)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <span style="text-decoration: overline underline;">
+                        2022-09&nbsp;(Alpha release)
+                    </span>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-07.html">
+                        2022-07&nbsp;(HTML-first)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-03.html">
+                        2022-03&nbsp;(Prealpha)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-09.html">
+                        2021-09&nbsp;(Thoughts on framework design)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-01.html">
+                        2021-01&nbsp;(FAQ)
+                    </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+
+
+    
+
+    
+        <h1>Alpha release</h1>
+    
+
+    
+
+    
+
+    
+
+    
+
+
+</mws-devlognav>
 
 
 <p>After years of development as a side-project, I'm super excited to announce
@@ -144,6 +268,56 @@ examples.</p>
 </section>
 
 
-</mws-page>
-<script src="/_modulo/modulo-build-x1sacnqb.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
-</script></body></html>
+</slot>
+    </main>
+
+
+<footer>
+    <main>
+        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1
+    </main>
+</footer>
+
+
+
+<script src="/_modulo/modulo-build-xxft2pt4.js"></script><script>window.moduloBuild && modulo.start(window.moduloBuild);
+modulo.assets.require("configuration");
+modulo.assets.require("DemoModal");
+modulo.assets.require("DemoChart");
+modulo.assets.require("ExampleBtn");
+modulo.assets.require("DemoSelector");
+modulo.assets.require("Page");
+modulo.assets.require("ProjectInfo");
+modulo.assets.require("DevLogNav");
+modulo.assets.require("DocSidebar");
+modulo.assets.require("Demo");
+modulo.assets.require("AllExamples");
+modulo.assets.require("Section");
+modulo.assets.require("Templating_1");
+modulo.assets.require("Templating_PrepareCallback");
+modulo.assets.require("Templating_Comments");
+modulo.assets.require("Templating_Escaping");
+modulo.assets.require("Tutorial_P1");
+modulo.assets.require("Tutorial_P2");
+modulo.assets.require("Tutorial_P2_filters_demo");
+modulo.assets.require("Tutorial_P3_state_demo");
+modulo.assets.require("Tutorial_P3_state_bind");
+modulo.assets.require("Hello");
+modulo.assets.require("Simple");
+modulo.assets.require("ToDo");
+modulo.assets.require("JSON");
+modulo.assets.require("JSONArray");
+modulo.assets.require("GitHubAPI");
+modulo.assets.require("ColorSelector");
+modulo.assets.require("DateNumberPicker");
+modulo.assets.require("PrimeSieve");
+modulo.assets.require("Scatter");
+modulo.assets.require("FlexibleForm");
+modulo.assets.require("FlexibleFormWithAPI");
+modulo.assets.require("Components");
+modulo.assets.require("OscillatingGraph");
+modulo.assets.require("Search");
+modulo.assets.require("SearchBox");
+modulo.assets.require("WorldMap");
+modulo.assets.require("Memory");
+modulo.assets.require("ConwayGameOfLife");</script></body></html>

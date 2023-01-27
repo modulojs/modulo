@@ -1052,14 +1052,14 @@ window.moduloBuild.modules["x11c5ufm"] = function DevLogNav (modulo) {
         return mws_DevLogNav;
     
 };
-window.moduloBuild.modules["xxivj2tr"] = function DevLogNav_template (modulo) {
+window.moduloBuild.modules["x1vqburp"] = function DevLogNav_template (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("<nav style=\""); // "<nav style=\""
   if (CTX.props.fn) { // "if props.fn"
   OUT.push("border-bottom: none"); // "border-bottom: none"
   } // "endif"
   OUT.push("\">\n    <h4>DEV LOG</h4>\n\n    <ul>\n        "); // "\"><h4>DEV LOG</h4><ul>"
-  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
+  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
   OUT.push("\n            <li>\n                "); // "<li>"
   if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
   OUT.push("\n                    <span style=\"text-decoration: overline underline;\">\n                        "); // "<span style=\"text-decoration: overline underline;\">"
@@ -1079,7 +1079,7 @@ return function (CTX, G) { var OUT=[];
   OUT.push("\n            </li>\n        "); // "</li>"
   } // "endfor"
   OUT.push("\n    </ul>\n</nav>\n\n"); // "</ul></nav>"
-  var ARR0=CTX.state.data;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.data"
+  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
   OUT.push("\n    "); // ""
   if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
   OUT.push("\n        <h1>"); // "<h1>"
@@ -1700,8 +1700,8 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxens5ah"] = function JSON_staticdata (modulo) {
-return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2023-01-18T20:24:51Z","pushed_at":"2023-01-24T01:20:50Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":6882,"stargazers_count":2,"watchers_count":2,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"has_discussions":false,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":20,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":0,"open_issues":20,"watchers":2,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":0,"subscribers_count":1};
+window.moduloBuild.modules["xxd5dqrj"] = function JSON_staticdata (modulo) {
+return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2023-01-18T20:24:51Z","pushed_at":"2023-01-27T18:54:37Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":2810,"stargazers_count":2,"watchers_count":2,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"has_discussions":false,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":23,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":0,"open_issues":23,"watchers":2,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":0,"subscribers_count":1};
 };
 window.moduloBuild.modules["x1lhd4rn"] = function JSON_template (modulo) {
 return function (CTX, G) { var OUT=[];
@@ -2083,8 +2083,8 @@ window.moduloBuild.modules["xx8ugqhn"] = function ProjectInfo (modulo) {
         return mws_ProjectInfo;
     
 };
-window.moduloBuild.modules["x1an76i7"] = function ProjectInfo_staticdata (modulo) {
-return {"name":"mdu.js","author":"michaelb","version":"0.0.26","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","srcserve":"npm run cli -- srcserve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"peerDependencies":{"express":"^4.18.2","node-watch":"^0.7.2","puppeteer":"^13.7.0"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
+window.moduloBuild.modules["x1kgum1d"] = function ProjectInfo_staticdata (modulo) {
+return {"name":"mdu.js","author":"michaelb","version":"0.0.31","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","srcserve":"npm run cli -- srcserve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"peerDependencies":{"express":"^4.18.2","node-watch":"^0.7.2","puppeteer":"^13.7.0"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
 };
 window.moduloBuild.modules["xx9t56li"] = function ProjectInfo_template (modulo) {
 return function (CTX, G) { var OUT=[];
@@ -2755,7 +2755,7 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxltokpe"] = function configuration (modulo) {
+window.moduloBuild.modules["xxbjangp"] = function configuration (modulo) {
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -15447,6 +15447,13 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
             confDef.cachedComponentDefs = {};
         }
         if (!(path in modulo.fetchQueue.data)) {
+            for (const realPath of Object.keys(modulo.fetchQueue.data).sort()) {
+                if (realPath.endsWith(path)) {
+                    path = realPath; // always end with longest match, hence sort
+                }
+            }
+        }
+        if (!(path in modulo.fetchQueue.data)) {
             console.error('ERROR: Have not loaded:', path);
             return {};
         }
@@ -15520,7 +15527,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
 
 };
 window.moduloBuild.nameToHash = {
- "configuration": "xxltokpe",
+ "configuration": "xxbjangp",
  "DemoModal": "xxb46q1m",
  "DemoChart": "x1jclvkr",
  "ExampleBtn": "xxl4fb4g",
@@ -15585,9 +15592,9 @@ window.moduloBuild.nameToHash = {
  "ExampleBtn_template": "xx5ann6n",
  "DemoSelector_template": "xxbjtni2",
  "Page_template": "x18vovt8",
- "ProjectInfo_staticdata": "x1an76i7",
+ "ProjectInfo_staticdata": "x1kgum1d",
  "ProjectInfo_template": "xx9t56li",
- "DevLogNav_template": "xxivj2tr",
+ "DevLogNav_template": "x1vqburp",
  "DocSidebar_template": "x1s9cikh",
  "Demo_template": "xxs8mvob",
  "AllExamples_template": "xxslhngg",
@@ -15605,7 +15612,7 @@ window.moduloBuild.nameToHash = {
  "Simple_template": "xxl4an33",
  "ToDo_template": "xxbdh5fm",
  "JSON_template": "x1lhd4rn",
- "JSON_staticdata": "xxens5ah",
+ "JSON_staticdata": "xxd5dqrj",
  "JSONArray_template": "x1npfhrn",
  "JSONArray_staticdata": "xxgkj36u",
  "GitHubAPI_template": "x130qf1i",
@@ -15641,8 +15648,9 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": null,
   "Name": "configuration",
+  "Source": "http://127.0.0.1:6627/js/codemirror_5.63.0/codemirror_bundled.js",
   "cachedComponentDefs": {
-   "/libraries/eg.html": {
+   "http://127.0.0.1:6627/libraries/eg.html": {
     "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
     "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
     "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
@@ -15662,17 +15670,6 @@ window.moduloBuild.definitions = {
     "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
     "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
     "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   },
-   "/libraries/docseg.html": {
-    "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
-    "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
-    "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
-    "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
-    "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
-    "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
-    "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
-    "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
-    "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
    }
   }
  },
@@ -15860,6 +15857,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "visible": false,
   "Content": "",
   "DefName": null,
@@ -15993,6 +15991,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "value": "",
   "Content": "",
   "DefName": null,
@@ -16315,7 +16314,8 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": "Page",
   "Name": "style",
-  "DefinitionName": "Page_style"
+  "DefinitionName": "Page_style",
+  "Source": "http://127.0.0.1:6627/libraries/mws/Page.css"
  },
  "Page_template": {
   "Type": "Template",
@@ -16326,6 +16326,7 @@ window.moduloBuild.definitions = {
   "Parent": "Page",
   "Name": "template",
   "DefinitionName": "Page_template",
+  "Source": "http://127.0.0.1:6627/libraries/mws/Page.html",
   "Hash": "Tx18vovt8"
  },
  "Page_script": {
@@ -16367,15 +16368,16 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.26\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n    \"mdu-cli\": \"modulocli/modulocli.js\",\n    \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"srcserve\": \"npm run cli -- srcserve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.18.2\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.7.0\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
+  "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.31\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n    \"mdu-cli\": \"modulocli/modulocli.js\",\n    \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"srcserve\": \"npm run cli -- srcserve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.18.2\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.7.0\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
   "DefName": null,
   "Parent": "ProjectInfo",
   "Name": "staticdata",
   "DefinitionName": "ProjectInfo_staticdata",
+  "Source": "https://raw.githubusercontent.com/modulojs/modulo/main/package.json",
   "data": {
    "name": "mdu.js",
    "author": "michaelb",
-   "version": "0.0.26",
+   "version": "0.0.31",
    "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
    "homepage": "https://modulojs.org/",
    "main": "./src/Modulo.js",
@@ -16452,7 +16454,8 @@ window.moduloBuild.definitions = {
   "Parent": "DevLogNav",
   "Name": "template",
   "DefinitionName": "DevLogNav_template",
-  "Hash": "Txxivj2tr"
+  "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.html",
+  "Hash": "Tx1vqburp"
  },
  "DevLogNav_state": {
   "Type": "State",
@@ -16460,7 +16463,8 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
-  "data": [
+  "Store": null,
+  "nav": [
    [
     "2022-12",
     "Intro slides"
@@ -16500,7 +16504,8 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": "DevLogNav",
   "Name": "style",
-  "DefinitionName": "DevLogNav_style"
+  "DefinitionName": "DevLogNav_style",
+  "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.css"
  },
  "DocSidebar_props": {
   "Type": "Props",
@@ -16521,6 +16526,7 @@ window.moduloBuild.definitions = {
   "Parent": "DocSidebar",
   "Name": "template",
   "DefinitionName": "DocSidebar_template",
+  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.html",
   "Hash": "Tx1s9cikh"
  },
  "DocSidebar_state": {
@@ -16529,6 +16535,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "menu": [],
   "Content": "",
   "DefName": null,
@@ -16547,6 +16554,7 @@ window.moduloBuild.definitions = {
   "Parent": "DocSidebar",
   "Name": "script",
   "DefinitionName": "DocSidebar_script",
+  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.js",
   "Directives": []
  },
  "DocSidebar_style": {
@@ -16557,7 +16565,8 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": "DocSidebar",
   "Name": "style",
-  "DefinitionName": "DocSidebar_style"
+  "DefinitionName": "DocSidebar_style",
+  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.css"
  },
  "Demo_props": {
   "Type": "Props",
@@ -16584,6 +16593,7 @@ window.moduloBuild.definitions = {
   "Parent": "Demo",
   "Name": "template",
   "DefinitionName": "Demo_template",
+  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.html",
   "Hash": "Txxs8mvob"
  },
  "Demo_state": {
@@ -16592,6 +16602,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "tabs": [],
   "selected": null,
   "preview": "",
@@ -16620,6 +16631,7 @@ window.moduloBuild.definitions = {
   "Parent": "Demo",
   "Name": "script",
   "DefinitionName": "Demo_script",
+  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.js",
   "Directives": [
    "codemirrorMount",
    "previewspotMount"
@@ -16633,7 +16645,8 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": "Demo",
   "Name": "style",
-  "DefinitionName": "Demo_style"
+  "DefinitionName": "Demo_style",
+  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.css"
  },
  "AllExamples_template": {
   "Type": "Template",
@@ -16644,6 +16657,7 @@ window.moduloBuild.definitions = {
   "Parent": "AllExamples",
   "Name": "template",
   "DefinitionName": "AllExamples_template",
+  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.html",
   "Hash": "Txxslhngg"
  },
  "AllExamples_state": {
@@ -16652,6 +16666,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "selected": "",
   "examples": [],
   "Content": "",
@@ -16671,6 +16686,7 @@ window.moduloBuild.definitions = {
   "Parent": "AllExamples",
   "Name": "script",
   "DefinitionName": "AllExamples_script",
+  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.js",
   "Directives": []
  },
  "AllExamples_style": {
@@ -16681,7 +16697,8 @@ window.moduloBuild.definitions = {
   "DefName": null,
   "Parent": "AllExamples",
   "Name": "style",
-  "DefinitionName": "AllExamples_style"
+  "DefinitionName": "AllExamples_style",
+  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.css"
  },
  "Section_props": {
   "Type": "Props",
@@ -17065,6 +17082,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "count": 42,
   "articles": [
    {
@@ -17115,6 +17133,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "perc": 50,
   "total": 30,
   "Content": "",
@@ -17174,6 +17193,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "username": "Little <Bobby> <Drop> &tables",
   "content": "\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    ",
   "Content": "",
@@ -17252,6 +17272,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "verb": "toot",
   "noun": "kazoo",
   "count": "two",
@@ -17288,6 +17309,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "opacity": "0.5",
   "color": "blue",
   "username": "Testing_Username",
@@ -18036,6 +18058,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "num": 42,
   "Content": "",
   "DefName": null,
@@ -18094,6 +18117,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "list": [
    "Milk",
    "Bread",
@@ -18147,11 +18171,12 @@ window.moduloBuild.definitions = {
    "Code",
    "RequireData"
   ],
-  "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2023-01-18T20:24:51Z\",\n  \"pushed_at\": \"2023-01-24T01:20:50Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 6882,\n  \"stargazers_count\": 2,\n  \"watchers_count\": 2,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"has_discussions\": false,\n  \"forks_count\": 0,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 20,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 0,\n  \"open_issues\": 20,\n  \"watchers\": 2,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 0,\n  \"subscribers_count\": 1\n}\n",
+  "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2023-01-18T20:24:51Z\",\n  \"pushed_at\": \"2023-01-27T18:54:37Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 2810,\n  \"stargazers_count\": 2,\n  \"watchers_count\": 2,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"has_discussions\": false,\n  \"forks_count\": 0,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 23,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 0,\n  \"open_issues\": 23,\n  \"watchers\": 2,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 0,\n  \"subscribers_count\": 1\n}\n",
   "DefName": null,
   "Parent": "JSON",
   "Name": "staticdata",
   "DefinitionName": "JSON_staticdata",
+  "Source": "https://api.github.com/repos/modulojs/modulo",
   "data": {
    "id": 542682907,
    "node_id": "R_kgDOIFivGw",
@@ -18220,13 +18245,13 @@ window.moduloBuild.definitions = {
    "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
    "created_at": "2022-09-28T16:20:49Z",
    "updated_at": "2023-01-18T20:24:51Z",
-   "pushed_at": "2023-01-24T01:20:50Z",
+   "pushed_at": "2023-01-27T18:54:37Z",
    "git_url": "git://github.com/modulojs/modulo.git",
    "ssh_url": "git@github.com:modulojs/modulo.git",
    "clone_url": "https://github.com/modulojs/modulo.git",
    "svn_url": "https://github.com/modulojs/modulo",
    "homepage": "https://modulojs.org/",
-   "size": 6882,
+   "size": 2810,
    "stargazers_count": 2,
    "watchers_count": 2,
    "language": "JavaScript",
@@ -18240,7 +18265,7 @@ window.moduloBuild.definitions = {
    "mirror_url": null,
    "archived": false,
    "disabled": false,
-   "open_issues_count": 20,
+   "open_issues_count": 23,
    "license": {
     "key": "lgpl-2.1",
     "name": "GNU Lesser General Public License v2.1",
@@ -18265,7 +18290,7 @@ window.moduloBuild.definitions = {
    ],
    "visibility": "public",
    "forks": 0,
-   "open_issues": 20,
+   "open_issues": 23,
    "watchers": 2,
    "default_branch": "main",
    "temp_clone_token": null,
@@ -18326,6 +18351,7 @@ window.moduloBuild.definitions = {
   "Parent": "JSONArray",
   "Name": "staticdata",
   "DefinitionName": "JSONArray_staticdata",
+  "Source": "https://jsonplaceholder.typicode.com/todos",
   "data": [
    {
     "userId": 1,
@@ -19546,6 +19572,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "search": "",
   "name": "",
   "location": "",
@@ -19586,6 +19613,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "hue": 130,
   "sat": 50,
   "lum": 50,
@@ -19612,6 +19640,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "day": 1,
   "month": 1,
   "year": 2022,
@@ -19666,6 +19695,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "number": 64,
   "Content": "",
   "DefName": null,
@@ -19729,6 +19759,7 @@ window.moduloBuild.definitions = {
   "Parent": "Scatter",
   "Name": "staticdata",
   "DefinitionName": "Scatter_staticdata",
+  "Source": "https://jsonplaceholder.typicode.com/users",
   "data": [
    {
     "id": 1,
@@ -19989,6 +20020,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "name": "Spartacus",
   "topic": "On the treatment of Thracian gladiators",
   "subscribe": true,
@@ -20024,6 +20056,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "user": 1337,
   "topic": "On the treatment of Thracian gladiators",
   "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
@@ -20080,6 +20113,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "playing": false,
   "speed": 10,
   "easing": "linear",
@@ -20136,6 +20170,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "search": "the lord of the rings",
   "loading": false,
   "results": [],
@@ -20175,6 +20210,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "search": "",
   "results": [],
   "loading": false,
@@ -20268,6 +20304,7 @@ window.moduloBuild.definitions = {
   "Parent": "WorldMap",
   "Name": "staticdata",
   "DefinitionName": "WorldMap_staticdata",
+  "Source": "https://jsonplaceholder.typicode.com/users",
   "data": [
    {
     "id": 1,
@@ -20528,6 +20565,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "message": "Good luck!",
   "win": false,
   "cards": [],
@@ -20580,6 +20618,7 @@ window.moduloBuild.definitions = {
    "bindMount",
    "bindUnmount"
   ],
+  "Store": null,
   "playing": false,
   "speed": 3,
   "cells": {
@@ -20627,6 +20666,7 @@ window.moduloBuild.definitions = {
 };
 
 // Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
+const FLAG_RELPATHS = true;
 window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -20638,6 +20678,7 @@ window.Modulo = class Modulo {
         this._configSteps = 0;
         this.config = {};
         this.definitions = {};
+        this.stores = {};
         if (parentModulo) {
             this.parentModulo = parentModulo;
             const { deepClone } = modulo.registry.utils;
@@ -20853,11 +20894,19 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
 
-// Reference global modulo instance in configuring core CParts, Utils, and Engines
-modulo.register('processor', function src (modulo, conf, value) {
-    modulo.fetchQueue.enqueue(value, text => {
-        conf.Content = (text || '') + (conf.Content || '');
-    });
+modulo.register('processor', function src (modulo, def, value) {
+    if (FLAG_RELPATHS) {
+        const { getParentDefPath, resolvePath } = modulo.registry.utils;
+        def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
+        modulo.fetchQueue.fetch(def.Source).then(text => {
+            def.Content = (text || '') + (def.Content || '');
+        });
+    } else {
+        const conf = def;
+        modulo.fetchQueue.enqueue(value, text => {
+            conf.Content = (text || '') + (conf.Content || '');
+        });
+    }
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -20933,6 +20982,14 @@ modulo.register('util', function initElement (modulo, def, elem) {
     elem.originalHTML = null;
     elem.originalChildren = [];
     elem.cparts = {};
+});
+
+modulo.register('util', function makeStore (modulo, def) {
+    const isLower = key => key[0].toLowerCase() === key[0];
+    const data = modulo.registry.utils.keyFilter(def, isLower);
+    const newStore = { boundElements: {}, subscribers: [] };
+    newStore.data = JSON.parse(JSON.stringify(data));
+    return newStore;
 });
 
 modulo.register('util', function initClass (modulo, def, cls) {
@@ -21031,7 +21088,7 @@ modulo.config.component = {
 
 modulo.register('cpart', class Component {
     rerender(original = null) {
-        if (original) { // TODO: this logic needs refactor
+        if (original) {
             if (this.element.originalHTML === null) {
                 this.element.originalHTML = original.innerHTML;
             }
@@ -21199,8 +21256,11 @@ modulo.register('cpart', class Component {
     }
 
     dataPropUnmount({ el, attrName, rawName }) {
-        delete el.dataProps[attrName];
-        delete el.dataPropsAttributeNames[rawName];
+        if (!el.dataProps) { console.log('Modulo ERROR: Could not Unmount', attrName, rawName, el); }
+        if (el.dataProps) {
+            delete el.dataProps[attrName];
+            delete el.dataPropsAttributeNames[rawName];
+        }
     }
 });
 
@@ -21299,7 +21359,7 @@ modulo.register('util', function normalize(html) {
 
 modulo.register('util', function saveFileAs(filename, text) {
     const element = window.document.createElement('a');
-    const enc = encodeURIComponent(text); // TODO silo in globals
+    const enc = window.encodeURIComponent(text);
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + enc);
     element.setAttribute('download', filename);
     window.document.body.appendChild(element);
@@ -21309,8 +21369,10 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    // TODO: It's get that should autobind functions!!
-    return key.split('.').reduce((o, name) => o[name], obj);
+    if (key in obj) { // Shortcut for common case
+        return obj[key];
+    }
+    return (key + '').split('.').reduce((o, name) => o[name], obj);
 });
 
 modulo.register('util', function set(obj, keyPath, val, ctx = null) {
@@ -21321,12 +21383,18 @@ modulo.register('util', function set(obj, keyPath, val, ctx = null) {
     dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
 });
 
+modulo.register('util', function getParentDefPath(modulo, def) {
+    const { getParentDefPath } = modulo.registry.utils; // Use to recurse
+    const pDef = def.Parent ? modulo.definitions[def.Parent] : null;
+    const url = String(window.location).split('?')[0]; // Remove ? and #
+    return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
+});
+
 modulo.register('util', function dirname(path) {
     return (path || '').match(/.*\//);
 });
 
 modulo.register('util', function resolvePath(workingDir, relPath) {
-    // TODO: Fix, refactor
     if (!workingDir) {
         console.log('Warning: Blank workingDir:', workingDir);
     }
@@ -21349,6 +21417,23 @@ modulo.register('util', function resolvePath(workingDir, relPath) {
     const prefix = workingDir.startsWith('/') ? '/' : '';
     return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
 });
+
+/*
+modulo.register('util', function resolvePath(workingDir, relPath) {
+    if (relPath.toLowerCase().startsWith('http')) {
+        return relPath; // already absolute
+    }
+    const newPath = [];
+    for (const pathPart of relPath.split('/').filter(s => s !== '.')) {
+        if (pathPart === '..') { // Trim one directory away
+            workingDir = workingDir.replace(/[^\/]+\/?$/, '');
+        } else if (pathPart) { // If non-zero length string
+            workingDir = workingDir.replace(/\/$/, '') + '/' + pathPart;
+        }
+    }
+    return workingDir;
+});
+*/
 
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     // TODO: Redo prefixAllSelectors to instead behave more like DataType,
@@ -21491,10 +21576,9 @@ modulo.register('core', class AssetManager {
     appendToHead(tagName, codeStr) {
         const doc = window.document;
         const elem = doc.createElement(tagName);
-        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset" (TODO: Maybe change to hash?)
+        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset"
         if (doc.head === null) {
-            // TODO: NOTE: this is still broken, can still trigger before head
-            // is created!
+            console.log('Modulo WARNING: Head not ready.');
             setTimeout(() => doc.head.append(elem), 0);
         } else {
             doc.head.append(elem);
@@ -21511,6 +21595,30 @@ modulo.register('core', class FetchQueue {
         this.waitCallbacks = [];
     }
 
+    fetch(src) {
+        const label = 'testlabel'; // XXX rm label concept
+        //if (src in this.data) { // Already found, resolve immediately
+        //    const then = resolve => resolve(this.data[src], label, src);
+        //    return { then, catch: () => {} }; // Return synchronous Then-able
+        //}
+        //return new Promise((resolve, reject) => {
+        //});
+        return { then : (resolve, reject) => {
+            if (src in this.data) { // Already found, resolve immediately
+                resolve(this.data[src], label, src);
+            } else if (!(src in this.queue)) { // First time, make queue
+                this.queue[src] = [ resolve ];
+                // TODO: Think about if we want to keep cache:no-store
+                window.fetch(src, { cache: 'no-store' })
+                    .then(response => response.text())
+                    .then(text => this.receiveData(text, label, src))
+                    .catch(reject);
+            } else {
+                this.queue[src].push(resolve); // add to end of src queue
+            }
+        }};
+    }
+
     enqueue(fetchObj, callback, basePath = null) {
         this.basePath = basePath ? basePath : this.basePath;
         fetchObj = typeof fetchObj === 'string' ? { fetchObj } : fetchObj;
@@ -21520,8 +21628,7 @@ modulo.register('core', class FetchQueue {
     }
 
     _enqueue(src, label, callback) {
-        if (this.basePath && !this.basePath.endsWith('/')) {
-            // <-- TODO rm & straighten this stuff out
+        if (this.basePath && !this.basePath.endsWith('/')) { // <-- XXX rm & straighten this stuff out
             this.basePath = this.basePath + '/'; // make sure trails '/'
         }
 
@@ -21534,7 +21641,6 @@ modulo.register('core', class FetchQueue {
         } else if (!(src in this.queue)) {
             this.queue[src] = [ callback ];
             // TODO: Think about if we want to keep cache:no-store
-            //console.log('FETCH', src);
             window.fetch(src, { cache: 'no-store' })
                 .then(response => response.text())
                 .then(text => this.receiveData(text, label, src))
@@ -21650,21 +21756,9 @@ modulo.register('cpart', class Template {
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
         this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
+        const render = this.templater.render.bind(this.templater);
+        return { render }; // Expose render to include, renderas etc
     }
-
-    /*
-    prepareCallback(renderObj) {
-        // Exposes templates in render context, so stuff like
-        // "|renderas:template.row" works
-        const obj = {};
-        for (const template of this.element.cpartSpares.template) {
-            obj[template.attrs.name || 'regular'] = template;
-            //obj[template.name || 'regular'] = template;
-        }
-        return obj;
-    }
-    */
-
     renderCallback(renderObj) {
         if (!renderObj.component)renderObj.component={};// XXX fix
         renderObj.component.innerHTML = this.templater.render(renderObj);
@@ -21693,7 +21787,7 @@ modulo.register('processor', function contentTXT (modulo, def, value) {
 });
 
 modulo.register('processor', function dataType (modulo, def, value) {
-    if (value === '?') {
+    if (value === '?') { // '?' means determine based on extension
         const ext = def.Src && def.Src.match(/(?<=\.)[a-z]+$/i);
         value = ext ? ext[0] : 'json';
     }
@@ -21779,8 +21873,8 @@ modulo.register('cpart', class Script {
         // Create all lifecycle callbacks, wrapping around the inner script
         const script = renderObj[this.conf.Name];
         this.eventCallback = (rObj) => { // Create eventCallback to set inner
-            const setLocal = script.setLocalVariables || (() => {});
             const vars = { element: this.element, cparts: this.element.cparts };
+            const setLocal = script.setLocalVariables || (() => {});
             setLocal(Object.assign(vars, rObj)); // Set inner vars (or no-op)
         };
 
@@ -21795,7 +21889,7 @@ modulo.register('cpart', class Script {
             if (cbName === 'initializedCallback' || !cbName.match(isCallback)) {
                 continue; // Skip over initialized (already handled) and non-CBs
             }
-            this[cbName] = (arg) => { // Arg: Either renderObj or directive obj
+            this[cbName] = arg => { // Arg: Either renderObj or directive obj
                 const renderObj = this.element.getCurrentRenderObj();
                 const script = renderObj[this.conf.Name]; // Get new render obj
                 this.eventCallback(renderObj); // Prep before lifecycle method
@@ -21809,59 +21903,47 @@ modulo.register('cpart', class Script {
 });
 
 modulo.register('cpart', class State {
-    initializedCallback(renderObj) {
-        if (!this.data) {
-            // Initialize with deep copy of attributes
-            let { attrs } = this;
-            if (attrs && attrs.attrs) { // TODO: Hack code here, not sure why its like this
-                attrs = attrs.attrs;
+    static factoryCallback(renderObj, def, modulo) {
+        if (def.Store) {
+            const store = modulo.registry.utils.makeStore(modulo, def);
+            if (!(def.Store in modulo.stores)) {
+                modulo.stores[def.Store] = store;
+            } else {
+                Object.assign(modulo.stores[def.Store].data, store.data);
             }
-            this.data = Object.assign({}, attrs);
-            // TODO: Need to do proper deep-copy... is this okay?
-            this.data = JSON.parse(JSON.stringify(this.data));
         }
+    }
 
-        this.boundElements = {}; // initialize
-        return this.data;
+    initializedCallback(renderObj) {
+        if (!this.def && this.conf) { this.def = this.conf; } // XXX rm
+        const store = this.def.Store ? this.modulo.stores[this.def.Store]
+                : this.modulo.registry.utils.makeStore(this.modulo, this.def);
+        store.subscribers.push(Object.assign(this, store));
+        return store.data; // TODO: Possibly, push ALL sibling CParts with stateChangedCallback
     }
 
     bindMount({ el, attrName, value }) {
-        // TODO: BUG: This should be attrName || el.getATtribute('name') (todo:
-        // write failing tests, then flip and see green)
-        const name = el.getAttribute('name') || attrName;
+        const name = attrName || el.getAttribute('name');
         const val = modulo.registry.utils.get(this.data, name);
-        this.modulo.assert(val !== undefined, `state.bind "${name}" is undefined`);
-        const listen = () => {
-            // TODO: Refactor this function + propagate to be more consistent +
-            // extendable with types / conversions -- MAYBE even just attach it
-            // as stateChangeCallback!
-            let { value, type, checked, tagName } = el;
-            if (type && type === 'checkbox') {
-                value = !!checked;
-            } else if (type && (type === 'range' || type === 'number')) {
-                value = Number(value); // ensure ranges & numbers get evaled
-            }
-            this.set(name, value, el);
-        };
+        this.modulo.assert(val !== undefined, `state.bind "${name}" undefined`);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
-        //assert(!this.boundElements[name], `[state.bind]: Duplicate "${name}"`);
-
         if (!(name in this.boundElements)) {
             this.boundElements[name] = [];
         }
+        // Bind the "listen" event to propagate to all, and trigger initial vals
+        const listen = () => this.propagate(name, el.value, el);
         this.boundElements[name].push([ el, evName, listen ]);
         el.addEventListener(evName, listen); // todo: make optional, e.g. to support cparts?
-        this.propagate(name, val); // trigger initial assignment(s)
+        this.propagate(name, val, this); // trigger initial assignment(s)
     }
 
     bindUnmount({ el, attrName }) {
-        const name = el.getAttribute('name') || attrName;
-        const remainingBound = [];
+        const name = attrName || el.getAttribute('name');
         if (!(name in this.boundElements)) { // XXX HACK
-            console.log('Modulo ERROR: Could not unbind', name);
-            return;
+            return console.log('Modulo ERROR: Could not unbind', name);
         }
+        const remainingBound = [];
         for (const row of this.boundElements[name]) {
             if (row[0] === el) {
                 row[0].removeEventListener(row[1], row[2]);
@@ -21872,11 +21954,11 @@ modulo.register('cpart', class State {
         this.boundElements[name] = remainingBound;
     }
 
-    set(name, value, originalEl) {
-        /* if (valueOrEv.target) { this.data[valueOrEv.target.name] = name; } else { } if ((name in this.boundElements) && this.boundElements[name].length > 1) { } */
-        modulo.registry.utils.set(this.data, name, value);
-        this.propagate(name, value, originalEl);
-        this.element.rerender();
+    stateChangedCallback(name, value, el) {
+        this.modulo.registry.utils.set(this.data, name, value);
+        if (!this.def.Only || this.def.Only.includes(name)) { // TODO: Test & document
+            this.element.rerender();
+        }
     }
 
     eventCallback() {
@@ -21884,7 +21966,8 @@ modulo.register('cpart', class State {
     }
 
     propagate(name, val, originalEl = null) {
-        for (const [ el, evName, cb ] of (this.boundElements[name] || [])) {
+        const elems = (this.boundElements[name] || []).map(row => row[0]);
+        for (const el of this.subscribers.concat(elems)) {
             if (originalEl && el === originalEl) {
                 continue; // don't propagate to self
             }
@@ -21899,26 +21982,22 @@ modulo.register('cpart', class State {
     }
 
     eventCleanupCallback() {
-        // TODO: Instead, should JUST do _lastPropagated (isntead of _oldData)
-        // with each key from boundElements, and thus more efficiently loop
-        // through
         for (const name of Object.keys(this.data)) {
             this.modulo.assert(name in this._oldData, `There is no "state.${name}"`);
-            const val = this.data[name];
-            if (name in this.boundElements && val !== this._oldData[name]) {
-                this.propagate(name, val);
+            if (this.data[name] !== this._oldData[name]) {
+                this.propagate(name, this.data[name], this);
             }
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ] });
+}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
 
 
 /* Implementation of Modulo Templating Language */
 modulo.register('engine', class Templater {
     constructor(modulo, def) {
         this.modulo = modulo;
-        this.setup(def.Content, def); // TODO, refactor
+        this.setup(def.Content, def);
     }
 
     setup(text, def) {
@@ -21957,7 +22036,6 @@ modulo.register('engine', class Templater {
     }
 
     compile(text) {
-        // const prepComment = token => truncate(escapejs(trim(token)), 80);
         const { normalize } = this.modulo.registry.utils;
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
@@ -21966,7 +22044,7 @@ modulo.register('engine', class Templater {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
-                    const comment = JSON.stringify(normalize(token).trim()); // TODO: maybe collapse all ws?
+                    const comment = JSON.stringify(normalize(token).trim());
                     this.output += `  ${result} // ${ comment }\n`;
                 }
             }
@@ -22058,44 +22136,16 @@ modulo.config.templater.modes = {
 };
 
 modulo.config.templater.filters = (function () {
-    //const { get } = modulo.registry.utils; // TODO, fix this code duplciation
-    function get(obj, key) {
-        return obj[key];
-    }
-
-    function sorted(obj, arg) {
-        if (!obj) {
-            return obj;
-        }
-        // TODO Refactor or remove?
-        if (Array.isArray(obj)) {// && (!obj.length || typeof obj[0] !== 'object')) {
-            return obj.sort();
-        } else {
-            const keys = Array.from(Object.keys(obj)).sort(); // Loop through sorted
-            return keys.map(k => [k, obj[k]]);
-        }
-    }
-
-    const safe = s => Object.assign(new String(s), {safe: true});
-
-    //trim: s => s.trim(), // TODO: improve interface to be more useful
-    //invoke: (s, arg) => s(arg),
-    //getAttribute: (s, arg) => s.getAttribute(arg),
-
-    // Idea: Generalized "matches" filter that gets registered like such:
-    //     defaultOptions.filters.matches = {name: //ig}
-    // Then we could configure "named" RegExps in Script that get used in
-    // template
-
+    const { get } = modulo.registry.utils;
+    const safe = s => Object.assign(new String(s), { safe: true });
     const filters = {
         add: (s, arg) => s + arg,
         allow: (s, arg) => arg.split(',').includes(s) ? s : '',
         camelcase: s => s.replace(/-([a-z])/g, g => g[1].toUpperCase()),
         capfirst: s => s.charAt(0).toUpperCase() + s.slice(1),
         concat: (s, arg) => s.concat ? s.concat(arg) : s + arg,
-        //combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign(s, arg),
+        combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign({}, s, arg),
         default: (s, arg) => s || arg,
-        yesno: (s, arg) => ((arg || 'yes,no') + ',,').split(',')[s === null ? 2 : (1 - (1 * !s))],
         divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,
         dividedinto: (s, arg) => Math.ceil((s * 1) / (arg * 1)),
         escapejs: s => JSON.stringify(String(s)).replace(/(^"|"$)/g, ''),
@@ -22112,12 +22162,13 @@ modulo.config.templater.filters = (function () {
         subtract: (s, arg) => s - arg,
         truncate: (s, arg) => ((s && s.length > arg*1) ? (s.substr(0, arg-1) + '…') : s),
         type: s => s === null ? 'null' : (Array.isArray(s) ? 'array' : typeof s),
-        renderas: (rCtx, template) => safe(template.Instance.render(rCtx)),
+        renderas: (rCtx, template) => safe(template.render(rCtx)),
         reversed: s => Array.from(s).reverse(),
         upper: s => s.toUpperCase(),
+        yesno: (s, arg) => `${ arg || 'yes,no' },,`.split(',')[s ? 0 : s === null ? 2 : 1],
     };
     const { values, keys, entries } = Object;
-    const extra = { get, safe, sorted, values, keys, entries };
+    const extra = { get, safe, values, keys, entries };
     return Object.assign(filters, extra);
 })();
 
@@ -22135,6 +22186,7 @@ modulo.config.templater.tags = {
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
     'comment': () => ({ start: "/*", end: "*/"}),
+    'include': (text) => `OUT.push(CTX.${ text.trim() }.render(CTX));`,
     'for': (text, tmplt) => {
         // Make variable name be based on nested-ness of tag stack
         const { cleanWord } = modulo.registry.utils;
@@ -22161,9 +22213,6 @@ modulo.config.templater.tags = {
     },
 };
 
-// TODO: 
-//  - Then, re-implement [component.key] and [component.ignore] as TagLoad
-//  - Possibly: Use this to then do granular patches (directiveMount etc)
 modulo.register('engine', class DOMCursor {
     constructor(parentNode, parentRival) {
         this.initialize(parentNode, parentRival);
@@ -22262,11 +22311,6 @@ modulo.register('engine', class DOMCursor {
     }
 
     getMatchedNode(elem, keyedElems, keyedOthers) {
-        // IDEA: Rewrite keying elements with this trick: - Use LoadTag
-        // directive, removed keyed rival from DOM
-        /// - Issue: Cursor is scoped per "layer", and non-recursive reconcile
-        //    not created yet, so reconciler will need to keep keyed elements
-        /// - Solution: Finish non-recursive reconciler
         const key = elem && elem.getAttribute && elem.getAttribute('key');
         if (!key) {
             return null;
@@ -22301,8 +22345,7 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            //this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts;
-            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts;
+            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts; // TODO global modulo
         }
         this.patch = this.pushPatch;
         this.patches = [];
@@ -22410,19 +22453,12 @@ modulo.register('engine', class Reconciler {
     reconcileChildren(childParent, rivalParent) {
         // Nonstandard nomenclature: "The rival" is the node we wish to match
         const cursor = new modulo.registry.engines.DOMCursor(childParent, rivalParent);
-
-        //console.log('Reconciling (1):', childParent.outerHTML);
-        //console.log('Reconciling (2):', rivalParent.outerHTML);
-
         while (cursor.hasNext()) {
             const [ child, rival ] = cursor.next();
-
-            //console.log('NEXT', child, rival, cursor.hasNext());
-            // Does this node to be swapped out? Swap if exist but mismatched
             const needReplace = child && rival && (
                 child.nodeType !== rival.nodeType ||
                 child.nodeName !== rival.nodeName
-            );
+            ); // Does this node to be swapped out? Swap if exist but mismatched
 
             if ((child && !rival) || needReplace) { // we have more rival, delete child
                 this.patchAndDescendants(child, 'Unmount');
@@ -22441,20 +22477,15 @@ modulo.register('engine', class Reconciler {
 
             if (child && rival && !needReplace) {
                 // Both exist and are of same type, let's reconcile nodes
-
-                //console.log('NODE', child.isEqualNode(rival), child.innerHTML, rival.innerHTML);
                 if (child.nodeType !== 1) { // text or comment node
                     if (child.nodeValue !== rival.nodeValue) { // update
                         this.patch(child, 'node-value', rival.nodeValue);
                     }
                 } else if (!child.isEqualNode(rival)) { // sync if not equal
-                    //console.log('NOT EQUAL', child, rival);
                     this.reconcileAttributes(child, rival);
-
                     if (rival.hasAttribute('modulo-ignore')) {
-                        //console.log('Skipping ignored node');
+                        // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
-                        // OR: Maybe even a simple way to reuse renderObj?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
@@ -22584,10 +22615,18 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
         elem.remove();
         // TODO: Add support for inline script tags..?
         data.push(dataItem);
-        modulo.fetchQueue.enqueue(dataItem.src, text => {
-            delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-            dataItem.content = text;
-        });
+        if (FLAG_RELPATHS) {
+            modulo.fetchQueue.fetch(dataItem.src).then(text => {
+                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
+                dataItem.content = text;
+            });
+        } else {
+            modulo.fetchQueue.enqueue(dataItem.src, text => {
+                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
+                dataItem.content = text;
+                console.log('this is text old flag', text);
+            });
+        }
     }
     modulo.fetchQueue.enqueueAll(() => callback(data));
 });

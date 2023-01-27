@@ -723,11 +723,11 @@ modulo.register('util', function getParentDefPath(modulo, def) {
     return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
 });
 
-modulo.register('util', function dirname(path) {
+modulo.register('util', function dirname(path) { // XXX DEAD CODE
     return (path || '').match(/.*\//);
 });
 
-modulo.register('util', function resolvePath(workingDir, relPath) {
+modulo.register('util', function resolvePath(workingDir, relPath) { // XXX DEAD CODE
     if (!workingDir) {
         console.log('Warning: Blank workingDir:', workingDir);
     }

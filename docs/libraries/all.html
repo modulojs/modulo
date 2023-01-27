@@ -18,6 +18,14 @@
             confDef.cachedComponentDefs = {};
         }
         if (!(path in modulo.fetchQueue.data)) {
+            console.count('not found inititially');
+            for (const realPath of Object.keys(modulo.fetchQueue.data).sort()) {
+                if (realPath.endsWith(path)) {
+                    path = realPath; // always end with longest match, hence sort
+                }
+            }
+        }
+        if (!(path in modulo.fetchQueue.data)) {
             console.error('ERROR: Have not loaded:', path);
             return {};
         }
