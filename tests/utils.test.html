@@ -93,9 +93,8 @@
 
 </test>
 
+<!--
 <test name="utils.resolvePath">
-
-
     <script name="Can resolve relativep paths">
         const { resolvePath } = modulo.registry.utils;
         /*
@@ -108,10 +107,35 @@
         const result = resolvePath(baseDir, relPath);
         assert: result === expected
     </script>
+</test>
+-->
+
+
+<test name="utils.getParentDefPath">
+
+    <script name="Ensure can find direct parent">
+        const { getParentDefPath } = modulo.registry.utils;
+        const d = modulo.definitions;
+        d.MockChild = { Parent: 'MockParent', Source: 'ignore me' };
+        d.MockParent = { Parent: null, Source: 'https://foo.com/bar/' };
+        const expected = 'https://foo.com/bar/';
+        const result = getParentDefPath(modulo, d.MockChild);
+        assert: result === expected
+    </script>
+
+    <script name="Ensure can find recursive parent">
+        const { getParentDefPath } = modulo.registry.utils;
+        const d = modulo.definitions;
+        d.MockChild = { Parent: 'MockParent1', Source: 'ignore me' };
+        d.MockParent1 = { Parent: 'MockParent2' };
+        d.MockParent2 = { Parent: 'MockParent3' };
+        d.MockParent3 = { Parent: 'MockParent4', Source: 'https://boo.com/far/' };
+        const expected = 'https://boo.com/far/';
+        const result = getParentDefPath(modulo, d.MockChild);
+        assert: result === expected
+    </script>
 
 </test>
-
-
 
 <test name="utils.get and utils.set">
     <script name="Ensure defined">

@@ -1,10 +1,8 @@
 // Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
-const FLAG_RELPATHS = true;
 window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
-        // Note: parentModulo arg is still being used by mws/Demo.js
         window._moduloID = (window._moduloID || 0) + 1; // Global ID
         window._moduloStack = (window._moduloStack || [ ]);
         this.id = window._moduloID;
@@ -12,7 +10,7 @@ window.Modulo = class Modulo {
         this.config = {};
         this.definitions = {};
         this.stores = {};
-        if (parentModulo) {
+        if (parentModulo) { // TODO: Delete code path (Note: parentModulo arg is still being used by mws/Demo.js)
             this.parentModulo = parentModulo;
             const { deepClone } = modulo.registry.utils;
             this.config = deepClone(parentModulo.config, parentModulo);
@@ -121,7 +119,7 @@ window.Modulo = class Modulo {
         });
     }
 
-    loadString(text, parentFactoryName = null) {
+    loadString(text, parentName = null) {
         const tmp_Cmp = new this.registry.cparts.Component({}, {}, this);
         tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
         this.reconciler = new this.registry.engines.Reconciler(this, {
@@ -129,7 +127,7 @@ window.Modulo = class Modulo {
             directiveShortcuts: [ [ /:$/, 'modulo.dataProp' ] ],
         });
         const div = this.reconciler.loadString(text, {});
-        const result = this.loadFromDOM(div, parentFactoryName);
+        const result = this.loadFromDOM(div, parentName);
         return result;
     }
 
@@ -142,7 +140,7 @@ window.Modulo = class Modulo {
                 const processors = conf[field] || defaults;
                 //changed = changed || this.applyProcessors(conf, processors);
                 const result = this.applyProcessors(conf, processors);
-                if (result === 'wait') {
+                if (result === 'wait') { // TODO: Test or document, or delete
                     changed = false;
                     break;
                 }
@@ -228,18 +226,11 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
 }
 
 modulo.register('processor', function src (modulo, def, value) {
-    if (FLAG_RELPATHS) {
-        const { getParentDefPath, resolvePath } = modulo.registry.utils;
-        def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
-        modulo.fetchQueue.fetch(def.Source).then(text => {
-            def.Content = (text || '') + (def.Content || '');
-        });
-    } else {
-        const conf = def;
-        modulo.fetchQueue.enqueue(value, text => {
-            conf.Content = (text || '') + (conf.Content || '');
-        });
-    }
+    const { getParentDefPath } = modulo.registry.utils;
+    def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
+    modulo.fetchQueue.fetch(def.Source).then(text => {
+        def.Content = (text || '') + (def.Content || '');
+    });
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -603,7 +594,7 @@ modulo.register('cpart', class Modulo { }, {
 
 modulo.register('cpart', class Library { }, {
     SetAttrs: 'config.component',
-    DefLoaders: [ 'Src', 'SetAttrs', 'Content' ],
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
 });
 
 modulo.register('util', function keyFilter (obj, func) {
@@ -611,7 +602,6 @@ modulo.register('util', function keyFilter (obj, func) {
     return Object.fromEntries(keys.map(key => [ key, obj[key] ]));
 });
 
-// TODO: pass in modulo more consistently
 modulo.register('util', function deepClone (obj, modulo) {
     if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
         return obj;
@@ -722,51 +712,6 @@ modulo.register('util', function getParentDefPath(modulo, def) {
     const url = String(window.location).split('?')[0]; // Remove ? and #
     return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
 });
-
-modulo.register('util', function dirname(path) { // XXX DEAD CODE
-    return (path || '').match(/.*\//);
-});
-
-modulo.register('util', function resolvePath(workingDir, relPath) { // XXX DEAD CODE
-    if (!workingDir) {
-        console.log('Warning: Blank workingDir:', workingDir);
-    }
-    if (relPath.toLowerCase().startsWith('http')) {
-        return relPath; // already absolute
-    }
-    workingDir = workingDir || '';
-    // Similar to Node's path.resolve()
-    const combinedPath = workingDir + '/' + relPath;
-    const newPath = [];
-    for (const pathPart of combinedPath.split('/')) {
-        if (pathPart === '..') {
-            newPath.pop();
-        } else if (pathPart === '.') {
-            // No-op
-        } else if (pathPart.trim()) {
-            newPath.push(pathPart);
-        }
-    }
-    const prefix = workingDir.startsWith('/') ? '/' : '';
-    return prefix + newPath.join('/').replace(RegExp('//', 'g'), '/');
-});
-
-/*
-modulo.register('util', function resolvePath(workingDir, relPath) {
-    if (relPath.toLowerCase().startsWith('http')) {
-        return relPath; // already absolute
-    }
-    const newPath = [];
-    for (const pathPart of relPath.split('/').filter(s => s !== '.')) {
-        if (pathPart === '..') { // Trim one directory away
-            workingDir = workingDir.replace(/[^\/]+\/?$/, '');
-        } else if (pathPart) { // If non-zero length string
-            workingDir = workingDir.replace(/\/$/, '') + '/' + pathPart;
-        }
-    }
-    return workingDir;
-});
-*/
 
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     // TODO: Redo prefixAllSelectors to instead behave more like DataType,
@@ -950,37 +895,6 @@ modulo.register('core', class FetchQueue {
                 this.queue[src].push(resolve); // add to end of src queue
             }
         }};
-    }
-
-    enqueue(fetchObj, callback, basePath = null) {
-        this.basePath = basePath ? basePath : this.basePath;
-        fetchObj = typeof fetchObj === 'string' ? { fetchObj } : fetchObj;
-        for (let [ label, src ] of Object.entries(fetchObj)) {
-            this._enqueue(src, label, callback);
-        }
-    }
-
-    _enqueue(src, label, callback) {
-        if (this.basePath && !this.basePath.endsWith('/')) { // <-- XXX rm & straighten this stuff out
-            this.basePath = this.basePath + '/'; // make sure trails '/'
-        }
-
-        // TODO: FIX THIS ---v
-        //src = this.modulo.registry.utils.resolvePath(this.basePath || '', src);
-        src = (this.basePath || '') + src;
-
-        if (src in this.data) {
-            callback(this.data[src], label, src); // Synchronous route
-        } else if (!(src in this.queue)) {
-            this.queue[src] = [ callback ];
-            // TODO: Think about if we want to keep cache:no-store
-            window.fetch(src, { cache: 'no-store' })
-                .then(response => response.text())
-                .then(text => this.receiveData(text, label, src))
-                //.catch(err => console.error('Modulo Load ERR', src, err));
-        } else {
-            this.queue[src].push(callback); // add to end of src queue
-        }
     }
 
     receiveData(text, label, src) {
@@ -1948,18 +1862,10 @@ modulo.register('util', function fetchBundleData(modulo, callback) {
         elem.remove();
         // TODO: Add support for inline script tags..?
         data.push(dataItem);
-        if (FLAG_RELPATHS) {
-            modulo.fetchQueue.fetch(dataItem.src).then(text => {
-                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-                dataItem.content = text;
-            });
-        } else {
-            modulo.fetchQueue.enqueue(dataItem.src, text => {
-                delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-                dataItem.content = text;
-                console.log('this is text old flag', text);
-            });
-        }
+        modulo.fetchQueue.fetch(dataItem.src).then(text => {
+            delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
+            dataItem.content = text;
+        });
     }
     modulo.fetchQueue.enqueueAll(() => callback(data));
 });

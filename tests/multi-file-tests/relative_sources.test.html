@@ -1,0 +1,46 @@
+<!--
+    These tests are useful as unit tests testing the loadString method &
+    loadFromDOM methods
+-->
+<Component name="TestRelativeSources">
+
+<StaticData
+    -name="rel1"
+    -src="./relative_sources_1.json"
+></StaticData>
+
+<StaticData
+    -name="rel2"
+    -src="../multi-file-tests/relative_sources_2.json"
+></StaticData>
+
+<StaticData
+    -name="rel3"
+    -src="../../tests/../tests/multi-file-tests/relative_sources_3.json"
+></StaticData>
+
+<TestSuite>
+    <Test name="Test StaticData and Template loaded">
+        <Script name="static data loaded with relative local path">
+            const actual = JSON.stringify(rel1);
+            const expected = JSON.stringify({ a: 1 });
+            assert: actual === expected;
+        </Script>
+
+        <Script name="static data loaded with one level up going up">
+            const actual = JSON.stringify(rel2);
+            const expected = JSON.stringify({ b: 2 });
+            assert: actual === expected;
+        </Script>
+
+        <Script name="static data loaded with complex path">
+            const actual = JSON.stringify(rel3);
+            const expected = JSON.stringify({ c: 3 });
+            assert: actual === expected;
+        </Script>
+
+
+    </Test>
+</TestSuite>
+</Component>
+
