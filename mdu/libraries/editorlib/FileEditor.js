@@ -1,21 +1,7 @@
 const { getEditor } = modulo.registry.utils;
 
-let rerender = null;
-
-function fetchContent(state, element) {
-    state.loading = true;
-    fetch(props.url)
-        .then(response => response.text())
-        .then(text => {
-            state.content = text;
-            state.loading = false;
-            rerender();
-        })
-        .catch(err => {
-            state.err = err;
-            rerender();
-        });
-}
+let rerender = null; // Allows for manual rerender
+let editor = null; // Used to store ACE editor instance
 
 function prepareCallback() {
     // TODO: Possibly add a component rerender mode feature for this, or make
@@ -25,29 +11,39 @@ function prepareCallback() {
         rerender = element.rerender.bind(element); // Stash away the real rerender
         element.rerender = () => {}; // eliminate rerendering
     }
-    // component._rerender = component.rerender.bind(component); // attaching hidden one
-    if (!props.content) {
-        state.content = '';
-        // TODO: Better support /document multiple editors
-        fetchContent(state, element);
+    if (optstate.src) {
+        window.fetch(optstate.src)
+            .then(response => response.text())
+            .then(text => {
+                state.content = text;
+                state.loading = false;
+                if (editor) {
+                    editor.getSession().setValue(text);
+                }
+                rerender();
+            })
+            .catch(err => {
+                state.err = err;
+                rerender();
+            });
     }
 }
 
 // Subscribe to editor_options
 function stateChangedCallback(name, value) {
-    //element.editor.session.setMode("ace/mode/python");
+    //editor.session.setMode("ace/mode/python");
     //state.theme = newTheme;
-    console.log('stateChangedCallback', name, value);
+    //console.log('stateChangedCallback', name, value);
     if (name === 'themeDark' || name === 'themeLight' || name === 'theme') {
-        element.editor.setTheme('ace/theme/' + value);
+        editor.setTheme('ace/theme/' + value);
         optstate.theme = value; // ensure theme gets set always
     } else if (name == 'fontSize') { // later look in set, etc
         const newOpts = {};
         newOpts[name] = Number(value);
-        element.editor.setOptions(newOpts);
+        editor.setOptions(newOpts);
 
     } else if (name == 'syntaxMode') {
-        element.editor.session.setMode('ace/mode/' + value);
+        editor.session.setMode('ace/mode/' + value);
 
     // Make the editor theme match the colors scheme that was just set
     } else if (name == 'colorScheme') {
@@ -60,29 +56,33 @@ function stateChangedCallback(name, value) {
                 optstate.theme = optstate.themeLight;
             }
         }
-        element.editor.setTheme('ace/theme/' + optstate.theme);
+        editor.setTheme('ace/theme/' + optstate.theme);
     }
 }
 modulo.stores.editor_options.subscribers.push({ stateChangedCallback });
 
+
+let timeout = null;
+function _debounce(func, ms = 1000) {
+    return () => {
+        if (timeout) {
+            window.clearTimeout(timeout);
+        }
+        timeout = window.setTimeout(func, ms);
+    };
+}
+
 function editspotMount ({ el }) {
-    element.editor = getEditor(el);
-    element.editor.setTheme('ace/theme/' + optstate.theme || optstate.themeLight);
-    element.editor.session.setMode("ace/mode/" + props.mode);
-    element.editor.setOptions({ fontSize: optstate.fontSize });
+    editor = getEditor(el);
+    editor.session.setValue(state.content || '');
+    editor.setTheme('ace/theme/' + optstate.theme || optstate.themeLight);
+    editor.session.setMode("ace/mode/" + props.mode);
+    editor.setOptions({ fontSize: optstate.fontSize });
+    const changeEv = () => datastate.propagate('value', editor.session.getValue());
+    editor.session.on('change', _debounce(changeEv));
 }
 
 function editspotUnmount () {
-    element.editor.destroy();
-}
-
-function previewspotMount ({ el }) {
-    console.log('mounting el', el);
-    element.iframe = document.createElement('iframe');
-    el.appendChild(element.iframe);
-    element.iframe.contentWindow.document.open();
-    element.iframe.contentWindow.document.write(state.content || props.content);
-    element.iframe.contentWindow.document.close();
-    console.log(element.iframe);
+    editor.destroy();
 }
 

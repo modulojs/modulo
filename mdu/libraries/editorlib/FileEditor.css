@@ -1,15 +1,10 @@
-
 :host {
     border: 3px solid black;
     display: block;
     width: 100%;
+    position: relative;
     height: calc(100vh - 20px);
     box-shadow: var(--m-shadow-size) var(--m-shadow-size)  var(--m-shadow-spread) var(--m-shadow);
-}
-
-#main_editor {
-    height: 100%;
-    width: 100%;
 }
 
 h3 {

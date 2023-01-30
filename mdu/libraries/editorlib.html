@@ -32,6 +32,7 @@
         layout="center"
         color-scheme="l-mintygoo"
         show-preview:=false
+        simple-mode:=false
         profile="syntax"
         font-size:=18
         syntax-mode="text"
@@ -44,6 +45,17 @@
         -store="editor_data"
     ></State>
 
+    <Script>
+        const urlParams = new URLSearchParams(window.location.search);
+        function initializedCallback() {
+            if (urlParams.has('file')) {
+                state.showPreview = true;
+                state.simpleMode = true;
+                state.src = urlParams.get('file');
+            }
+        }
+    </Script>
+
     <Style
         -src="./editorlib/ModuloEditor.css"
     ></Style>
@@ -52,12 +64,23 @@
 <Component name="EditorPreview">
     <Template>
         <h3>preview</h3>
+        <div id="preview" [script.previewspot]></div>
     </Template>
 
     <Style
         -src="./editorlib/FileEditor.css"
     ></Style>
 
+    <Script>
+        function previewspotMount ({ el }) {
+            element.iframe = document.createElement('iframe');
+            el.appendChild(element.iframe);
+            element.iframe.contentWindow.document.open();
+            element.iframe.contentWindow.document.write();
+            element.iframe.contentWindow.document.close();
+            console.log(element.iframe);
+        }
+    </Script>
 </Component>
 
 <Component name="FileBrowser">
@@ -90,6 +113,10 @@
         tabs:=[]
         boxes:=[]
     ></State>
+    <State
+        -name="optstate"
+        -store="editor_options"
+    ></State>
     <Script
         -src="./editorlib/EditorSidebar.js"
     ></Script>
@@ -107,13 +134,14 @@
         mode
     ></Props>
 
+        <!--
     <Template
         -src="./editorlib/FileEditor.html"
     ></Template>
 
     <State
         content=""
-        loading:=false
+        loading:=true
         err:=null
     ></State>
 
@@ -132,6 +160,7 @@
         lifecycle="initialized"
         -src="./editorlib/FileEditor.js"
     ></Script>
+    -->
     <Style
         -src="./editorlib/FileEditor.css"
     ></Style>
