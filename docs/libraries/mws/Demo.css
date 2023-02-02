@@ -116,7 +116,7 @@
     padding: 5px;
     border-left: none;
     width: 200px;
-    height: 200px;
+    height: 202px;
     overflow-y: auto;
     position: relative;
     z-index: 7; /* code mirror scrollbars are 6, Page.css navbar is 8 */

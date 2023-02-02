@@ -594,6 +594,7 @@ modulo.register('cpart', class Modulo { }, {
 
 modulo.register('cpart', class Library { }, {
     SetAttrs: 'config.component',
+    // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
     DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
 });
 

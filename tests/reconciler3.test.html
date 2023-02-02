@@ -6,6 +6,23 @@
 
 <test name="ensure ModRec and MTL are defined">
     <script>
+
+// Quickly registering this here
+modulo.register('util', function mergeAttrs (elem, defaults) {
+    const camelcase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
+    const obj = Object.assign({}, defaults);
+    const dataPropNames = elem.dataPropsAttributeNames || false;
+    for (const name of elem.getAttributeNames()) {
+        const dataPropKey = dataPropNames && dataPropNames[name];
+        if (dataPropKey) {
+            obj[camelcase(dataPropKey)] = elem.dataProps[dataPropKey];
+        } else {
+            obj[camelcase(name)] = elem.getAttribute(name);
+        }
+    }
+    return obj;
+});
+
         const directiveShortcuts = [[/^@/, 'component.event'],
                                     [/:$/, 'component.dataProp']];
         Modulo.utils.makeMockElement = function reconcile (html)  {

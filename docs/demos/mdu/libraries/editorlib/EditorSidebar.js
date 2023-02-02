@@ -1,5 +1,5 @@
-//const ALLOW_NULL = false; // quick feature flag, later should be turned into option
-const ALLOW_NULL = true; // quick feature flag, later should be turned into option
+//const ALLOW_NULL = true; // quick feature flag, later should be turned into option
+const ALLOW_NULL = false; // quick feature flag, later should be turned into option
 
 function initializedCallback () {
     state.tabs = [
@@ -33,6 +33,11 @@ function initializedCallback () {
     ];
     if (!ALLOW_NULL) {
         toggleTab('files');
+    }
+    if (optstate.simpleMode) { // TODO turn all of sidebar into an options thing
+        state.tabs.shift(); // remove fake help placeholder
+        state.tabs.shift(); // remove fake filebrowser placeholder
+        toggleTab('options');
     }
 }
 
