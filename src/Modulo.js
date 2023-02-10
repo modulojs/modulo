@@ -255,7 +255,6 @@ modulo.register('core', class DOMLoader {
     }
 });
 
-
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
     def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
@@ -1091,6 +1090,12 @@ modulo.register('cpart', class StaticData {
     DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
     DefFinalizers: [ 'Code', 'RequireData' ],
 });
+
+modulo.register('cpart', class GetParams { // TODO: Test / document, or delete
+    static factoryCallback(renderObj, def, modulo) { // TODO: allow "plucking"
+        return Object.from(new URLSearchParams(window.location.search));
+    }
+}); // TODO: Worth it if we can add simple pushState routing
 
 modulo.register('cpart', class Configuration { }, {
     SetAttrs: 'config',

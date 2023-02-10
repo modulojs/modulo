@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { processBrowserConsoleLog } = require('./cliUtils');
+const { getModuloMiddleware } = require('../middlewareUtils.js');
 
 
 class ModuloBrowser {
@@ -24,7 +25,9 @@ class ModuloBrowser {
             }
             const express = require('express');
             this._genApp = express();
-            this._genApp.use(express.static(this.absoluteRoot));
+            //this._genApp.use(express.static(this.absoluteRoot));
+            const conf = Object.assign({}, config, { port: this.port, serveInput: true })
+            this._genApp.use(getModuloMiddleware(conf, express));
             this._serverGen = this._genApp.listen(this.port, () => {
                 this.log('Modulo Browser - static server at: ' + this.port);
                 resolve();
