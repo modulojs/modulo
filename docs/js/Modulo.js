@@ -91,24 +91,9 @@ window.Modulo = class Modulo {
         }
     }
 
-    loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const { mergeAttrs } = this.registry.utils;
-        const isModulo = node => this.getNodeModuloType(node, quietErrors);
-        const defArray = [];
-        for (const node of Array.from(elem.children).filter(isModulo)) {
-            const partTypeLC = this.getNodeModuloType(node); // Lowercase
-            const def = mergeAttrs(node, this.config[partTypeLC]);
-            defArray.push(def);
-            if (partTypeLC in def && !def[partTypeLC]) {
-                delete def[partTypeLC]; // Remove attribute name used as type
-            }
-            def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
-            def.DefinedAs = def.DefinedAs || null; // defaults to: Name, Type
-            def.DefName = def.Name || null; // -name only, null otherwise
-            def.Parent = def.Parent || parentName;
-        }
-        this.repeatProcessors(defArray, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
-        return defArray;
+    loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
+        this.loader = new this.registry.core.DOMLoader(this);
+        return this.loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
     preprocessAndDefine() {
@@ -157,34 +142,6 @@ window.Modulo = class Modulo {
         }
     }
 
-    getNodeModuloType(node, quietErrors = false) {
-        const { tagName, nodeType, textContent } = node;
-        const err = msg => quietErrors || console.error('Modulo Load:', msg);
-        if (nodeType !== 1) { // Text nodes, comment nodes, etc
-            if (nodeType === 3 && textContent && textContent.trim()) {
-                err(`Unexpected text found near definitions: ${textContent}`);
-            }
-            return null;
-        }
-
-        let cPartName = tagName.toLowerCase();
-        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
-            for (const attrUnknownCase of node.getAttributeNames()) {
-                const attr = attrUnknownCase.toLowerCase();
-                if (attr in this.registry.dom && !node.getAttribute(attr)) {
-                    cPartName = attr; // Is a CPart, but has empty string value
-                }
-                break; // Always exit, since we are only looking at first iter
-            }
-        }
-        if (!(cPartName in this.registry.dom)) {
-            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
-            err(`${ cPartName }. CParts: ${ Object.keys(this.registry.dom) }`);
-            return null;
-        }
-        return cPartName;
-    }
-
     applyProcessors(conf, processors) {
         for (const name of processors) {
             const [ attrName, aliasedName ] = name.split('|');
@@ -224,6 +181,79 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
+
+
+modulo.register('core', class DOMLoader {
+    constructor(modulo) {
+        this.modulo = modulo;
+    }
+
+    loadFromDOM(elem, parentName = null, quietErrors = false) {
+        const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        const arr = [];
+        const { get, set } = modulo.registry.utils;
+        for (const node of elem.children) { // Loop through all child nodes
+            const partTypeLC = this.getDefType(node, quietErrors);
+            if (partTypeLC === null) {
+                continue; // This will be null if this is an ignorable node
+            }
+            // Valid CPart definition, now create the "def" object
+            const def = { Parent: parentName, DefinedAs: null, DefName: null };
+            arr.push(Object.assign(def, this.modulo.config[partTypeLC]));
+            def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
+            for (let name of node.getAttributeNames()) { // Loop through attrs
+                let value = node.getAttribute(name);
+                if (partTypeLC === name && !value) { // e.g. <cpart Script>
+                    continue; // This is the "Type" attribute itself, skip
+                }
+                const tmp_IsData = name.endsWith(':'); // RM TODO
+                if (name.endsWith(':')) {
+                    const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
+                    value = isVar ? get(this.modulo, value) : JSON.parse(value);
+                    name = name.slice(0, -1);
+                }
+                if (tmp_IsData) {
+                    set(def, camelCase(name), value);
+                } else {
+                    def[camelCase(name)] = value; // Store "resolved" value in definition
+                }
+                // TODO: Delete above, make it just set, once that is the default path
+                //set(def, camelCase(name), value);
+            }
+        }
+        this.modulo.repeatProcessors(arr, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
+        return arr;
+    }
+
+    getDefType(node, quietErrors = false) {
+        const { tagName, nodeType, textContent } = node;
+        const dom = this.modulo.registry.dom;
+        const err = msg => quietErrors || console.error('Modulo Load:', msg);
+        if (nodeType !== 1) { // Text nodes, comment nodes, etc
+            if (nodeType === 3 && textContent && textContent.trim()) {
+                err(`Unexpected text found near definitions: ${textContent}`);
+            }
+            return null;
+        }
+
+        let cPartName = tagName.toLowerCase();
+        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
+            for (const attrUnknownCase of node.getAttributeNames()) {
+                const attr = attrUnknownCase.toLowerCase();
+                if (attr in dom && !node.getAttribute(attr)) {
+                    cPartName = attr; // Is a CPart, but has empty string value
+                }
+                break; // Always exit, since we are only looking at first iter
+            }
+        }
+        if (!(cPartName in dom)) {
+            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
+            err(`${ cPartName }. CParts: ${ Object.keys(dom) }`);
+            return null;
+        }
+        return cPartName;
+    }
+});
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
@@ -386,6 +416,28 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
+modulo.register('processor', function mainRequire (modulo, conf, value) {
+    modulo.assets.mainRequire(value);
+});
+
+modulo.register('cpart', class Artifact {
+    // TODO: Refactor this to use something more generalized for children, so
+    // it shares code flow with component
+    static render(modulo, def) {
+        const children = (def.ChildrenNames || []).map(n => modulo.definitions[n].Name);
+        const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
+        console.log('thsi si tdef', children, tdef);
+        const engine = tDef.engine || 'Templater';
+        const templater = new modulo.registry.engines[engine](modulo, tDef);
+        console.log('thsi si templater', templater);
+        return '';
+    }
+}, {
+    DefinedAs: 'name',
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+});
+
+
 /*
 modulo.config.reconciler = {
     directiveShortcuts: [ [ /^@/, 'component.event' ],
@@ -393,6 +445,7 @@ modulo.config.reconciler = {
     directives: [ 'component.event', 'component.dataProp' ],
 };
 */
+
 
 modulo.config.component = {
     mode: 'regular',
@@ -639,22 +692,6 @@ modulo.register('util', function stripWord (text) {
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
 });
 
-modulo.register('util', function mergeAttrs (elem, defaults) {
-    // TODO: Write unit tests for this
-    const camelcase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
-    const obj = Object.assign({}, defaults);
-    const dataPropNames = elem.dataPropsAttributeNames || false;
-    for (const name of elem.getAttributeNames()) {
-        const dataPropKey = dataPropNames && dataPropNames[name];
-        if (dataPropKey) {
-            obj[camelcase(dataPropKey)] = elem.dataProps[dataPropKey];
-        } else {
-            obj[camelcase(name)] = elem.getAttribute(name);
-        }
-    }
-    return obj;
-});
-
 modulo.register('util', function hash (str) {
     // Simple, insecure, "hashCode()" implementation. Returns base32 hash
     let h = 0;
@@ -834,6 +871,7 @@ modulo.register('core', class AssetManager {
         const { fetchBundleData } = this.modulo.registry.utils;
         fetchBundleData(this.modulo, bundleData => {
             //const results = this.cssAssetsArray;
+            // TODO: This should be replaced with Artifact system (#35)
             const results = { js: [], css: this.cssAssetsArray };
             results.js.push(this.modulo.assets.buildJavaScript());
             for (const bundle of bundleData) { // Loop through bundle data
@@ -983,6 +1021,17 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+    /*
+    updateCallback() {
+        const { isolateClass, allSelectors } = this.def;
+        if (!isolateClass || allSelectors.length < 1) {
+            return;
+        }
+        for (const elem of this.element.querySelector(allSelectors.join(','))) {
+            elem.classList.add(isolateClass); // ensure always has class added
+        }
+    }
+    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });

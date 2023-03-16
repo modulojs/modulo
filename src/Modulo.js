@@ -96,10 +96,11 @@ window.Modulo = class Modulo {
         return this.loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
-    preprocessAndDefine() {
+    preprocessAndDefine(callback) {
+        callback = callback ? callback : (() => {});
         this.fetchQueue.wait(() => {
             this.repeatProcessors(null, 'DefBuilders', [ ], () => {
-                this.repeatProcessors(null, 'DefFinalizers', [ ]);
+                this.repeatProcessors(null, 'DefFinalizers', [ ], callback);
             });
         });
     }
@@ -181,7 +182,29 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
-
+window.modulo.DEVLIB_SOURCE = `
+<Artifact name="js">
+    <Template>{{ assets.bundledJS|safe }}</Template>
+</Artifact>
+<Artifact name="css">
+    <Template>{{ assets.bundledCSS|safe }}</Template>
+</Artifact>
+<Artifact name="html">
+    <Script>
+        const { hash } = modulo.registry.utils;
+        script.exports.jspath = './modulo-build.' + hash(modulo.assets.bundledJS) + '.js';
+        script.exports.prefix = '<!DOCTYPE html><html>';
+        script.exports.suffix = '</html>';
+        script.exports.head = window.document.head ? window.document.head.innerHTML : '';
+        script.exports.body = window.document.body ? window.document.body.innerHTML : '';
+        script.exports.jsInlineText = modulo.assets.buildMain();
+    </S` + `cript>
+    <Template>{{ script.prefix|safe }}<head>{{ script.head|safe }}</head>
+        <body>{{ script.body|safe }}<script src="{{ script.jspath }}"</s` + `cript>
+        <script>{{ script.jsInlineText|safe }}</s` + `cript>
+        </body>{{ script.suffix|safe }}</Template>
+</Artifact>
+`.replace(/\n\s+/g, '');
 
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
@@ -416,6 +439,34 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
+modulo.register('cpart', class Artifact {
+    // TODO: Refactor Component logic to be shared with Artifact (maybe using
+    // preprocessors?). Refactor this to use something more generalized for
+    // children, so it shares code flow with component.
+    static build(modulo, def) {
+        const { saveFileAs, getBuiltHTML, hash, fetchBundleData } = modulo.registry.utils;
+        const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
+        //for (const child of children
+        const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
+        const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
+        let result = { exports: {} };
+        if (sDef) {
+            result = modulo.assetManager.require(sDef.DefinitionName);
+        }
+        //modulo.register('util', function fetchBundleData(modulo, callback) {
+        const ctx = Object.assign({}, modulo, { script: result.exports });
+        const templater = new modulo.registry.engines.Templater(modulo, tDef);
+        const code = templater.render(ctx);
+        def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
+        /*modulo.enqueueAll.wait(() => {
+        });*/
+    }
+}, {
+    DefinedAs: 'name',
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+});
+
+
 /*
 modulo.config.reconciler = {
     directiveShortcuts: [ [ /^@/, 'component.event' ],
@@ -423,6 +474,7 @@ modulo.config.reconciler = {
     directives: [ 'component.event', 'component.dataProp' ],
 };
 */
+
 
 modulo.config.component = {
     mode: 'regular',
@@ -848,6 +900,7 @@ modulo.register('core', class AssetManager {
         const { fetchBundleData } = this.modulo.registry.utils;
         fetchBundleData(this.modulo, bundleData => {
             //const results = this.cssAssetsArray;
+            // TODO: This should be replaced with Artifact system (#35)
             const results = { js: [], css: this.cssAssetsArray };
             results.js.push(this.modulo.assets.buildJavaScript());
             for (const bundle of bundleData) { // Loop through bundle data
@@ -997,6 +1050,17 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+    /*
+    updateCallback() {
+        const { isolateClass, allSelectors } = this.def;
+        if (!isolateClass || allSelectors.length < 1) {
+            return;
+        }
+        for (const elem of this.element.querySelector(allSelectors.join(','))) {
+            elem.classList.add(isolateClass); // ensure always has class added
+        }
+    }
+    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });
@@ -1090,12 +1154,6 @@ modulo.register('cpart', class StaticData {
     DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
     DefFinalizers: [ 'Code', 'RequireData' ],
 });
-
-modulo.register('cpart', class GetParams { // TODO: Test / document, or delete
-    static factoryCallback(renderObj, def, modulo) { // TODO: allow "plucking"
-        return Object.from(new URLSearchParams(window.location.search));
-    }
-}); // TODO: Worth it if we can add simple pushState routing
 
 modulo.register('cpart', class Configuration { }, {
     SetAttrs: 'config',
@@ -1914,8 +1972,8 @@ modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     let head = '<head>' + window.document.head.innerHTML;
     let body = '<body>' + window.document.body.innerHTML;
     head += `<link rel="stylesheet" href="${ opts.cssFilePath }" /></head>`;
-    body += `<script src="${ opts.jsFilePath }"></script>`;
-    body += `<script>${ opts.jsInlineText }</script></body>`;
+    body += `<script src="${ opts.jsFilePath }"></s` + `cript>`;
+    body += `<script>${ opts.jsInlineText }</s` + `cript></body>`;
     return '<!DOCTYPE HTML><html>' + head + body + '</html>';
 });
 
@@ -1938,20 +1996,45 @@ modulo.register('command', function build (modulo, opts = {}) {
     });
 });
 
+modulo.register('command', function build (modulo, opts = {}) {
+    const filter = opts.filter || (({ Type }) => Type === 'Artifact');
+    const artifacts = Object.values(modulo.definitions).filter(filter);
+    const buildNext = () => {
+        modulo.registry.cparts.Artifact.build(modulo, artifacts.pop());
+        if (artifacts.length > 0) {
+            modulo.fetchQueue.enqueueAll(buildNext);
+        }
+    };
+    console.log('thsi is mdoulodefs', modulo.definitions);
+    // TODO
+    modulo.assert(artifacts.length, 'Build filter produced no artifacts');
+    modulo.assets.bundleAssets((js, css) => {
+        modulo.assets.bundledJS = js; // TODO 
+        modulo.assets.bundledCSS = css;
+        buildNext();
+    });
+});
+
 if (typeof document !== 'undefined' && !window.moduloBuild) {
-    window.document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-        if (cmd || window.moduloBuild) { // Command / already built: Run & exit
-            return cmd && modulo.registry.commands[cmd](modulo);
-        } // Else: Display "COMMANDS:" menu in console
-        const commandNames = Object.keys(modulo.registry.commands);
-        const href = 'window.location.href += ';
-        const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
-        const commandGetters = commandNames.map(cmd =>
-            ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
-        const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
-        new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
-    }));
+    window.document.addEventListener('DOMContentLoaded', () => {
+        if (window.moduloBuild) {
+            return;
+        }
+        modulo.loadString(modulo.DEVLIB_SOURCE, 'devlib');
+        modulo.preprocessAndDefine(() => {
+            const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
+            if (cmd) { // Command specified, run and exit right away
+                return modulo.registry.commands[cmd](modulo);
+            } // Else: Display "COMMANDS:" menu in console
+            const commandNames = Object.keys(modulo.registry.commands);
+            const href = 'window.location.href += ';
+            const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
+            const commandGetters = commandNames.map(cmd =>
+                ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
+            const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
+            new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
+        });
+    });
 }
 
 if (typeof document !== 'undefined' && document.head) { // Browser environ
