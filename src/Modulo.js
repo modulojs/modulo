@@ -1,5 +1,4 @@
-// Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
-window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
+window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
@@ -159,7 +158,7 @@ window.Modulo = class Modulo {
 
     assert(value, ...info) {
         if (!value) {
-            console.error(...info);
+            console.error(this.id, ...info);
             throw new Error(`Modulo Error: "${Array.from(info).join(' ')}"`);
         }
     }
@@ -182,27 +181,43 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
+// TODO: Replace with hardcoded definitions, nameToHash, and modules (with impossible X-hashes)
+/* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
+            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
+*/
 window.modulo.DEVLIB_SOURCE = `
-<Artifact name="js">
-    <Template>{{ assets.bundledJS|safe }}</Template>
+<Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
+    <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+{% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}</Template>
 </Artifact>
-<Artifact name="css">
-    <Template>{{ assets.bundledCSS|safe }}</Template>
+<Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
+    <Template>window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+{% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}
+window.moduloBuild.modules["{{ hash }}"] = function (modulo) { {{ assets.moduleSources|get:hash|safe }} };
+window.moduloBuild.nameToHash["{{ name }}"] = "{{ hash }}";
+{% endif %}{% endfor %}
+window.moduloBuild.definitions = {{ definitions|json:1|safe }};
+{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+//modulo.start(window.moduloBuild);
+{% for name in assets.mainRequires %}
+    modulo.assets.require("{{ name|escapejs }}");
+{% endfor %}
+    </Template>
 </Artifact>
-<Artifact name="html">
+<Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        const { hash } = modulo.registry.utils;
-        script.exports.jspath = './modulo-build.' + hash(modulo.assets.bundledJS) + '.js';
-        script.exports.prefix = '<!DOCTYPE html><html>';
-        script.exports.suffix = '</html>';
-        script.exports.head = window.document.head ? window.document.head.innerHTML : '';
-        script.exports.body = window.document.body ? window.document.body.innerHTML : '';
-        script.exports.jsInlineText = modulo.assets.buildMain();
+        for (const elem of window.document.querySelectorAll('*')) { // Annotate modulo-original-html
+            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
+                elem.setAttribute('modulo-original-html', elem.originalHTML);
+            }
+        }
+        script.exports.prefix = '<!DOCTYPE html><html><head>' + (window.document.head ? window.document.head.innerHTML : '');
+        script.exports.interfix = '</head><body>' + (window.document.body ? window.document.body.innerHTML : '');
+        script.exports.suffix = '</body></html>';
     </S` + `cript>
-    <Template>{{ script.prefix|safe }}<head>{{ script.head|safe }}</head>
-        <body>{{ script.body|safe }}<script src="{{ script.jspath }}"</s` + `cript>
-        <script>{{ script.jsInlineText|safe }}</s` + `cript>
-        </body>{{ script.suffix|safe }}</Template>
+    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions.devlib_artifact_css.OutputPath }}" />
+        {{ script.interfix|safe }}<script src="{{ definitions.devlib_artifact_js.OutputPath }}"></s` + `cript>
+        {{ script.suffix|safe }}</Template>
 </Artifact>
 `.replace(/\n\s+/g, '');
 
@@ -277,6 +292,14 @@ modulo.register('core', class DOMLoader {
         return cPartName;
     }
 });
+
+/*
+modulo.register('processor', function templatedValue (modulo, def, value) {
+    // TODO: Add this in for |TemplatedValue syntax, for Artifacts, etc
+    const templater = new modulo.registry.engines.Templater(modulo, {});
+    def.Value = templater.render(modulo);
+});
+*/
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
@@ -444,20 +467,40 @@ modulo.register('cpart', class Artifact {
     // preprocessors?). Refactor this to use something more generalized for
     // children, so it shares code flow with component.
     static build(modulo, def) {
-        const { saveFileAs, getBuiltHTML, hash, fetchBundleData } = modulo.registry.utils;
-        const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
-        //for (const child of children
-        const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
-        const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
-        let result = { exports: {} };
-        if (sDef) {
-            result = modulo.assetManager.require(sDef.DefinitionName);
+        const finish = (bundle) => {
+            const { saveFileAs, getBuiltHTML, hash, fetchBundleData } = modulo.registry.utils;
+            const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
+            //for (const child of children
+            const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
+            const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
+            let result = { exports: {} };
+            if (sDef) {
+                result = modulo.assets.require(sDef.DefinitionName);
+            }
+            const ctx = Object.assign({}, modulo, { script: result.exports });
+            ctx.bundle = bundledElems;
+            const templater = new modulo.registry.engines.Templater(modulo, tDef);
+            const code = templater.render(ctx);
+            def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
         }
-        //modulo.register('util', function fetchBundleData(modulo, callback) {
-        const ctx = Object.assign({}, modulo, { script: result.exports });
-        const templater = new modulo.registry.engines.Templater(modulo, tDef);
-        const code = templater.render(ctx);
-        def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
+
+        const bundledElems = [];
+        if (def.bundle) {
+            for (const elem of document.querySelectorAll(def.bundle)) {
+                if (def.exclude && elem.matches(def.exclude)) {
+                    continue;
+                }
+                modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
+                    delete modulo.fetchQueue.data[elem.src || elem.href]; // clear cache
+                    elem.bundledContent = text;
+                });
+                bundledElems.push(elem);
+            }
+        }
+        if (def.remove) {
+            document.querySelectorAll(def.remove).forEach(elem => elem.remove());
+        }
+        modulo.fetchQueue.enqueueAll(() => finish(bundledElems));
         /*modulo.enqueueAll.wait(() => {
         });*/
     }
@@ -1977,6 +2020,7 @@ modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     return '<!DOCTYPE HTML><html>' + head + body + '</html>';
 });
 
+/*
 modulo.register('command', function build (modulo, opts = {}) {
     const { saveFileAs, getBuiltHTML, hash } = modulo.registry.utils;
     modulo.assets.bundleAssets((js, css) => {
@@ -1995,24 +2039,19 @@ modulo.register('command', function build (modulo, opts = {}) {
         }, 0);
     });
 });
+*/
 
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
-        modulo.registry.cparts.Artifact.build(modulo, artifacts.pop());
+        modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
         }
     };
-    console.log('thsi is mdoulodefs', modulo.definitions);
-    // TODO
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');
-    modulo.assets.bundleAssets((js, css) => {
-        modulo.assets.bundledJS = js; // TODO 
-        modulo.assets.bundledCSS = css;
-        buildNext();
-    });
+    buildNext();
 });
 
 if (typeof document !== 'undefined' && !window.moduloBuild) {
@@ -2020,7 +2059,7 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         if (window.moduloBuild) {
             return;
         }
-        modulo.loadString(modulo.DEVLIB_SOURCE, 'devlib');
+        modulo.loadString(modulo.DEVLIB_SOURCE, 'devlib_artifact');
         modulo.preprocessAndDefine(() => {
             const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
             if (cmd) { // Command specified, run and exit right away

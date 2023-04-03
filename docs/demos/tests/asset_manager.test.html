@@ -96,6 +96,20 @@ window.moduloBuild.nameToHash = {
             mod2.config = deepClone(originalConfig, modulo);
             mod2.assets = new mod2.registry.core.AssetManager(mod2);
             mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
+
+            // Copy over devlib
+            const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('devlib'))
+            for (const [ key, def ] of devlib) {
+                mod2.definitions[key] = def;
+                const hash = modulo.assets.nameToHash[key];
+                if (hash) {
+                    mod2.assets.nameToHash[key] = hash;
+                    mod2.assets.modules[hash] = modulo.assets.modules[hash];
+                }
+            }
+            //Object.assign(mod2.assets.modules, modulo.assets.modules); /* Copy over modules as well */
+            //Object.assign(mod2.assets.nameToHash, modulo.assets.nameToHash); /* Copy over modules as well */
+
             const customElements = {
                 define: (tagName, cls) => {
                     customElements.elemClasses[tagName] = cls;
@@ -215,7 +229,7 @@ window.moduloBuild.nameToHash = {
 
         window._getRelevantInfoForComponentTexts = (mod2) => {
             const actual1 = JSON.stringify(Array.from(Object.keys(mod2.definitions)));
-            const expected1 = JSON.stringify([ 'TestA' , 'TestB', 'TestA_template', 'TestB_template' ]);
+            const expected1 = JSON.stringify(["devlib_artifact_js","devlib_artifact_css","devlib_artifact_html","devlib_artifact_js_template","devlib_artifact_css_template","devlib_artifact_html_script","devlib_artifact_html_template","TestA","TestB","TestA_template","TestB_template"]);
             let actual2a = null;
             let actual2b = null;
             let tName = '';

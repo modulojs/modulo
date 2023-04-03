@@ -297,6 +297,7 @@ modulo.register('cpart', class TestSuite {
             }
             TestSuite.teardownMocks(testModulo);
 
+
             if (!element) {
                 failure++;
                 console.log('[%]', '         ! ELEMENT FAILED TO MOUNT');
@@ -326,7 +327,6 @@ modulo.register('cpart', class TestSuite {
             }
             ////////////////////
             */
-
             for (const partialConf of stepArray) {
                 const result = TestSuite.doTestStep(testModulo, element, partialConf);
                 if (result !== null) {
