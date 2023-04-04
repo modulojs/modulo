@@ -149,6 +149,9 @@ window.Modulo = class Modulo {
                 const value = conf[attrName];
                 delete conf[attrName];
                 const funcName = (aliasedName || attrName).toLowerCase();
+                // TODO: Look at this.registry.cparts[conf.Type][funcName] first
+                // const  { cparts, processors } = this.registry;
+                // const func = funcName in cparts[conf.Type] ? cparts[conf.Type][funcName] : processors[funcName];
                 const result = this.registry.processors[funcName](this, conf, value);
                 return result === true ? 'wait' : true;
             }
@@ -185,23 +188,28 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
 /* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
             const hash = this.nameToHash[name]; // Alphabetic by name, not hash
 */
-window.modulo.DEVLIB_SOURCE = `
+// NOTE: ALWAYS assumes "name" in nameToHash is a JS safe variable name
+window.modulo.DEVLIB_SOURCE = (`
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
     <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
 {% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}</Template>
 </Artifact>
 <Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
-    <Template>window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
-{% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}
-window.moduloBuild.modules["{{ hash }}"] = function (modulo) { {{ assets.moduleSources|get:hash|safe }} };
-window.moduloBuild.nameToHash["{{ name }}"] = "{{ hash }}";
-{% endif %}{% endfor %}
-window.moduloBuild.definitions = {{ definitions|json:1|safe }};
-{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-//modulo.start(window.moduloBuild);
-{% for name in assets.mainRequires %}
-    modulo.assets.require("{{ name|escapejs }}");
-{% endfor %}
+    <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
+                {{ assets.moduleSources|get:hash|safe }}
+            };
+            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
+        {% endif %}{% endif %}{% endfor %}
+        window.moduloBuild.definitions = { {% for name, value in definitions %}
+            {% if name|first is not "_" %}{{ name }}: {{ value|json:1|safe }}, {% endif %} 
+        {% endfor %} };
+        {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+        modulo.start(window.moduloBuild);
+        {% for name in assets.mainRequires %}
+            modulo.assets.require("{{ name|escapejs }}");
+        {% endfor %}
     </Template>
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
@@ -215,11 +223,11 @@ window.moduloBuild.definitions = {{ definitions|json:1|safe }};
         script.exports.interfix = '</head><body>' + (window.document.body ? window.document.body.innerHTML : '');
         script.exports.suffix = '</body></html>';
     </S` + `cript>
-    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions.devlib_artifact_css.OutputPath }}" />
-        {{ script.interfix|safe }}<script src="{{ definitions.devlib_artifact_js.OutputPath }}"></s` + `cript>
+    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
+        {{ script.interfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
         {{ script.suffix|safe }}</Template>
 </Artifact>
-`.replace(/\n\s+/g, '');
+`).replace(/^\s+/gm, '');
 
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
@@ -480,7 +488,24 @@ modulo.register('cpart', class Artifact {
             const ctx = Object.assign({}, modulo, { script: result.exports });
             ctx.bundle = bundledElems;
             const templater = new modulo.registry.engines.Templater(modulo, tDef);
-            const code = templater.render(ctx);
+            let code = templater.render(ctx);
+            if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
+                const tDef2 = Object.assign({}, tDef, {
+                    modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
+                    modes: {
+                        ['/' + '*-{-%']: templater.modes['{%'], // alias
+                        ['/' + '*-{-{']: templater.modes['{{'], // alias
+                        ['/' + '*-{-#']: templater.modes['{#'], // alias
+                        text: templater.modes.text,
+                    },
+                    Content: code,
+                    DefinitionName: tDef.DefinitionName + '_macro',
+                    Hash: undefined,
+                });
+                const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
+                //templater2.escapeText = s => s; // turn on safe all the time
+                code = templater2.render(ctx);
+            }
             def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
         }
 
@@ -501,8 +526,6 @@ modulo.register('cpart', class Artifact {
             document.querySelectorAll(def.remove).forEach(elem => elem.remove());
         }
         modulo.fetchQueue.enqueueAll(() => finish(bundledElems));
-        /*modulo.enqueueAll.wait(() => {
-        });*/
     }
 }, {
     DefinedAs: 'name',
@@ -788,6 +811,10 @@ modulo.register('util', function makeDiv(html) {
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
+});
+
+modulo.register('util', function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
@@ -1399,8 +1426,8 @@ modulo.register('engine', class Templater {
 
     tokenizeText(text) {
         // Join all modeTokens with | (OR in regex).
-        // Replace space with wildcard capture.
-        const re = '(' + this.modeTokens.join('|(').replace(/ +/g, ')(.+?)');
+        const { escapeRegExp } = this.modulo.registry.utils;
+        const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
         return text.split(RegExp(re)).filter(token => token !== undefined);
     }
 
@@ -1409,7 +1436,8 @@ modulo.register('engine', class Templater {
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
-        for (const token of this.tokenizeText(text)) {
+        const tokens = this.tokenizeText(text);
+        for (const token of tokens) {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
@@ -2041,8 +2069,10 @@ modulo.register('command', function build (modulo, opts = {}) {
 });
 */
 
+/*-{-% if not config.IS_BUILD %-}-*/
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
+    modulo.config.IS_BUILD = true;
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
         modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
@@ -2059,7 +2089,7 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         if (window.moduloBuild) {
             return;
         }
-        modulo.loadString(modulo.DEVLIB_SOURCE, 'devlib_artifact');
+        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact');
         modulo.preprocessAndDefine(() => {
             const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
             if (cmd) { // Command specified, run and exit right away
@@ -2075,9 +2105,9 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         });
     });
 }
-
 if (typeof document !== 'undefined' && document.head) { // Browser environ
     modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }
+/*-{-% endif %-}-*/

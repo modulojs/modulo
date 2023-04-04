@@ -1,3 +1,4 @@
+window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
@@ -148,6 +149,9 @@ window.Modulo = class Modulo {
                 const value = conf[attrName];
                 delete conf[attrName];
                 const funcName = (aliasedName || attrName).toLowerCase();
+                // TODO: Look at this.registry.cparts[conf.Type][funcName] first
+                // const  { cparts, processors } = this.registry;
+                // const func = funcName in cparts[conf.Type] ? cparts[conf.Type][funcName] : processors[funcName];
                 const result = this.registry.processors[funcName](this, conf, value);
                 return result === true ? 'wait' : true;
             }
@@ -180,27 +184,45 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
+// TODO: Replace with hardcoded definitions, nameToHash, and modules (with impossible X-hashes)
+/* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
+            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
+*/
 window.modulo.DEVLIB_SOURCE = `
-<Artifact name="css" bundle="link[href]" exclude="[modulo-asset]">
-    <Template>or does dis work</Template>
+<Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
+    <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+{% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}</Template>
 </Artifact>
 <Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
-    <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}</Template>
+    <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+{% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) { {{ assets.moduleSources|get:hash|safe }} };
+window.moduloBuild.nameToHash["{{ name }}"] = "{{ hash }}";
+{% endif %}{% endif %}{% endfor %}
+window.moduloBuild.definitions = { {% for name, value in definitions %}
+{% if name|first is not "_" %}  "{{ name|escapejs }}": {{ value|json:1|safe }}, {% endif %} 
+{% endfor %} };
+{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+modulo.start(window.moduloBuild); // Load the definitions
+{% for name in assets.mainRequires %}
+    modulo.assets.require("{{ name|escapejs }}");
+{% endfor %}
+    </Template>
 </Artifact>
-<Artifact name="html" remove="script[src],link[href],[modulo-asset]">
+<Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        const { hash } = modulo.registry.utils;
-        script.exports.jspath = './modulo-build.' + hash('TODO XXX REPLACEME') + '.js';
-        script.exports.prefix = '<!DOCTYPE html><html>';
-        script.exports.suffix = '</html>';
-        script.exports.head = window.document.head ? window.document.head.innerHTML : '';
-        script.exports.body = window.document.body ? window.document.body.innerHTML : '';
-        script.exports.jsInlineText = modulo.assets.buildMain();
+        for (const elem of window.document.querySelectorAll('*')) { // Annotate modulo-original-html
+            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
+                elem.setAttribute('modulo-original-html', elem.originalHTML);
+            }
+        }
+        script.exports.prefix = '<!DOCTYPE html><html><head>' + (window.document.head ? window.document.head.innerHTML : '');
+        script.exports.interfix = '</head><body>' + (window.document.body ? window.document.body.innerHTML : '');
+        script.exports.suffix = '</body></html>';
     </S` + `cript>
-    <Template>{{ script.prefix|safe }}<head>{{ script.head|safe }}</head>
-        <body>{{ script.body|safe }}<script src="{{ script.jspath }}"></s` + `cript>
-        <script>{{ script.jsInlineText|safe }}</s` + `cript>
-        </body>{{ script.suffix|safe }}</Template>
+    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
+        {{ script.interfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
+        {{ script.suffix|safe }}</Template>
 </Artifact>
 `.replace(/\n\s+/g, '');
 
@@ -463,21 +485,35 @@ modulo.register('cpart', class Artifact {
             const ctx = Object.assign({}, modulo, { script: result.exports });
             ctx.bundle = bundledElems;
             const templater = new modulo.registry.engines.Templater(modulo, tDef);
-            const code = templater.render(ctx);
+            let code = templater.render(ctx);
+            if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
+                const tDef2 = Object.assign({}, tDef, {
+                    modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
+                    modes: {
+                        ['/' + '*-{-%']: templater.modes['{%'], // alias
+                        ['/' + '*-{-{']: templater.modes['{{'], // alias
+                        ['/' + '*-{-#']: templater.modes['{#'], // alias
+                        text: templater.modes.text,
+                    },
+                    Content: code,
+                    DefinitionName: tDef.DefinitionName + '_macro',
+                    Hash: undefined,
+                });
+                const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
+                //templater2.escapeText = s => s; // turn on safe all the time
+                code = templater2.render(ctx);
+            }
             def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
         }
 
         const bundledElems = [];
-        console.log("if def bundle", def.bundle, document.querySelectorAll(def.bundle));
         if (def.bundle) {
             for (const elem of document.querySelectorAll(def.bundle)) {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                console.log("enqueueing", elem.src || elem.href);
                 modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
                     delete modulo.fetchQueue.data[elem.src || elem.href]; // clear cache
-                    console.log("receiving", elem.src || elem.href);
                     elem.bundledContent = text;
                 });
                 bundledElems.push(elem);
@@ -487,8 +523,6 @@ modulo.register('cpart', class Artifact {
             document.querySelectorAll(def.remove).forEach(elem => elem.remove());
         }
         modulo.fetchQueue.enqueueAll(() => finish(bundledElems));
-        /*modulo.enqueueAll.wait(() => {
-        });*/
     }
 }, {
     DefinedAs: 'name',
@@ -774,6 +808,10 @@ modulo.register('util', function makeDiv(html) {
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
+});
+
+modulo.register('util', function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
@@ -1385,8 +1423,8 @@ modulo.register('engine', class Templater {
 
     tokenizeText(text) {
         // Join all modeTokens with | (OR in regex).
-        // Replace space with wildcard capture.
-        const re = '(' + this.modeTokens.join('|(').replace(/ +/g, ')(.+?)');
+        const { escapeRegExp } = this.modulo.registry.utils;
+        const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
         return text.split(RegExp(re)).filter(token => token !== undefined);
     }
 
@@ -1395,7 +1433,9 @@ modulo.register('engine', class Templater {
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
-        for (const token of this.tokenizeText(text)) {
+        const tokens = this.tokenizeText(text);
+        console.log('this is tokens', this.modeTokens, tokens);
+        for (const token of tokens) {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
@@ -2027,11 +2067,13 @@ modulo.register('command', function build (modulo, opts = {}) {
 });
 */
 
+/*-{-% if not config.IS_BUILD %-}-*/
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
+    modulo.config.IS_BUILD = true;
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
-        modulo.registry.cparts.Artifact.build(modulo, artifacts.pop());
+        modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
         }
@@ -2045,7 +2087,7 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         if (window.moduloBuild) {
             return;
         }
-        modulo.loadString(modulo.DEVLIB_SOURCE, 'devlib_artifact');
+        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact');
         modulo.preprocessAndDefine(() => {
             const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
             if (cmd) { // Command specified, run and exit right away
@@ -2061,9 +2103,9 @@ if (typeof document !== 'undefined' && !window.moduloBuild) {
         });
     });
 }
-
 if (typeof document !== 'undefined' && document.head) { // Browser environ
     modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }
+/*-{-% endif %-}-*/
