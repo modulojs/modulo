@@ -184,11 +184,7 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
-// TODO: Replace with hardcoded definitions, nameToHash, and modules (with impossible X-hashes)
-/* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
-            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
-*/
-// NOTE: ALWAYS assumes "name" in nameToHash is a JS safe variable name
+
 window.modulo.DEVLIB_SOURCE = (`
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
     <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
@@ -215,7 +211,7 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        for (const elem of window.document.querySelectorAll('*')) { // Annotate modulo-original-html
+        for (const elem of window.document.querySelectorAll('*')) {
             if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
                 elem.setAttribute('modulo-original-html', elem.originalHTML);
             }
@@ -301,14 +297,6 @@ modulo.register('core', class DOMLoader {
         return cPartName;
     }
 });
-
-/*
-modulo.register('processor', function templatedValue (modulo, def, value) {
-    // TODO: Add this in for |TemplatedValue syntax, for Artifacts, etc
-    const templater = new modulo.registry.engines.Templater(modulo, {});
-    def.Value = templater.render(modulo);
-});
-*/
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
@@ -477,7 +465,7 @@ modulo.register('cpart', class Artifact {
     // children, so it shares code flow with component.
     static build(modulo, def) {
         const finish = (bundle) => {
-            const { saveFileAs, getBuiltHTML, hash, fetchBundleData } = modulo.registry.utils;
+            const { saveFileAs, hash } = modulo.registry.utils;
             const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
             //for (const child of children
             const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
@@ -918,71 +906,20 @@ modulo.register('core', class AssetManager {
         return this.modules[hash].call(window, this.modulo);
     }
 
-    wrapDefine(hash, name, code, prefix = 'window.modulo.assets') {
-        const assignee = `${ prefix }.modules["${ hash }"]`;
-        return `${ assignee } = function ${ name } (modulo) {\n${ code }\n};\n`;
-    }
-
     define(name, code) {
         const hash = this.modulo.registry.utils.hash(code);
         this.modulo.assert(!(name in this.nameToHash), `Duplicate: ${ name }`);
         this.nameToHash[name] = hash;
         if (!(hash in this.modules)) {
             this.moduleSources[hash] = code;
-            const jsText = this.wrapDefine(hash, name, code);
+            const assignee = `window.modulo.assets.modules["${ hash }"] = `;
+            const prefix = assignee + `function ${ name } (modulo) {\n`;
             this.modulo.assets = this;// TODO Should investigate why needed
             this.modulo.pushGlobal();
-            this.appendToHead('script', '"use strict";' + jsText);
+            this.appendToHead('script', `"use strict";${ prefix }${ code }};\n`);
             this.modulo.popGlobal();
         }
         return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
-    }
-
-    buildJavaScript() {
-        const prefix = `window.moduloBuild = window.moduloBuild || { modules: {} };\n`;
-        return prefix + this.buildModuleDefs() + this.buildConfigDef();
-    }
-
-    buildConfigDef() {
-        const defs = JSON.stringify(this.modulo.definitions, null, 1);
-        return `window.moduloBuild.definitions = ${ defs };\n`;
-    }
-
-    buildModuleDefs() {
-        let jsText = '';
-        const pre = 'window.moduloBuild';
-        for (const name of Object.keys(this.nameToHash).sort()) {
-            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
-            if (hash in this.moduleSources) {
-                const source = this.moduleSources[hash];
-                jsText += this.wrapDefine(hash, name, source, pre);
-                delete this.moduleSources[hash];
-            }
-        }
-        const namesString = JSON.stringify(this.nameToHash, null, 1);
-        jsText += pre + '.nameToHash = ' + namesString + ';\n';
-        modulo.assert(Object.keys(this.moduleSources).length === 0, 'Unused mod keys');
-        return jsText.length > 40 ? jsText : ''; // <40 chars means no-op
-    }
-
-    buildMain() {
-        const p = 'window.moduloBuild && modulo.start(window.moduloBuild);\n';
-        const asRequireInvocation = s => `modulo.assets.require("${ s }");`;
-        return p + this.mainRequires.map(asRequireInvocation).join('\n');
-    }
-
-    bundleAssets(callback) {
-        const { fetchBundleData } = this.modulo.registry.utils;
-        fetchBundleData(this.modulo, bundleData => {
-            //const results = this.cssAssetsArray;
-            // TODO: This should be replaced with Artifact system (#35)
-            const results = { js: [], css: this.cssAssetsArray };
-            results.js.push(this.modulo.assets.buildJavaScript());
-            for (const bundle of bundleData) { // Loop through bundle data
-                results[bundle.type].push(bundle.content);
-            }
-            callback(results.js.join('\n'), results.css.join('\n'));
-        });
     }
 
     registerStylesheet(text) {
@@ -2003,76 +1940,6 @@ modulo.register('util', function getAutoExportNames(contents) {
     return (contents.match(regexpG) || []).map(s => s.match(regexp2)[2])
         .filter(s => s && !Modulo.INVALID_WORDS.has(s));
 });
-
-modulo.register('util', function fetchBundleData(modulo, callback) {
-    const query = 'script[src],link[rel=stylesheet]';
-    const data = [];
-    const elems = Array.from(window.document.querySelectorAll(query));
-    for (const elem of elems) {
-        const dataItem = {
-            src: elem.src || elem.href,
-            type: elem.tagName === 'SCRIPT' ? 'js' : 'css',
-            content: null,
-        };
-        elem.remove();
-        // TODO: Add support for inline script tags..?
-        data.push(dataItem);
-        modulo.fetchQueue.fetch(dataItem.src).then(text => {
-            delete modulo.fetchQueue.data[dataItem.src]; // clear cached data
-            dataItem.content = text;
-        });
-    }
-    modulo.fetchQueue.enqueueAll(() => callback(data));
-});
-
-modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
-    // Scan document for modulo elements, attaching modulo-original-html=""
-    // as needed, and clearing link / script tags that have been bundled
-    const bundledTags = { script: 1, link: 1, style: 1 }; // TODO: Move to conf?
-    for (const elem of window.document.querySelectorAll('*')) {
-        if (elem.tagName.toLowerCase() in bundledTags) {
-            elem.remove();
-        }
-        /*
-            // TODO: As we are bundling together, create a src/href/etc collection
-            // to the compare against instead?
-            // TODO: Maybe remove bundle logic here, since we remove when bundling?
-        if (elem.hasAttribute('modulo-asset')) {
-            elem.remove(); // TODO: Maybe remove bundle logic here, since we remove when bundling?
-        }
-        */
-        if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-            elem.setAttribute('modulo-original-html', elem.originalHTML);
-        }
-    }
-    let head = '<head>' + window.document.head.innerHTML;
-    let body = '<body>' + window.document.body.innerHTML;
-    head += `<link rel="stylesheet" href="${ opts.cssFilePath }" /></head>`;
-    body += `<script src="${ opts.jsFilePath }"></s` + `cript>`;
-    body += `<script>${ opts.jsInlineText }</s` + `cript></body>`;
-    return '<!DOCTYPE HTML><html>' + head + body + '</html>';
-});
-
-/*
-modulo.register('command', function build (modulo, opts = {}) {
-    const { saveFileAs, getBuiltHTML, hash } = modulo.registry.utils;
-    modulo.assets.bundleAssets((js, css) => {
-        opts.jsInlineText = modulo.assets.buildMain();
-        opts.jsFilePath = saveFileAs(`modulo-build-${ hash(js) }.js`, js);
-        opts.cssFilePath = saveFileAs(`modulo-build-${ hash(css) }.css`, css);
-        const htmlFN = window.location.pathname.split('/').pop() || 'index.html';
-        opts.htmlFilePath = saveFileAs(htmlFN, getBuiltHTML(modulo, opts));
-        window.setTimeout(() => {
-            // TODO: Move this "refresh" into a generic utility
-            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
-                build</a>: ${ opts.htmlFilePath }</h1>`;
-            if (opts && opts.callback) {
-                opts.callback();
-            }
-        }, 0);
-    });
-});
-*/
 
 /*-{-% if not config.IS_BUILD %-}-*/
 modulo.register('command', function build (modulo, opts = {}) {

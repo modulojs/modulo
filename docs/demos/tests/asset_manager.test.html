@@ -9,6 +9,7 @@
         assert: modulo && modulo.assets && modulo.registry.core.AssetManager
     </script>
 
+    <!--
     <script name="wrapDefine creates an assignment">
         const pre = 'window.moduloBuild';
         const assets = new modulo.registry.core.AssetManager(modulo);
@@ -25,6 +26,7 @@
                          'function Test_x_x_x (modulo) {\nreturn "testing123"\n};\n';
         assert: actual === expected
     </script>
+    -->
 
     <script name="Associates module name with hash">
         const assets = new modulo.registry.core.AssetManager(modulo);
@@ -56,6 +58,7 @@
         assert: func() === 'testing123'
     </script>
 
+    <!--
     <script name="assets.buildModuleDefs produces empty-string for empty modulo conf">
         const mod = new Modulo(null, [ ]);
         mod.registry = modulo.registry;
@@ -78,6 +81,7 @@ window.moduloBuild.nameToHash = {
 `.trim()
         assert: actual === expected
     </script>
+    -->
 
 </Test>
 
@@ -270,7 +274,6 @@ window.moduloBuild.nameToHash = {
         const expected4 = "[]"; // Empty, since we won't include source in build
         assert: actual1 === expected1 && actual2 === expected2 && actual3 === expected3 && actual4 === expected4
     </script>
-    -->
 
     <script name="assets.buildJavaScript builds defs">
         const mod2 = window._buildAndRun(mod => {
@@ -282,6 +285,7 @@ window.moduloBuild.nameToHash = {
         const correctExpected1 = JSON.stringify(["_artifact_css","_artifact_js","_artifact_html","_artifact_css_template","_artifact_js_template","_artifact_html_script","_artifact_html_template","TestA","TestB","TestA_template","TestB_template"]);
         assert: actual1 === correctExpected1 && actual2a === 1 && actual2b === 1 && hash in mod2.assets.modules && actual4 === expected4
     </script>
+    -->
 
     <script name="commands.build produces files with expected names and sizes">
         const files = window._buildCommandAndRun(false, null);
