@@ -192,7 +192,8 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
 window.modulo.DEVLIB_SOURCE = (`
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
     <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-{% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}</Template>
+              {% for css in assets.cssAssetsArray %}{{ css|safe }}
+              {% endfor %}</Template>
 </Artifact>
 <Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
     <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
@@ -506,7 +507,11 @@ modulo.register('cpart', class Artifact {
                 //templater2.escapeText = s => s; // turn on safe all the time
                 code = templater2.render(ctx);
             }
-            def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
+            def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
+            if (def.name === 'html') { // TODO: Make this only happen during SSG
+                def.FileName = window.location.pathname.split('/').pop() || 'index.html';
+            }
+            def.OutputPath = saveFileAs(def.FileName, code);
         }
 
         const bundledElems = [];
@@ -2078,6 +2083,12 @@ modulo.register('command', function build (modulo, opts = {}) {
         modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
+        } else {
+            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
+                build</a>: ${ opts.htmlFilePath }</h1>`;
+            if (opts && opts.callback) {
+                opts.callback();
+            }
         }
     };
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');
