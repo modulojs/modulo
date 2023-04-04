@@ -188,25 +188,29 @@ if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
 /* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
             const hash = this.nameToHash[name]; // Alphabetic by name, not hash
 */
-window.modulo.DEVLIB_SOURCE = `
+// NOTE: ALWAYS assumes "name" in nameToHash is a JS safe variable name
+window.modulo.DEVLIB_SOURCE = (`
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
     <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-{% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}</Template>
+              {% for css in assets.cssAssetsArray %}{{ css|safe }}
+              {% endfor %}</Template>
 </Artifact>
 <Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
     <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
-{% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
-window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) { {{ assets.moduleSources|get:hash|safe }} };
-window.moduloBuild.nameToHash["{{ name }}"] = "{{ hash }}";
-{% endif %}{% endif %}{% endfor %}
-window.moduloBuild.definitions = { {% for name, value in definitions %}
-{% if name|first is not "_" %}  "{{ name|escapejs }}": {{ value|json:1|safe }}, {% endif %} 
-{% endfor %} };
-{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-modulo.start(window.moduloBuild); // Load the definitions
-{% for name in assets.mainRequires %}
-    modulo.assets.require("{{ name|escapejs }}");
-{% endfor %}
+        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
+                {{ assets.moduleSources|get:hash|safe }}
+            };
+            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
+        {% endif %}{% endif %}{% endfor %}
+        window.moduloBuild.definitions = { {% for name, value in definitions %}
+            {% if name|first is not "_" %}{{ name }}: {{ value|json:1|safe }}, {% endif %} 
+        {% endfor %} };
+        {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+        modulo.start(window.moduloBuild);
+        {% for name in assets.mainRequires %}
+            modulo.assets.require("{{ name|escapejs }}");
+        {% endfor %}
     </Template>
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
@@ -224,7 +228,7 @@ modulo.start(window.moduloBuild); // Load the definitions
         {{ script.interfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
         {{ script.suffix|safe }}</Template>
 </Artifact>
-`.replace(/\n\s+/g, '');
+`).replace(/^\s+/gm, '');
 
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
@@ -503,7 +507,11 @@ modulo.register('cpart', class Artifact {
                 //templater2.escapeText = s => s; // turn on safe all the time
                 code = templater2.render(ctx);
             }
-            def.OutputPath = saveFileAs(`modulo-build-${ hash(code) }.${ def.name }`, code);
+            def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
+            if (def.name === 'html') { // TODO: Make this only happen during SSG
+                def.FileName = window.location.pathname.split('/').pop() || 'index.html';
+            }
+            def.OutputPath = saveFileAs(def.FileName, code);
         }
 
         const bundledElems = [];
@@ -1434,7 +1442,6 @@ modulo.register('engine', class Templater {
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
         const tokens = this.tokenizeText(text);
-        console.log('this is tokens', this.modeTokens, tokens);
         for (const token of tokens) {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
@@ -2076,6 +2083,12 @@ modulo.register('command', function build (modulo, opts = {}) {
         modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
+        } else {
+            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
+                build</a>: ${ opts.htmlFilePath }</h1>`;
+            if (opts && opts.callback) {
+                opts.callback();
+            }
         }
     };
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');

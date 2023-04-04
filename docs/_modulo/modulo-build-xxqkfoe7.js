@@ -1,4 +1,5 @@
-window.moduloBuild = window.moduloBuild || { modules: {} };
+window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+
 window.moduloBuild.modules["x15blq4q"] = function configuration (modulo) {
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
@@ -12778,10 +12779,12 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     modulo.register('util', copyTextToClipboard);
 
 };
-window.moduloBuild.modules["x1ekkph7"] = function docseg_Templating_1 (modulo) {
+window.moduloBuild.nameToHash.configuration = "x15blq4q";
 
-        const def = modulo.definitions['docseg_Templating_1'];
-        class docseg_Templating_1 extends window.HTMLElement {
+window.moduloBuild.modules["xxpfb13f"] = function x_DemoModal (modulo) {
+
+        const def = modulo.definitions['x_DemoModal'];
+        class x_DemoModal extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -12793,48 +12796,17 @@ window.moduloBuild.modules["x1ekkph7"] = function docseg_Templating_1 (modulo) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Templating_1);
-        window.customElements.define(def.TagName, docseg_Templating_1);
-        return docseg_Templating_1;
+        modulo.registry.utils.initClass(modulo, def, x_DemoModal);
+        window.customElements.define(def.TagName, x_DemoModal);
+        return x_DemoModal;
     
 };
-window.moduloBuild.modules["x1adah1a"] = function docseg_Templating_1_script (modulo) {
-var script = { exports: {} }; var script;
+window.moduloBuild.nameToHash.x_DemoModal = "xxpfb13f";
 
-    script.exports.title = "ModuloNews";
+window.moduloBuild.modules["x151hoj2"] = function x_DemoChart (modulo) {
 
-return {setLocalVariables: function(o) {script=o.script}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x1nrhiqd"] = function docseg_Templating_1_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push("\n  "); // ""
-  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
-  OUT.push("</em>\n  on "); // "</em> on"
-  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
-  OUT.push(".</p>\n\n"); // ".</p>"
-  OUT.push("\n"); // ""
-  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
-  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
-  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
-  OUT.push("</h4>\n    "); // "</h4>"
-  if (CTX.article.tease) { // "if article.tease"
-  OUT.push("\n      <p>"); // "<p>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
-  OUT.push("</p>\n    "); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxr282hq"] = function docseg_Templating_Comments (modulo) {
-
-        const def = modulo.definitions['docseg_Templating_Comments'];
-        class docseg_Templating_Comments extends window.HTMLElement {
+        const def = modulo.definitions['x_DemoChart'];
+        class x_DemoChart extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -12846,34 +12818,17 @@ window.moduloBuild.modules["xxr282hq"] = function docseg_Templating_Comments (mo
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Templating_Comments);
-        window.customElements.define(def.TagName, docseg_Templating_Comments);
-        return docseg_Templating_Comments;
+        modulo.registry.utils.initClass(modulo, def, x_DemoChart);
+        window.customElements.define(def.TagName, x_DemoChart);
+        return x_DemoChart;
     
 };
-window.moduloBuild.modules["x1p85et1"] = function docseg_Templating_Comments_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <h1>hello "); // "<h1>hello"
-  OUT.push("</h1>\n    "); // "</h1>"
-  /* // "comment"
-  OUT.push("\n      "); // ""
-  if (CTX.a) { // "if a"
-  OUT.push("<div>"); // "<div>"
-  OUT.push(G.escapeText(CTX.b)); // "b"
-  OUT.push("</div>"); // "</div>"
-  } // "endif"
-  OUT.push("\n      <h3>"); // "<h3>"
-  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
-  OUT.push("</h3>\n    "); // "</h3>"
-  */ // "endcomment"
-  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
+window.moduloBuild.nameToHash.x_DemoChart = "x151hoj2";
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x11n9f38"] = function docseg_Templating_Escaping (modulo) {
+window.moduloBuild.modules["xxxjnsmn"] = function x_ExampleBtn (modulo) {
 
-        const def = modulo.definitions['docseg_Templating_Escaping'];
-        class docseg_Templating_Escaping extends window.HTMLElement {
+        const def = modulo.definitions['x_ExampleBtn'];
+        class x_ExampleBtn extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -12885,25 +12840,17 @@ window.moduloBuild.modules["x11n9f38"] = function docseg_Templating_Escaping (mo
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Templating_Escaping);
-        window.customElements.define(def.TagName, docseg_Templating_Escaping);
-        return docseg_Templating_Escaping;
+        modulo.registry.utils.initClass(modulo, def, x_ExampleBtn);
+        window.customElements.define(def.TagName, x_ExampleBtn);
+        return x_ExampleBtn;
     
 };
-window.moduloBuild.modules["x184ue3a"] = function docseg_Templating_Escaping_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
-  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
-  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
-  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
-  OUT.push("\n</div>\n"); // "</div>"
+window.moduloBuild.nameToHash.x_ExampleBtn = "xxxjnsmn";
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1d0lm7c"] = function docseg_Templating_PrepareCallback (modulo) {
+window.moduloBuild.modules["x1r4nctp"] = function x_DemoSelector (modulo) {
 
-        const def = modulo.definitions['docseg_Templating_PrepareCallback'];
-        class docseg_Templating_PrepareCallback extends window.HTMLElement {
+        const def = modulo.definitions['x_DemoSelector'];
+        class x_DemoSelector extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -12915,572 +12862,67 @@ window.moduloBuild.modules["x1d0lm7c"] = function docseg_Templating_PrepareCallb
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Templating_PrepareCallback);
-        window.customElements.define(def.TagName, docseg_Templating_PrepareCallback);
-        return docseg_Templating_PrepareCallback;
+        modulo.registry.utils.initClass(modulo, def, x_DemoSelector);
+        window.customElements.define(def.TagName, x_DemoSelector);
+        return x_DemoSelector;
     
 };
-window.moduloBuild.modules["xxfr5sfs"] = function docseg_Templating_PrepareCallback_script (modulo) {
+window.moduloBuild.nameToHash.x_DemoSelector = "x1r4nctp";
+
+window.moduloBuild.modules["xxsbnnt4"] = function x_DemoModal_script (modulo) {
 var script = { exports: {} }; var state;
 
-    function prepareCallback() {
-        const calcResult = (state.perc / 100) * state.total;
-        return { calcResult };
-    }
-
-return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xx7jgg2i"] = function docseg_Templating_PrepareCallback_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
-  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxvb81tk"] = function docseg_Tutorial_P1 (modulo) {
-
-        const def = modulo.definitions['docseg_Tutorial_P1'];
-        class docseg_Tutorial_P1 extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
+        function show() {
+            state.visible = true;
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P1);
-        window.customElements.define(def.TagName, docseg_Tutorial_P1);
-        return docseg_Tutorial_P1;
+        function hide() {
+            state.visible = false;
+        }
     
-};
-window.moduloBuild.modules["xxm6soph"] = function docseg_Tutorial_P1_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n"); // "Hello <strong>Modulo</strong> World! <p class=\"neat\">Any HTML can be here!</p>"
+return {"show": typeof show !== "undefined" ? show : undefined, "hide": typeof hide !== "undefined" ? hide : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
 
-return OUT.join(""); };
 };
-window.moduloBuild.modules["xx85njvf"] = function docseg_Tutorial_P2 (modulo) {
+window.moduloBuild.nameToHash.x_DemoModal_script = "xxsbnnt4";
 
-        const def = modulo.definitions['docseg_Tutorial_P2'];
-        class docseg_Tutorial_P2 extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
+window.moduloBuild.modules["x1g5fuoe"] = function x_DemoChart_script (modulo) {
+var script = { exports: {} }; var props;
+
+        function prepareCallback() {
+            const data = props.data || [];
+            const max = Math.max(...data);
+            const min = 0;// Math.min(...props.data),
+            return {
+                percent: data.map(item => ((item - min) / max) * 100),
+                width: Math.floor(100 / data.length),
             }
         }
-        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P2);
-        window.customElements.define(def.TagName, docseg_Tutorial_P2);
-        return docseg_Tutorial_P2;
     
-};
-window.moduloBuild.modules["xx7h5unj"] = function docseg_Tutorial_P2_filters_demo (modulo) {
-
-        const def = modulo.definitions['docseg_Tutorial_P2_filters_demo'];
-        class docseg_Tutorial_P2_filters_demo extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P2_filters_demo);
-        window.customElements.define(def.TagName, docseg_Tutorial_P2_filters_demo);
-        return docseg_Tutorial_P2_filters_demo;
-    
-};
-window.moduloBuild.modules["x1h93c2j"] = function docseg_Tutorial_P2_filters_demo_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1hmr3nm"] = function docseg_Tutorial_P3_state_bind (modulo) {
-
-        const def = modulo.definitions['docseg_Tutorial_P3_state_bind'];
-        class docseg_Tutorial_P3_state_bind extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P3_state_bind);
-        window.customElements.define(def.TagName, docseg_Tutorial_P3_state_bind);
-        return docseg_Tutorial_P3_state_bind;
-    
-};
-window.moduloBuild.modules["xxonth4n"] = function docseg_Tutorial_P3_state_bind_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
-  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
-  OUT.push(";\n            color: "); // "; color:"
-  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
-  OUT.push(";\n        \">\n        "); // "; \">"
-  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
-  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1pd9q54"] = function docseg_Tutorial_P3_state_demo (modulo) {
-
-        const def = modulo.definitions['docseg_Tutorial_P3_state_demo'];
-        class docseg_Tutorial_P3_state_demo extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P3_state_demo);
-        window.customElements.define(def.TagName, docseg_Tutorial_P3_state_demo);
-        return docseg_Tutorial_P3_state_demo;
-    
-};
-window.moduloBuild.modules["x13o8260"] = function docseg_Tutorial_P3_state_demo_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
-  OUT.push(" who\n"); // "who"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ed a "); // "ed a"
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push(",\ntaught "); // ", taught"
-  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
-  OUT.push("ing in\nthe City of "); // "ing in the City of"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
-  OUT.push(",\nto "); // ", to"
-  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
-  OUT.push(" "); // ""
-  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
-  OUT.push("s.\n</pre>\n"); // "s. </pre>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1bekpk5"] = function eg_ColorSelector (modulo) {
-
-        const def = modulo.definitions['eg_ColorSelector'];
-        class eg_ColorSelector extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_ColorSelector);
-        window.customElements.define(def.TagName, eg_ColorSelector);
-        return eg_ColorSelector;
-    
-};
-window.moduloBuild.modules["x145sdaa"] = function eg_ColorSelector_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
-  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
-  OUT.push("%, "); // "%,"
-  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
-  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1avssv1"] = function eg_Components (modulo) {
-
-        const def = modulo.definitions['eg_Components'];
-        class eg_Components extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_Components);
-        window.customElements.define(def.TagName, eg_Components);
-        return eg_Components;
-    
-};
-window.moduloBuild.modules["x1gk8lc3"] = function eg_Components_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x18fmfmt"] = function eg_ConwayGameOfLife (modulo) {
-
-        const def = modulo.definitions['eg_ConwayGameOfLife'];
-        class eg_ConwayGameOfLife extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_ConwayGameOfLife);
-        window.customElements.define(def.TagName, eg_ConwayGameOfLife);
-        return eg_ConwayGameOfLife;
-    
-};
-window.moduloBuild.modules["xxmintkp"] = function eg_ConwayGameOfLife_script (modulo) {
-var script = { exports: {} }; var state, script, element;
-
-    function toggle([ i, j ]) {
-        if (!state.cells[i]) {
-            state.cells[i] = {};
-        }
-        state.cells[i][j] = !state.cells[i][j];
-    }
-
-    function play() {
-        state.playing = true;
-        setTimeout(() => {
-            if (state.playing) {
-                updateNextFrame();
-                element.rerender(); // manually rerender
-                play(); // cue next frame
-            }
-        }, 2000 / state.speed);
-    }
-
-    function pause() {
-        state.playing = false;
-    }
-
-    function clear() {
-        state.cells = {};
-    }
-
-    function randomize() {
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!state.cells[i]) {
-                    state.cells[i] = {};
-                }
-                state.cells[i][j] = (Math.random() > 0.5);
-            }
-        }
-    }
-
-    // Helper function for getting a cell from data
-    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
-    function updateNextFrame() {
-        const nextData = {};
-        for (const i of script.exports.range) {
-            for (const j of script.exports.range) {
-                if (!nextData[i]) {
-                    nextData[i] = {};
-                }
-                const count = countNeighbors(i, j);
-                nextData[i][j] = get(i, j) ?
-                    (count === 2 || count === 3) : // stays alive
-                    (count === 3); // comes alive
-            }
-        }
-        state.cells = nextData;
-    }
-
-    function countNeighbors(i, j) {
-        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
-                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
-                get(i + 1, j - 1), get(i - 1, j + 1)];
-        return neighbors.filter(v => v).length;
-    }
-    script.exports.range = Array.from({length: 24}, (x, i) => i);
-
-return {"toggle": typeof toggle !== "undefined" ? toggle : undefined, "play": typeof play !== "undefined" ? play : undefined, "pause": typeof pause !== "undefined" ? pause : undefined, "clear": typeof clear !== "undefined" ? clear : undefined, "randomize": typeof randomize !== "undefined" ? randomize : undefined, "updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined, "countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined, setLocalVariables: function(o) {state=o.state; script=o.script; element=o.element}, exports: script.exports }
+return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, setLocalVariables: function(o) {props=o.props}, exports: script.exports }
 
 };
-window.moduloBuild.modules["x1spom4d"] = function eg_ConwayGameOfLife_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
-  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n        "); // ""
-  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
-  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
-  OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push(", "); // ","
-  OUT.push(G.escapeText(CTX.j)); // "j"
-  OUT.push(" ]\" style=\""); // "]\" style=\""
-  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
-  OUT.push("\n                "); // ""
-  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
-  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\"></div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endfor"
-  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
-  if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
-  } else { // "else"
-  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
-  } // "endif"
-  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
+window.moduloBuild.nameToHash.x_DemoChart_script = "x1g5fuoe";
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1d3p8tg"] = function eg_DateNumberPicker (modulo) {
-
-        const def = modulo.definitions['eg_DateNumberPicker'];
-        class eg_DateNumberPicker extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_DateNumberPicker);
-        window.customElements.define(def.TagName, eg_DateNumberPicker);
-        return eg_DateNumberPicker;
-    
-};
-window.moduloBuild.modules["x119ugke"] = function eg_DateNumberPicker_script (modulo) {
-var script = { exports: {} }; var state;
-
-    function isValid({ year, month, day }) {
-        month--; // Months are zero indexed
-        const d = new Date(year, month, day);
-        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
-    }
-    function next(part) {
-        state[part]++;
-        if (!isValid(state)) { // undo if not valid
-            state[part]--;
-        }
-    }
-    function previous(part) {
-        state[part]--;
-        if (!isValid(state)) { // undo if not valid
-            state[part]++;
-        }
-    }
-
-return {"isValid": typeof isValid !== "undefined" ? isValid : undefined, "next": typeof next !== "undefined" ? next : undefined, "previous": typeof previous !== "undefined" ? previous : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x1j17irn"] = function eg_DateNumberPicker_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
-  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
-  OUT.push("-"); // "-"
-  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
-  OUT.push("</tt></p>\n    "); // "</tt></p>"
-  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
-  OUT.push("\n        <label>\n            "); // "<label>"
-  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
-  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
-  OUT.push(G.escapeText(CTX.part)); // "part"
-  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1ovegn6"] = function eg_FlexibleForm (modulo) {
-
-        const def = modulo.definitions['eg_FlexibleForm'];
-        class eg_FlexibleForm extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_FlexibleForm);
-        window.customElements.define(def.TagName, eg_FlexibleForm);
-        return eg_FlexibleForm;
-    
-};
-window.moduloBuild.modules["x1t172bs"] = function eg_FlexibleFormWithAPI (modulo) {
-
-        const def = modulo.definitions['eg_FlexibleFormWithAPI'];
-        class eg_FlexibleFormWithAPI extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_FlexibleFormWithAPI);
-        window.customElements.define(def.TagName, eg_FlexibleFormWithAPI);
-        return eg_FlexibleFormWithAPI;
-    
-};
-window.moduloBuild.modules["x11988a0"] = function eg_FlexibleFormWithAPI_script (modulo) {
+window.moduloBuild.modules["x1d63iro"] = function x_DemoSelector_script (modulo) {
 var script = { exports: {} }; var state, element;
 
-    const URL = 'https://jsonplaceholder.typicode.com/posts';
-    const fakedPosts = [];
-    const headers = [];
-
-    function initializedCallback() {
-        refresh(); // Refresh on first load
-    }
-
-    function refresh() {
-        fetch(URL).then(r => r.json()).then(data => {
-            // Since Typicode API doesn't save it's POST
-            // data, we'll have manually fake it here
-            state.posts = data.concat(fakedPosts);
-            element.rerender();
-        });
-    }
-
-    function submit() {
-        // Rename the state variables to be what the API suggests
-        const postData = {
-              userId: state.user,
-              title: state.topic,
-              body: state.comment,
-        };
-        state.topic = ''; // clear the comment & topic text
-        state.comment = '';
-        fakedPosts.push(postData); // Required for refresh()
-
-        // Send the POST request with fetch, then refresh after
-        const opts = {
-            method: 'POST',
-            body: JSON.stringify(postData),
-            headers: { 'Content-type': 'application/json; charset=UTF-8' },
-        };
-        fetch(URL, opts).then(r => r.json()).then(refresh);
-    }
-
-return {"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, "refresh": typeof refresh !== "undefined" ? refresh : undefined, "submit": typeof submit !== "undefined" ? submit : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+        function prepareCallback() {
+            state.value = element.value;
+        }
+        function setValue(val) {
+            state.value = val;
+            element.value = val;
+            element.dispatchEvent(new Event('change'));
+        }
+    
+return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, "setValue": typeof setValue !== "undefined" ? setValue : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
 
 };
-window.moduloBuild.modules["x16ihg4b"] = function eg_FlexibleFormWithAPI_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <form>\n        "); // "<form>"
-  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
-  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
-  OUT.push("\">\n                    <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
-  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
-  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
-  OUT.push("number"); // "number"
-  } else { // "else"
-  OUT.push("text"); // "text"
-  } // "endif"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("\" id=\""); // "\" id=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
-  OUT.push("\">\n            </div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
-  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
-  OUT.push("\n            <p>\n                "); // "<p>"
-  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
-  OUT.push(":\n                <strong>"); // ": <strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</strong>\n                "); // "</strong>"
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
-  OUT.push("\n            </p>\n        "); // "</p>"
-  } // "endfor"
-  OUT.push("\n    </form>\n"); // "</form>"
+window.moduloBuild.nameToHash.x_DemoSelector_script = "x1d63iro";
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1ah1gte"] = function eg_FlexibleForm_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <form>\n        "); // "<form>"
-  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
-  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
-  OUT.push("\">\n                    <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
-  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
-  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === "string") { // "if state|get:field|type == 'string'"
-  OUT.push("text"); // "text"
-  } else { // "else"
-  OUT.push("checkbox"); // "checkbox"
-  } // "endif"
-  OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("\" id=\""); // "\" id=\""
-  OUT.push(G.escapeText(CTX.field)); // "field"
-  OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
-  OUT.push("\">\n            </div>\n        "); // "\"></div>"
-  } // "endfor"
-  OUT.push("\n    </form>\n"); // "</form>"
+window.moduloBuild.modules["x191astr"] = function mws_Page (modulo) {
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1teq8fq"] = function eg_GitHubAPI (modulo) {
-
-        const def = modulo.definitions['eg_GitHubAPI'];
-        class eg_GitHubAPI extends window.HTMLElement {
+        const def = modulo.definitions['mws_Page'];
+        class mws_Page extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -13492,53 +12934,17 @@ window.moduloBuild.modules["x1teq8fq"] = function eg_GitHubAPI (modulo) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, eg_GitHubAPI);
-        window.customElements.define(def.TagName, eg_GitHubAPI);
-        return eg_GitHubAPI;
+        modulo.registry.utils.initClass(modulo, def, mws_Page);
+        window.customElements.define(def.TagName, mws_Page);
+        return mws_Page;
     
 };
-window.moduloBuild.modules["x18vnjfe"] = function eg_GitHubAPI_script (modulo) {
-var script = { exports: {} }; var state, element;
+window.moduloBuild.nameToHash.mws_Page = "x191astr";
 
-    function fetchGitHub() {
-        fetch(`https://api.github.com/users/${state.search}`)
-            .then(response => response.json())
-            .then(githubCallback);
-    }
-    function githubCallback(apiData) {
-        state.name = apiData.name;
-        state.location = apiData.location;
-        state.bio = apiData.bio;
-        element.rerender();
-    }
+window.moduloBuild.modules["xx95jsjv"] = function mws_ProjectInfo (modulo) {
 
-return {"fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined, "githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x130qf1i"] = function eg_GitHubAPI_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>"); // "<p>"
-  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
-  OUT.push(" | "); // "|"
-  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
-  OUT.push("</p>\n<p>"); // "</p><p>"
-  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
-  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
-  if (CTX.state.search) { // "if state.search"
-  OUT.push("github.com/"); // "github.com/"
-  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
-  OUT.push("/"); // "/"
-  } // "endif"
-  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxupjk9l"] = function eg_Hello (modulo) {
-
-        const def = modulo.definitions['eg_Hello'];
-        class eg_Hello extends window.HTMLElement {
+        const def = modulo.definitions['mws_ProjectInfo'];
+        class mws_ProjectInfo extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -13550,33 +12956,17 @@ window.moduloBuild.modules["xxupjk9l"] = function eg_Hello (modulo) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, eg_Hello);
-        window.customElements.define(def.TagName, eg_Hello);
-        return eg_Hello;
+        modulo.registry.utils.initClass(modulo, def, mws_ProjectInfo);
+        window.customElements.define(def.TagName, mws_ProjectInfo);
+        return mws_ProjectInfo;
     
 };
-window.moduloBuild.modules["x1ml47eb"] = function eg_Hello_script (modulo) {
-var script = { exports: {} }; var state;
+window.moduloBuild.nameToHash.mws_ProjectInfo = "xx95jsjv";
 
-    function countUp() {
-        state.num++;
-    }
+window.moduloBuild.modules["x15gcnek"] = function mws_DevLogNav (modulo) {
 
-return {"countUp": typeof countUp !== "undefined" ? countUp : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xx9ntrq4"] = function eg_Hello_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
-  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
-  OUT.push("</button>\n"); // "</button>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxo8lpij"] = function eg_JSON (modulo) {
-
-        const def = modulo.definitions['eg_JSON'];
-        class eg_JSON extends window.HTMLElement {
+        const def = modulo.definitions['mws_DevLogNav'];
+        class mws_DevLogNav extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -13588,15 +12978,17 @@ window.moduloBuild.modules["xxo8lpij"] = function eg_JSON (modulo) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, eg_JSON);
-        window.customElements.define(def.TagName, eg_JSON);
-        return eg_JSON;
+        modulo.registry.utils.initClass(modulo, def, mws_DevLogNav);
+        window.customElements.define(def.TagName, mws_DevLogNav);
+        return mws_DevLogNav;
     
 };
-window.moduloBuild.modules["x124cpbo"] = function eg_JSONArray (modulo) {
+window.moduloBuild.nameToHash.mws_DevLogNav = "x15gcnek";
 
-        const def = modulo.definitions['eg_JSONArray'];
-        class eg_JSONArray extends window.HTMLElement {
+window.moduloBuild.modules["x1k6jtfq"] = function mws_DocSidebar (modulo) {
+
+        const def = modulo.definitions['mws_DocSidebar'];
+        class mws_DocSidebar extends window.HTMLElement {
             constructor() {
                 super();
                 modulo.registry.utils.initElement(modulo, def, this);
@@ -13608,719 +13000,13 @@ window.moduloBuild.modules["x124cpbo"] = function eg_JSONArray (modulo) {
                 modulo.registry.utils.mountElement(modulo, def, this);
             }
         }
-        modulo.registry.utils.initClass(modulo, def, eg_JSONArray);
-        window.customElements.define(def.TagName, eg_JSONArray);
-        return eg_JSONArray;
+        modulo.registry.utils.initClass(modulo, def, mws_DocSidebar);
+        window.customElements.define(def.TagName, mws_DocSidebar);
+        return mws_DocSidebar;
     
 };
-window.moduloBuild.modules["xxgkj36u"] = function eg_JSONArray_staticdata (modulo) {
-return [{"userId":1,"id":1,"title":"delectus aut autem","completed":false},{"userId":1,"id":2,"title":"quis ut nam facilis et officia qui","completed":false},{"userId":1,"id":3,"title":"fugiat veniam minus","completed":false},{"userId":1,"id":4,"title":"et porro tempora","completed":true},{"userId":1,"id":5,"title":"laboriosam mollitia et enim quasi adipisci quia provident illum","completed":false},{"userId":1,"id":6,"title":"qui ullam ratione quibusdam voluptatem quia omnis","completed":false},{"userId":1,"id":7,"title":"illo expedita consequatur quia in","completed":false},{"userId":1,"id":8,"title":"quo adipisci enim quam ut ab","completed":true},{"userId":1,"id":9,"title":"molestiae perspiciatis ipsa","completed":false},{"userId":1,"id":10,"title":"illo est ratione doloremque quia maiores aut","completed":true},{"userId":1,"id":11,"title":"vero rerum temporibus dolor","completed":true},{"userId":1,"id":12,"title":"ipsa repellendus fugit nisi","completed":true},{"userId":1,"id":13,"title":"et doloremque nulla","completed":false},{"userId":1,"id":14,"title":"repellendus sunt dolores architecto voluptatum","completed":true},{"userId":1,"id":15,"title":"ab voluptatum amet voluptas","completed":true},{"userId":1,"id":16,"title":"accusamus eos facilis sint et aut voluptatem","completed":true},{"userId":1,"id":17,"title":"quo laboriosam deleniti aut qui","completed":true},{"userId":1,"id":18,"title":"dolorum est consequatur ea mollitia in culpa","completed":false},{"userId":1,"id":19,"title":"molestiae ipsa aut voluptatibus pariatur dolor nihil","completed":true},{"userId":1,"id":20,"title":"ullam nobis libero sapiente ad optio sint","completed":true},{"userId":2,"id":21,"title":"suscipit repellat esse quibusdam voluptatem incidunt","completed":false},{"userId":2,"id":22,"title":"distinctio vitae autem nihil ut molestias quo","completed":true},{"userId":2,"id":23,"title":"et itaque necessitatibus maxime molestiae qui quas velit","completed":false},{"userId":2,"id":24,"title":"adipisci non ad dicta qui amet quaerat doloribus ea","completed":false},{"userId":2,"id":25,"title":"voluptas quo tenetur perspiciatis explicabo natus","completed":true},{"userId":2,"id":26,"title":"aliquam aut quasi","completed":true},{"userId":2,"id":27,"title":"veritatis pariatur delectus","completed":true},{"userId":2,"id":28,"title":"nesciunt totam sit blanditiis sit","completed":false},{"userId":2,"id":29,"title":"laborum aut in quam","completed":false},{"userId":2,"id":30,"title":"nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis","completed":true},{"userId":2,"id":31,"title":"repudiandae totam in est sint facere fuga","completed":false},{"userId":2,"id":32,"title":"earum doloribus ea doloremque quis","completed":false},{"userId":2,"id":33,"title":"sint sit aut vero","completed":false},{"userId":2,"id":34,"title":"porro aut necessitatibus eaque distinctio","completed":false},{"userId":2,"id":35,"title":"repellendus veritatis molestias dicta incidunt","completed":true},{"userId":2,"id":36,"title":"excepturi deleniti adipisci voluptatem et neque optio illum ad","completed":true},{"userId":2,"id":37,"title":"sunt cum tempora","completed":false},{"userId":2,"id":38,"title":"totam quia non","completed":false},{"userId":2,"id":39,"title":"doloremque quibusdam asperiores libero corrupti illum qui omnis","completed":false},{"userId":2,"id":40,"title":"totam atque quo nesciunt","completed":true},{"userId":3,"id":41,"title":"aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit","completed":false},{"userId":3,"id":42,"title":"rerum perferendis error quia ut eveniet","completed":false},{"userId":3,"id":43,"title":"tempore ut sint quis recusandae","completed":true},{"userId":3,"id":44,"title":"cum debitis quis accusamus doloremque ipsa natus sapiente omnis","completed":true},{"userId":3,"id":45,"title":"velit soluta adipisci molestias reiciendis harum","completed":false},{"userId":3,"id":46,"title":"vel voluptatem repellat nihil placeat corporis","completed":false},{"userId":3,"id":47,"title":"nam qui rerum fugiat accusamus","completed":false},{"userId":3,"id":48,"title":"sit reprehenderit omnis quia","completed":false},{"userId":3,"id":49,"title":"ut necessitatibus aut maiores debitis officia blanditiis velit et","completed":false},{"userId":3,"id":50,"title":"cupiditate necessitatibus ullam aut quis dolor voluptate","completed":true},{"userId":3,"id":51,"title":"distinctio exercitationem ab doloribus","completed":false},{"userId":3,"id":52,"title":"nesciunt dolorum quis recusandae ad pariatur ratione","completed":false},{"userId":3,"id":53,"title":"qui labore est occaecati recusandae aliquid quam","completed":false},{"userId":3,"id":54,"title":"quis et est ut voluptate quam dolor","completed":true},{"userId":3,"id":55,"title":"voluptatum omnis minima qui occaecati provident nulla voluptatem ratione","completed":true},{"userId":3,"id":56,"title":"deleniti ea temporibus enim","completed":true},{"userId":3,"id":57,"title":"pariatur et magnam ea doloribus similique voluptatem rerum quia","completed":false},{"userId":3,"id":58,"title":"est dicta totam qui explicabo doloribus qui dignissimos","completed":false},{"userId":3,"id":59,"title":"perspiciatis velit id laborum placeat iusto et aliquam odio","completed":false},{"userId":3,"id":60,"title":"et sequi qui architecto ut adipisci","completed":true},{"userId":4,"id":61,"title":"odit optio omnis qui sunt","completed":true},{"userId":4,"id":62,"title":"et placeat et tempore aspernatur sint numquam","completed":false},{"userId":4,"id":63,"title":"doloremque aut dolores quidem fuga qui nulla","completed":true},{"userId":4,"id":64,"title":"voluptas consequatur qui ut quia magnam nemo esse","completed":false},{"userId":4,"id":65,"title":"fugiat pariatur ratione ut asperiores necessitatibus magni","completed":false},{"userId":4,"id":66,"title":"rerum eum molestias autem voluptatum sit optio","completed":false},{"userId":4,"id":67,"title":"quia voluptatibus voluptatem quos similique maiores repellat","completed":false},{"userId":4,"id":68,"title":"aut id perspiciatis voluptatem iusto","completed":false},{"userId":4,"id":69,"title":"doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit","completed":false},{"userId":4,"id":70,"title":"ut sequi accusantium et mollitia delectus sunt","completed":false},{"userId":4,"id":71,"title":"aut velit saepe ullam","completed":false},{"userId":4,"id":72,"title":"praesentium facilis facere quis harum voluptatibus voluptatem eum","completed":false},{"userId":4,"id":73,"title":"sint amet quia totam corporis qui exercitationem commodi","completed":true},{"userId":4,"id":74,"title":"expedita tempore nobis eveniet laborum maiores","completed":false},{"userId":4,"id":75,"title":"occaecati adipisci est possimus totam","completed":false},{"userId":4,"id":76,"title":"sequi dolorem sed","completed":true},{"userId":4,"id":77,"title":"maiores aut nesciunt delectus exercitationem vel assumenda eligendi at","completed":false},{"userId":4,"id":78,"title":"reiciendis est magnam amet nemo iste recusandae impedit quaerat","completed":false},{"userId":4,"id":79,"title":"eum ipsa maxime ut","completed":true},{"userId":4,"id":80,"title":"tempore molestias dolores rerum sequi voluptates ipsum consequatur","completed":true},{"userId":5,"id":81,"title":"suscipit qui totam","completed":true},{"userId":5,"id":82,"title":"voluptates eum voluptas et dicta","completed":false},{"userId":5,"id":83,"title":"quidem at rerum quis ex aut sit quam","completed":true},{"userId":5,"id":84,"title":"sunt veritatis ut voluptate","completed":false},{"userId":5,"id":85,"title":"et quia ad iste a","completed":true},{"userId":5,"id":86,"title":"incidunt ut saepe autem","completed":true},{"userId":5,"id":87,"title":"laudantium quae eligendi consequatur quia et vero autem","completed":true},{"userId":5,"id":88,"title":"vitae aut excepturi laboriosam sint aliquam et et accusantium","completed":false},{"userId":5,"id":89,"title":"sequi ut omnis et","completed":true},{"userId":5,"id":90,"title":"molestiae nisi accusantium tenetur dolorem et","completed":true},{"userId":5,"id":91,"title":"nulla quis consequatur saepe qui id expedita","completed":true},{"userId":5,"id":92,"title":"in omnis laboriosam","completed":true},{"userId":5,"id":93,"title":"odio iure consequatur molestiae quibusdam necessitatibus quia sint","completed":true},{"userId":5,"id":94,"title":"facilis modi saepe mollitia","completed":false},{"userId":5,"id":95,"title":"vel nihil et molestiae iusto assumenda nemo quo ut","completed":true},{"userId":5,"id":96,"title":"nobis suscipit ducimus enim asperiores voluptas","completed":false},{"userId":5,"id":97,"title":"dolorum laboriosam eos qui iure aliquam","completed":false},{"userId":5,"id":98,"title":"debitis accusantium ut quo facilis nihil quis sapiente necessitatibus","completed":true},{"userId":5,"id":99,"title":"neque voluptates ratione","completed":false},{"userId":5,"id":100,"title":"excepturi a et neque qui expedita vel voluptate","completed":false},{"userId":6,"id":101,"title":"explicabo enim cumque porro aperiam occaecati minima","completed":false},{"userId":6,"id":102,"title":"sed ab consequatur","completed":false},{"userId":6,"id":103,"title":"non sunt delectus illo nulla tenetur enim omnis","completed":false},{"userId":6,"id":104,"title":"excepturi non laudantium quo","completed":false},{"userId":6,"id":105,"title":"totam quia dolorem et illum repellat voluptas optio","completed":true},{"userId":6,"id":106,"title":"ad illo quis voluptatem temporibus","completed":true},{"userId":6,"id":107,"title":"praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt","completed":false},{"userId":6,"id":108,"title":"a eos eaque nihil et exercitationem incidunt delectus","completed":true},{"userId":6,"id":109,"title":"autem temporibus harum quisquam in culpa","completed":true},{"userId":6,"id":110,"title":"aut aut ea corporis","completed":true},{"userId":6,"id":111,"title":"magni accusantium labore et id quis provident","completed":false},{"userId":6,"id":112,"title":"consectetur impedit quisquam qui deserunt non rerum consequuntur eius","completed":false},{"userId":6,"id":113,"title":"quia atque aliquam sunt impedit voluptatum rerum assumenda nisi","completed":false},{"userId":6,"id":114,"title":"cupiditate quos possimus corporis quisquam exercitationem beatae","completed":false},{"userId":6,"id":115,"title":"sed et ea eum","completed":false},{"userId":6,"id":116,"title":"ipsa dolores vel facilis ut","completed":true},{"userId":6,"id":117,"title":"sequi quae est et qui qui eveniet asperiores","completed":false},{"userId":6,"id":118,"title":"quia modi consequatur vero fugiat","completed":false},{"userId":6,"id":119,"title":"corporis ducimus ea perspiciatis iste","completed":false},{"userId":6,"id":120,"title":"dolorem laboriosam vel voluptas et aliquam quasi","completed":false},{"userId":7,"id":121,"title":"inventore aut nihil minima laudantium hic qui omnis","completed":true},{"userId":7,"id":122,"title":"provident aut nobis culpa","completed":true},{"userId":7,"id":123,"title":"esse et quis iste est earum aut impedit","completed":false},{"userId":7,"id":124,"title":"qui consectetur id","completed":false},{"userId":7,"id":125,"title":"aut quasi autem iste tempore illum possimus","completed":false},{"userId":7,"id":126,"title":"ut asperiores perspiciatis veniam ipsum rerum saepe","completed":true},{"userId":7,"id":127,"title":"voluptatem libero consectetur rerum ut","completed":true},{"userId":7,"id":128,"title":"eius omnis est qui voluptatem autem","completed":false},{"userId":7,"id":129,"title":"rerum culpa quis harum","completed":false},{"userId":7,"id":130,"title":"nulla aliquid eveniet harum laborum libero alias ut unde","completed":true},{"userId":7,"id":131,"title":"qui ea incidunt quis","completed":false},{"userId":7,"id":132,"title":"qui molestiae voluptatibus velit iure harum quisquam","completed":true},{"userId":7,"id":133,"title":"et labore eos enim rerum consequatur sunt","completed":true},{"userId":7,"id":134,"title":"molestiae doloribus et laborum quod ea","completed":false},{"userId":7,"id":135,"title":"facere ipsa nam eum voluptates reiciendis vero qui","completed":false},{"userId":7,"id":136,"title":"asperiores illo tempora fuga sed ut quasi adipisci","completed":false},{"userId":7,"id":137,"title":"qui sit non","completed":false},{"userId":7,"id":138,"title":"placeat minima consequatur rem qui ut","completed":true},{"userId":7,"id":139,"title":"consequatur doloribus id possimus voluptas a voluptatem","completed":false},{"userId":7,"id":140,"title":"aut consectetur in blanditiis deserunt quia sed laboriosam","completed":true},{"userId":8,"id":141,"title":"explicabo consectetur debitis voluptates quas quae culpa rerum non","completed":true},{"userId":8,"id":142,"title":"maiores accusantium architecto necessitatibus reiciendis ea aut","completed":true},{"userId":8,"id":143,"title":"eum non recusandae cupiditate animi","completed":false},{"userId":8,"id":144,"title":"ut eum exercitationem sint","completed":false},{"userId":8,"id":145,"title":"beatae qui ullam incidunt voluptatem non nisi aliquam","completed":false},{"userId":8,"id":146,"title":"molestiae suscipit ratione nihil odio libero impedit vero totam","completed":true},{"userId":8,"id":147,"title":"eum itaque quod reprehenderit et facilis dolor autem ut","completed":true},{"userId":8,"id":148,"title":"esse quas et quo quasi exercitationem","completed":false},{"userId":8,"id":149,"title":"animi voluptas quod perferendis est","completed":false},{"userId":8,"id":150,"title":"eos amet tempore laudantium fugit a","completed":false},{"userId":8,"id":151,"title":"accusamus adipisci dicta qui quo ea explicabo sed vero","completed":true},{"userId":8,"id":152,"title":"odit eligendi recusandae doloremque cumque non","completed":false},{"userId":8,"id":153,"title":"ea aperiam consequatur qui repellat eos","completed":false},{"userId":8,"id":154,"title":"rerum non ex sapiente","completed":true},{"userId":8,"id":155,"title":"voluptatem nobis consequatur et assumenda magnam","completed":true},{"userId":8,"id":156,"title":"nam quia quia nulla repellat assumenda quibusdam sit nobis","completed":true},{"userId":8,"id":157,"title":"dolorem veniam quisquam deserunt repellendus","completed":true},{"userId":8,"id":158,"title":"debitis vitae delectus et harum accusamus aut deleniti a","completed":true},{"userId":8,"id":159,"title":"debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis","completed":true},{"userId":8,"id":160,"title":"et praesentium aliquam est","completed":false},{"userId":9,"id":161,"title":"ex hic consequuntur earum omnis alias ut occaecati culpa","completed":true},{"userId":9,"id":162,"title":"omnis laboriosam molestias animi sunt dolore","completed":true},{"userId":9,"id":163,"title":"natus corrupti maxime laudantium et voluptatem laboriosam odit","completed":false},{"userId":9,"id":164,"title":"reprehenderit quos aut aut consequatur est sed","completed":false},{"userId":9,"id":165,"title":"fugiat perferendis sed aut quidem","completed":false},{"userId":9,"id":166,"title":"quos quo possimus suscipit minima ut","completed":false},{"userId":9,"id":167,"title":"et quis minus quo a asperiores molestiae","completed":false},{"userId":9,"id":168,"title":"recusandae quia qui sunt libero","completed":false},{"userId":9,"id":169,"title":"ea odio perferendis officiis","completed":true},{"userId":9,"id":170,"title":"quisquam aliquam quia doloribus aut","completed":false},{"userId":9,"id":171,"title":"fugiat aut voluptatibus corrupti deleniti velit iste odio","completed":true},{"userId":9,"id":172,"title":"et provident amet rerum consectetur et voluptatum","completed":false},{"userId":9,"id":173,"title":"harum ad aperiam quis","completed":false},{"userId":9,"id":174,"title":"similique aut quo","completed":false},{"userId":9,"id":175,"title":"laudantium eius officia perferendis provident perspiciatis asperiores","completed":true},{"userId":9,"id":176,"title":"magni soluta corrupti ut maiores rem quidem","completed":false},{"userId":9,"id":177,"title":"et placeat temporibus voluptas est tempora quos quibusdam","completed":false},{"userId":9,"id":178,"title":"nesciunt itaque commodi tempore","completed":true},{"userId":9,"id":179,"title":"omnis consequuntur cupiditate impedit itaque ipsam quo","completed":true},{"userId":9,"id":180,"title":"debitis nisi et dolorem repellat et","completed":true},{"userId":10,"id":181,"title":"ut cupiditate sequi aliquam fuga maiores","completed":false},{"userId":10,"id":182,"title":"inventore saepe cumque et aut illum enim","completed":true},{"userId":10,"id":183,"title":"omnis nulla eum aliquam distinctio","completed":true},{"userId":10,"id":184,"title":"molestias modi perferendis perspiciatis","completed":false},{"userId":10,"id":185,"title":"voluptates dignissimos sed doloribus animi quaerat aut","completed":false},{"userId":10,"id":186,"title":"explicabo odio est et","completed":false},{"userId":10,"id":187,"title":"consequuntur animi possimus","completed":false},{"userId":10,"id":188,"title":"vel non beatae est","completed":true},{"userId":10,"id":189,"title":"culpa eius et voluptatem et","completed":true},{"userId":10,"id":190,"title":"accusamus sint iusto et voluptatem exercitationem","completed":true},{"userId":10,"id":191,"title":"temporibus atque distinctio omnis eius impedit tempore molestias pariatur","completed":true},{"userId":10,"id":192,"title":"ut quas possimus exercitationem sint voluptates","completed":false},{"userId":10,"id":193,"title":"rerum debitis voluptatem qui eveniet tempora distinctio a","completed":true},{"userId":10,"id":194,"title":"sed ut vero sit molestiae","completed":false},{"userId":10,"id":195,"title":"rerum ex veniam mollitia voluptatibus pariatur","completed":true},{"userId":10,"id":196,"title":"consequuntur aut ut fugit similique","completed":true},{"userId":10,"id":197,"title":"dignissimos quo nobis earum saepe","completed":true},{"userId":10,"id":198,"title":"quis eius est sint explicabo","completed":true},{"userId":10,"id":199,"title":"numquam repellendus a magnam","completed":true},{"userId":10,"id":200,"title":"ipsam aperiam voluptates qui","completed":false}];
-};
-window.moduloBuild.modules["x1npfhrn"] = function eg_JSONArray_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
-  OUT.push("\n    <p>"); // "<p>"
-  if (CTX.post.completed) { // "if post.completed"
-  OUT.push("★"); // "★"
-  } else { // "else"
-  OUT.push("☆"); // "☆"
-  } // "endif"
-  OUT.push("\n        "); // ""
-  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
-  OUT.push("</p>\n  "); // "</p>"
-  } // "endfor"
-  OUT.push("\n"); // ""
+window.moduloBuild.nameToHash.mws_DocSidebar = "x1k6jtfq";
 
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1p9j2tl"] = function eg_JSON_staticdata (modulo) {
-return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2023-01-18T20:24:51Z","pushed_at":"2023-01-28T01:56:21Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":3035,"stargazers_count":2,"watchers_count":2,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"has_discussions":false,"forks_count":0,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":24,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":0,"open_issues":24,"watchers":2,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":0,"subscribers_count":1};
-};
-window.moduloBuild.modules["x1lhd4rn"] = function eg_JSON_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
-  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
-  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
-  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxs0uo1c"] = function eg_Memory (modulo) {
-
-        const def = modulo.definitions['eg_Memory'];
-        class eg_Memory extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_Memory);
-        window.customElements.define(def.TagName, eg_Memory);
-        return eg_Memory;
-    
-};
-window.moduloBuild.modules["xxqsulhb"] = function eg_Memory_script (modulo) {
-var script = { exports: {} }; var state, element;
-
-const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
-function setup(payload) {
-    const count = Number(payload);
-    let symbols = symbolsStr.substr(0, count/2).split("");
-    symbols = symbols.concat(symbols); // duplicate cards
-    let id = 0;
-    while (id < count) {
-        const index = Math.floor(Math.random()
-                                    * symbols.length);
-        const symbol = symbols.splice(index, 1)[0];
-        state.cards.push({symbol, id});
-        id++;
-    }
-}
-
-function failedFlipCallback() {
-    // Remove both from revealed array & set to null
-    state.revealed = state.revealed.filter(
-            id => id !== state.failedflip
-                    && id !== state.lastflipped);
-    state.failedflip = null;
-    state.lastflipped = null;
-    state.message = "";
-    element.rerender();
-}
-
-function flip(id) {
-    if (state.failedflip !== null) {
-        return;
-    }
-    id = Number(id);
-    if (state.revealed.includes(id)) {
-        return; // double click
-    } else if (state.lastflipped === null) {
-        state.lastflipped = id;
-        state.revealed.push(id);
-    } else {
-        state.revealed.push(id);
-        const {symbol} = state.cards[id];
-        const lastCard = state.cards[state.lastflipped];
-        if (symbol === lastCard.symbol) {
-            // Successful match! Check for win.
-            const {revealed, cards} = state;
-            if (revealed.length === cards.length) {
-                state.message = "You win!";
-                state.win = true;
-            } else {
-                state.message = "Nice match!";
-            }
-            state.lastflipped = null;
-        } else {
-            state.message = "No match.";
-            state.failedflip = id;
-            setTimeout(failedFlipCallback, 1000);
-        }
-    }
-}
-
-return {"setup": typeof setup !== "undefined" ? setup : undefined, "failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined, "flip": typeof flip !== "undefined" ? flip : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x1rfau7j"] = function eg_Memory_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n"); // ""
-  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
-  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
-  } else { // "else"
-  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
-  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
-  OUT.push("hard"); // "hard"
-  } // "endif"
-  OUT.push("\">\n    "); // "\">"
-  OUT.push("\n    "); // ""
-  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
-  OUT.push("\n        "); // ""
-  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                flipped\n            "); // "flipped"
-  } // "endif"
-  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
-  if (CTX.state.win) { // "if state.win"
-  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("."); // "."
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("s;\n            "); // "s;"
-  } // "endif"
-  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
-  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
-  OUT.push("\">\n            "); // "\">"
-  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
-  OUT.push("\n                "); // ""
-  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </div>\n    "); // "</div>"
-  } // "endfor"
-  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
-  if (CTX.state.failedflip) { // "if state.failedflip"
-  OUT.push("\n                color: red"); // "color: red"
-  } // "endif"
-  OUT.push("\">\n        "); // "\">"
-  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
-  OUT.push("</p>\n"); // "</p>"
-  } // "endif"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxgmlldk"] = function eg_OscillatingGraph (modulo) {
-
-        const def = modulo.definitions['eg_OscillatingGraph'];
-        class eg_OscillatingGraph extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_OscillatingGraph);
-        window.customElements.define(def.TagName, eg_OscillatingGraph);
-        return eg_OscillatingGraph;
-    
-};
-window.moduloBuild.modules["x18q70th"] = function eg_OscillatingGraph_script (modulo) {
-var script = { exports: {} }; var state, script, element;
-
-    let timeout = null;
-    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
-    function play() {
-        state.playing = true;
-        nextTick();
-    }
-    function pause() {
-        state.playing = false;
-    }
-    function setEasing(payload) {
-        state.easing = payload;
-    }
-
-    function nextTick() {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        const el = element;
-        timeout = setTimeout(() => {
-            el.rerender();
-        }, 2000 / state.speed);
-    }
-
-    function updateCallback() {
-        if (state.playing) {
-            while (state.data.length <= state.width) {
-                state.tick++;
-                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
-            }
-            state.data.shift(); // remove one from left
-            nextTick();
-        }
-    }
-
-return {"play": typeof play !== "undefined" ? play : undefined, "pause": typeof pause !== "undefined" ? pause : undefined, "setEasing": typeof setEasing !== "undefined" ? setEasing : undefined, "nextTick": typeof nextTick !== "undefined" ? nextTick : undefined, "updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined, setLocalVariables: function(o) {state=o.state; script=o.script; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xxqlg44u"] = function eg_OscillatingGraph_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
-  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
-  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
-  if (!(CTX.state.playing)) { // "if not state.playing"
-  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
-  } else { // "else"
-  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
-  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
-  OUT.push("</button>\n        "); // "</button>"
-  } // "endif"
-  OUT.push("\n    </p>\n\n    "); // "</p>"
-  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
-  OUT.push("\n        <label>"); // "<label>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
-  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
-  OUT.push(G.escapeText(CTX.name)); // "name"
-  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxbr6cba"] = function eg_PrimeSieve (modulo) {
-
-        const def = modulo.definitions['eg_PrimeSieve'];
-        class eg_PrimeSieve extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_PrimeSieve);
-        window.customElements.define(def.TagName, eg_PrimeSieve);
-        return eg_PrimeSieve;
-    
-};
-window.moduloBuild.modules["x17drlid"] = function eg_PrimeSieve_script (modulo) {
-var script = { exports: {} }; var state, script;
-
-    // Getting big a range of numbers in JS. Use "script.exports"
-    // to export this as a one-time global constant.
-    // (Hint: Curious how it calculates prime? See CSS!)
-    script.exports.range = 
-        Array.from({length: 63}, (x, i) => i + 2);
-    function setNum(payload, ev) {
-        state.number = Number(ev.target.textContent);
-    }
-
-return {"setNum": typeof setNum !== "undefined" ? setNum : undefined, setLocalVariables: function(o) {state=o.state; script=o.script}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xxn6m9dp"] = function eg_PrimeSieve_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
-  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
-  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
-  OUT.push("\n            "); // ""
-  if (CTX.state.number === CTX.i) { // "if state.number == i"
-  OUT.push("number"); // "number"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  if (CTX.state.number < CTX.i) { // "if state.number lt i"
-  OUT.push("hidden"); // "hidden"
-  } else { // "else"
-  OUT.push("\n              "); // ""
-  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
-  OUT.push("whole"); // "whole"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        \">"); // "\">"
-  OUT.push(G.escapeText(CTX.i)); // "i"
-  OUT.push("</div>\n    "); // "</div>"
-  } // "endfor"
-  OUT.push("\n  </div>\n"); // "</div>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxo638jh"] = function eg_Scatter (modulo) {
-
-        const def = modulo.definitions['eg_Scatter'];
-        class eg_Scatter extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_Scatter);
-        window.customElements.define(def.TagName, eg_Scatter);
-        return eg_Scatter;
-    
-};
-window.moduloBuild.modules["x11t9udg"] = function eg_Scatter_staticdata (modulo) {
-return [{"id":1,"name":"Leanne Graham","username":"Bret","email":"Sincere@april.biz","address":{"street":"Kulas Light","suite":"Apt. 556","city":"Gwenborough","zipcode":"92998-3874","geo":{"lat":"-37.3159","lng":"81.1496"}},"phone":"1-770-736-8031 x56442","website":"hildegard.org","company":{"name":"Romaguera-Crona","catchPhrase":"Multi-layered client-server neural-net","bs":"harness real-time e-markets"}},{"id":2,"name":"Ervin Howell","username":"Antonette","email":"Shanna@melissa.tv","address":{"street":"Victor Plains","suite":"Suite 879","city":"Wisokyburgh","zipcode":"90566-7771","geo":{"lat":"-43.9509","lng":"-34.4618"}},"phone":"010-692-6593 x09125","website":"anastasia.net","company":{"name":"Deckow-Crist","catchPhrase":"Proactive didactic contingency","bs":"synergize scalable supply-chains"}},{"id":3,"name":"Clementine Bauch","username":"Samantha","email":"Nathan@yesenia.net","address":{"street":"Douglas Extension","suite":"Suite 847","city":"McKenziehaven","zipcode":"59590-4157","geo":{"lat":"-68.6102","lng":"-47.0653"}},"phone":"1-463-123-4447","website":"ramiro.info","company":{"name":"Romaguera-Jacobson","catchPhrase":"Face to face bifurcated interface","bs":"e-enable strategic applications"}},{"id":4,"name":"Patricia Lebsack","username":"Karianne","email":"Julianne.OConner@kory.org","address":{"street":"Hoeger Mall","suite":"Apt. 692","city":"South Elvis","zipcode":"53919-4257","geo":{"lat":"29.4572","lng":"-164.2990"}},"phone":"493-170-9623 x156","website":"kale.biz","company":{"name":"Robel-Corkery","catchPhrase":"Multi-tiered zero tolerance productivity","bs":"transition cutting-edge web services"}},{"id":5,"name":"Chelsey Dietrich","username":"Kamren","email":"Lucio_Hettinger@annie.ca","address":{"street":"Skiles Walks","suite":"Suite 351","city":"Roscoeview","zipcode":"33263","geo":{"lat":"-31.8129","lng":"62.5342"}},"phone":"(254)954-1289","website":"demarco.info","company":{"name":"Keebler LLC","catchPhrase":"User-centric fault-tolerant solution","bs":"revolutionize end-to-end systems"}},{"id":6,"name":"Mrs. Dennis Schulist","username":"Leopoldo_Corkery","email":"Karley_Dach@jasper.info","address":{"street":"Norberto Crossing","suite":"Apt. 950","city":"South Christy","zipcode":"23505-1337","geo":{"lat":"-71.4197","lng":"71.7478"}},"phone":"1-477-935-8478 x6430","website":"ola.org","company":{"name":"Considine-Lockman","catchPhrase":"Synchronised bottom-line interface","bs":"e-enable innovative applications"}},{"id":7,"name":"Kurtis Weissnat","username":"Elwyn.Skiles","email":"Telly.Hoeger@billy.biz","address":{"street":"Rex Trail","suite":"Suite 280","city":"Howemouth","zipcode":"58804-1099","geo":{"lat":"24.8918","lng":"21.8984"}},"phone":"210.067.6132","website":"elvis.io","company":{"name":"Johns Group","catchPhrase":"Configurable multimedia task-force","bs":"generate enterprise e-tailers"}},{"id":8,"name":"Nicholas Runolfsdottir V","username":"Maxime_Nienow","email":"Sherwood@rosamond.me","address":{"street":"Ellsworth Summit","suite":"Suite 729","city":"Aliyaview","zipcode":"45169","geo":{"lat":"-14.3990","lng":"-120.7677"}},"phone":"586.493.6943 x140","website":"jacynthe.com","company":{"name":"Abernathy Group","catchPhrase":"Implemented secondary concept","bs":"e-enable extensible e-tailers"}},{"id":9,"name":"Glenna Reichert","username":"Delphine","email":"Chaim_McDermott@dana.io","address":{"street":"Dayna Park","suite":"Suite 449","city":"Bartholomebury","zipcode":"76495-3109","geo":{"lat":"24.6463","lng":"-168.8889"}},"phone":"(775)976-6794 x41206","website":"conrad.com","company":{"name":"Yost and Sons","catchPhrase":"Switchable contextually-based project","bs":"aggregate real-time technologies"}},{"id":10,"name":"Clementina DuBuque","username":"Moriah.Stanton","email":"Rey.Padberg@karina.biz","address":{"street":"Kattie Turnpike","suite":"Suite 198","city":"Lebsackbury","zipcode":"31428-2261","geo":{"lat":"-38.2386","lng":"57.2232"}},"phone":"024-648-3804","website":"ambrose.net","company":{"name":"Hoeger LLC","catchPhrase":"Centralized empowering task-force","bs":"target end-to-end models"}}];
-};
-window.moduloBuild.modules["x1ejsk79"] = function eg_Scatter_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
-  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
-  OUT.push("px;\n                    --y: "); // "px; --y:"
-  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
-  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
-  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
-  OUT.push(" ("); // "("
-  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
-  OUT.push(")</label>\n    "); // ")</label>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxo3b9id"] = function eg_Search (modulo) {
-
-        const def = modulo.definitions['eg_Search'];
-        class eg_Search extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_Search);
-        window.customElements.define(def.TagName, eg_Search);
-        return eg_Search;
-    
-};
-window.moduloBuild.modules["x15i6ec2"] = function eg_SearchBox (modulo) {
-
-        const def = modulo.definitions['eg_SearchBox'];
-        class eg_SearchBox extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_SearchBox);
-        window.customElements.define(def.TagName, eg_SearchBox);
-        return eg_SearchBox;
-    
-};
-window.moduloBuild.modules["xxmfhi87"] = function eg_SearchBox_script (modulo) {
-var script = { exports: {} }; var state, staticdata, element;
-
-    function typingCallback() {
-        state.loading = true;
-        const search = `q=${state.search}`;
-        const opts = 'limit=6&fields=title,author_name,cover_i';
-        const url = `${staticdata.apiBase}?${search}&${opts}`;
-        _globalDebounce(() => {
-            fetch(url)
-                .then(response => response.json())
-                .then(dataBackCallback);
-        });
-    }
-
-    function dataBackCallback(data) {
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-    let _globalDebounceTimeout = null;
-    function _globalDebounce(func) {
-        if (_globalDebounceTimeout) {
-            clearTimeout(_globalDebounceTimeout);
-        }
-        _globalDebounceTimeout = setTimeout(func, 500);
-    }
-
-return {"typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined, "dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined, "_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined, setLocalVariables: function(o) {state=o.state; staticdata=o.staticdata; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xx64c9tf"] = function eg_SearchBox_staticdata (modulo) {
-return {"apiBase":"https://openlibrary.org/search.json","cover":"https://covers.openlibrary.org/b/id/","gif":"https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif"};
-};
-window.moduloBuild.modules["x1k5cj37"] = function eg_SearchBox_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
-  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
-  OUT.push("\n                      visible "); // "visible"
-  } // "endif"
-  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("\n      <img src=\""); // "<img src=\""
-  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
-  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
-  } else { // "else"
-  OUT.push("\n      "); // ""
-  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
-  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
-  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
-  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
-  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
-  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
-  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
-  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
-  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
-  OUT.push("\n    "); // ""
-  } // "endif"
-  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxqi0rec"] = function eg_Search_script (modulo) {
-var script = { exports: {} }; var state, element;
-
-    const OPTS = '&limit=6&fields=title,author_name,cover_i';
-    const COVER ='https://covers.openlibrary.org/b/id/';
-    const API = 'https://openlibrary.org/search.json?q=';
-    function doSearch() {
-        const url = API + '?q=' + state.search + OPTS;
-        state.loading = true;
-        fetch(url)
-            .then(response => response.json())
-            .then(dataBackCallback);
-    }
-
-    function dataBackCallback(data) {
-        for (const item of data.docs) {
-            // For convenience, we prepare the cover URL
-            item.cover = COVER + item.cover_i + '-S.jpg';
-        }
-        state.results = data.docs;
-        state.loading = false;
-        element.rerender();
-    }
-
-return {"doSearch": typeof doSearch !== "undefined" ? doSearch : undefined, "dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x1l103gn"] = function eg_Search_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
-  if (CTX.state.loading) { // "if state.loading"
-  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
-  } // "endif"
-  OUT.push("\n  <ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
-  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
-  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
-  OUT.push("\">\n        <strong>"); // "\"><strong>"
-  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
-  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
-  } // "endfor"
-  OUT.push("\n  </ol>\n"); // "</ol>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxrhos83"] = function eg_Simple (modulo) {
-
-        const def = modulo.definitions['eg_Simple'];
-        class eg_Simple extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_Simple);
-        window.customElements.define(def.TagName, eg_Simple);
-        return eg_Simple;
-    
-};
-window.moduloBuild.modules["xxl4an33"] = function eg_Simple_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xx5qdh5h"] = function eg_ToDo (modulo) {
-
-        const def = modulo.definitions['eg_ToDo'];
-        class eg_ToDo extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_ToDo);
-        window.customElements.define(def.TagName, eg_ToDo);
-        return eg_ToDo;
-    
-};
-window.moduloBuild.modules["x1i773pd"] = function eg_ToDo_script (modulo) {
-var script = { exports: {} }; var state;
-
-    function addItem() {
-        state.list.push(state.text); // add to list
-        state.text = ""; // clear input
-    }
-
-return {"addItem": typeof addItem !== "undefined" ? addItem : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xxbdh5fm"] = function eg_ToDo_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n<ol>\n    "); // "<ol>"
-  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
-  OUT.push("\n        <li>"); // "<li>"
-  OUT.push(G.escapeText(CTX.item)); // "item"
-  OUT.push("</li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1bh86eb"] = function eg_WorldMap (modulo) {
-
-        const def = modulo.definitions['eg_WorldMap'];
-        class eg_WorldMap extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, eg_WorldMap);
-        window.customElements.define(def.TagName, eg_WorldMap);
-        return eg_WorldMap;
-    
-};
-window.moduloBuild.modules["xxmbc1sp"] = function eg_WorldMap_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n    "); // ""
-  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
-  OUT.push("\n        <div style=\"top: "); // "<div style=\"top:"
-  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lng),180),100),360))); // "user.address.geo.lng|number|add:180|multiply:100|dividedinto:360"
-  OUT.push("%;\n                    left: "); // "%; left:"
-  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lat),90),100),180))); // "user.address.geo.lat|number|add:90|multiply:100|dividedinto:180"
-  OUT.push("%;\">\n            <x-demomodal button=\""); // "%;\"><x-demomodal button=\""
-  OUT.push(G.escapeText(CTX.user.id)); // "user.id"
-  OUT.push("\" title=\""); // "\" title=\""
-  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
-  OUT.push("\">\n                "); // "\">"
-  var ARR1=CTX.user;for (var KEY in ARR1) {CTX.key=KEY;CTX.value=ARR1[KEY]; // "for key, value in user"
-  OUT.push("\n                    <dl>\n                        <dt>"); // "<dl><dt>"
-  OUT.push(G.escapeText(G.filters["capfirst"](CTX.key))); // "key|capfirst"
-  OUT.push("</dt>\n                        <dd>"); // "</dt><dd>"
-  if (G.filters["type"](CTX.value) === "object") { // "if value|type == \"object\""
-  OUT.push(G.escapeText(G.filters["json"](CTX.value))); // "value|json"
-  } else { // "else"
-  OUT.push(G.escapeText(CTX.value)); // "value"
-  } // "endif"
-  OUT.push("</dd>\n                    </dl>\n                "); // "</dd></dl>"
-  } // "endfor"
-  OUT.push("\n            </x-demomodal>\n        </div>\n    "); // "</x-demomodal></div>"
-  } // "endfor"
-  OUT.push("\n"); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1f5mjvu"] = function mws_AllExamples (modulo) {
-
-        const def = modulo.definitions['mws_AllExamples'];
-        class mws_AllExamples extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_AllExamples);
-        window.customElements.define(def.TagName, mws_AllExamples);
-        return mws_AllExamples;
-    
-};
-window.moduloBuild.modules["xxk29dsf"] = function mws_AllExamples_script (modulo) {
-var script = { exports: {} }; var state, element;
-function toggleExample(payload) {
-    if (state.selected === payload) {
-        state.selected = '';
-    } else {
-        state.selected = payload;
-    }
-}
-
-function initializedCallback() {
-    const { getComponentDefs } = modulo.registry.utils;
-    if (!getComponentDefs) {
-          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
-    }
-    const eg = getComponentDefs('/libraries/eg.html');
-    state.examples = [];
-    for (const [ name, content ] of Object.entries(eg)) {
-        state.examples.push({ name, content });
-    }
-    element.rerender();
-}
-
- 
-return {"toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined, "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xxslhngg"] = function mws_AllExamples_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  var ARR0=CTX.state.examples;for (var KEY in ARR0) {CTX. example=ARR0[KEY]; // "for example in state.examples"
-  OUT.push("\n    "); // ""
-  if (CTX.example.name === CTX.state.selected) { // "if example.name == state.selected"
-  OUT.push("\n        <div class=\"Example expanded\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example expanded\"><button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\" @click:=script.toggleExample payload=\""
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\">\n                "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n                &times;\n            </button>\n            <mws-Demo\n                demotype=\"minipreview\"\n                fromlibrary='"); // "&times; </button><mws-Demo demotype=\"minipreview\" fromlibrary='"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("'\n            ></mws-Demo>\n        </div>\n    "); // "' ></mws-Demo></div>"
-  } else { // "else"
-  OUT.push("\n        <div class=\"Example\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example\"><button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\" @click:=script.toggleExample payload=\""
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\">\n                "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n                ✎\n            </button>\n            <div class=\"Example-wrapper\">\n                <eg-"); // "✎ </button><div class=\"Example-wrapper\"><eg-"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("></eg-"); // "></eg-"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push(">\n            </div>\n        </div>\n    "); // "></div></div>"
-  } // "endif"
-  OUT.push("\n"); // ""
-  } // "endfor"
-  OUT.push("\n\n<!--\n<mws-Section name=\""); // "<!-- <mws-Section name=\""
-  OUT.push(G.escapeText(G.filters["lower"](CTX.example.name))); // "example.name|lower"
-  OUT.push("\">\n    "); // "\">"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("\n</mws-Section>\n<mws-Demo\n    demotype=\"minipreview\"\n    fromlibrary='"); // "</mws-Section><mws-Demo demotype=\"minipreview\" fromlibrary='"
-  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
-  OUT.push("'\n></mws-Demo>\n-->\n\n"); // "' ></mws-Demo> -->"
-
-return OUT.join(""); };
-};
 window.moduloBuild.modules["x1kue0u9"] = function mws_Demo (modulo) {
 
         const def = modulo.definitions['mws_Demo'];
@@ -14341,6 +13027,260 @@ window.moduloBuild.modules["x1kue0u9"] = function mws_Demo (modulo) {
         return mws_Demo;
     
 };
+window.moduloBuild.nameToHash.mws_Demo = "x1kue0u9";
+
+window.moduloBuild.modules["x1f5mjvu"] = function mws_AllExamples (modulo) {
+
+        const def = modulo.definitions['mws_AllExamples'];
+        class mws_AllExamples extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, mws_AllExamples);
+        window.customElements.define(def.TagName, mws_AllExamples);
+        return mws_AllExamples;
+    
+};
+window.moduloBuild.nameToHash.mws_AllExamples = "x1f5mjvu";
+
+window.moduloBuild.modules["xxigi01t"] = function mws_Section (modulo) {
+
+        const def = modulo.definitions['mws_Section'];
+        class mws_Section extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, mws_Section);
+        window.customElements.define(def.TagName, mws_Section);
+        return mws_Section;
+    
+};
+window.moduloBuild.nameToHash.mws_Section = "xxigi01t";
+
+window.moduloBuild.modules["x1gf7uop"] = function mws_Page_script (modulo) {
+var script = { exports: {} }; 
+
+        //console.log('mws-Page/Script is running', modulo);
+    
+return {setLocalVariables: function(o) {}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.mws_Page_script = "x1gf7uop";
+
+window.moduloBuild.modules["x1qnckrq"] = function mws_DocSidebar_script (modulo) {
+var script = { exports: {} }; var props, template, state, script, style, component, cparts;
+function initializedCallback() {
+    const { path, showall } = props;
+    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
+    for (const groupObj of state.menu) {
+        if (showall) {
+            groupObj.active = true;
+        }
+        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
+            groupObj.active = true;
+        }
+    }
+}
+
+function _child(label, hash, keywords=[], filepath=null) {
+    if (!hash) {
+        hash = label.toLowerCase()
+    }
+    if (hash.endsWith('.html') && filepath === null) {
+        filepath = hash;
+    }
+    return {label, hash, keywords, filepath};
+}
+
+let componentTexts = {};
+try {
+    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
+} catch {
+    console.log('couldnt get componentTexts');
+}
+
+script.exports.menu = [
+    {
+        label: 'Table of Contents',
+        filename: '/docs/',
+    },
+
+    {
+        label: 'Tutorial',
+        filename: '/docs/tutorial_part1.html',
+        children: [
+            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
+            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
+            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
+        ],
+    },
+
+    {
+        label: 'Templating',
+        filename: '/docs/templating.html',
+        children: [
+            _child('Templates', null, ['templating philosophy', 'templating overview']),
+            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
+            _child('Filters', null, ['filter syntax', 'example filters']),
+            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
+            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
+            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
+            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
+        ],
+    },
+
+    {
+        label: 'Template Reference',
+        filename: '/docs/templating-reference.html',
+        children: [
+            _child('Built-in Template Tags', 'templatetags', [
+                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
+                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
+                'comparison', 'control-flow',
+            ]),
+            _child('Built-in Filters', 'filters', [
+                'add', 'allow', 'capfirst', 'concat', 'default',
+                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
+                'length', 'lower', 'number', 'pluralize', 'subtract',
+                'truncate', 'renderas', 'reversed', 'upper',
+            ]),
+        ],
+    },
+
+    {
+        label: 'CParts',
+        filename: '/docs/cparts.html',
+        children: [
+            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
+                                'rendering mode', 'manual rerender', 'shadow',
+                                'vanish', 'vanish-into-document', 'component.event',
+                                'component.slot', 'component.dataProp']),
+            _child('Props', 'props', ['accessing props', 'defining props',
+                                'setting props', 'using props']),
+            _child('Script', 'script', ['javascript', 'events', 'computed properties',
+                            'static execution', 'custom lifecycle methods',
+                                'script callback execution context', 'script exports']),
+            _child('State', 'state', ['state definition', 'state data types',
+                            'json', 'state variables', 'state.bind directive']),
+            _child('StaticData', 'staticdata', ['loading API', 'loading json',
+                            'transform function', 'bundling data']),
+            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
+            _child('Template', 'template', ['custom template', 'templating engine']),
+        ],
+    },
+
+    {
+        label: 'Lifecycle',
+        filename: '/docs/lifecycle.html',
+        children: [
+            _child('Global lifecycle', 'global',
+                ['lifestyle phases', 'prebuild', 'define', 'factory']),
+            _child('Component lifecycle', 'global',
+                ['consturctor', 'initialized', 'prepare', 'render',
+                'reconcile', 'update', 'event', 'eventCleanup']),
+            _child('Lifecycle callbacks', 'callbacks',
+                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
+                'renderobj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),
+        ],
+    },
+
+            /*_child('Factory lifecycle', 'factory',
+                ['renderObj', 'baseRenderObj', 'loadObj',
+                'dependency injection', 'middleware']),*/
+    {
+        label: 'Directives',
+        filename: '/docs/directives.html',
+        children: [
+            _child('Directives', 'directives',
+                ['built-in directives', 'directive shortcuts',
+                'custom directives']),
+            _child('Built-in directives', 'builtin', [
+                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
+                    'data-prop', 'assignment',
+                    '[component.event]', '@click', '@...:=',
+                    '[component.slot]', '[state.bind]',
+                ]),
+            _child('Custom directives', 'custom', [
+                'refs', 'accessing dom', 'escape hatch',
+                'Mount callbacks', 'Unmount callbacks',
+                'template variables vs directives',
+                'script-tag custom directives',
+                'custom shortcuts',
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'API & Extension',
+        filename: '/docs/api.html',
+        children: [
+            _child('Custom CParts', 'cparts'),
+            _child('CPart Spares', 'spares'),
+            _child('Custom Templating', 'template'),
+            _child('Custom Filters', 'customfilters'),
+            _child('Custom Template Tags', 'customtags'),
+            _child('Custom Template Syntax', 'customtags'),
+            _child('ModRec', 'modrec'),
+            _child('DOMCursor', 'cursor'),
+        ],
+    },
+    */
+
+    {
+        label: 'Examples',
+        filename: '/demos/',
+        children: [
+            _child('Starter Files', 'starter', [ 'starter', 'snippets',
+              'component libraries', 'download', 'zip', 'page layouts',
+              'vanish-into-document' ]),
+            _child('Example Library', 'library', Object.keys(componentTexts)),
+            _child('Experiments', 'experiments', [
+                'custom cparts for apis', 'custom cparts for legacy', 'jQuery',
+                'handlebars', 'jsx',  'Tone.js', 'audio synthesis', 'MIDI',
+                'jsx templating', 'babel.js',
+                'transpiling', 'cparts for apis',
+                'TestSuite', 'unit testing',
+              //'FetchState cpart', 
+            ]),
+        ],
+    },
+
+    /*
+    {
+        label: 'Project Info',
+        filename: '/docs/project-info.html',
+        children: [
+            _child('FAQ', 'faq'),
+            _child('Framework Design Philosophy', 'philosophy'),
+        ],
+    },
+    */
+];
+
+
+return {"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, "_child": typeof _child !== "undefined" ? _child : undefined, setLocalVariables: function(o) {props=o.props; template=o.template; state=o.state; script=o.script; style=o.style; component=o.component; cparts=o.cparts}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.mws_DocSidebar_script = "x1qnckrq";
+
 window.moduloBuild.modules["xxf2s79r"] = function mws_Demo_script (modulo) {
 var script = { exports: {} }; var props, template, state, script, style, component, element;
 let componentTexts = null;
@@ -14771,6 +13711,1314 @@ function _setupCodemirror(el, demoType, myElement, myState) {
 return {"_setupGlobalVariables": typeof _setupGlobalVariables !== "undefined" ? _setupGlobalVariables : undefined, "codemirrorMount": typeof codemirrorMount !== "undefined" ? codemirrorMount : undefined, "_setupCodemirrorSync": typeof _setupCodemirrorSync !== "undefined" ? _setupCodemirrorSync : undefined, "selectTab": typeof selectTab !== "undefined" ? selectTab : undefined, "toEmbedScript": typeof toEmbedScript !== "undefined" ? toEmbedScript : undefined, "toEmbedTemplate": typeof toEmbedTemplate !== "undefined" ? toEmbedTemplate : undefined, "doCopy": typeof doCopy !== "undefined" ? doCopy : undefined, "hideToast": typeof hideToast !== "undefined" ? hideToast : undefined, "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, "rerenderFirstTime": typeof rerenderFirstTime !== "undefined" ? rerenderFirstTime : undefined, "_newModulo": typeof _newModulo !== "undefined" ? _newModulo : undefined, "runModuloText": typeof runModuloText !== "undefined" ? runModuloText : undefined, "doRun": typeof doRun !== "undefined" ? doRun : undefined, "countUp": typeof countUp !== "undefined" ? countUp : undefined, "doFullscreen": typeof doFullscreen !== "undefined" ? doFullscreen : undefined, "previewspotMount": typeof previewspotMount !== "undefined" ? previewspotMount : undefined, "setupShaChecksum": typeof setupShaChecksum !== "undefined" ? setupShaChecksum : undefined, "_setupCodemirror": typeof _setupCodemirror !== "undefined" ? _setupCodemirror : undefined, setLocalVariables: function(o) {props=o.props; template=o.template; state=o.state; script=o.script; style=o.style; component=o.component; element=o.element}, exports: script.exports }
 
 };
+window.moduloBuild.nameToHash.mws_Demo_script = "xxf2s79r";
+
+window.moduloBuild.modules["xxk29dsf"] = function mws_AllExamples_script (modulo) {
+var script = { exports: {} }; var state, element;
+function toggleExample(payload) {
+    if (state.selected === payload) {
+        state.selected = '';
+    } else {
+        state.selected = payload;
+    }
+}
+
+function initializedCallback() {
+    const { getComponentDefs } = modulo.registry.utils;
+    if (!getComponentDefs) {
+          throw new Error('Uh oh, getComponentDefs isnt getting defined!');
+    }
+    const eg = getComponentDefs('/libraries/eg.html');
+    state.examples = [];
+    for (const [ name, content ] of Object.entries(eg)) {
+        state.examples.push({ name, content });
+    }
+    element.rerender();
+}
+
+ 
+return {"toggleExample": typeof toggleExample !== "undefined" ? toggleExample : undefined, "initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.mws_AllExamples_script = "xxk29dsf";
+
+window.moduloBuild.modules["x1ekkph7"] = function docseg_Templating_1 (modulo) {
+
+        const def = modulo.definitions['docseg_Templating_1'];
+        class docseg_Templating_1 extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Templating_1);
+        window.customElements.define(def.TagName, docseg_Templating_1);
+        return docseg_Templating_1;
+    
+};
+window.moduloBuild.nameToHash.docseg_Templating_1 = "x1ekkph7";
+
+window.moduloBuild.modules["x1d0lm7c"] = function docseg_Templating_PrepareCallback (modulo) {
+
+        const def = modulo.definitions['docseg_Templating_PrepareCallback'];
+        class docseg_Templating_PrepareCallback extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Templating_PrepareCallback);
+        window.customElements.define(def.TagName, docseg_Templating_PrepareCallback);
+        return docseg_Templating_PrepareCallback;
+    
+};
+window.moduloBuild.nameToHash.docseg_Templating_PrepareCallback = "x1d0lm7c";
+
+window.moduloBuild.modules["xxr282hq"] = function docseg_Templating_Comments (modulo) {
+
+        const def = modulo.definitions['docseg_Templating_Comments'];
+        class docseg_Templating_Comments extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Templating_Comments);
+        window.customElements.define(def.TagName, docseg_Templating_Comments);
+        return docseg_Templating_Comments;
+    
+};
+window.moduloBuild.nameToHash.docseg_Templating_Comments = "xxr282hq";
+
+window.moduloBuild.modules["x11n9f38"] = function docseg_Templating_Escaping (modulo) {
+
+        const def = modulo.definitions['docseg_Templating_Escaping'];
+        class docseg_Templating_Escaping extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Templating_Escaping);
+        window.customElements.define(def.TagName, docseg_Templating_Escaping);
+        return docseg_Templating_Escaping;
+    
+};
+window.moduloBuild.nameToHash.docseg_Templating_Escaping = "x11n9f38";
+
+window.moduloBuild.modules["xxvb81tk"] = function docseg_Tutorial_P1 (modulo) {
+
+        const def = modulo.definitions['docseg_Tutorial_P1'];
+        class docseg_Tutorial_P1 extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P1);
+        window.customElements.define(def.TagName, docseg_Tutorial_P1);
+        return docseg_Tutorial_P1;
+    
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P1 = "xxvb81tk";
+
+window.moduloBuild.modules["xx85njvf"] = function docseg_Tutorial_P2 (modulo) {
+
+        const def = modulo.definitions['docseg_Tutorial_P2'];
+        class docseg_Tutorial_P2 extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P2);
+        window.customElements.define(def.TagName, docseg_Tutorial_P2);
+        return docseg_Tutorial_P2;
+    
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P2 = "xx85njvf";
+
+window.moduloBuild.modules["xx7h5unj"] = function docseg_Tutorial_P2_filters_demo (modulo) {
+
+        const def = modulo.definitions['docseg_Tutorial_P2_filters_demo'];
+        class docseg_Tutorial_P2_filters_demo extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P2_filters_demo);
+        window.customElements.define(def.TagName, docseg_Tutorial_P2_filters_demo);
+        return docseg_Tutorial_P2_filters_demo;
+    
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P2_filters_demo = "xx7h5unj";
+
+window.moduloBuild.modules["x1pd9q54"] = function docseg_Tutorial_P3_state_demo (modulo) {
+
+        const def = modulo.definitions['docseg_Tutorial_P3_state_demo'];
+        class docseg_Tutorial_P3_state_demo extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P3_state_demo);
+        window.customElements.define(def.TagName, docseg_Tutorial_P3_state_demo);
+        return docseg_Tutorial_P3_state_demo;
+    
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P3_state_demo = "x1pd9q54";
+
+window.moduloBuild.modules["x1hmr3nm"] = function docseg_Tutorial_P3_state_bind (modulo) {
+
+        const def = modulo.definitions['docseg_Tutorial_P3_state_bind'];
+        class docseg_Tutorial_P3_state_bind extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, docseg_Tutorial_P3_state_bind);
+        window.customElements.define(def.TagName, docseg_Tutorial_P3_state_bind);
+        return docseg_Tutorial_P3_state_bind;
+    
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P3_state_bind = "x1hmr3nm";
+
+window.moduloBuild.modules["x1adah1a"] = function docseg_Templating_1_script (modulo) {
+var script = { exports: {} }; var script;
+
+    script.exports.title = "ModuloNews";
+
+return {setLocalVariables: function(o) {script=o.script}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.docseg_Templating_1_script = "x1adah1a";
+
+window.moduloBuild.modules["xxfr5sfs"] = function docseg_Templating_PrepareCallback_script (modulo) {
+var script = { exports: {} }; var state;
+
+    function prepareCallback() {
+        const calcResult = (state.perc / 100) * state.total;
+        return { calcResult };
+    }
+
+return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.docseg_Templating_PrepareCallback_script = "xxfr5sfs";
+
+window.moduloBuild.modules["xxupjk9l"] = function eg_Hello (modulo) {
+
+        const def = modulo.definitions['eg_Hello'];
+        class eg_Hello extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Hello);
+        window.customElements.define(def.TagName, eg_Hello);
+        return eg_Hello;
+    
+};
+window.moduloBuild.nameToHash.eg_Hello = "xxupjk9l";
+
+window.moduloBuild.modules["xxrhos83"] = function eg_Simple (modulo) {
+
+        const def = modulo.definitions['eg_Simple'];
+        class eg_Simple extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Simple);
+        window.customElements.define(def.TagName, eg_Simple);
+        return eg_Simple;
+    
+};
+window.moduloBuild.nameToHash.eg_Simple = "xxrhos83";
+
+window.moduloBuild.modules["xx5qdh5h"] = function eg_ToDo (modulo) {
+
+        const def = modulo.definitions['eg_ToDo'];
+        class eg_ToDo extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_ToDo);
+        window.customElements.define(def.TagName, eg_ToDo);
+        return eg_ToDo;
+    
+};
+window.moduloBuild.nameToHash.eg_ToDo = "xx5qdh5h";
+
+window.moduloBuild.modules["xxo8lpij"] = function eg_JSON (modulo) {
+
+        const def = modulo.definitions['eg_JSON'];
+        class eg_JSON extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_JSON);
+        window.customElements.define(def.TagName, eg_JSON);
+        return eg_JSON;
+    
+};
+window.moduloBuild.nameToHash.eg_JSON = "xxo8lpij";
+
+window.moduloBuild.modules["x124cpbo"] = function eg_JSONArray (modulo) {
+
+        const def = modulo.definitions['eg_JSONArray'];
+        class eg_JSONArray extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_JSONArray);
+        window.customElements.define(def.TagName, eg_JSONArray);
+        return eg_JSONArray;
+    
+};
+window.moduloBuild.nameToHash.eg_JSONArray = "x124cpbo";
+
+window.moduloBuild.modules["x1teq8fq"] = function eg_GitHubAPI (modulo) {
+
+        const def = modulo.definitions['eg_GitHubAPI'];
+        class eg_GitHubAPI extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_GitHubAPI);
+        window.customElements.define(def.TagName, eg_GitHubAPI);
+        return eg_GitHubAPI;
+    
+};
+window.moduloBuild.nameToHash.eg_GitHubAPI = "x1teq8fq";
+
+window.moduloBuild.modules["x1bekpk5"] = function eg_ColorSelector (modulo) {
+
+        const def = modulo.definitions['eg_ColorSelector'];
+        class eg_ColorSelector extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_ColorSelector);
+        window.customElements.define(def.TagName, eg_ColorSelector);
+        return eg_ColorSelector;
+    
+};
+window.moduloBuild.nameToHash.eg_ColorSelector = "x1bekpk5";
+
+window.moduloBuild.modules["x1d3p8tg"] = function eg_DateNumberPicker (modulo) {
+
+        const def = modulo.definitions['eg_DateNumberPicker'];
+        class eg_DateNumberPicker extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_DateNumberPicker);
+        window.customElements.define(def.TagName, eg_DateNumberPicker);
+        return eg_DateNumberPicker;
+    
+};
+window.moduloBuild.nameToHash.eg_DateNumberPicker = "x1d3p8tg";
+
+window.moduloBuild.modules["xxbr6cba"] = function eg_PrimeSieve (modulo) {
+
+        const def = modulo.definitions['eg_PrimeSieve'];
+        class eg_PrimeSieve extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_PrimeSieve);
+        window.customElements.define(def.TagName, eg_PrimeSieve);
+        return eg_PrimeSieve;
+    
+};
+window.moduloBuild.nameToHash.eg_PrimeSieve = "xxbr6cba";
+
+window.moduloBuild.modules["xxo638jh"] = function eg_Scatter (modulo) {
+
+        const def = modulo.definitions['eg_Scatter'];
+        class eg_Scatter extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Scatter);
+        window.customElements.define(def.TagName, eg_Scatter);
+        return eg_Scatter;
+    
+};
+window.moduloBuild.nameToHash.eg_Scatter = "xxo638jh";
+
+window.moduloBuild.modules["x1ovegn6"] = function eg_FlexibleForm (modulo) {
+
+        const def = modulo.definitions['eg_FlexibleForm'];
+        class eg_FlexibleForm extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_FlexibleForm);
+        window.customElements.define(def.TagName, eg_FlexibleForm);
+        return eg_FlexibleForm;
+    
+};
+window.moduloBuild.nameToHash.eg_FlexibleForm = "x1ovegn6";
+
+window.moduloBuild.modules["x1t172bs"] = function eg_FlexibleFormWithAPI (modulo) {
+
+        const def = modulo.definitions['eg_FlexibleFormWithAPI'];
+        class eg_FlexibleFormWithAPI extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_FlexibleFormWithAPI);
+        window.customElements.define(def.TagName, eg_FlexibleFormWithAPI);
+        return eg_FlexibleFormWithAPI;
+    
+};
+window.moduloBuild.nameToHash.eg_FlexibleFormWithAPI = "x1t172bs";
+
+window.moduloBuild.modules["x1avssv1"] = function eg_Components (modulo) {
+
+        const def = modulo.definitions['eg_Components'];
+        class eg_Components extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Components);
+        window.customElements.define(def.TagName, eg_Components);
+        return eg_Components;
+    
+};
+window.moduloBuild.nameToHash.eg_Components = "x1avssv1";
+
+window.moduloBuild.modules["xxgmlldk"] = function eg_OscillatingGraph (modulo) {
+
+        const def = modulo.definitions['eg_OscillatingGraph'];
+        class eg_OscillatingGraph extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_OscillatingGraph);
+        window.customElements.define(def.TagName, eg_OscillatingGraph);
+        return eg_OscillatingGraph;
+    
+};
+window.moduloBuild.nameToHash.eg_OscillatingGraph = "xxgmlldk";
+
+window.moduloBuild.modules["xxo3b9id"] = function eg_Search (modulo) {
+
+        const def = modulo.definitions['eg_Search'];
+        class eg_Search extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Search);
+        window.customElements.define(def.TagName, eg_Search);
+        return eg_Search;
+    
+};
+window.moduloBuild.nameToHash.eg_Search = "xxo3b9id";
+
+window.moduloBuild.modules["x15i6ec2"] = function eg_SearchBox (modulo) {
+
+        const def = modulo.definitions['eg_SearchBox'];
+        class eg_SearchBox extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_SearchBox);
+        window.customElements.define(def.TagName, eg_SearchBox);
+        return eg_SearchBox;
+    
+};
+window.moduloBuild.nameToHash.eg_SearchBox = "x15i6ec2";
+
+window.moduloBuild.modules["x1bh86eb"] = function eg_WorldMap (modulo) {
+
+        const def = modulo.definitions['eg_WorldMap'];
+        class eg_WorldMap extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_WorldMap);
+        window.customElements.define(def.TagName, eg_WorldMap);
+        return eg_WorldMap;
+    
+};
+window.moduloBuild.nameToHash.eg_WorldMap = "x1bh86eb";
+
+window.moduloBuild.modules["xxs0uo1c"] = function eg_Memory (modulo) {
+
+        const def = modulo.definitions['eg_Memory'];
+        class eg_Memory extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_Memory);
+        window.customElements.define(def.TagName, eg_Memory);
+        return eg_Memory;
+    
+};
+window.moduloBuild.nameToHash.eg_Memory = "xxs0uo1c";
+
+window.moduloBuild.modules["x18fmfmt"] = function eg_ConwayGameOfLife (modulo) {
+
+        const def = modulo.definitions['eg_ConwayGameOfLife'];
+        class eg_ConwayGameOfLife extends window.HTMLElement {
+            constructor() {
+                super();
+                modulo.registry.utils.initElement(modulo, def, this);
+            }
+            connectedCallback() {
+                window.setTimeout(() => this.parsedCallback(), 0);
+            }
+            parsedCallback() {
+                modulo.registry.utils.mountElement(modulo, def, this);
+            }
+        }
+        modulo.registry.utils.initClass(modulo, def, eg_ConwayGameOfLife);
+        window.customElements.define(def.TagName, eg_ConwayGameOfLife);
+        return eg_ConwayGameOfLife;
+    
+};
+window.moduloBuild.nameToHash.eg_ConwayGameOfLife = "x18fmfmt";
+
+window.moduloBuild.modules["x1ml47eb"] = function eg_Hello_script (modulo) {
+var script = { exports: {} }; var state;
+
+    function countUp() {
+        state.num++;
+    }
+
+return {"countUp": typeof countUp !== "undefined" ? countUp : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_Hello_script = "x1ml47eb";
+
+window.moduloBuild.modules["x1i773pd"] = function eg_ToDo_script (modulo) {
+var script = { exports: {} }; var state;
+
+    function addItem() {
+        state.list.push(state.text); // add to list
+        state.text = ""; // clear input
+    }
+
+return {"addItem": typeof addItem !== "undefined" ? addItem : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_ToDo_script = "x1i773pd";
+
+window.moduloBuild.modules["x18vnjfe"] = function eg_GitHubAPI_script (modulo) {
+var script = { exports: {} }; var state, element;
+
+    function fetchGitHub() {
+        fetch(`https://api.github.com/users/${state.search}`)
+            .then(response => response.json())
+            .then(githubCallback);
+    }
+    function githubCallback(apiData) {
+        state.name = apiData.name;
+        state.location = apiData.location;
+        state.bio = apiData.bio;
+        element.rerender();
+    }
+
+return {"fetchGitHub": typeof fetchGitHub !== "undefined" ? fetchGitHub : undefined, "githubCallback": typeof githubCallback !== "undefined" ? githubCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_GitHubAPI_script = "x18vnjfe";
+
+window.moduloBuild.modules["x119ugke"] = function eg_DateNumberPicker_script (modulo) {
+var script = { exports: {} }; var state;
+
+    function isValid({ year, month, day }) {
+        month--; // Months are zero indexed
+        const d = new Date(year, month, day);
+        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
+    }
+    function next(part) {
+        state[part]++;
+        if (!isValid(state)) { // undo if not valid
+            state[part]--;
+        }
+    }
+    function previous(part) {
+        state[part]--;
+        if (!isValid(state)) { // undo if not valid
+            state[part]++;
+        }
+    }
+
+return {"isValid": typeof isValid !== "undefined" ? isValid : undefined, "next": typeof next !== "undefined" ? next : undefined, "previous": typeof previous !== "undefined" ? previous : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_DateNumberPicker_script = "x119ugke";
+
+window.moduloBuild.modules["x17drlid"] = function eg_PrimeSieve_script (modulo) {
+var script = { exports: {} }; var state, script;
+
+    // Getting big a range of numbers in JS. Use "script.exports"
+    // to export this as a one-time global constant.
+    // (Hint: Curious how it calculates prime? See CSS!)
+    script.exports.range = 
+        Array.from({length: 63}, (x, i) => i + 2);
+    function setNum(payload, ev) {
+        state.number = Number(ev.target.textContent);
+    }
+
+return {"setNum": typeof setNum !== "undefined" ? setNum : undefined, setLocalVariables: function(o) {state=o.state; script=o.script}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_PrimeSieve_script = "x17drlid";
+
+window.moduloBuild.modules["x11988a0"] = function eg_FlexibleFormWithAPI_script (modulo) {
+var script = { exports: {} }; var state, element;
+
+    const URL = 'https://jsonplaceholder.typicode.com/posts';
+    const fakedPosts = [];
+    const headers = [];
+
+    function initializedCallback() {
+        refresh(); // Refresh on first load
+    }
+
+    function refresh() {
+        fetch(URL).then(r => r.json()).then(data => {
+            // Since Typicode API doesn't save it's POST
+            // data, we'll have manually fake it here
+            state.posts = data.concat(fakedPosts);
+            element.rerender();
+        });
+    }
+
+    function submit() {
+        // Rename the state variables to be what the API suggests
+        const postData = {
+              userId: state.user,
+              title: state.topic,
+              body: state.comment,
+        };
+        state.topic = ''; // clear the comment & topic text
+        state.comment = '';
+        fakedPosts.push(postData); // Required for refresh()
+
+        // Send the POST request with fetch, then refresh after
+        const opts = {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' },
+        };
+        fetch(URL, opts).then(r => r.json()).then(refresh);
+    }
+
+return {"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, "refresh": typeof refresh !== "undefined" ? refresh : undefined, "submit": typeof submit !== "undefined" ? submit : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_FlexibleFormWithAPI_script = "x11988a0";
+
+window.moduloBuild.modules["x18q70th"] = function eg_OscillatingGraph_script (modulo) {
+var script = { exports: {} }; var state, script, element;
+
+    let timeout = null;
+    script.exports.properties = ["anim", "speed", "width", "pulse"];//, "offset"];
+    function play() {
+        state.playing = true;
+        nextTick();
+    }
+    function pause() {
+        state.playing = false;
+    }
+    function setEasing(payload) {
+        state.easing = payload;
+    }
+
+    function nextTick() {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        const el = element;
+        timeout = setTimeout(() => {
+            el.rerender();
+        }, 2000 / state.speed);
+    }
+
+    function updateCallback() {
+        if (state.playing) {
+            while (state.data.length <= state.width) {
+                state.tick++;
+                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right
+            }
+            state.data.shift(); // remove one from left
+            nextTick();
+        }
+    }
+
+return {"play": typeof play !== "undefined" ? play : undefined, "pause": typeof pause !== "undefined" ? pause : undefined, "setEasing": typeof setEasing !== "undefined" ? setEasing : undefined, "nextTick": typeof nextTick !== "undefined" ? nextTick : undefined, "updateCallback": typeof updateCallback !== "undefined" ? updateCallback : undefined, setLocalVariables: function(o) {state=o.state; script=o.script; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_OscillatingGraph_script = "x18q70th";
+
+window.moduloBuild.modules["xxqi0rec"] = function eg_Search_script (modulo) {
+var script = { exports: {} }; var state, element;
+
+    const OPTS = '&limit=6&fields=title,author_name,cover_i';
+    const COVER ='https://covers.openlibrary.org/b/id/';
+    const API = 'https://openlibrary.org/search.json?q=';
+    function doSearch() {
+        const url = API + '?q=' + state.search + OPTS;
+        state.loading = true;
+        fetch(url)
+            .then(response => response.json())
+            .then(dataBackCallback);
+    }
+
+    function dataBackCallback(data) {
+        for (const item of data.docs) {
+            // For convenience, we prepare the cover URL
+            item.cover = COVER + item.cover_i + '-S.jpg';
+        }
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+return {"doSearch": typeof doSearch !== "undefined" ? doSearch : undefined, "dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_Search_script = "xxqi0rec";
+
+window.moduloBuild.modules["xxmfhi87"] = function eg_SearchBox_script (modulo) {
+var script = { exports: {} }; var state, staticdata, element;
+
+    function typingCallback() {
+        state.loading = true;
+        const search = `q=${state.search}`;
+        const opts = 'limit=6&fields=title,author_name,cover_i';
+        const url = `${staticdata.apiBase}?${search}&${opts}`;
+        _globalDebounce(() => {
+            fetch(url)
+                .then(response => response.json())
+                .then(dataBackCallback);
+        });
+    }
+
+    function dataBackCallback(data) {
+        state.results = data.docs;
+        state.loading = false;
+        element.rerender();
+    }
+
+    let _globalDebounceTimeout = null;
+    function _globalDebounce(func) {
+        if (_globalDebounceTimeout) {
+            clearTimeout(_globalDebounceTimeout);
+        }
+        _globalDebounceTimeout = setTimeout(func, 500);
+    }
+
+return {"typingCallback": typeof typingCallback !== "undefined" ? typingCallback : undefined, "dataBackCallback": typeof dataBackCallback !== "undefined" ? dataBackCallback : undefined, "_globalDebounce": typeof _globalDebounce !== "undefined" ? _globalDebounce : undefined, setLocalVariables: function(o) {state=o.state; staticdata=o.staticdata; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_SearchBox_script = "xxmfhi87";
+
+window.moduloBuild.modules["xxqsulhb"] = function eg_Memory_script (modulo) {
+var script = { exports: {} }; var state, element;
+
+const symbolsStr = "%!@#=?&+~÷≠∑µ‰∂Δƒσ"; // 16 options
+function setup(payload) {
+    const count = Number(payload);
+    let symbols = symbolsStr.substr(0, count/2).split("");
+    symbols = symbols.concat(symbols); // duplicate cards
+    let id = 0;
+    while (id < count) {
+        const index = Math.floor(Math.random()
+                                    * symbols.length);
+        const symbol = symbols.splice(index, 1)[0];
+        state.cards.push({symbol, id});
+        id++;
+    }
+}
+
+function failedFlipCallback() {
+    // Remove both from revealed array & set to null
+    state.revealed = state.revealed.filter(
+            id => id !== state.failedflip
+                    && id !== state.lastflipped);
+    state.failedflip = null;
+    state.lastflipped = null;
+    state.message = "";
+    element.rerender();
+}
+
+function flip(id) {
+    if (state.failedflip !== null) {
+        return;
+    }
+    id = Number(id);
+    if (state.revealed.includes(id)) {
+        return; // double click
+    } else if (state.lastflipped === null) {
+        state.lastflipped = id;
+        state.revealed.push(id);
+    } else {
+        state.revealed.push(id);
+        const {symbol} = state.cards[id];
+        const lastCard = state.cards[state.lastflipped];
+        if (symbol === lastCard.symbol) {
+            // Successful match! Check for win.
+            const {revealed, cards} = state;
+            if (revealed.length === cards.length) {
+                state.message = "You win!";
+                state.win = true;
+            } else {
+                state.message = "Nice match!";
+            }
+            state.lastflipped = null;
+        } else {
+            state.message = "No match.";
+            state.failedflip = id;
+            setTimeout(failedFlipCallback, 1000);
+        }
+    }
+}
+
+return {"setup": typeof setup !== "undefined" ? setup : undefined, "failedFlipCallback": typeof failedFlipCallback !== "undefined" ? failedFlipCallback : undefined, "flip": typeof flip !== "undefined" ? flip : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_Memory_script = "xxqsulhb";
+
+window.moduloBuild.modules["xxmintkp"] = function eg_ConwayGameOfLife_script (modulo) {
+var script = { exports: {} }; var state, script, element;
+
+    function toggle([ i, j ]) {
+        if (!state.cells[i]) {
+            state.cells[i] = {};
+        }
+        state.cells[i][j] = !state.cells[i][j];
+    }
+
+    function play() {
+        state.playing = true;
+        setTimeout(() => {
+            if (state.playing) {
+                updateNextFrame();
+                element.rerender(); // manually rerender
+                play(); // cue next frame
+            }
+        }, 2000 / state.speed);
+    }
+
+    function pause() {
+        state.playing = false;
+    }
+
+    function clear() {
+        state.cells = {};
+    }
+
+    function randomize() {
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!state.cells[i]) {
+                    state.cells[i] = {};
+                }
+                state.cells[i][j] = (Math.random() > 0.5);
+            }
+        }
+    }
+
+    // Helper function for getting a cell from data
+    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);
+    function updateNextFrame() {
+        const nextData = {};
+        for (const i of script.exports.range) {
+            for (const j of script.exports.range) {
+                if (!nextData[i]) {
+                    nextData[i] = {};
+                }
+                const count = countNeighbors(i, j);
+                nextData[i][j] = get(i, j) ?
+                    (count === 2 || count === 3) : // stays alive
+                    (count === 3); // comes alive
+            }
+        }
+        state.cells = nextData;
+    }
+
+    function countNeighbors(i, j) {
+        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),
+                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),
+                get(i + 1, j - 1), get(i - 1, j + 1)];
+        return neighbors.filter(v => v).length;
+    }
+    script.exports.range = Array.from({length: 24}, (x, i) => i);
+
+return {"toggle": typeof toggle !== "undefined" ? toggle : undefined, "play": typeof play !== "undefined" ? play : undefined, "pause": typeof pause !== "undefined" ? pause : undefined, "clear": typeof clear !== "undefined" ? clear : undefined, "randomize": typeof randomize !== "undefined" ? randomize : undefined, "updateNextFrame": typeof updateNextFrame !== "undefined" ? updateNextFrame : undefined, "countNeighbors": typeof countNeighbors !== "undefined" ? countNeighbors : undefined, setLocalVariables: function(o) {state=o.state; script=o.script; element=o.element}, exports: script.exports }
+
+};
+window.moduloBuild.nameToHash.eg_ConwayGameOfLife_script = "xxmintkp";
+
+window.moduloBuild.modules["xx2noapr"] = function x_DemoModal_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
+  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
+  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push("block"); // "block"
+  } else { // "else"
+  OUT.push("none"); // "none"
+  } // "endif"
+  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
+  if (CTX.state.visible) { // "if state.visible"
+  OUT.push(" top: 100px; "); // "top: 100px;"
+  } else { // "else"
+  OUT.push(" top: -500px; "); // "top: -500px;"
+  } // "endif"
+  OUT.push("\">\n            <h2>"); // "\"><h2>"
+  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
+  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.x_DemoModal_template = "xx2noapr";
+
+window.moduloBuild.modules["xx9i16tt"] = function x_DemoChart_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <div class=\"chart-container\n        "); // "<div class=\"chart-container"
+  if (CTX.props.animated) { // "if props.animated"
+  OUT.push("animated"); // "animated"
+  } // "endif"
+  OUT.push("\">\n            "); // "\">"
+  var ARR0=CTX.script.percent;for (var KEY in ARR0) {CTX. percent=ARR0[KEY]; // "for percent in script.percent"
+  OUT.push("\n                <div style=\"height: "); // "<div style=\"height:"
+  OUT.push(G.escapeText(CTX.percent)); // "percent"
+  OUT.push("px; width: "); // "px; width:"
+  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
+  OUT.push("px\">\n                </div>\n            "); // "px\"></div>"
+  } // "endfor"
+  OUT.push("\n        </div>\n        "); // "</div>"
+  if (!(CTX.props.animated)) { // "if not props.animated"
+  OUT.push("\n            "); // ""
+  var ARR1=CTX.props.data;for (var KEY in ARR1) {CTX. value=ARR1[KEY]; // "for value in props.data"
+  OUT.push("\n                <label style=\"width: "); // "<label style=\"width:"
+  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
+  OUT.push("px\">"); // "px\">"
+  OUT.push(G.escapeText(CTX.value)); // "value"
+  OUT.push("</label>\n            "); // "</label>"
+  } // "endfor"
+  OUT.push("\n        "); // ""
+  } // "endif"
+  OUT.push("\n    "); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.x_DemoChart_template = "xx9i16tt";
+
+window.moduloBuild.modules["xx5ann6n"] = function x_ExampleBtn_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
+  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
+  OUT.push("\">\n            "); // "\">"
+  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
+  OUT.push("\n        </button>\n    "); // "</button>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.x_ExampleBtn_template = "xx5ann6n";
+
+window.moduloBuild.modules["xxbjtni2"] = function x_DemoSelector_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        "); // ""
+  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
+  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\" payload=\""); // "\" payload=\""
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
+  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push("</label>\n        "); // "</label>"
+  } // "endfor"
+  OUT.push("\n    "); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.x_DemoSelector_template = "xxbjtni2";
+
+window.moduloBuild.modules["x18vovt8"] = function mws_Page_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
+  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
+  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
+  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
+  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
+  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
+  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
+  } // "endif"
+  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
+  if (CTX.script.exports.version) { // "if script.exports.version"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
+  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
+  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
+  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
+  } else { // "else"
+  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
+  } // "endif"
+  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
+  if (CTX.props.docbarselected) { // "if props.docbarselected"
+  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
+  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
+  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
+  } else { // "else"
+  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
+  } // "endif"
+  OUT.push("\n\n<footer>\n    <main>\n        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1 </main></footer></body></html>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.mws_Page_template = "x18vovt8";
+
+window.moduloBuild.modules["xxdsp3hb"] = function mws_ProjectInfo_staticdata (modulo) {
+return {"name":"mdu.js","author":"michaelb","version":"0.0.33","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","srcserve":"npm run cli -- srcserve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"peerDependencies":{"express":"^4.18.2","node-watch":"^0.7.2","puppeteer":"^13.7.0"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
+};
+window.moduloBuild.nameToHash.mws_ProjectInfo_staticdata = "xxdsp3hb";
+
+window.moduloBuild.modules["xx9t56li"] = function mws_ProjectInfo_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        "); // ""
+  if (CTX.props.version) { // "if props.version"
+  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("</a>\n        "); // "</a>"
+  } else { // "else"
+  OUT.push("\n            v: "); // "v:"
+  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
+  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
+  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
+  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("\">npm "); // "\">npm"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push("</a>\n        "); // "</a>"
+  } // "endif"
+  OUT.push("\n    "); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.mws_ProjectInfo_template = "xx9t56li";
+
+window.moduloBuild.modules["x1vqburp"] = function mws_DevLogNav_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("<nav style=\""); // "<nav style=\""
+  if (CTX.props.fn) { // "if props.fn"
+  OUT.push("border-bottom: none"); // "border-bottom: none"
+  } // "endif"
+  OUT.push("\">\n    <h4>DEV LOG</h4>\n\n    <ul>\n        "); // "\"><h4>DEV LOG</h4><ul>"
+  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
+  OUT.push("\n            <li>\n                "); // "<li>"
+  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
+  OUT.push("\n                    <span style=\"text-decoration: overline underline;\">\n                        "); // "<span style=\"text-decoration: overline underline;\">"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push("&nbsp;("); // "&nbsp;("
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push(")\n                    </span>\n                "); // ") </span>"
+  } else { // "else"
+  OUT.push("\n                    <a href=\"/devlog/"); // "<a href=\"/devlog/"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push(".html\">\n                        "); // ".html\">"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
+  OUT.push("&nbsp;("); // "&nbsp;("
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push(")\n                    </a>\n                "); // ") </a>"
+  } // "endif"
+  OUT.push("\n            </li>\n        "); // "</li>"
+  } // "endfor"
+  OUT.push("\n    </ul>\n</nav>\n\n"); // "</ul></nav>"
+  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
+  OUT.push("\n    "); // ""
+  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
+  OUT.push("\n        <h1>"); // "<h1>"
+  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
+  OUT.push("</h1>\n    "); // "</h1>"
+  } // "endif"
+  OUT.push("\n"); // ""
+  } // "endfor"
+  OUT.push("\n\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.mws_DevLogNav_template = "x1vqburp";
+
+window.moduloBuild.modules["x1s9cikh"] = function mws_DocSidebar_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("<ul>\n    "); // "<ul>"
+  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
+  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("gactive"); // "gactive"
+  } else { // "else"
+  OUT.push("ginactive"); // "ginactive"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("\">"); // "\">"
+  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
+  OUT.push("</a>\n            "); // "</a>"
+  if (CTX.linkGroup.active) { // "if linkGroup.active"
+  OUT.push("\n                "); // ""
+  if (CTX.linkGroup.children) { // "if linkGroup.children"
+  OUT.push("\n                    <ul>\n                    "); // "<ul>"
+  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
+  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
+  if (CTX.childLink.filepath) { // "if childLink.filepath"
+  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
+  } else { // "else"
+  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
+  OUT.push("#"); // "#"
+  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
+  } // "endif"
+  OUT.push("\"\n                            >"); // "\" >"
+  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
+  OUT.push("</a>\n                        "); // "</a>"
+  if (CTX.props.showall) { // "if props.showall"
+  OUT.push("\n                            "); // ""
+  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
+  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
+  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
+  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
+  } // "endif"
+  OUT.push("\n                        "); // ""
+  } // "endif"
+  OUT.push("\n                        </li>\n                    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n                    </ul>\n                "); // "</ul>"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.mws_DocSidebar_template = "x1s9cikh";
+
 window.moduloBuild.modules["xxs8mvob"] = function mws_Demo_template (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("<div \n    @mouseenter:=script.rerenderFirstTime\n    class=\"demo-wrapper\n        "); // "<div @mouseenter:=script.rerenderFirstTime class=\"demo-wrapper"
@@ -14847,469 +15095,45 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["x15gcnek"] = function mws_DevLogNav (modulo) {
+window.moduloBuild.nameToHash.mws_Demo_template = "xxs8mvob";
 
-        const def = modulo.definitions['mws_DevLogNav'];
-        class mws_DevLogNav extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_DevLogNav);
-        window.customElements.define(def.TagName, mws_DevLogNav);
-        return mws_DevLogNav;
-    
-};
-window.moduloBuild.modules["x1vqburp"] = function mws_DevLogNav_template (modulo) {
+window.moduloBuild.modules["xxslhngg"] = function mws_AllExamples_template (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("<nav style=\""); // "<nav style=\""
-  if (CTX.props.fn) { // "if props.fn"
-  OUT.push("border-bottom: none"); // "border-bottom: none"
-  } // "endif"
-  OUT.push("\">\n    <h4>DEV LOG</h4>\n\n    <ul>\n        "); // "\"><h4>DEV LOG</h4><ul>"
-  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
-  OUT.push("\n            <li>\n                "); // "<li>"
-  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
-  OUT.push("\n                    <span style=\"text-decoration: overline underline;\">\n                        "); // "<span style=\"text-decoration: overline underline;\">"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push("&nbsp;("); // "&nbsp;("
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push(")\n                    </span>\n                "); // ") </span>"
-  } else { // "else"
-  OUT.push("\n                    <a href=\"/devlog/"); // "<a href=\"/devlog/"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push(".html\">\n                        "); // ".html\">"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,0))); // "pair|get:0"
-  OUT.push("&nbsp;("); // "&nbsp;("
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push(")\n                    </a>\n                "); // ") </a>"
-  } // "endif"
-  OUT.push("\n            </li>\n        "); // "</li>"
-  } // "endfor"
-  OUT.push("\n    </ul>\n</nav>\n\n"); // "</ul></nav>"
-  var ARR0=CTX.state.nav;for (var KEY in ARR0) {CTX. pair=ARR0[KEY]; // "for pair in state.nav"
+  var ARR0=CTX.state.examples;for (var KEY in ARR0) {CTX. example=ARR0[KEY]; // "for example in state.examples"
   OUT.push("\n    "); // ""
-  if (G.filters["get"](CTX.pair,0) === CTX.props.fn) { // "if pair|get:0 == props.fn"
-  OUT.push("\n        <h1>"); // "<h1>"
-  OUT.push(G.escapeText(G.filters["get"](CTX.pair,1))); // "pair|get:1"
-  OUT.push("</h1>\n    "); // "</h1>"
+  if (CTX.example.name === CTX.state.selected) { // "if example.name == state.selected"
+  OUT.push("\n        <div class=\"Example expanded\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example expanded\"><button class=\"tool-button\" alt=\"Edit\" title=\"Hide source code & editor\" @click:=script.toggleExample payload=\""
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\">\n                "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n                &times;\n            </button>\n            <mws-Demo\n                demotype=\"minipreview\"\n                fromlibrary='"); // "&times; </button><mws-Demo demotype=\"minipreview\" fromlibrary='"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("'\n            ></mws-Demo>\n        </div>\n    "); // "' ></mws-Demo></div>"
+  } else { // "else"
+  OUT.push("\n        <div class=\"Example\">\n            <button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\"\n                @click:=script.toggleExample payload=\""); // "<div class=\"Example\"><button class=\"tool-button\" alt=\"Edit\" title=\"See source code & edit example\" @click:=script.toggleExample payload=\""
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\">\n                "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n                ✎\n            </button>\n            <div class=\"Example-wrapper\">\n                <eg-"); // "✎ </button><div class=\"Example-wrapper\"><eg-"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("></eg-"); // "></eg-"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push(">\n            </div>\n        </div>\n    "); // "></div></div>"
   } // "endif"
   OUT.push("\n"); // ""
   } // "endfor"
-  OUT.push("\n\n"); // ""
+  OUT.push("\n\n<!--\n<mws-Section name=\""); // "<!-- <mws-Section name=\""
+  OUT.push(G.escapeText(G.filters["lower"](CTX.example.name))); // "example.name|lower"
+  OUT.push("\">\n    "); // "\">"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("\n</mws-Section>\n<mws-Demo\n    demotype=\"minipreview\"\n    fromlibrary='"); // "</mws-Section><mws-Demo demotype=\"minipreview\" fromlibrary='"
+  OUT.push(G.escapeText(CTX.example.name)); // "example.name"
+  OUT.push("'\n></mws-Demo>\n-->\n\n"); // "' ></mws-Demo> -->"
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["x1k6jtfq"] = function mws_DocSidebar (modulo) {
+window.moduloBuild.nameToHash.mws_AllExamples_template = "xxslhngg";
 
-        const def = modulo.definitions['mws_DocSidebar'];
-        class mws_DocSidebar extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_DocSidebar);
-        window.customElements.define(def.TagName, mws_DocSidebar);
-        return mws_DocSidebar;
-    
-};
-window.moduloBuild.modules["x1qnckrq"] = function mws_DocSidebar_script (modulo) {
-var script = { exports: {} }; var props, template, state, script, style, component, cparts;
-function initializedCallback() {
-    const { path, showall } = props;
-    state.menu = script.exports.menu.map(o => Object.assign({}, o)); // dupe
-    for (const groupObj of state.menu) {
-        if (showall) {
-            groupObj.active = true;
-        }
-        if (groupObj.filename && path && groupObj.filename.endsWith(path)) {
-            groupObj.active = true;
-        }
-    }
-}
-
-function _child(label, hash, keywords=[], filepath=null) {
-    if (!hash) {
-        hash = label.toLowerCase()
-    }
-    if (hash.endsWith('.html') && filepath === null) {
-        filepath = hash;
-    }
-    return {label, hash, keywords, filepath};
-}
-
-let componentTexts = {};
-try {
-    componentTexts  = modulo.registry.utils.getComponentDefs('/libraries/eg.html');
-} catch {
-    console.log('couldnt get componentTexts');
-}
-
-script.exports.menu = [
-    {
-        label: 'Table of Contents',
-        filename: '/docs/',
-    },
-
-    {
-        label: 'Tutorial',
-        filename: '/docs/tutorial_part1.html',
-        children: [
-            _child('Part 1: Components, CParts, and Loading', '/docs/tutorial_part1.html', ['cdn', 'components', 'cparts', 'template', 'style', 'html & css']),
-            _child('Part 2: Props, Templating, and Building', '/docs/tutorial_part2.html', ['props', 'template variables', 'template filters', 'modulo console command', 'build', 'hash']),
-            _child('Part 3: State, Directives, and Scripting', '/docs/tutorial_part3.html', ['state', 'directives', 'data props', 'state.bind', 'data types', 'events', 'basic scripting']),
-        ],
-    },
-
-    {
-        label: 'Templating',
-        filename: '/docs/templating.html',
-        children: [
-            _child('Templates', null, ['templating philosophy', 'templating overview']),
-            _child('Variables', null, ['variable syntax', 'variable sources', 'cparts as variables']),
-            _child('Filters', null, ['filter syntax', 'example filters']),
-            _child('Tags', null, ['template-tag syntax', 'example use of templatetags']),
-            _child('Comments', null, ['syntax', 'inline comments', 'block comments']),
-            _child('Debugging', null, ['code generation', 'debugger', 'developer tools']),
-            _child('Escaping', null, ['escaping HTML', 'safe filter', 'XSS injection protection']),
-        ],
-    },
-
-    {
-        label: 'Template Reference',
-        filename: '/docs/templating-reference.html',
-        children: [
-            _child('Built-in Template Tags', 'templatetags', [
-                'if', 'elif', 'else', 'endif', 'for', 'empty', 'endfor',
-                'operators', 'in', 'not in', 'is', 'is not', 'lt', 'gt',
-                'comparison', 'control-flow',
-            ]),
-            _child('Built-in Filters', 'filters', [
-                'add', 'allow', 'capfirst', 'concat', 'default',
-                'divisibleby', 'escapejs', 'first', 'join', 'json', 'last',
-                'length', 'lower', 'number', 'pluralize', 'subtract',
-                'truncate', 'renderas', 'reversed', 'upper',
-            ]),
-        ],
-    },
-
-    {
-        label: 'CParts',
-        filename: '/docs/cparts.html',
-        children: [
-            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
-                                'rendering mode', 'manual rerender', 'shadow',
-                                'vanish', 'vanish-into-document', 'component.event',
-                                'component.slot', 'component.dataProp']),
-            _child('Props', 'props', ['accessing props', 'defining props',
-                                'setting props', 'using props']),
-            _child('Script', 'script', ['javascript', 'events', 'computed properties',
-                            'static execution', 'custom lifecycle methods',
-                                'script callback execution context', 'script exports']),
-            _child('State', 'state', ['state definition', 'state data types',
-                            'json', 'state variables', 'state.bind directive']),
-            _child('StaticData', 'staticdata', ['loading API', 'loading json',
-                            'transform function', 'bundling data']),
-            _child('Style', 'style', ['CSS', 'styling', ':host', 'shadowDOM']),
-            _child('Template', 'template', ['custom template', 'templating engine']),
-        ],
-    },
-
-    {
-        label: 'Lifecycle',
-        filename: '/docs/lifecycle.html',
-        children: [
-            _child('Global lifecycle', 'global',
-                ['lifestyle phases', 'prebuild', 'define', 'factory']),
-            _child('Component lifecycle', 'global',
-                ['consturctor', 'initialized', 'prepare', 'render',
-                'reconcile', 'update', 'event', 'eventCleanup']),
-            _child('Lifecycle callbacks', 'callbacks',
-                ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
-                'renderobj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),
-        ],
-    },
-
-            /*_child('Factory lifecycle', 'factory',
-                ['renderObj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),*/
-    {
-        label: 'Directives',
-        filename: '/docs/directives.html',
-        children: [
-            _child('Directives', 'directives',
-                ['built-in directives', 'directive shortcuts',
-                'custom directives']),
-            _child('Built-in directives', 'builtin', [
-                    '[component.dataProp]', ':=', 'prop:=', 'JSON primitive',
-                    'data-prop', 'assignment',
-                    '[component.event]', '@click', '@...:=',
-                    '[component.slot]', '[state.bind]',
-                ]),
-            _child('Custom directives', 'custom', [
-                'refs', 'accessing dom', 'escape hatch',
-                'Mount callbacks', 'Unmount callbacks',
-                'template variables vs directives',
-                'script-tag custom directives',
-                'custom shortcuts',
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'API & Extension',
-        filename: '/docs/api.html',
-        children: [
-            _child('Custom CParts', 'cparts'),
-            _child('CPart Spares', 'spares'),
-            _child('Custom Templating', 'template'),
-            _child('Custom Filters', 'customfilters'),
-            _child('Custom Template Tags', 'customtags'),
-            _child('Custom Template Syntax', 'customtags'),
-            _child('ModRec', 'modrec'),
-            _child('DOMCursor', 'cursor'),
-        ],
-    },
-    */
-
-    {
-        label: 'Examples',
-        filename: '/demos/',
-        children: [
-            _child('Starter Files', 'starter', [ 'starter', 'snippets',
-              'component libraries', 'download', 'zip', 'page layouts',
-              'vanish-into-document' ]),
-            _child('Example Library', 'library', Object.keys(componentTexts)),
-            _child('Experiments', 'experiments', [
-                'custom cparts for apis', 'custom cparts for legacy', 'jQuery',
-                'handlebars', 'jsx',  'Tone.js', 'audio synthesis', 'MIDI',
-                'jsx templating', 'babel.js',
-                'transpiling', 'cparts for apis',
-                'TestSuite', 'unit testing',
-              //'FetchState cpart', 
-            ]),
-        ],
-    },
-
-    /*
-    {
-        label: 'Project Info',
-        filename: '/docs/project-info.html',
-        children: [
-            _child('FAQ', 'faq'),
-            _child('Framework Design Philosophy', 'philosophy'),
-        ],
-    },
-    */
-];
-
-
-return {"initializedCallback": typeof initializedCallback !== "undefined" ? initializedCallback : undefined, "_child": typeof _child !== "undefined" ? _child : undefined, setLocalVariables: function(o) {props=o.props; template=o.template; state=o.state; script=o.script; style=o.style; component=o.component; cparts=o.cparts}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x1s9cikh"] = function mws_DocSidebar_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("<ul>\n    "); // "<ul>"
-  var ARR0=CTX.state.menu;for (var KEY in ARR0) {CTX. linkGroup=ARR0[KEY]; // "for linkGroup in state.menu"
-  OUT.push("\n        <li class=\"\n            "); // "<li class=\""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("gactive"); // "gactive"
-  } else { // "else"
-  OUT.push("ginactive"); // "ginactive"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n            \"><a href=\""); // "\"><a href=\""
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.linkGroup.label)); // "linkGroup.label"
-  OUT.push("</a>\n            "); // "</a>"
-  if (CTX.linkGroup.active) { // "if linkGroup.active"
-  OUT.push("\n                "); // ""
-  if (CTX.linkGroup.children) { // "if linkGroup.children"
-  OUT.push("\n                    <ul>\n                    "); // "<ul>"
-  var ARR3=CTX.linkGroup.children;for (var KEY in ARR3) {CTX. childLink=ARR3[KEY]; // "for childLink in linkGroup.children"
-  OUT.push("\n                        <li><a\n                          href=\""); // "<li><a href=\""
-  if (CTX.childLink.filepath) { // "if childLink.filepath"
-  OUT.push(G.escapeText(CTX.childLink.filepath)); // "childLink.filepath"
-  } else { // "else"
-  OUT.push(G.escapeText(CTX.linkGroup.filename)); // "linkGroup.filename"
-  OUT.push("#"); // "#"
-  OUT.push(G.escapeText(CTX.childLink.hash)); // "childLink.hash"
-  } // "endif"
-  OUT.push("\"\n                            >"); // "\" >"
-  OUT.push(G.escapeText(CTX.childLink.label)); // "childLink.label"
-  OUT.push("</a>\n                        "); // "</a>"
-  if (CTX.props.showall) { // "if props.showall"
-  OUT.push("\n                            "); // ""
-  if (CTX.childLink.keywords.length > 0) { // "if childLink.keywords.length gt 0"
-  OUT.push("\n                                <span style=\"margin-left: 10px; color: #aaa\">(<em>Topics: "); // "<span style=\"margin-left: 10px; color: #aaa\">(<em>Topics:"
-  OUT.push(G.escapeText(G.filters["join"](CTX.childLink.keywords,", "))); // "childLink.keywords|join:', '"
-  OUT.push("</em>)</span>\n                            "); // "</em>)</span>"
-  } // "endif"
-  OUT.push("\n                        "); // ""
-  } // "endif"
-  OUT.push("\n                        </li>\n                    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n                    </ul>\n                "); // "</ul>"
-  } // "endif"
-  OUT.push("\n            "); // ""
-  } // "endif"
-  OUT.push("\n        </li>\n    "); // "</li>"
-  } // "endfor"
-  OUT.push("\n\n\n    <!--\n    <li>\n        Other resources:\n\n        <ul>\n            <li>\n                <a href=\"/docs/faq.html\">FAQ</a>\n            <li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\">\n                Literate Source*<br /><em>* Coming soon!</em>\n            </li>\n        </ul>\n\n    </li>\n    -->\n    <!--<a href=\"/literate/src/Modulo.html\">Literate source</a>-->\n</ul>\n\n"); // "<!-- <li> Other resources: <ul><li><a href=\"/docs/faq.html\">FAQ</a><li title=\"Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.\"> Literate Source*<br /><em>* Coming soon!</em></li></ul></li> --><!--<a href=\"/literate/src/Modulo.html\">Literate source</a>--></ul>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x191astr"] = function mws_Page (modulo) {
-
-        const def = modulo.definitions['mws_Page'];
-        class mws_Page extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_Page);
-        window.customElements.define(def.TagName, mws_Page);
-        return mws_Page;
-    
-};
-window.moduloBuild.modules["x1gf7uop"] = function mws_Page_script (modulo) {
-var script = { exports: {} }; 
-
-        //console.log('mws-Page/Script is running', modulo);
-    
-return {setLocalVariables: function(o) {}, exports: script.exports }
-
-};
-window.moduloBuild.modules["x18vovt8"] = function mws_Page_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" />\n    <title>"); // "<!DOCTYPE html><html><head><meta charset=\"utf8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\" /><title>"
-  OUT.push(G.escapeText(CTX.props.pagetitle)); // "props.pagetitle"
-  OUT.push(" - modulojs.org</title>\n    <link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" />\n\n    <!-- Some global CSS that is not tied to any component: -->\n    <link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" />\n</head>\n<body>\n\n<slot name=\"above-navbar\"></slot>\n\n<nav class=\"Navbar\">\n    <a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a>\n    <a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a>\n    <ul>\n        <li>\n            <a href=\"/index.html#about\" "); // "- modulojs.org</title><link rel=\"icon\" type=\"image/png\" href=\"/img/mono_logo_percent_only.png\" /><!-- Some global CSS that is not tied to any component: --><link rel=\"stylesheet\" href=\"/js/codemirror_5.63.0/codemirror_bundled.css\" /></head><body><slot name=\"above-navbar\"></slot><nav class=\"Navbar\"><a href=\"/index.html\" class=\"Navbar-logo\"><img src=\"/img/modulo_logo.svg\" style=\"height:70px\" alt=\"Modulo\" /></a><a href=\"/index.html\" class=\"Navbar-tinyText\">[%] modulo.js</a><ul><li><a href=\"/index.html#about\""
-  if (CTX.props.navbar === "about") { // "if props.navbar == \"about\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">About</a>\n        </li>\n        <li>\n            <a href=\"/start.html\" "); // ">About</a></li><li><a href=\"/start.html\""
-  if (CTX.props.navbar === "start") { // "if props.navbar == \"start\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Start</a>\n        </li>\n        <li>\n            <a href=\"/docs/\" "); // ">Start</a></li><li><a href=\"/docs/\""
-  if (CTX.props.navbar === "docs") { // "if props.navbar == \"docs\""
-  OUT.push("class=\"Navbar--selected\""); // "class=\"Navbar--selected\""
-  } // "endif"
-  OUT.push(">Docs</a>\n        </li>\n    </ul>\n\n    <div class=\"Navbar-rightInfo\">\n        <mws-ProjectInfo></mws-ProjectInfo>\n        <!--\n        "); // ">Docs</a></li></ul><div class=\"Navbar-rightInfo\"><mws-ProjectInfo></mws-ProjectInfo><!--"
-  if (CTX.script.exports.version) { // "if script.exports.version"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.script.exports.version)); // "script.exports.version"
-  OUT.push("<br />\n            SLOC: "); // "<br /> SLOC:"
-  OUT.push(G.escapeText(CTX.script.exports.sloc)); // "script.exports.sloc"
-  OUT.push(" lines<br />\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> | \n            <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a> \n        "); // "lines<br /><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://npmjs.com/https://www.npmjs.com/package/mdu.js\">npm (mdu.js)</a>"
-  } else { // "else"
-  OUT.push("\n            <a href=\"https://github.com/modulojs/modulo/\">Source Code\n                <br />\n                (on GitHub)\n            </a>\n        "); // "<a href=\"https://github.com/modulojs/modulo/\">Source Code <br /> (on GitHub) </a>"
-  } // "endif"
-  OUT.push("\n        -->\n    </div>\n</nav>\n\n"); // "--></div></nav>"
-  if (CTX.props.docbarselected) { // "if props.docbarselected"
-  OUT.push("\n    <main class=\"Main Main--fluid Main--withSidebar\">\n        <aside class=\"TitleAside TitleAside--navBar\" >\n            <h3><span alt=\"Lower-case delta\">%</span></h3>\n            <nav class=\"TitleAside-navigation\">\n                <h3>Documentation</h3>\n                <mws-DocSidebar path=\""); // "<main class=\"Main Main--fluid Main--withSidebar\"><aside class=\"TitleAside TitleAside--navBar\" ><h3><span alt=\"Lower-case delta\">%</span></h3><nav class=\"TitleAside-navigation\"><h3>Documentation</h3><mws-DocSidebar path=\""
-  OUT.push(G.escapeText(CTX.props.docbarselected)); // "props.docbarselected"
-  OUT.push("\"></mws-DocSidebar>\n            </nav>\n        </aside>\n        <aside style=\"border:none\">\n            <slot></slot>\n        </aside>\n    </main>\n"); // "\"></mws-DocSidebar></nav></aside><aside style=\"border:none\"><slot></slot></aside></main>"
-  } else { // "else"
-  OUT.push("\n    <main class=\"Main\">\n        <slot></slot>\n    </main>\n"); // "<main class=\"Main\"><slot></slot></main>"
-  } // "endif"
-  OUT.push("\n\n<footer>\n    <main>\n        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1\n    </main>\n</footer>\n\n</body>\n</html>\n"); // "<footer><main> (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1 </main></footer></body></html>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xx95jsjv"] = function mws_ProjectInfo (modulo) {
-
-        const def = modulo.definitions['mws_ProjectInfo'];
-        class mws_ProjectInfo extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_ProjectInfo);
-        window.customElements.define(def.TagName, mws_ProjectInfo);
-        return mws_ProjectInfo;
-    
-};
-window.moduloBuild.modules["x1kgum1d"] = function mws_ProjectInfo_staticdata (modulo) {
-return {"name":"mdu.js","author":"michaelb","version":"0.0.31","description":"Lightweight, easy-to-learn Web Component JavaScript framework","homepage":"https://modulojs.org/","main":"./src/Modulo.js","bin":{"mdu-cli":"modulocli/modulocli.js","modulocli":"modulocli/modulocli.js"},"scripts":{"serve":"npm run cli -- serve","srcserve":"npm run cli -- srcserve","start":"npm run cli -- devserve","build-docs":"npm run cli -- ssg","cli":"node ./modulocli/modulocli.js","test":"npm run cli -- test"},"peerDependencies":{"express":"^4.18.2","node-watch":"^0.7.2","puppeteer":"^13.7.0"},"repository":{"type":"git","url":"git+https://github.com/modulojs/modulo.git"},"exports":{"require":"./src/Modulo.js"},"keywords":["UI","templates","templating","components","framework"],"files":["src/*","modulocli/*","modulocli/**/*","mdu/*","mdu/**/*"],"license":"LGPL-2.1","bugs":{"url":"https://github.com/modulojs/modulo/issues"}};
-};
-window.moduloBuild.modules["xx9t56li"] = function mws_ProjectInfo_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        "); // ""
-  if (CTX.props.version) { // "if props.version"
-  OUT.push("\n            <a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"); // "<a href=\"/devlog/2022-09.html\" title=\"This product is still under heavy development. Click to learn more.\">alpha&nbsp;v"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("</a>\n        "); // "</a>"
-  } else { // "else"
-  OUT.push("\n            v: "); // "v:"
-  OUT.push(G.escapeText(CTX.staticdata.version)); // "staticdata.version"
-  OUT.push("<br>\n            <!--SLOC: "); // "<br><!--SLOC:"
-  OUT.push(G.escapeText(CTX.staticdata.sloc)); // "staticdata.sloc"
-  OUT.push(" lines<br />-->\n            <a href=\"https://github.com/modulojs/modulo/\">github</a> |\n            <a href=\"https://www.npmjs.com/package/"); // "lines<br />--><a href=\"https://github.com/modulojs/modulo/\">github</a> | <a href=\"https://www.npmjs.com/package/"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("\">npm "); // "\">npm"
-  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
-  OUT.push("</a>\n        "); // "</a>"
-  } // "endif"
-  OUT.push("\n    "); // ""
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["xxigi01t"] = function mws_Section (modulo) {
-
-        const def = modulo.definitions['mws_Section'];
-        class mws_Section extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, mws_Section);
-        window.customElements.define(def.TagName, mws_Section);
-        return mws_Section;
-    
-};
 window.moduloBuild.modules["xx3sjna4"] = function mws_Section_template (modulo) {
 return function (CTX, G) { var OUT=[];
   OUT.push("\n        <a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""); // "<a class=\"secanchor\" title=\"Click to focus on this section.\" id=\""
@@ -15324,5460 +15148,5937 @@ return function (CTX, G) { var OUT=[];
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["x151hoj2"] = function x_DemoChart (modulo) {
+window.moduloBuild.nameToHash.mws_Section_template = "xx3sjna4";
 
-        const def = modulo.definitions['x_DemoChart'];
-        class x_DemoChart extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, x_DemoChart);
-        window.customElements.define(def.TagName, x_DemoChart);
-        return x_DemoChart;
-    
-};
-window.moduloBuild.modules["x1g5fuoe"] = function x_DemoChart_script (modulo) {
-var script = { exports: {} }; var props;
-
-        function prepareCallback() {
-            const data = props.data || [];
-            const max = Math.max(...data);
-            const min = 0;// Math.min(...props.data),
-            return {
-                percent: data.map(item => ((item - min) / max) * 100),
-                width: Math.floor(100 / data.length),
-            }
-        }
-    
-return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, setLocalVariables: function(o) {props=o.props}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xx9i16tt"] = function x_DemoChart_template (modulo) {
+window.moduloBuild.modules["x1nrhiqd"] = function docseg_Templating_1_template (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <div class=\"chart-container\n        "); // "<div class=\"chart-container"
-  if (CTX.props.animated) { // "if props.animated"
-  OUT.push("animated"); // "animated"
+  OUT.push("\n<p>There are <em>"); // "<p>There are <em>"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push("\n  "); // ""
+  OUT.push(G.escapeText(G.filters["pluralize"](CTX.state.count,"articles,article"))); // "state.count|pluralize:\"articles,article\""
+  OUT.push("</em>\n  on "); // "</em> on"
+  OUT.push(G.escapeText(CTX.script.exports.title)); // "script.exports.title"
+  OUT.push(".</p>\n\n"); // ".</p>"
+  OUT.push("\n"); // ""
+  var ARR0=CTX.state.articles;for (var KEY in ARR0) {CTX. article=ARR0[KEY]; // "for article in state.articles"
+  OUT.push("\n    <h4 style=\"color: blue\">"); // "<h4 style=\"color: blue\">"
+  OUT.push(G.escapeText(G.filters["upper"](CTX.article.headline))); // "article.headline|upper"
+  OUT.push("</h4>\n    "); // "</h4>"
+  if (CTX.article.tease) { // "if article.tease"
+  OUT.push("\n      <p>"); // "<p>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.article.tease,30))); // "article.tease|truncate:30"
+  OUT.push("</p>\n    "); // "</p>"
   } // "endif"
-  OUT.push("\">\n            "); // "\">"
-  var ARR0=CTX.script.percent;for (var KEY in ARR0) {CTX. percent=ARR0[KEY]; // "for percent in script.percent"
-  OUT.push("\n                <div style=\"height: "); // "<div style=\"height:"
-  OUT.push(G.escapeText(CTX.percent)); // "percent"
-  OUT.push("px; width: "); // "px; width:"
-  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
-  OUT.push("px\">\n                </div>\n            "); // "px\"></div>"
+  OUT.push("\n"); // ""
   } // "endfor"
-  OUT.push("\n        </div>\n        "); // "</div>"
-  if (!(CTX.props.animated)) { // "if not props.animated"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Templating_1_template = "x1nrhiqd";
+
+window.moduloBuild.modules["xx7jgg2i"] = function docseg_Templating_PrepareCallback_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <input name=\"perc\" [state.bind]=\"\">% of\n    <input name=\"total\" [state.bind]=\"\">\n    is: "); // "<input name=\"perc\" [state.bind]=\"\">% of <input name=\"total\" [state.bind]=\"\"> is:"
+  OUT.push(G.escapeText(CTX.script.calcResult)); // "script.calcResult"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Templating_PrepareCallback_template = "xx7jgg2i";
+
+window.moduloBuild.modules["x1p85et1"] = function docseg_Templating_Comments_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <h1>hello "); // "<h1>hello"
+  OUT.push("</h1>\n    "); // "</h1>"
+  /* // "comment"
+  OUT.push("\n      "); // ""
+  if (CTX.a) { // "if a"
+  OUT.push("<div>"); // "<div>"
+  OUT.push(G.escapeText(CTX.b)); // "b"
+  OUT.push("</div>"); // "</div>"
+  } // "endif"
+  OUT.push("\n      <h3>"); // "<h3>"
+  OUT.push(G.escapeText(G.filters["first"](CTX.state.items))); // "state.items|first"
+  OUT.push("</h3>\n    "); // "</h3>"
+  */ // "endcomment"
+  OUT.push("\n    <p>Below the greeting...</p>\n"); // "<p>Below the greeting...</p>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Templating_Comments_template = "x1p85et1";
+
+window.moduloBuild.modules["x184ue3a"] = function docseg_Templating_Escaping_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>User \"<em>"); // "<p>User \"<em>"
+  OUT.push(G.escapeText(CTX.state.username)); // "state.username"
+  OUT.push("</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    "); // "</em>\" sent a message:</p><div class=\"msgcontent\">"
+  OUT.push(G.escapeText(G.filters["safe"](CTX.state.content))); // "state.content|safe"
+  OUT.push("\n</div>\n"); // "</div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Templating_Escaping_template = "x184ue3a";
+
+window.moduloBuild.modules["xxm6soph"] = function docseg_Tutorial_P1_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n"); // "Hello <strong>Modulo</strong> World! <p class=\"neat\">Any HTML can be here!</p>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P1_template = "xxm6soph";
+
+window.moduloBuild.modules["x1h93c2j"] = function docseg_Tutorial_P2_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P2_template = "x1h93c2j";
+
+window.moduloBuild.modules["x1h93c2j"] = function docseg_Tutorial_P2_filters_demo_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <p>Trying out the button...</p>\n    <x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn>\n\n    <p>Another button...</p>\n    <x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>\n"); // "<p>Trying out the button...</p><x-examplebtn label=\"Button Example\" shape=\"square\"></x-examplebtn><p>Another button...</p><x-examplebtn label=\"Example 2: Rounded\" shape=\"round\"></x-examplebtn>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P2_filters_demo_template = "x1h93c2j";
+
+window.moduloBuild.modules["x13o8260"] = function docseg_Tutorial_P3_state_demo_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>Nonsense poem:</p> <pre>Professor "); // "<p>Nonsense poem:</p><pre>Professor"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.verb))); // "state.verb|capfirst"
+  OUT.push(" who\n"); // "who"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ed a "); // "ed a"
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push(",\ntaught "); // ", taught"
+  OUT.push(G.escapeText(CTX.state.verb)); // "state.verb"
+  OUT.push("ing in\nthe City of "); // "ing in the City of"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.state.noun))); // "state.noun|capfirst"
+  OUT.push(",\nto "); // ", to"
+  OUT.push(G.escapeText(CTX.state.count)); // "state.count"
+  OUT.push(" "); // ""
+  OUT.push(G.escapeText(CTX.state.noun)); // "state.noun"
+  OUT.push("s.\n</pre>\n"); // "s. </pre>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P3_state_demo_template = "x13o8260";
+
+window.moduloBuild.modules["xxonth4n"] = function docseg_Tutorial_P3_state_bind_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n<div>\n    <label>Username:\n        <input [state.bind]=\"\" name=\"username\"></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind]=\"\" name=\"color\"></label>\n    <label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label>\n\n    <h5 style=\"\n            opacity: "); // "<div><label>Username: <input [state.bind]=\"\" name=\"username\"></label><label>Color (\"green\" or \"blue\"): <input [state.bind]=\"\" name=\"color\"></label><label>Opacity: <input [state.bind]=\"\" name=\"opacity\" type=\"number\" min=\"0\" max=\"1\" step=\"0.1\"></label><h5 style=\" opacity:"
+  OUT.push(G.escapeText(CTX.state.opacity)); // "state.opacity"
+  OUT.push(";\n            color: "); // "; color:"
+  OUT.push(G.escapeText(G.filters["default"](G.filters["allow"](CTX.state.color,"green,blue"),"red"))); // "state.color|allow:'green,blue'|default:'red'"
+  OUT.push(";\n        \">\n        "); // "; \">"
+  OUT.push(G.escapeText(G.filters["lower"](CTX.state.username))); // "state.username|lower"
+  OUT.push("\n    </h5>\n</div>\n\n"); // "</h5></div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.docseg_Tutorial_P3_state_bind_template = "xxonth4n";
+
+window.moduloBuild.modules["xx9ntrq4"] = function eg_Hello_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <button @click:=\"script.countUp\">Hello "); // "<button @click:=\"script.countUp\">Hello"
+  OUT.push(G.escapeText(CTX.state.num)); // "state.num"
+  OUT.push("</button>\n"); // "</button>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_Hello_template = "xx9ntrq4";
+
+window.moduloBuild.modules["xxl4an33"] = function eg_Simple_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n"); // "Components can use any number of <strong>CParts</strong>. Here we use only <em>Style</em> and <em>Template</em>."
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_Simple_template = "xxl4an33";
+
+window.moduloBuild.modules["xxbdh5fm"] = function eg_ToDo_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.list;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.list"
+  OUT.push("\n        <li>"); // "<li>"
+  OUT.push(G.escapeText(CTX.item)); // "item"
+  OUT.push("</li>\n    "); // "</li>"
+  } // "endfor"
+  OUT.push("\n    <li>\n        <input [state.bind]=\"\" name=\"text\">\n        <button @click:=\"script.addItem\">Add</button>\n    </li>\n</ol>\n"); // "<li><input [state.bind]=\"\" name=\"text\"><button @click:=\"script.addItem\">Add</button></li></ol>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_ToDo_template = "xxbdh5fm";
+
+window.moduloBuild.modules["x1lhd4rn"] = function eg_JSON_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <strong>Name:</strong> "); // "<strong>Name:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.name)); // "staticdata.name"
+  OUT.push(" <br>\n    <strong>Site:</strong> "); // "<br><strong>Site:</strong>"
+  OUT.push(G.escapeText(CTX.staticdata.homepage)); // "staticdata.homepage"
+  OUT.push(" <br>\n    <strong>Tags:</strong> "); // "<br><strong>Tags:</strong>"
+  OUT.push(G.escapeText(G.filters["join"](CTX.staticdata.topics))); // "staticdata.topics|join"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_JSON_template = "x1lhd4rn";
+
+window.moduloBuild.modules["xxk24s2s"] = function eg_JSON_staticdata (modulo) {
+return {"id":542682907,"node_id":"R_kgDOIFivGw","name":"modulo","full_name":"modulojs/modulo","private":false,"owner":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"html_url":"https://github.com/modulojs/modulo","description":"A drop-in JavaScript framework for modular web components, kept to about 2000 lines","fork":false,"url":"https://api.github.com/repos/modulojs/modulo","forks_url":"https://api.github.com/repos/modulojs/modulo/forks","keys_url":"https://api.github.com/repos/modulojs/modulo/keys{/key_id}","collaborators_url":"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/modulojs/modulo/teams","hooks_url":"https://api.github.com/repos/modulojs/modulo/hooks","issue_events_url":"https://api.github.com/repos/modulojs/modulo/issues/events{/number}","events_url":"https://api.github.com/repos/modulojs/modulo/events","assignees_url":"https://api.github.com/repos/modulojs/modulo/assignees{/user}","branches_url":"https://api.github.com/repos/modulojs/modulo/branches{/branch}","tags_url":"https://api.github.com/repos/modulojs/modulo/tags","blobs_url":"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}","trees_url":"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}","statuses_url":"https://api.github.com/repos/modulojs/modulo/statuses/{sha}","languages_url":"https://api.github.com/repos/modulojs/modulo/languages","stargazers_url":"https://api.github.com/repos/modulojs/modulo/stargazers","contributors_url":"https://api.github.com/repos/modulojs/modulo/contributors","subscribers_url":"https://api.github.com/repos/modulojs/modulo/subscribers","subscription_url":"https://api.github.com/repos/modulojs/modulo/subscription","commits_url":"https://api.github.com/repos/modulojs/modulo/commits{/sha}","git_commits_url":"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}","comments_url":"https://api.github.com/repos/modulojs/modulo/comments{/number}","issue_comment_url":"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}","contents_url":"https://api.github.com/repos/modulojs/modulo/contents/{+path}","compare_url":"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}","merges_url":"https://api.github.com/repos/modulojs/modulo/merges","archive_url":"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/modulojs/modulo/downloads","issues_url":"https://api.github.com/repos/modulojs/modulo/issues{/number}","pulls_url":"https://api.github.com/repos/modulojs/modulo/pulls{/number}","milestones_url":"https://api.github.com/repos/modulojs/modulo/milestones{/number}","notifications_url":"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/modulojs/modulo/labels{/name}","releases_url":"https://api.github.com/repos/modulojs/modulo/releases{/id}","deployments_url":"https://api.github.com/repos/modulojs/modulo/deployments","created_at":"2022-09-28T16:20:49Z","updated_at":"2023-03-16T19:37:05Z","pushed_at":"2023-02-10T04:39:14Z","git_url":"git://github.com/modulojs/modulo.git","ssh_url":"git@github.com:modulojs/modulo.git","clone_url":"https://github.com/modulojs/modulo.git","svn_url":"https://github.com/modulojs/modulo","homepage":"https://modulojs.org/","size":3294,"stargazers_count":2,"watchers_count":2,"language":"JavaScript","has_issues":true,"has_projects":false,"has_downloads":true,"has_wiki":false,"has_pages":true,"has_discussions":false,"forks_count":1,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":38,"license":{"key":"lgpl-2.1","name":"GNU Lesser General Public License v2.1","spdx_id":"LGPL-2.1","url":"https://api.github.com/licenses/lgpl-2.1","node_id":"MDc6TGljZW5zZTEx"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"topics":["api","component","css","framework","html","javascript","modulo","modulojs","ui","web-components"],"visibility":"public","forks":1,"open_issues":38,"watchers":2,"default_branch":"main","temp_clone_token":null,"organization":{"login":"modulojs","id":104522255,"node_id":"O_kgDOBjriDw","avatar_url":"https://avatars.githubusercontent.com/u/104522255?v=4","gravatar_id":"","url":"https://api.github.com/users/modulojs","html_url":"https://github.com/modulojs","followers_url":"https://api.github.com/users/modulojs/followers","following_url":"https://api.github.com/users/modulojs/following{/other_user}","gists_url":"https://api.github.com/users/modulojs/gists{/gist_id}","starred_url":"https://api.github.com/users/modulojs/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/modulojs/subscriptions","organizations_url":"https://api.github.com/users/modulojs/orgs","repos_url":"https://api.github.com/users/modulojs/repos","events_url":"https://api.github.com/users/modulojs/events{/privacy}","received_events_url":"https://api.github.com/users/modulojs/received_events","type":"Organization","site_admin":false},"network_count":1,"subscribers_count":1};
+};
+window.moduloBuild.nameToHash.eg_JSON_staticdata = "xxk24s2s";
+
+window.moduloBuild.modules["x1npfhrn"] = function eg_JSONArray_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in staticdata"
+  OUT.push("\n    <p>"); // "<p>"
+  if (CTX.post.completed) { // "if post.completed"
+  OUT.push("★"); // "★"
+  } else { // "else"
+  OUT.push("☆"); // "☆"
+  } // "endif"
+  OUT.push("\n        "); // ""
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</p>\n  "); // "</p>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_JSONArray_template = "x1npfhrn";
+
+window.moduloBuild.modules["xxgkj36u"] = function eg_JSONArray_staticdata (modulo) {
+return [{"userId":1,"id":1,"title":"delectus aut autem","completed":false},{"userId":1,"id":2,"title":"quis ut nam facilis et officia qui","completed":false},{"userId":1,"id":3,"title":"fugiat veniam minus","completed":false},{"userId":1,"id":4,"title":"et porro tempora","completed":true},{"userId":1,"id":5,"title":"laboriosam mollitia et enim quasi adipisci quia provident illum","completed":false},{"userId":1,"id":6,"title":"qui ullam ratione quibusdam voluptatem quia omnis","completed":false},{"userId":1,"id":7,"title":"illo expedita consequatur quia in","completed":false},{"userId":1,"id":8,"title":"quo adipisci enim quam ut ab","completed":true},{"userId":1,"id":9,"title":"molestiae perspiciatis ipsa","completed":false},{"userId":1,"id":10,"title":"illo est ratione doloremque quia maiores aut","completed":true},{"userId":1,"id":11,"title":"vero rerum temporibus dolor","completed":true},{"userId":1,"id":12,"title":"ipsa repellendus fugit nisi","completed":true},{"userId":1,"id":13,"title":"et doloremque nulla","completed":false},{"userId":1,"id":14,"title":"repellendus sunt dolores architecto voluptatum","completed":true},{"userId":1,"id":15,"title":"ab voluptatum amet voluptas","completed":true},{"userId":1,"id":16,"title":"accusamus eos facilis sint et aut voluptatem","completed":true},{"userId":1,"id":17,"title":"quo laboriosam deleniti aut qui","completed":true},{"userId":1,"id":18,"title":"dolorum est consequatur ea mollitia in culpa","completed":false},{"userId":1,"id":19,"title":"molestiae ipsa aut voluptatibus pariatur dolor nihil","completed":true},{"userId":1,"id":20,"title":"ullam nobis libero sapiente ad optio sint","completed":true},{"userId":2,"id":21,"title":"suscipit repellat esse quibusdam voluptatem incidunt","completed":false},{"userId":2,"id":22,"title":"distinctio vitae autem nihil ut molestias quo","completed":true},{"userId":2,"id":23,"title":"et itaque necessitatibus maxime molestiae qui quas velit","completed":false},{"userId":2,"id":24,"title":"adipisci non ad dicta qui amet quaerat doloribus ea","completed":false},{"userId":2,"id":25,"title":"voluptas quo tenetur perspiciatis explicabo natus","completed":true},{"userId":2,"id":26,"title":"aliquam aut quasi","completed":true},{"userId":2,"id":27,"title":"veritatis pariatur delectus","completed":true},{"userId":2,"id":28,"title":"nesciunt totam sit blanditiis sit","completed":false},{"userId":2,"id":29,"title":"laborum aut in quam","completed":false},{"userId":2,"id":30,"title":"nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis","completed":true},{"userId":2,"id":31,"title":"repudiandae totam in est sint facere fuga","completed":false},{"userId":2,"id":32,"title":"earum doloribus ea doloremque quis","completed":false},{"userId":2,"id":33,"title":"sint sit aut vero","completed":false},{"userId":2,"id":34,"title":"porro aut necessitatibus eaque distinctio","completed":false},{"userId":2,"id":35,"title":"repellendus veritatis molestias dicta incidunt","completed":true},{"userId":2,"id":36,"title":"excepturi deleniti adipisci voluptatem et neque optio illum ad","completed":true},{"userId":2,"id":37,"title":"sunt cum tempora","completed":false},{"userId":2,"id":38,"title":"totam quia non","completed":false},{"userId":2,"id":39,"title":"doloremque quibusdam asperiores libero corrupti illum qui omnis","completed":false},{"userId":2,"id":40,"title":"totam atque quo nesciunt","completed":true},{"userId":3,"id":41,"title":"aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit","completed":false},{"userId":3,"id":42,"title":"rerum perferendis error quia ut eveniet","completed":false},{"userId":3,"id":43,"title":"tempore ut sint quis recusandae","completed":true},{"userId":3,"id":44,"title":"cum debitis quis accusamus doloremque ipsa natus sapiente omnis","completed":true},{"userId":3,"id":45,"title":"velit soluta adipisci molestias reiciendis harum","completed":false},{"userId":3,"id":46,"title":"vel voluptatem repellat nihil placeat corporis","completed":false},{"userId":3,"id":47,"title":"nam qui rerum fugiat accusamus","completed":false},{"userId":3,"id":48,"title":"sit reprehenderit omnis quia","completed":false},{"userId":3,"id":49,"title":"ut necessitatibus aut maiores debitis officia blanditiis velit et","completed":false},{"userId":3,"id":50,"title":"cupiditate necessitatibus ullam aut quis dolor voluptate","completed":true},{"userId":3,"id":51,"title":"distinctio exercitationem ab doloribus","completed":false},{"userId":3,"id":52,"title":"nesciunt dolorum quis recusandae ad pariatur ratione","completed":false},{"userId":3,"id":53,"title":"qui labore est occaecati recusandae aliquid quam","completed":false},{"userId":3,"id":54,"title":"quis et est ut voluptate quam dolor","completed":true},{"userId":3,"id":55,"title":"voluptatum omnis minima qui occaecati provident nulla voluptatem ratione","completed":true},{"userId":3,"id":56,"title":"deleniti ea temporibus enim","completed":true},{"userId":3,"id":57,"title":"pariatur et magnam ea doloribus similique voluptatem rerum quia","completed":false},{"userId":3,"id":58,"title":"est dicta totam qui explicabo doloribus qui dignissimos","completed":false},{"userId":3,"id":59,"title":"perspiciatis velit id laborum placeat iusto et aliquam odio","completed":false},{"userId":3,"id":60,"title":"et sequi qui architecto ut adipisci","completed":true},{"userId":4,"id":61,"title":"odit optio omnis qui sunt","completed":true},{"userId":4,"id":62,"title":"et placeat et tempore aspernatur sint numquam","completed":false},{"userId":4,"id":63,"title":"doloremque aut dolores quidem fuga qui nulla","completed":true},{"userId":4,"id":64,"title":"voluptas consequatur qui ut quia magnam nemo esse","completed":false},{"userId":4,"id":65,"title":"fugiat pariatur ratione ut asperiores necessitatibus magni","completed":false},{"userId":4,"id":66,"title":"rerum eum molestias autem voluptatum sit optio","completed":false},{"userId":4,"id":67,"title":"quia voluptatibus voluptatem quos similique maiores repellat","completed":false},{"userId":4,"id":68,"title":"aut id perspiciatis voluptatem iusto","completed":false},{"userId":4,"id":69,"title":"doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit","completed":false},{"userId":4,"id":70,"title":"ut sequi accusantium et mollitia delectus sunt","completed":false},{"userId":4,"id":71,"title":"aut velit saepe ullam","completed":false},{"userId":4,"id":72,"title":"praesentium facilis facere quis harum voluptatibus voluptatem eum","completed":false},{"userId":4,"id":73,"title":"sint amet quia totam corporis qui exercitationem commodi","completed":true},{"userId":4,"id":74,"title":"expedita tempore nobis eveniet laborum maiores","completed":false},{"userId":4,"id":75,"title":"occaecati adipisci est possimus totam","completed":false},{"userId":4,"id":76,"title":"sequi dolorem sed","completed":true},{"userId":4,"id":77,"title":"maiores aut nesciunt delectus exercitationem vel assumenda eligendi at","completed":false},{"userId":4,"id":78,"title":"reiciendis est magnam amet nemo iste recusandae impedit quaerat","completed":false},{"userId":4,"id":79,"title":"eum ipsa maxime ut","completed":true},{"userId":4,"id":80,"title":"tempore molestias dolores rerum sequi voluptates ipsum consequatur","completed":true},{"userId":5,"id":81,"title":"suscipit qui totam","completed":true},{"userId":5,"id":82,"title":"voluptates eum voluptas et dicta","completed":false},{"userId":5,"id":83,"title":"quidem at rerum quis ex aut sit quam","completed":true},{"userId":5,"id":84,"title":"sunt veritatis ut voluptate","completed":false},{"userId":5,"id":85,"title":"et quia ad iste a","completed":true},{"userId":5,"id":86,"title":"incidunt ut saepe autem","completed":true},{"userId":5,"id":87,"title":"laudantium quae eligendi consequatur quia et vero autem","completed":true},{"userId":5,"id":88,"title":"vitae aut excepturi laboriosam sint aliquam et et accusantium","completed":false},{"userId":5,"id":89,"title":"sequi ut omnis et","completed":true},{"userId":5,"id":90,"title":"molestiae nisi accusantium tenetur dolorem et","completed":true},{"userId":5,"id":91,"title":"nulla quis consequatur saepe qui id expedita","completed":true},{"userId":5,"id":92,"title":"in omnis laboriosam","completed":true},{"userId":5,"id":93,"title":"odio iure consequatur molestiae quibusdam necessitatibus quia sint","completed":true},{"userId":5,"id":94,"title":"facilis modi saepe mollitia","completed":false},{"userId":5,"id":95,"title":"vel nihil et molestiae iusto assumenda nemo quo ut","completed":true},{"userId":5,"id":96,"title":"nobis suscipit ducimus enim asperiores voluptas","completed":false},{"userId":5,"id":97,"title":"dolorum laboriosam eos qui iure aliquam","completed":false},{"userId":5,"id":98,"title":"debitis accusantium ut quo facilis nihil quis sapiente necessitatibus","completed":true},{"userId":5,"id":99,"title":"neque voluptates ratione","completed":false},{"userId":5,"id":100,"title":"excepturi a et neque qui expedita vel voluptate","completed":false},{"userId":6,"id":101,"title":"explicabo enim cumque porro aperiam occaecati minima","completed":false},{"userId":6,"id":102,"title":"sed ab consequatur","completed":false},{"userId":6,"id":103,"title":"non sunt delectus illo nulla tenetur enim omnis","completed":false},{"userId":6,"id":104,"title":"excepturi non laudantium quo","completed":false},{"userId":6,"id":105,"title":"totam quia dolorem et illum repellat voluptas optio","completed":true},{"userId":6,"id":106,"title":"ad illo quis voluptatem temporibus","completed":true},{"userId":6,"id":107,"title":"praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt","completed":false},{"userId":6,"id":108,"title":"a eos eaque nihil et exercitationem incidunt delectus","completed":true},{"userId":6,"id":109,"title":"autem temporibus harum quisquam in culpa","completed":true},{"userId":6,"id":110,"title":"aut aut ea corporis","completed":true},{"userId":6,"id":111,"title":"magni accusantium labore et id quis provident","completed":false},{"userId":6,"id":112,"title":"consectetur impedit quisquam qui deserunt non rerum consequuntur eius","completed":false},{"userId":6,"id":113,"title":"quia atque aliquam sunt impedit voluptatum rerum assumenda nisi","completed":false},{"userId":6,"id":114,"title":"cupiditate quos possimus corporis quisquam exercitationem beatae","completed":false},{"userId":6,"id":115,"title":"sed et ea eum","completed":false},{"userId":6,"id":116,"title":"ipsa dolores vel facilis ut","completed":true},{"userId":6,"id":117,"title":"sequi quae est et qui qui eveniet asperiores","completed":false},{"userId":6,"id":118,"title":"quia modi consequatur vero fugiat","completed":false},{"userId":6,"id":119,"title":"corporis ducimus ea perspiciatis iste","completed":false},{"userId":6,"id":120,"title":"dolorem laboriosam vel voluptas et aliquam quasi","completed":false},{"userId":7,"id":121,"title":"inventore aut nihil minima laudantium hic qui omnis","completed":true},{"userId":7,"id":122,"title":"provident aut nobis culpa","completed":true},{"userId":7,"id":123,"title":"esse et quis iste est earum aut impedit","completed":false},{"userId":7,"id":124,"title":"qui consectetur id","completed":false},{"userId":7,"id":125,"title":"aut quasi autem iste tempore illum possimus","completed":false},{"userId":7,"id":126,"title":"ut asperiores perspiciatis veniam ipsum rerum saepe","completed":true},{"userId":7,"id":127,"title":"voluptatem libero consectetur rerum ut","completed":true},{"userId":7,"id":128,"title":"eius omnis est qui voluptatem autem","completed":false},{"userId":7,"id":129,"title":"rerum culpa quis harum","completed":false},{"userId":7,"id":130,"title":"nulla aliquid eveniet harum laborum libero alias ut unde","completed":true},{"userId":7,"id":131,"title":"qui ea incidunt quis","completed":false},{"userId":7,"id":132,"title":"qui molestiae voluptatibus velit iure harum quisquam","completed":true},{"userId":7,"id":133,"title":"et labore eos enim rerum consequatur sunt","completed":true},{"userId":7,"id":134,"title":"molestiae doloribus et laborum quod ea","completed":false},{"userId":7,"id":135,"title":"facere ipsa nam eum voluptates reiciendis vero qui","completed":false},{"userId":7,"id":136,"title":"asperiores illo tempora fuga sed ut quasi adipisci","completed":false},{"userId":7,"id":137,"title":"qui sit non","completed":false},{"userId":7,"id":138,"title":"placeat minima consequatur rem qui ut","completed":true},{"userId":7,"id":139,"title":"consequatur doloribus id possimus voluptas a voluptatem","completed":false},{"userId":7,"id":140,"title":"aut consectetur in blanditiis deserunt quia sed laboriosam","completed":true},{"userId":8,"id":141,"title":"explicabo consectetur debitis voluptates quas quae culpa rerum non","completed":true},{"userId":8,"id":142,"title":"maiores accusantium architecto necessitatibus reiciendis ea aut","completed":true},{"userId":8,"id":143,"title":"eum non recusandae cupiditate animi","completed":false},{"userId":8,"id":144,"title":"ut eum exercitationem sint","completed":false},{"userId":8,"id":145,"title":"beatae qui ullam incidunt voluptatem non nisi aliquam","completed":false},{"userId":8,"id":146,"title":"molestiae suscipit ratione nihil odio libero impedit vero totam","completed":true},{"userId":8,"id":147,"title":"eum itaque quod reprehenderit et facilis dolor autem ut","completed":true},{"userId":8,"id":148,"title":"esse quas et quo quasi exercitationem","completed":false},{"userId":8,"id":149,"title":"animi voluptas quod perferendis est","completed":false},{"userId":8,"id":150,"title":"eos amet tempore laudantium fugit a","completed":false},{"userId":8,"id":151,"title":"accusamus adipisci dicta qui quo ea explicabo sed vero","completed":true},{"userId":8,"id":152,"title":"odit eligendi recusandae doloremque cumque non","completed":false},{"userId":8,"id":153,"title":"ea aperiam consequatur qui repellat eos","completed":false},{"userId":8,"id":154,"title":"rerum non ex sapiente","completed":true},{"userId":8,"id":155,"title":"voluptatem nobis consequatur et assumenda magnam","completed":true},{"userId":8,"id":156,"title":"nam quia quia nulla repellat assumenda quibusdam sit nobis","completed":true},{"userId":8,"id":157,"title":"dolorem veniam quisquam deserunt repellendus","completed":true},{"userId":8,"id":158,"title":"debitis vitae delectus et harum accusamus aut deleniti a","completed":true},{"userId":8,"id":159,"title":"debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis","completed":true},{"userId":8,"id":160,"title":"et praesentium aliquam est","completed":false},{"userId":9,"id":161,"title":"ex hic consequuntur earum omnis alias ut occaecati culpa","completed":true},{"userId":9,"id":162,"title":"omnis laboriosam molestias animi sunt dolore","completed":true},{"userId":9,"id":163,"title":"natus corrupti maxime laudantium et voluptatem laboriosam odit","completed":false},{"userId":9,"id":164,"title":"reprehenderit quos aut aut consequatur est sed","completed":false},{"userId":9,"id":165,"title":"fugiat perferendis sed aut quidem","completed":false},{"userId":9,"id":166,"title":"quos quo possimus suscipit minima ut","completed":false},{"userId":9,"id":167,"title":"et quis minus quo a asperiores molestiae","completed":false},{"userId":9,"id":168,"title":"recusandae quia qui sunt libero","completed":false},{"userId":9,"id":169,"title":"ea odio perferendis officiis","completed":true},{"userId":9,"id":170,"title":"quisquam aliquam quia doloribus aut","completed":false},{"userId":9,"id":171,"title":"fugiat aut voluptatibus corrupti deleniti velit iste odio","completed":true},{"userId":9,"id":172,"title":"et provident amet rerum consectetur et voluptatum","completed":false},{"userId":9,"id":173,"title":"harum ad aperiam quis","completed":false},{"userId":9,"id":174,"title":"similique aut quo","completed":false},{"userId":9,"id":175,"title":"laudantium eius officia perferendis provident perspiciatis asperiores","completed":true},{"userId":9,"id":176,"title":"magni soluta corrupti ut maiores rem quidem","completed":false},{"userId":9,"id":177,"title":"et placeat temporibus voluptas est tempora quos quibusdam","completed":false},{"userId":9,"id":178,"title":"nesciunt itaque commodi tempore","completed":true},{"userId":9,"id":179,"title":"omnis consequuntur cupiditate impedit itaque ipsam quo","completed":true},{"userId":9,"id":180,"title":"debitis nisi et dolorem repellat et","completed":true},{"userId":10,"id":181,"title":"ut cupiditate sequi aliquam fuga maiores","completed":false},{"userId":10,"id":182,"title":"inventore saepe cumque et aut illum enim","completed":true},{"userId":10,"id":183,"title":"omnis nulla eum aliquam distinctio","completed":true},{"userId":10,"id":184,"title":"molestias modi perferendis perspiciatis","completed":false},{"userId":10,"id":185,"title":"voluptates dignissimos sed doloribus animi quaerat aut","completed":false},{"userId":10,"id":186,"title":"explicabo odio est et","completed":false},{"userId":10,"id":187,"title":"consequuntur animi possimus","completed":false},{"userId":10,"id":188,"title":"vel non beatae est","completed":true},{"userId":10,"id":189,"title":"culpa eius et voluptatem et","completed":true},{"userId":10,"id":190,"title":"accusamus sint iusto et voluptatem exercitationem","completed":true},{"userId":10,"id":191,"title":"temporibus atque distinctio omnis eius impedit tempore molestias pariatur","completed":true},{"userId":10,"id":192,"title":"ut quas possimus exercitationem sint voluptates","completed":false},{"userId":10,"id":193,"title":"rerum debitis voluptatem qui eveniet tempora distinctio a","completed":true},{"userId":10,"id":194,"title":"sed ut vero sit molestiae","completed":false},{"userId":10,"id":195,"title":"rerum ex veniam mollitia voluptatibus pariatur","completed":true},{"userId":10,"id":196,"title":"consequuntur aut ut fugit similique","completed":true},{"userId":10,"id":197,"title":"dignissimos quo nobis earum saepe","completed":true},{"userId":10,"id":198,"title":"quis eius est sint explicabo","completed":true},{"userId":10,"id":199,"title":"numquam repellendus a magnam","completed":true},{"userId":10,"id":200,"title":"ipsam aperiam voluptates qui","completed":false}];
+};
+window.moduloBuild.nameToHash.eg_JSONArray_staticdata = "xxgkj36u";
+
+window.moduloBuild.modules["x130qf1i"] = function eg_GitHubAPI_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>"); // "<p>"
+  OUT.push(G.escapeText(CTX.state.name)); // "state.name"
+  OUT.push(" | "); // "|"
+  OUT.push(G.escapeText(CTX.state.location)); // "state.location"
+  OUT.push("</p>\n<p>"); // "</p><p>"
+  OUT.push(G.escapeText(CTX.state.bio)); // "state.bio"
+  OUT.push("</p>\n<a href=\"https://github.com/"); // "</p><a href=\"https://github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/\" target=\"_blank\">\n    "); // "/\" target=\"_blank\">"
+  if (CTX.state.search) { // "if state.search"
+  OUT.push("github.com/"); // "github.com/"
+  OUT.push(G.escapeText(CTX.state.search)); // "state.search"
+  OUT.push("/"); // "/"
+  } // "endif"
+  OUT.push("\n</a>\n<input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\">\n<button @click:=\"script.fetchGitHub\">Get Info</button>\n"); // "</a><input [state.bind]=\"\" name=\"search\" placeholder=\"Type GitHub username\"><button @click:=\"script.fetchGitHub\">Get Info</button>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_GitHubAPI_template = "x130qf1i";
+
+window.moduloBuild.modules["x145sdaa"] = function eg_ColorSelector_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <div style=\"float: right\">\n        <p><label>Hue:<br>\n            <input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\">\n        </label></p>\n        <p><label>Saturation: <br>\n            <input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n        <p><label>Luminosity:<br>\n            <input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl("); // "<div style=\"float: right\"><p><label>Hue:<br><input [state.bind]=\"\" name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\"></label></p><p><label>Saturation: <br><input [state.bind]=\"\" name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p><p><label>Luminosity:<br><input [state.bind]=\"\" name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\"></label></p></div><div style=\" width: 80px; height: 80px; background: hsl("
+  OUT.push(G.escapeText(CTX.state.hue)); // "state.hue"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.state.sat)); // "state.sat"
+  OUT.push("%, "); // "%,"
+  OUT.push(G.escapeText(CTX.state.lum)); // "state.lum"
+  OUT.push("%)\">\n    </div>\n"); // "%)\"></div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_ColorSelector_template = "x145sdaa";
+
+window.moduloBuild.modules["x1j17irn"] = function eg_DateNumberPicker_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <p>ISO: <tt>"); // "<p>ISO: <tt>"
+  OUT.push(G.escapeText(CTX.state.year)); // "state.year"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.month)); // "state.month"
+  OUT.push("-"); // "-"
+  OUT.push(G.escapeText(CTX.state.day)); // "state.day"
+  OUT.push("</tt></p>\n    "); // "</tt></p>"
+  var ARR0=CTX.state.ordering;for (var KEY in ARR0) {CTX. part=ARR0[KEY]; // "for part in state.ordering"
+  OUT.push("\n        <label>\n            "); // "<label>"
+  OUT.push(G.escapeText(G.filters["get"](CTX.state,CTX.part))); // "state|get:part"
+  OUT.push("\n            <div>\n                <button @click:=\"script.next\" payload=\""); // "<div><button @click:=\"script.next\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↑</button>\n                <button @click:=\"script.previous\" payload=\""); // "\">↑</button><button @click:=\"script.previous\" payload=\""
+  OUT.push(G.escapeText(CTX.part)); // "part"
+  OUT.push("\">↓</button>\n            </div>\n        </label>\n    "); // "\">↓</button></div></label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_DateNumberPicker_template = "x1j17irn";
+
+window.moduloBuild.modules["xxn6m9dp"] = function eg_PrimeSieve_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
+  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
+  OUT.push("\n      <div @mouseover:=\"script.setNum\" class=\"\n            "); // "<div @mouseover:=\"script.setNum\" class=\""
   OUT.push("\n            "); // ""
-  var ARR1=CTX.props.data;for (var KEY in ARR1) {CTX. value=ARR1[KEY]; // "for value in props.data"
-  OUT.push("\n                <label style=\"width: "); // "<label style=\"width:"
-  OUT.push(G.escapeText(CTX.script.width)); // "script.width"
-  OUT.push("px\">"); // "px\">"
-  OUT.push(G.escapeText(CTX.value)); // "value"
-  OUT.push("</label>\n            "); // "</label>"
+  if (CTX.state.number === CTX.i) { // "if state.number == i"
+  OUT.push("number"); // "number"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  if (CTX.state.number < CTX.i) { // "if state.number lt i"
+  OUT.push("hidden"); // "hidden"
+  } else { // "else"
+  OUT.push("\n              "); // ""
+  if (G.filters["divisibleby"](CTX.state.number,CTX.i)) { // "if state.number|divisibleby:i"
+  OUT.push("whole"); // "whole"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        \">"); // "\">"
+  OUT.push(G.escapeText(CTX.i)); // "i"
+  OUT.push("</div>\n    "); // "</div>"
   } // "endfor"
-  OUT.push("\n        "); // ""
-  } // "endif"
+  OUT.push("\n  </div>\n"); // "</div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_PrimeSieve_template = "xxn6m9dp";
+
+window.moduloBuild.modules["x1ejsk79"] = function eg_Scatter_template (modulo) {
+return function (CTX, G) { var OUT=[];
   OUT.push("\n    "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
+  OUT.push("\n        <div style=\"--x: "); // "<div style=\"--x:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lng)); // "user.address.geo.lng"
+  OUT.push("px;\n                    --y: "); // "px; --y:"
+  OUT.push(G.escapeText(CTX.user.address.geo.lat)); // "user.address.geo.lat"
+  OUT.push("px;\"></div>\n        <label>"); // "px;\"></div><label>"
+  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
+  OUT.push(" ("); // "("
+  OUT.push(G.escapeText(CTX.user.email)); // "user.email"
+  OUT.push(")</label>\n    "); // ")</label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxpfb13f"] = function x_DemoModal (modulo) {
+window.moduloBuild.nameToHash.eg_Scatter_template = "x1ejsk79";
 
-        const def = modulo.definitions['x_DemoModal'];
-        class x_DemoModal extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, x_DemoModal);
-        window.customElements.define(def.TagName, x_DemoModal);
-        return x_DemoModal;
-    
+window.moduloBuild.modules["x11t9udg"] = function eg_Scatter_staticdata (modulo) {
+return [{"id":1,"name":"Leanne Graham","username":"Bret","email":"Sincere@april.biz","address":{"street":"Kulas Light","suite":"Apt. 556","city":"Gwenborough","zipcode":"92998-3874","geo":{"lat":"-37.3159","lng":"81.1496"}},"phone":"1-770-736-8031 x56442","website":"hildegard.org","company":{"name":"Romaguera-Crona","catchPhrase":"Multi-layered client-server neural-net","bs":"harness real-time e-markets"}},{"id":2,"name":"Ervin Howell","username":"Antonette","email":"Shanna@melissa.tv","address":{"street":"Victor Plains","suite":"Suite 879","city":"Wisokyburgh","zipcode":"90566-7771","geo":{"lat":"-43.9509","lng":"-34.4618"}},"phone":"010-692-6593 x09125","website":"anastasia.net","company":{"name":"Deckow-Crist","catchPhrase":"Proactive didactic contingency","bs":"synergize scalable supply-chains"}},{"id":3,"name":"Clementine Bauch","username":"Samantha","email":"Nathan@yesenia.net","address":{"street":"Douglas Extension","suite":"Suite 847","city":"McKenziehaven","zipcode":"59590-4157","geo":{"lat":"-68.6102","lng":"-47.0653"}},"phone":"1-463-123-4447","website":"ramiro.info","company":{"name":"Romaguera-Jacobson","catchPhrase":"Face to face bifurcated interface","bs":"e-enable strategic applications"}},{"id":4,"name":"Patricia Lebsack","username":"Karianne","email":"Julianne.OConner@kory.org","address":{"street":"Hoeger Mall","suite":"Apt. 692","city":"South Elvis","zipcode":"53919-4257","geo":{"lat":"29.4572","lng":"-164.2990"}},"phone":"493-170-9623 x156","website":"kale.biz","company":{"name":"Robel-Corkery","catchPhrase":"Multi-tiered zero tolerance productivity","bs":"transition cutting-edge web services"}},{"id":5,"name":"Chelsey Dietrich","username":"Kamren","email":"Lucio_Hettinger@annie.ca","address":{"street":"Skiles Walks","suite":"Suite 351","city":"Roscoeview","zipcode":"33263","geo":{"lat":"-31.8129","lng":"62.5342"}},"phone":"(254)954-1289","website":"demarco.info","company":{"name":"Keebler LLC","catchPhrase":"User-centric fault-tolerant solution","bs":"revolutionize end-to-end systems"}},{"id":6,"name":"Mrs. Dennis Schulist","username":"Leopoldo_Corkery","email":"Karley_Dach@jasper.info","address":{"street":"Norberto Crossing","suite":"Apt. 950","city":"South Christy","zipcode":"23505-1337","geo":{"lat":"-71.4197","lng":"71.7478"}},"phone":"1-477-935-8478 x6430","website":"ola.org","company":{"name":"Considine-Lockman","catchPhrase":"Synchronised bottom-line interface","bs":"e-enable innovative applications"}},{"id":7,"name":"Kurtis Weissnat","username":"Elwyn.Skiles","email":"Telly.Hoeger@billy.biz","address":{"street":"Rex Trail","suite":"Suite 280","city":"Howemouth","zipcode":"58804-1099","geo":{"lat":"24.8918","lng":"21.8984"}},"phone":"210.067.6132","website":"elvis.io","company":{"name":"Johns Group","catchPhrase":"Configurable multimedia task-force","bs":"generate enterprise e-tailers"}},{"id":8,"name":"Nicholas Runolfsdottir V","username":"Maxime_Nienow","email":"Sherwood@rosamond.me","address":{"street":"Ellsworth Summit","suite":"Suite 729","city":"Aliyaview","zipcode":"45169","geo":{"lat":"-14.3990","lng":"-120.7677"}},"phone":"586.493.6943 x140","website":"jacynthe.com","company":{"name":"Abernathy Group","catchPhrase":"Implemented secondary concept","bs":"e-enable extensible e-tailers"}},{"id":9,"name":"Glenna Reichert","username":"Delphine","email":"Chaim_McDermott@dana.io","address":{"street":"Dayna Park","suite":"Suite 449","city":"Bartholomebury","zipcode":"76495-3109","geo":{"lat":"24.6463","lng":"-168.8889"}},"phone":"(775)976-6794 x41206","website":"conrad.com","company":{"name":"Yost and Sons","catchPhrase":"Switchable contextually-based project","bs":"aggregate real-time technologies"}},{"id":10,"name":"Clementina DuBuque","username":"Moriah.Stanton","email":"Rey.Padberg@karina.biz","address":{"street":"Kattie Turnpike","suite":"Suite 198","city":"Lebsackbury","zipcode":"31428-2261","geo":{"lat":"-38.2386","lng":"57.2232"}},"phone":"024-648-3804","website":"ambrose.net","company":{"name":"Hoeger LLC","catchPhrase":"Centralized empowering task-force","bs":"target end-to-end models"}}];
 };
-window.moduloBuild.modules["xxsbnnt4"] = function x_DemoModal_script (modulo) {
-var script = { exports: {} }; var state;
+window.moduloBuild.nameToHash.eg_Scatter_staticdata = "x11t9udg";
 
-        function show() {
-            state.visible = true;
-        }
-        function hide() {
-            state.visible = false;
-        }
-    
-return {"show": typeof show !== "undefined" ? show : undefined, "hide": typeof hide !== "undefined" ? hide : undefined, setLocalVariables: function(o) {state=o.state}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xx2noapr"] = function x_DemoModal_template (modulo) {
+window.moduloBuild.modules["x1ah1gte"] = function eg_FlexibleForm_template (modulo) {
 return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <button @click:=\"script.show\">"); // "<button @click:=\"script.show\">"
-  OUT.push(G.escapeText(CTX.props.button)); // "props.button"
-  OUT.push(" ⬇☐&nbsp;</button>\n        <div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display: "); // "⬇☐&nbsp;</button><div class=\"modal-backdrop\" @click:=\"script.hide\" style=\"display:"
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push("block"); // "block"
-  } else { // "else"
-  OUT.push("none"); // "none"
-  } // "endif"
-  OUT.push("\">\n        </div>\n        <div class=\"modal-body\" style=\"\n        "); // "\"></div><div class=\"modal-body\" style=\""
-  if (CTX.state.visible) { // "if state.visible"
-  OUT.push(" top: 100px; "); // "top: 100px;"
-  } else { // "else"
-  OUT.push(" top: -500px; "); // "top: -500px;"
-  } // "endif"
-  OUT.push("\">\n            <h2>"); // "\"><h2>"
-  OUT.push(G.escapeText(CTX.props.title)); // "props.title"
-  OUT.push(" <button @click:=\"script.hide\">×</button></h2>\n            <slot></slot>\n        </div>\n    "); // "<button @click:=\"script.hide\">×</button></h2><slot></slot></div>"
-
-return OUT.join(""); };
-};
-window.moduloBuild.modules["x1r4nctp"] = function x_DemoSelector (modulo) {
-
-        const def = modulo.definitions['x_DemoSelector'];
-        class x_DemoSelector extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, x_DemoSelector);
-        window.customElements.define(def.TagName, x_DemoSelector);
-        return x_DemoSelector;
-    
-};
-window.moduloBuild.modules["x1d63iro"] = function x_DemoSelector_script (modulo) {
-var script = { exports: {} }; var state, element;
-
-        function prepareCallback() {
-            state.value = element.value;
-        }
-        function setValue(val) {
-            state.value = val;
-            element.value = val;
-            element.dispatchEvent(new Event('change'));
-        }
-    
-return {"prepareCallback": typeof prepareCallback !== "undefined" ? prepareCallback : undefined, "setValue": typeof setValue !== "undefined" ? setValue : undefined, setLocalVariables: function(o) {state=o.state; element=o.element}, exports: script.exports }
-
-};
-window.moduloBuild.modules["xxbjtni2"] = function x_DemoSelector_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        "); // ""
-  var ARR0=CTX.props.options;for (var KEY in ARR0) {CTX. option=ARR0[KEY]; // "for option in props.options"
-  OUT.push("\n            <input type=\"radio\" id=\""); // "<input type=\"radio\" id=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push("\n    <form>\n        "); // "<form>"
+  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
+  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
+  OUT.push("\">\n                    <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
+  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
+  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === "string") { // "if state|get:field|type == 'string'"
+  OUT.push("text"); // "text"
+  } else { // "else"
+  OUT.push("checkbox"); // "checkbox"
+  } // "endif"
   OUT.push("\" name=\""); // "\" name=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
-  OUT.push("\" payload=\""); // "\" payload=\""
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\" @change:=\"script.setValue\"><label for=\""); // "\" @change:=\"script.setValue\"><label for=\""
-  OUT.push(G.escapeText(CTX.props.name)); // "props.name"
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("\" id=\""); // "\" id=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
   OUT.push("_"); // "_"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("\">"); // "\">"
-  OUT.push(G.escapeText(CTX.option)); // "option"
-  OUT.push("</label>\n        "); // "</label>"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
+  OUT.push("\">\n            </div>\n        "); // "\"></div>"
+  } // "endfor"
+  OUT.push("\n    </form>\n"); // "</form>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_FlexibleForm_template = "x1ah1gte";
+
+window.moduloBuild.modules["x16ihg4b"] = function eg_FlexibleFormWithAPI_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    <form>\n        "); // "<form>"
+  var ARR0=CTX.state.fields;for (var KEY in ARR0) {CTX. field=ARR0[KEY]; // "for field in state.fields"
+  OUT.push("\n            <div class=\"field-pair\">\n                <label for=\""); // "<div class=\"field-pair\"><label for=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
+  OUT.push("\">\n                    <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.field))); // "field|capfirst"
+  OUT.push(":</strong>\n                </label>\n                <input [state.bind]=\"\" type=\""); // ":</strong></label><input [state.bind]=\"\" type=\""
+  if (G.filters["type"](G.filters["get"](CTX.state,CTX.field)) === CTX.quotnumberquot) { // "if state|get:field|type == &quot;number&quot;"
+  OUT.push("number"); // "number"
+  } else { // "else"
+  OUT.push("text"); // "text"
+  } // "endif"
+  OUT.push("\" name=\""); // "\" name=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("\" id=\""); // "\" id=\""
+  OUT.push(G.escapeText(CTX.field)); // "field"
+  OUT.push("_"); // "_"
+  OUT.push(G.escapeText(CTX.component.id)); // "component.id"
+  OUT.push("\">\n            </div>\n        "); // "\"></div>"
+  } // "endfor"
+  OUT.push("\n        <button @click:=\"script.submit\">Post comment</button>\n        <hr>\n\n        "); // "<button @click:=\"script.submit\">Post comment</button><hr>"
+  var ARR0=G.filters["reversed"](CTX.state.posts);for (var KEY in ARR0) {CTX. post=ARR0[KEY]; // "for post in state.posts|reversed"
+  OUT.push("\n            <p>\n                "); // "<p>"
+  OUT.push(G.escapeText(CTX.post.userId)); // "post.userId"
+  OUT.push(":\n                <strong>"); // ": <strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.title,15))); // "post.title|truncate:15"
+  OUT.push("</strong>\n                "); // "</strong>"
+  OUT.push(G.escapeText(G.filters["truncate"](CTX.post.body,18))); // "post.body|truncate:18"
+  OUT.push("\n            </p>\n        "); // "</p>"
+  } // "endfor"
+  OUT.push("\n    </form>\n"); // "</form>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_FlexibleFormWithAPI_template = "x16ihg4b";
+
+window.moduloBuild.modules["x1gk8lc3"] = function eg_Components_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart>\n\n<x-demomodal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\">\n</x-demomodal>\n\n<x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-demochart data:=\"[50, 13, 94]\"></x-demochart>\n</x-demomodal>\n\n"); // "<x-demochart data:=\"[1, 2, 3, 5, 8]\"></x-demochart><x-demomodal button=\"Nicholas Cage\" title=\"Biography\"><p>Prolific Hollywood actor</p><img src=\"https://www.placecage.com/640/360\"></x-demomodal><x-demomodal button=\"Tommy Wiseau\" title=\"Further Data\"><p>Actor, director, and acclaimed fashion designer</p><x-demochart data:=\"[50, 13, 94]\"></x-demochart></x-demomodal>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_Components_template = "x1gk8lc3";
+
+window.moduloBuild.modules["xxqlg44u"] = function eg_OscillatingGraph_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-demochart data:=\"state.data\" animated:=\"true\" style=\"\n            --align: center;\n            --speed: "); // "<!-- Note that even with custom components, core properties like \"style\" are available, making CSS variables a handy way of specifying style overrides. --><x-demochart data:=\"state.data\" animated:=\"true\" style=\" --align: center; --speed:"
+  OUT.push(G.escapeText(CTX.state.anim)); // "state.anim"
+  OUT.push(";\n        \"></x-demochart>\n\n    <p>\n        "); // "; \"></x-demochart><p>"
+  if (!(CTX.state.playing)) { // "if not state.playing"
+  OUT.push("\n            <button @click:=\"script.play\" alt=\"Play\">▶  tick: "); // "<button @click:=\"script.play\" alt=\"Play\">▶ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
+  } else { // "else"
+  OUT.push("\n            <button @click:=\"script.pause\" alt=\"Pause\">‖  tick: "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖ tick:"
+  OUT.push(G.escapeText(CTX.state.tick)); // "state.tick"
+  OUT.push("</button>\n        "); // "</button>"
+  } // "endif"
+  OUT.push("\n    </p>\n\n    "); // "</p>"
+  var ARR0=CTX.script.exports.properties;for (var KEY in ARR0) {CTX. name=ARR0[KEY]; // "for name in script.exports.properties"
+  OUT.push("\n        <label>"); // "<label>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.name))); // "name|capfirst"
+  OUT.push(":\n            <input [state.bind]=\"\" name=\""); // ": <input [state.bind]=\"\" name=\""
+  OUT.push(G.escapeText(CTX.name)); // "name"
+  OUT.push("\" type=\"range\" min=\"1\" max=\"20\" step=\"1\">\n        </label>\n    "); // "\" type=\"range\" min=\"1\" max=\"20\" step=\"1\"></label>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_OscillatingGraph_template = "xxqlg44u";
+
+window.moduloBuild.modules["x1l103gn"] = function eg_Search_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  <input [state.bind]=\"\" name=\"search\">\n  <button @click:=\"script.doSearch\">Go</button>\n  "); // "<input [state.bind]=\"\" name=\"search\"><button @click:=\"script.doSearch\">Go</button>"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("<em>Loading...</em>"); // "<em>Loading...</em>"
+  } // "endif"
+  OUT.push("\n  <ol>\n    "); // "<ol>"
+  var ARR0=CTX.state.results;for (var KEY in ARR0) {CTX. item=ARR0[KEY]; // "for item in state.results"
+  OUT.push("\n      <li>\n        <img src=\""); // "<li><img src=\""
+  OUT.push(G.escapeText(CTX.item.cover)); // "item.cover"
+  OUT.push("\">\n        <strong>"); // "\"><strong>"
+  OUT.push(G.escapeText(CTX.item.title)); // "item.title"
+  OUT.push("</strong>\n      </li>\n    "); // "</strong></li>"
+  } // "endfor"
+  OUT.push("\n  </ol>\n"); // "</ol>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_Search_template = "x1l103gn";
+
+window.moduloBuild.modules["x1k5cj37"] = function eg_SearchBox_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n<p>Type a book name for \"search as you type\"\n(e.g. try “the lord of the rings”)</p>\n\n<input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\">\n\n<div class=\"results "); // "<p>Type a book name for \"search as you type\" (e.g. try “the lord of the rings”)</p><input [state.bind]=\"\" name=\"search\" @keyup:=\"script.typingCallback\"><div class=\"results"
+  if (CTX.state.search.length > 0) { // "if state.search.length gt 0"
+  OUT.push("\n                      visible "); // "visible"
+  } // "endif"
+  OUT.push("\">\n  <div class=\"results-container\">\n    "); // "\"><div class=\"results-container\">"
+  if (CTX.state.loading) { // "if state.loading"
+  OUT.push("\n      <img src=\""); // "<img src=\""
+  OUT.push(G.escapeText(CTX.staticdata.gif)); // "staticdata.gif"
+  OUT.push("\" alt=\"loading\">\n    "); // "\" alt=\"loading\">"
+  } else { // "else"
+  OUT.push("\n      "); // ""
+  var ARR1=CTX.state.results;for (var KEY in ARR1) {CTX. result=ARR1[KEY]; // "for result in state.results"
+  OUT.push("\n        <div class=\"result\">\n          <img src=\""); // "<div class=\"result\"><img src=\""
+  OUT.push(G.escapeText(G.filters["add"](CTX.staticdata.cover,CTX.result.cover_i))); // "staticdata.cover|add:result.cover_i"
+  OUT.push("-S.jpg\"> <label>"); // "-S.jpg\"><label>"
+  OUT.push(G.escapeText(CTX.result.title)); // "result.title"
+  OUT.push("</label>\n        </div>\n      "); // "</label></div>"
+  G.FORLOOP_NOT_EMPTY2=true; } if (!G.FORLOOP_NOT_EMPTY2) { // "empty"
+  OUT.push("\n        <p>No books found.</p>\n      "); // "<p>No books found.</p>"
+  }G.FORLOOP_NOT_EMPTY2 = false; // "endfor"
+  OUT.push("\n    "); // ""
+  } // "endif"
+  OUT.push("\n  </div>\n</div>\n"); // "</div></div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_SearchBox_template = "x1k5cj37";
+
+window.moduloBuild.modules["xx64c9tf"] = function eg_SearchBox_staticdata (modulo) {
+return {"apiBase":"https://openlibrary.org/search.json","cover":"https://covers.openlibrary.org/b/id/","gif":"https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif"};
+};
+window.moduloBuild.nameToHash.eg_SearchBox_staticdata = "xx64c9tf";
+
+window.moduloBuild.modules["xxmbc1sp"] = function eg_WorldMap_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n    "); // ""
+  var ARR0=CTX.staticdata;for (var KEY in ARR0) {CTX. user=ARR0[KEY]; // "for user in staticdata"
+  OUT.push("\n        <div style=\"top: "); // "<div style=\"top:"
+  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lng),180),100),360))); // "user.address.geo.lng|number|add:180|multiply:100|dividedinto:360"
+  OUT.push("%;\n                    left: "); // "%; left:"
+  OUT.push(G.escapeText(G.filters["dividedinto"](G.filters["multiply"](G.filters["add"](G.filters["number"](CTX.user.address.geo.lat),90),100),180))); // "user.address.geo.lat|number|add:90|multiply:100|dividedinto:180"
+  OUT.push("%;\">\n            <x-demomodal button=\""); // "%;\"><x-demomodal button=\""
+  OUT.push(G.escapeText(CTX.user.id)); // "user.id"
+  OUT.push("\" title=\""); // "\" title=\""
+  OUT.push(G.escapeText(CTX.user.name)); // "user.name"
+  OUT.push("\">\n                "); // "\">"
+  var ARR1=CTX.user;for (var KEY in ARR1) {CTX.key=KEY;CTX.value=ARR1[KEY]; // "for key, value in user"
+  OUT.push("\n                    <dl>\n                        <dt>"); // "<dl><dt>"
+  OUT.push(G.escapeText(G.filters["capfirst"](CTX.key))); // "key|capfirst"
+  OUT.push("</dt>\n                        <dd>"); // "</dt><dd>"
+  if (G.filters["type"](CTX.value) === "object") { // "if value|type == \"object\""
+  OUT.push(G.escapeText(G.filters["json"](CTX.value))); // "value|json"
+  } else { // "else"
+  OUT.push(G.escapeText(CTX.value)); // "value"
+  } // "endif"
+  OUT.push("</dd>\n                    </dl>\n                "); // "</dd></dl>"
+  } // "endfor"
+  OUT.push("\n            </x-demomodal>\n        </div>\n    "); // "</x-demomodal></div>"
+  } // "endfor"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_WorldMap_template = "xxmbc1sp";
+
+window.moduloBuild.modules["x11t9udg"] = function eg_WorldMap_staticdata (modulo) {
+return [{"id":1,"name":"Leanne Graham","username":"Bret","email":"Sincere@april.biz","address":{"street":"Kulas Light","suite":"Apt. 556","city":"Gwenborough","zipcode":"92998-3874","geo":{"lat":"-37.3159","lng":"81.1496"}},"phone":"1-770-736-8031 x56442","website":"hildegard.org","company":{"name":"Romaguera-Crona","catchPhrase":"Multi-layered client-server neural-net","bs":"harness real-time e-markets"}},{"id":2,"name":"Ervin Howell","username":"Antonette","email":"Shanna@melissa.tv","address":{"street":"Victor Plains","suite":"Suite 879","city":"Wisokyburgh","zipcode":"90566-7771","geo":{"lat":"-43.9509","lng":"-34.4618"}},"phone":"010-692-6593 x09125","website":"anastasia.net","company":{"name":"Deckow-Crist","catchPhrase":"Proactive didactic contingency","bs":"synergize scalable supply-chains"}},{"id":3,"name":"Clementine Bauch","username":"Samantha","email":"Nathan@yesenia.net","address":{"street":"Douglas Extension","suite":"Suite 847","city":"McKenziehaven","zipcode":"59590-4157","geo":{"lat":"-68.6102","lng":"-47.0653"}},"phone":"1-463-123-4447","website":"ramiro.info","company":{"name":"Romaguera-Jacobson","catchPhrase":"Face to face bifurcated interface","bs":"e-enable strategic applications"}},{"id":4,"name":"Patricia Lebsack","username":"Karianne","email":"Julianne.OConner@kory.org","address":{"street":"Hoeger Mall","suite":"Apt. 692","city":"South Elvis","zipcode":"53919-4257","geo":{"lat":"29.4572","lng":"-164.2990"}},"phone":"493-170-9623 x156","website":"kale.biz","company":{"name":"Robel-Corkery","catchPhrase":"Multi-tiered zero tolerance productivity","bs":"transition cutting-edge web services"}},{"id":5,"name":"Chelsey Dietrich","username":"Kamren","email":"Lucio_Hettinger@annie.ca","address":{"street":"Skiles Walks","suite":"Suite 351","city":"Roscoeview","zipcode":"33263","geo":{"lat":"-31.8129","lng":"62.5342"}},"phone":"(254)954-1289","website":"demarco.info","company":{"name":"Keebler LLC","catchPhrase":"User-centric fault-tolerant solution","bs":"revolutionize end-to-end systems"}},{"id":6,"name":"Mrs. Dennis Schulist","username":"Leopoldo_Corkery","email":"Karley_Dach@jasper.info","address":{"street":"Norberto Crossing","suite":"Apt. 950","city":"South Christy","zipcode":"23505-1337","geo":{"lat":"-71.4197","lng":"71.7478"}},"phone":"1-477-935-8478 x6430","website":"ola.org","company":{"name":"Considine-Lockman","catchPhrase":"Synchronised bottom-line interface","bs":"e-enable innovative applications"}},{"id":7,"name":"Kurtis Weissnat","username":"Elwyn.Skiles","email":"Telly.Hoeger@billy.biz","address":{"street":"Rex Trail","suite":"Suite 280","city":"Howemouth","zipcode":"58804-1099","geo":{"lat":"24.8918","lng":"21.8984"}},"phone":"210.067.6132","website":"elvis.io","company":{"name":"Johns Group","catchPhrase":"Configurable multimedia task-force","bs":"generate enterprise e-tailers"}},{"id":8,"name":"Nicholas Runolfsdottir V","username":"Maxime_Nienow","email":"Sherwood@rosamond.me","address":{"street":"Ellsworth Summit","suite":"Suite 729","city":"Aliyaview","zipcode":"45169","geo":{"lat":"-14.3990","lng":"-120.7677"}},"phone":"586.493.6943 x140","website":"jacynthe.com","company":{"name":"Abernathy Group","catchPhrase":"Implemented secondary concept","bs":"e-enable extensible e-tailers"}},{"id":9,"name":"Glenna Reichert","username":"Delphine","email":"Chaim_McDermott@dana.io","address":{"street":"Dayna Park","suite":"Suite 449","city":"Bartholomebury","zipcode":"76495-3109","geo":{"lat":"24.6463","lng":"-168.8889"}},"phone":"(775)976-6794 x41206","website":"conrad.com","company":{"name":"Yost and Sons","catchPhrase":"Switchable contextually-based project","bs":"aggregate real-time technologies"}},{"id":10,"name":"Clementina DuBuque","username":"Moriah.Stanton","email":"Rey.Padberg@karina.biz","address":{"street":"Kattie Turnpike","suite":"Suite 198","city":"Lebsackbury","zipcode":"31428-2261","geo":{"lat":"-38.2386","lng":"57.2232"}},"phone":"024-648-3804","website":"ambrose.net","company":{"name":"Hoeger LLC","catchPhrase":"Centralized empowering task-force","bs":"target end-to-end models"}}];
+};
+window.moduloBuild.nameToHash.eg_WorldMap_staticdata = "x11t9udg";
+
+window.moduloBuild.modules["x1rfau7j"] = function eg_Memory_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n"); // ""
+  if (!(CTX.state.cards.length)) { // "if not state.cards.length"
+  OUT.push("\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=\"script.setup\" click.payload=\"8\">2x4</button>\n    <button @click:=\"script.setup\" click.payload=\"16\">4x4</button>\n    <button @click:=\"script.setup\" click.payload=\"36\">6x6</button>\n"); // "<h3>The Symbolic Memory Game</h3><p>Choose your difficulty:</p><button @click:=\"script.setup\" click.payload=\"8\">2x4</button><button @click:=\"script.setup\" click.payload=\"16\">4x4</button><button @click:=\"script.setup\" click.payload=\"36\">6x6</button>"
+  } else { // "else"
+  OUT.push("\n    <div class=\"board\n        "); // "<div class=\"board"
+  if (CTX.state.cards.length > 16) { // "if state.cards.length > 16"
+  OUT.push("hard"); // "hard"
+  } // "endif"
+  OUT.push("\">\n    "); // "\">"
+  OUT.push("\n    "); // ""
+  var ARR1=CTX.state.cards;for (var KEY in ARR1) {CTX. card=ARR1[KEY]; // "for card in state.cards"
+  OUT.push("\n        "); // ""
+  OUT.push("\n        <div key=\"c"); // "<div key=\"c"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\" class=\"card\n            "); // "\" class=\"card"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                flipped\n            "); // "flipped"
+  } // "endif"
+  OUT.push("\n            \" style=\"\n            "); // "\" style=\""
+  if (CTX.state.win) { // "if state.win"
+  OUT.push("\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: "); // "animation: flipping 0.5s infinite alternate; animation-delay:"
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("."); // "."
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("s;\n            "); // "s;"
+  } // "endif"
+  OUT.push("\n            \" @click:=\"script.flip\" click.payload=\""); // "\" @click:=\"script.flip\" click.payload=\""
+  OUT.push(G.escapeText(CTX.card.id)); // "card.id"
+  OUT.push("\">\n            "); // "\">"
+  if ((CTX.state.revealed).includes ? (CTX.state.revealed).includes(CTX.card.id) : (CTX.card.id in CTX.state.revealed)) { // "if card.id in state.revealed"
+  OUT.push("\n                "); // ""
+  OUT.push(G.escapeText(CTX.card.symbol)); // "card.symbol"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\n        </div>\n    "); // "</div>"
+  } // "endfor"
+  OUT.push("\n    </div>\n    <p style=\""); // "</div><p style=\""
+  if (CTX.state.failedflip) { // "if state.failedflip"
+  OUT.push("\n                color: red"); // "color: red"
+  } // "endif"
+  OUT.push("\">\n        "); // "\">"
+  OUT.push(G.escapeText(CTX.state.message)); // "state.message"
+  OUT.push("</p>\n"); // "</p>"
+  } // "endif"
+  OUT.push("\n"); // ""
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.eg_Memory_template = "x1rfau7j";
+
+window.moduloBuild.modules["x1spom4d"] = function eg_ConwayGameOfLife_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n  <div class=\"grid\">\n    "); // "<div class=\"grid\">"
+  var ARR0=CTX.script.exports.range;for (var KEY in ARR0) {CTX. i=ARR0[KEY]; // "for i in script.exports.range"
+  OUT.push("\n        "); // ""
+  var ARR1=CTX.script.exports.range;for (var KEY in ARR1) {CTX. j=ARR1[KEY]; // "for j in script.exports.range"
+  OUT.push("\n          <div @click:=\"script.toggle\" payload:=\"[ "); // "<div @click:=\"script.toggle\" payload:=\"["
+  OUT.push(G.escapeText(CTX.i)); // "i"
+  OUT.push(", "); // ","
+  OUT.push(G.escapeText(CTX.j)); // "j"
+  OUT.push(" ]\" style=\""); // "]\" style=\""
+  if (G.filters["get"](CTX.state.cells,CTX.i)) { // "if state.cells|get:i"
+  OUT.push("\n                "); // ""
+  if (G.filters["get"](G.filters["get"](CTX.state.cells,CTX.i),CTX.j)) { // "if state.cells|get:i|get:j"
+  OUT.push("\n                    background: #B90183;\n                "); // "background: #B90183;"
+  } // "endif"
+  OUT.push("\n            "); // ""
+  } // "endif"
+  OUT.push("\"></div>\n        "); // "\"></div>"
   } // "endfor"
   OUT.push("\n    "); // ""
+  } // "endfor"
+  OUT.push("\n  </div>\n  <div class=\"controls\">\n    "); // "</div><div class=\"controls\">"
+  if (!(CTX.state.playing)) { // "if not state.playing"
+  OUT.push("\n        <button @click:=\"script.play\" alt=\"Play\">▶</button>\n    "); // "<button @click:=\"script.play\" alt=\"Play\">▶</button>"
+  } else { // "else"
+  OUT.push("\n        <button @click:=\"script.pause\" alt=\"Pause\">‖</button>\n    "); // "<button @click:=\"script.pause\" alt=\"Pause\">‖</button>"
+  } // "endif"
+  OUT.push("\n\n    <button @click:=\"script.randomize\" alt=\"Randomize\">RND</button>\n    <button @click:=\"script.clear\" alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label>\n  </div>\n"); // "<button @click:=\"script.randomize\" alt=\"Randomize\">RND</button><button @click:=\"script.clear\" alt=\"Randomize\">CLR</button><label>Spd: <input [state.bind]=\"\" name=\"speed\" type=\"number\" min=\"1\" max=\"10\" step=\"1\"></label></div>"
 
 return OUT.join(""); };
 };
-window.moduloBuild.modules["xxxjnsmn"] = function x_ExampleBtn (modulo) {
+window.moduloBuild.nameToHash.eg_ConwayGameOfLife_template = "x1spom4d";
 
-        const def = modulo.definitions['x_ExampleBtn'];
-        class x_ExampleBtn extends window.HTMLElement {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initClass(modulo, def, x_ExampleBtn);
-        window.customElements.define(def.TagName, x_ExampleBtn);
-        return x_ExampleBtn;
-    
-};
-window.moduloBuild.modules["xx5ann6n"] = function x_ExampleBtn_template (modulo) {
-return function (CTX, G) { var OUT=[];
-  OUT.push("\n        <button class=\"my-btn my-btn__"); // "<button class=\"my-btn my-btn__"
-  OUT.push(G.escapeText(CTX.props.shape)); // "props.shape"
-  OUT.push("\">\n            "); // "\">"
-  OUT.push(G.escapeText(CTX.props.label)); // "props.label"
-  OUT.push("\n        </button>\n    "); // "</button>"
+window.moduloBuild.definitions = { 
+configuration: {
+ "Parent": null,
+ "DefName": null,
+ "Type": "Configuration",
+ "DefLoaders": [
+  "DefinedAs",
+  "SetAttrs",
+  "Src"
+ ],
+ "DefBuilders": [
+  "Content|Code",
+  "DefinitionName|MainRequire"
+ ],
+ "Name": "configuration",
+ "Source": "http://127.0.0.1:6627/js/codemirror_5.63.0/codemirror_bundled.js",
+ "cachedComponentDefs": {
+  "http://127.0.0.1:6627/libraries/eg.html": {
+   "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
+   "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
+   "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
+   "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
+   "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
+   "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
+   "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
+   "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
+   "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
+   "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
+   "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
+   "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
+   "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
+   "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
+   "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
+   "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData -data-type=\"js\">\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
+   "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
+   "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
+   "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
+  },
+  "http://127.0.0.1:6627/libraries/docseg.html": {
+   "Templating_1": "<Template>\n<p>There are <em>{{ state.count }}\n  {{ state.count|pluralize:\"articles,article\" }}</em>\n  on {{ script.exports.title }}.</p>\n\n{# Show the articles #}\n{% for article in state.articles %}\n    <h4 style=\"color: blue\">{{ article.headline|upper }}</h4>\n    {% if article.tease %}\n      <p>{{ article.tease|truncate:30 }}</p>\n    {% endif %}\n{% endfor %}\n</Template>\n\n<!-- The data below was used to render the template above -->\n<State\n    count:=42\n    articles:='[\n      {\"headline\": \"Modulo released!\",\n       \"tease\": \"The most exciting news of the century.\"},\n      {\"headline\": \"Can JS be fun again?\"},\n      {\"headline\": \"MTL considered harmful\",\n       \"tease\": \"Why constructing JS is risky business.\"}\n    ]'\n></State>\n<Script>\n    script.exports.title = \"ModuloNews\";\n</Script>\n\n\n",
+   "Templating_PrepareCallback": "<Template>\n    <input name=\"perc\" [state.bind] />% of\n    <input name=\"total\" [state.bind] />\n    is: {{ script.calcResult }}\n</Template>\n\n<State\n    perc:=50\n    total:=30\n></State>\n\n<Script>\n    function prepareCallback() {\n        const calcResult = (state.perc / 100) * state.total;\n        return { calcResult };\n    }\n</Script>\n\n<Style>\n    input { display: inline; width: 25px }\n</Style>\n\n\n",
+   "Templating_Comments": "<Template>\n    <h1>hello {# greeting #}</h1>\n    {% comment %}\n      {% if a %}<div>{{ b }}</div>{% endif %}\n      <h3>{{ state.items|first }}</h3>\n    {% endcomment %}\n    <p>Below the greeting...</p>\n</Template>\n\n\n",
+   "Templating_Escaping": "<Template>\n<p>User \"<em>{{ state.username }}</em>\" sent a message:</p>\n<div class=\"msgcontent\">\n    {{ state.content|safe }}\n</div>\n</Template>\n\n<State\n    username=\"Little <Bobby> <Drop> &tables\"\n    content='\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    '\n></State>\n<Style>\n    .msgcontent {\n        background: #999;\n        padding: 10px;\n        margin: 10px;\n    }\n</Style>\n\n\n",
+   "Tutorial_P1": "<Template>\nHello <strong>Modulo</strong> World!\n<p class=\"neat\">Any HTML can be here!</p>\n</Template>\n<Style>\n/* ...and any CSS here! */\nstrong {\n    color: blue;\n}\n.neat {\n    font-variant: small-caps;\n}\n:host { /* styles the entire component */\n    display: inline-block;\n    background-color: cornsilk;\n    padding: 5px;\n    box-shadow: 10px 10px 0 0 turquoise;\n}\n</Style>\n\n\n\n",
+   "Tutorial_P2": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n",
+   "Tutorial_P2_filters_demo": "<Template>\n    <p>Trying out the button...</p>\n    <x-ExampleBtn\n        label=\"Button Example\"\n        shape=\"square\"\n    ></x-ExampleBtn>\n\n    <p>Another button...</p>\n    <x-ExampleBtn\n        label=\"Example 2: Rounded\"\n        shape=\"round\"\n    ></x-ExampleBtn>\n</Template>\n\n\n\n",
+   "Tutorial_P3_state_demo": "<Template>\n<p>Nonsense poem:</p> <pre>\nProfessor {{ state.verb|capfirst }} who\n{{ state.verb }}ed a {{ state.noun }},\ntaught {{ state.verb }}ing in\nthe City of {{ state.noun|capfirst }},\nto {{ state.count }} {{ state.noun }}s.\n</pre>\n</Template>\n\n<State\n    verb=\"toot\"\n    noun=\"kazoo\"\n    count=\"two\"\n></State>\n\n<Style>\n    :host {\n        font-size: 0.8rem;\n    }\n</Style>\n\n\n",
+   "Tutorial_P3_state_bind": "<Template>\n\n<div>\n    <label>Username:\n        <input [state.bind] name=\"username\" /></label>\n    <label>Color (\"green\" or \"blue\"):\n        <input [state.bind] name=\"color\" /></label>\n    <label>Opacity: <input [state.bind]\n        name=\"opacity\"\n        type=\"number\" min=\"0\" max=\"1\" step=\"0.1\" /></label>\n\n    <h5 style=\"\n            opacity: {{ state.opacity }};\n            color: {{ state.color|allow:'green,blue'|default:'red' }};\n        \">\n        {{ state.username|lower }}\n    </h5>\n</div>\n\n</Template>\n\n<State\n    opacity=\"0.5\"\n    color=\"blue\"\n    username=\"Testing_Username\"\n></State>\n\n\n"
+  }
+ }
+},  
 
-return OUT.join(""); };
-};
-window.moduloBuild.nameToHash = {
- "configuration": "x15blq4q",
- "x_DemoModal": "xxpfb13f",
- "x_DemoChart": "x151hoj2",
- "x_ExampleBtn": "xxxjnsmn",
- "x_DemoSelector": "x1r4nctp",
- "x_DemoModal_script": "xxsbnnt4",
- "x_DemoChart_script": "x1g5fuoe",
- "x_DemoSelector_script": "x1d63iro",
- "mws_Page": "x191astr",
- "mws_ProjectInfo": "xx95jsjv",
- "mws_DevLogNav": "x15gcnek",
- "mws_DocSidebar": "x1k6jtfq",
- "mws_Demo": "x1kue0u9",
- "mws_AllExamples": "x1f5mjvu",
- "mws_Section": "xxigi01t",
- "mws_Page_script": "x1gf7uop",
- "mws_DocSidebar_script": "x1qnckrq",
- "mws_Demo_script": "xxf2s79r",
- "mws_AllExamples_script": "xxk29dsf",
- "docseg_Templating_1": "x1ekkph7",
- "docseg_Templating_PrepareCallback": "x1d0lm7c",
- "docseg_Templating_Comments": "xxr282hq",
- "docseg_Templating_Escaping": "x11n9f38",
- "docseg_Tutorial_P1": "xxvb81tk",
- "docseg_Tutorial_P2": "xx85njvf",
- "docseg_Tutorial_P2_filters_demo": "xx7h5unj",
- "docseg_Tutorial_P3_state_demo": "x1pd9q54",
- "docseg_Tutorial_P3_state_bind": "x1hmr3nm",
- "docseg_Templating_1_script": "x1adah1a",
- "docseg_Templating_PrepareCallback_script": "xxfr5sfs",
- "eg_Hello": "xxupjk9l",
- "eg_Simple": "xxrhos83",
- "eg_ToDo": "xx5qdh5h",
- "eg_JSON": "xxo8lpij",
- "eg_JSONArray": "x124cpbo",
- "eg_GitHubAPI": "x1teq8fq",
- "eg_ColorSelector": "x1bekpk5",
- "eg_DateNumberPicker": "x1d3p8tg",
- "eg_PrimeSieve": "xxbr6cba",
- "eg_Scatter": "xxo638jh",
- "eg_FlexibleForm": "x1ovegn6",
- "eg_FlexibleFormWithAPI": "x1t172bs",
- "eg_Components": "x1avssv1",
- "eg_OscillatingGraph": "xxgmlldk",
- "eg_Search": "xxo3b9id",
- "eg_SearchBox": "x15i6ec2",
- "eg_WorldMap": "x1bh86eb",
- "eg_Memory": "xxs0uo1c",
- "eg_ConwayGameOfLife": "x18fmfmt",
- "eg_Hello_script": "x1ml47eb",
- "eg_ToDo_script": "x1i773pd",
- "eg_GitHubAPI_script": "x18vnjfe",
- "eg_DateNumberPicker_script": "x119ugke",
- "eg_PrimeSieve_script": "x17drlid",
- "eg_FlexibleFormWithAPI_script": "x11988a0",
- "eg_OscillatingGraph_script": "x18q70th",
- "eg_Search_script": "xxqi0rec",
- "eg_SearchBox_script": "xxmfhi87",
- "eg_Memory_script": "xxqsulhb",
- "eg_ConwayGameOfLife_script": "xxmintkp",
- "x_DemoModal_template": "xx2noapr",
- "x_DemoChart_template": "xx9i16tt",
- "x_ExampleBtn_template": "xx5ann6n",
- "x_DemoSelector_template": "xxbjtni2",
- "mws_Page_template": "x18vovt8",
- "mws_ProjectInfo_staticdata": "x1kgum1d",
- "mws_ProjectInfo_template": "xx9t56li",
- "mws_DevLogNav_template": "x1vqburp",
- "mws_DocSidebar_template": "x1s9cikh",
- "mws_Demo_template": "xxs8mvob",
- "mws_AllExamples_template": "xxslhngg",
- "mws_Section_template": "xx3sjna4",
- "docseg_Templating_1_template": "x1nrhiqd",
- "docseg_Templating_PrepareCallback_template": "xx7jgg2i",
- "docseg_Templating_Comments_template": "x1p85et1",
- "docseg_Templating_Escaping_template": "x184ue3a",
- "docseg_Tutorial_P1_template": "xxm6soph",
- "docseg_Tutorial_P2_template": "x1h93c2j",
- "docseg_Tutorial_P2_filters_demo_template": "x1h93c2j",
- "docseg_Tutorial_P3_state_demo_template": "x13o8260",
- "docseg_Tutorial_P3_state_bind_template": "xxonth4n",
- "eg_Hello_template": "xx9ntrq4",
- "eg_Simple_template": "xxl4an33",
- "eg_ToDo_template": "xxbdh5fm",
- "eg_JSON_template": "x1lhd4rn",
- "eg_JSON_staticdata": "x1p9j2tl",
- "eg_JSONArray_template": "x1npfhrn",
- "eg_JSONArray_staticdata": "xxgkj36u",
- "eg_GitHubAPI_template": "x130qf1i",
- "eg_ColorSelector_template": "x145sdaa",
- "eg_DateNumberPicker_template": "x1j17irn",
- "eg_PrimeSieve_template": "xxn6m9dp",
- "eg_Scatter_template": "x1ejsk79",
- "eg_Scatter_staticdata": "x11t9udg",
- "eg_FlexibleForm_template": "x1ah1gte",
- "eg_FlexibleFormWithAPI_template": "x16ihg4b",
- "eg_Components_template": "x1gk8lc3",
- "eg_OscillatingGraph_template": "xxqlg44u",
- "eg_Search_template": "x1l103gn",
- "eg_SearchBox_template": "x1k5cj37",
- "eg_SearchBox_staticdata": "xx64c9tf",
- "eg_WorldMap_template": "xxmbc1sp",
- "eg_WorldMap_staticdata": "x11t9udg",
- "eg_Memory_template": "x1rfau7j",
- "eg_ConwayGameOfLife_template": "x1spom4d"
-};
-window.moduloBuild.definitions = {
- "configuration": {
-  "Type": "Configuration",
-  "DefLoaders": [
-   "DefinedAs",
-   "SetAttrs",
-   "Src"
+x: {
+ "Parent": null,
+ "DefName": null,
+ "Type": "Library",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content",
+  "SetAttrs"
+ ],
+ "Name": "x",
+ "DefinitionName": "x",
+ "Source": "http://127.0.0.1:6627/libraries/globalExamples.html",
+ "ChildrenNames": [
+  "x_DemoModal",
+  "x_DemoChart",
+  "x_ExampleBtn",
+  "x_DemoSelector"
+ ]
+},  
+
+mws: {
+ "Parent": null,
+ "DefName": null,
+ "Type": "Library",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content",
+  "SetAttrs"
+ ],
+ "Name": "mws",
+ "DefinitionName": "mws",
+ "Source": "http://127.0.0.1:6627/libraries/mws.html",
+ "ChildrenNames": [
+  "mws_Page",
+  "mws_ProjectInfo",
+  "mws_DevLogNav",
+  "mws_DocSidebar",
+  "mws_Demo",
+  "mws_AllExamples",
+  "mws_Section"
+ ]
+},  
+
+docseg: {
+ "Parent": null,
+ "DefName": null,
+ "Type": "Library",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content",
+  "SetAttrs"
+ ],
+ "Name": "docseg",
+ "DefinitionName": "docseg",
+ "Source": "http://127.0.0.1:6627/libraries/docseg.html",
+ "ChildrenNames": [
+  "docseg_Templating_1",
+  "docseg_Templating_PrepareCallback",
+  "docseg_Templating_Comments",
+  "docseg_Templating_Escaping",
+  "docseg_Tutorial_P1",
+  "docseg_Tutorial_P2",
+  "docseg_Tutorial_P2_filters_demo",
+  "docseg_Tutorial_P3_state_demo",
+  "docseg_Tutorial_P3_state_bind"
+ ]
+},  
+
+eg: {
+ "Parent": null,
+ "DefName": null,
+ "Type": "Library",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content",
+  "SetAttrs"
+ ],
+ "Name": "eg",
+ "DefinitionName": "eg",
+ "Source": "http://127.0.0.1:6627/libraries/eg.html",
+ "ChildrenNames": [
+  "eg_Hello",
+  "eg_Simple",
+  "eg_ToDo",
+  "eg_JSON",
+  "eg_JSONArray",
+  "eg_GitHubAPI",
+  "eg_ColorSelector",
+  "eg_DateNumberPicker",
+  "eg_PrimeSieve",
+  "eg_Scatter",
+  "eg_FlexibleForm",
+  "eg_FlexibleFormWithAPI",
+  "eg_Components",
+  "eg_OscillatingGraph",
+  "eg_Search",
+  "eg_SearchBox",
+  "eg_WorldMap",
+  "eg_Memory",
+  "eg_ConwayGameOfLife"
+ ]
+},  
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+x_DemoModal: {
+ "Parent": "x",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "x",
+ "name": "DemoModal",
+ "Name": "DemoModal",
+ "DefinitionName": "x_DemoModal",
+ "ChildrenNames": [
+  "x_DemoModal_props",
+  "x_DemoModal_template",
+  "x_DemoModal_state",
+  "x_DemoModal_script",
+  "x_DemoModal_style"
+ ],
+ "TagName": "x-demomodal"
+},  
+
+x_DemoChart: {
+ "Parent": "x",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "x",
+ "name": "DemoChart",
+ "Name": "DemoChart",
+ "DefinitionName": "x_DemoChart",
+ "ChildrenNames": [
+  "x_DemoChart_props",
+  "x_DemoChart_template",
+  "x_DemoChart_script",
+  "x_DemoChart_style"
+ ],
+ "TagName": "x-demochart"
+},  
+
+x_ExampleBtn: {
+ "Parent": "x",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "x",
+ "name": "ExampleBtn",
+ "Name": "ExampleBtn",
+ "DefinitionName": "x_ExampleBtn",
+ "ChildrenNames": [
+  "x_ExampleBtn_props",
+  "x_ExampleBtn_template",
+  "x_ExampleBtn_style"
+ ],
+ "TagName": "x-examplebtn"
+},  
+
+x_DemoSelector: {
+ "Parent": "x",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "x",
+ "name": "DemoSelector",
+ "Name": "DemoSelector",
+ "DefinitionName": "x_DemoSelector",
+ "ChildrenNames": [
+  "x_DemoSelector_props",
+  "x_DemoSelector_template",
+  "x_DemoSelector_state",
+  "x_DemoSelector_script",
+  "x_DemoSelector_style"
+ ],
+ "TagName": "x-demoselector"
+},  
+
+x_DemoModal_props: {
+ "Parent": "x_DemoModal",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "button": "",
+ "title": "",
+ "Name": "props",
+ "DefinitionName": "x_DemoModal_props"
+},  
+
+x_DemoModal_template: {
+ "Parent": "x_DemoModal",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "x_DemoModal_template",
+ "Hash": "Txx2noapr"
+},  
+
+x_DemoModal_state: {
+ "Parent": "x_DemoModal",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "visible": false,
+ "Name": "state",
+ "DefinitionName": "x_DemoModal_state"
+},  
+
+x_DemoModal_script: {
+ "Parent": "x_DemoModal",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "x_DemoModal_script",
+ "Directives": []
+},  
+
+x_DemoModal_style: {
+ "Parent": "x_DemoModal",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "x_DemoModal_style"
+},  
+
+x_DemoChart_props: {
+ "Parent": "x_DemoChart",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "data": "",
+ "animated": "",
+ "Name": "props",
+ "DefinitionName": "x_DemoChart_props"
+},  
+
+x_DemoChart_template: {
+ "Parent": "x_DemoChart",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "x_DemoChart_template",
+ "Hash": "Txx9i16tt"
+},  
+
+x_DemoChart_script: {
+ "Parent": "x_DemoChart",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "x_DemoChart_script",
+ "Directives": []
+},  
+
+x_DemoChart_style: {
+ "Parent": "x_DemoChart",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "x_DemoChart_style"
+},  
+
+x_ExampleBtn_props: {
+ "Parent": "x_ExampleBtn",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "label": "",
+ "shape": "",
+ "Name": "props",
+ "DefinitionName": "x_ExampleBtn_props"
+},  
+
+x_ExampleBtn_template: {
+ "Parent": "x_ExampleBtn",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "x_ExampleBtn_template",
+ "Hash": "Txx5ann6n"
+},  
+
+x_ExampleBtn_style: {
+ "Parent": "x_ExampleBtn",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "x_ExampleBtn_style"
+},  
+
+x_DemoSelector_props: {
+ "Parent": "x_DemoSelector",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "onchange": "",
+ "options": "",
+ "name": "",
+ "Name": "props",
+ "DefinitionName": "x_DemoSelector_props"
+},  
+
+x_DemoSelector_template: {
+ "Parent": "x_DemoSelector",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "x_DemoSelector_template",
+ "Hash": "Txxbjtni2"
+},  
+
+x_DemoSelector_state: {
+ "Parent": "x_DemoSelector",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "value": "",
+ "Name": "state",
+ "DefinitionName": "x_DemoSelector_state"
+},  
+
+x_DemoSelector_script: {
+ "Parent": "x_DemoSelector",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "x_DemoSelector_script",
+ "Directives": []
+},  
+
+x_DemoSelector_style: {
+ "Parent": "x_DemoSelector",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "x_DemoSelector_style"
+},  
+
+mws_Page: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "vanish-into-document",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "Page",
+ "Name": "Page",
+ "DefinitionName": "mws_Page",
+ "ChildrenNames": [
+  "mws_Page_props",
+  "mws_Page_style",
+  "mws_Page_template",
+  "mws_Page_script"
+ ],
+ "TagName": "mws-page"
+},  
+
+mws_ProjectInfo: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "vanish",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "ProjectInfo",
+ "Name": "ProjectInfo",
+ "DefinitionName": "mws_ProjectInfo",
+ "ChildrenNames": [
+  "mws_ProjectInfo_props",
+  "mws_ProjectInfo_staticdata",
+  "mws_ProjectInfo_template"
+ ],
+ "TagName": "mws-projectinfo"
+},  
+
+mws_DevLogNav: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "DevLogNav",
+ "Name": "DevLogNav",
+ "DefinitionName": "mws_DevLogNav",
+ "ChildrenNames": [
+  "mws_DevLogNav_props",
+  "mws_DevLogNav_template",
+  "mws_DevLogNav_state",
+  "mws_DevLogNav_style"
+ ],
+ "TagName": "mws-devlognav"
+},  
+
+mws_DocSidebar: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "DocSidebar",
+ "Name": "DocSidebar",
+ "DefinitionName": "mws_DocSidebar",
+ "ChildrenNames": [
+  "mws_DocSidebar_props",
+  "mws_DocSidebar_template",
+  "mws_DocSidebar_state",
+  "mws_DocSidebar_script",
+  "mws_DocSidebar_style"
+ ],
+ "TagName": "mws-docsidebar"
+},  
+
+mws_Demo: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "Demo",
+ "Name": "Demo",
+ "DefinitionName": "mws_Demo",
+ "ChildrenNames": [
+  "mws_Demo_props",
+  "mws_Demo_template",
+  "mws_Demo_state",
+  "mws_Demo_script",
+  "mws_Demo_style"
+ ],
+ "TagName": "mws-demo"
+},  
+
+mws_AllExamples: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "AllExamples",
+ "Name": "AllExamples",
+ "DefinitionName": "mws_AllExamples",
+ "ChildrenNames": [
+  "mws_AllExamples_template",
+  "mws_AllExamples_state",
+  "mws_AllExamples_script",
+  "mws_AllExamples_style"
+ ],
+ "TagName": "mws-allexamples"
+},  
+
+mws_Section: {
+ "Parent": "mws",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "mws",
+ "name": "Section",
+ "Name": "Section",
+ "DefinitionName": "mws_Section",
+ "ChildrenNames": [
+  "mws_Section_props",
+  "mws_Section_template",
+  "mws_Section_style"
+ ],
+ "TagName": "mws-section"
+},  
+
+mws_Page_props: {
+ "Parent": "mws_Page",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "navbar": "",
+ "docbarselected": "",
+ "pagetitle": "",
+ "Name": "props",
+ "DefinitionName": "mws_Page_props"
+},  
+
+mws_Page_style: {
+ "Parent": "mws_Page",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_Page_style",
+ "Source": "http://127.0.0.1:6627/libraries/mws/Page.css"
+},  
+
+mws_Page_template: {
+ "Parent": "mws_Page",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_Page_template",
+ "Source": "http://127.0.0.1:6627/libraries/mws/Page.html",
+ "Hash": "Tx18vovt8"
+},  
+
+mws_Page_script: {
+ "Parent": "mws_Page",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "mws_Page_script",
+ "Directives": []
+},  
+
+mws_ProjectInfo_props: {
+ "Parent": "mws_ProjectInfo",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "version": "",
+ "Name": "props",
+ "DefinitionName": "mws_ProjectInfo_props"
+},  
+
+mws_ProjectInfo_staticdata: {
+ "Parent": "mws_ProjectInfo",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.33\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n    \"mdu-cli\": \"modulocli/modulocli.js\",\n    \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"srcserve\": \"npm run cli -- srcserve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.18.2\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.7.0\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
+ "Name": "staticdata",
+ "DefinitionName": "mws_ProjectInfo_staticdata",
+ "Source": "https://raw.githubusercontent.com/modulojs/modulo/main/package.json",
+ "data": {
+  "name": "mdu.js",
+  "author": "michaelb",
+  "version": "0.0.33",
+  "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
+  "homepage": "https://modulojs.org/",
+  "main": "./src/Modulo.js",
+  "bin": {
+   "mdu-cli": "modulocli/modulocli.js",
+   "modulocli": "modulocli/modulocli.js"
+  },
+  "scripts": {
+   "serve": "npm run cli -- serve",
+   "srcserve": "npm run cli -- srcserve",
+   "start": "npm run cli -- devserve",
+   "build-docs": "npm run cli -- ssg",
+   "cli": "node ./modulocli/modulocli.js",
+   "test": "npm run cli -- test"
+  },
+  "peerDependencies": {
+   "express": "^4.18.2",
+   "node-watch": "^0.7.2",
+   "puppeteer": "^13.7.0"
+  },
+  "repository": {
+   "type": "git",
+   "url": "git+https://github.com/modulojs/modulo.git"
+  },
+  "exports": {
+   "require": "./src/Modulo.js"
+  },
+  "keywords": [
+   "UI",
+   "templates",
+   "templating",
+   "components",
+   "framework"
   ],
-  "DefBuilders": [
-   "Content|Code",
-   "DefinitionName|MainRequire"
+  "files": [
+   "src/*",
+   "modulocli/*",
+   "modulocli/**/*",
+   "mdu/*",
+   "mdu/**/*"
   ],
-  "DefName": null,
-  "Parent": null,
-  "Name": "configuration",
-  "Source": "http://127.0.0.1:6627/js/codemirror_5.63.0/codemirror_bundled.js",
-  "cachedComponentDefs": {
-   "http://127.0.0.1:6627/libraries/eg.html": {
-    "Hello": "\n<Template>\n    <button @click:=script.countUp>Hello {{ state.num }}</button>\n</Template>\n<State\n    num:=42\n></State>\n<Script>\n    function countUp() {\n        state.num++;\n    }\n</Script>\n\n\n",
-    "Simple": "\n<Template>\n    Components can use any number of <strong>CParts</strong>.\n    Here we use only <em>Style</em> and <em>Template</em>.\n</Template>\n\n<Style>\n    em { color: darkgreen; }\n    * { text-decoration: underline; }\n</Style>\n\n\n",
-    "ToDo": "<Template>\n<ol>\n    {% for item in state.list %}\n        <li>{{ item }}</li>\n    {% endfor %}\n    <li>\n        <input [state.bind] name=\"text\" />\n        <button @click:=script.addItem>Add</button>\n    </li>\n</ol>\n</Template>\n\n<State\n    list:='[\"Milk\", \"Bread\", \"Candy\"]'\n    text=\"Beer\"\n></State>\n\n<Script>\n    function addItem() {\n        state.list.push(state.text); // add to list\n        state.text = \"\"; // clear input\n    }\n</Script>\n\n\n",
-    "JSON": "<!-- Use StaticData CPart to include JSON from an API or file -->\n<Template>\n    <strong>Name:</strong> {{ staticdata.name }} <br />\n    <strong>Site:</strong> {{ staticdata.homepage }} <br />\n    <strong>Tags:</strong> {{ staticdata.topics|join }}\n</Template>\n<StaticData\n    -src=\"https://api.github.com/repos/modulojs/modulo\"\n></StaticData>\n",
-    "JSONArray": "<!-- Use StaticData CPart to include JSON from an API or file.\nYou can use it for arrays as well. Note that it is \"bundled\"\nas static data in with JS, so it does not refresh. -->\n<Template>\n  {% for post in staticdata %}\n    <p>{% if post.completed %}&starf;{% else %}&star;{% endif %}\n        {{ post.title|truncate:15 }}</p>\n  {% endfor %}\n</Template>\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/todos\"\n></StaticData>\n",
-    "GitHubAPI": "<Template>\n<p>{{ state.name }} | {{ state.location }}</p>\n<p>{{ state.bio }}</p>\n<a href=\"https://github.com/{{ state.search }}/\" target=\"_blank\">\n    {% if state.search %}github.com/{{ state.search }}/{% endif %}\n</a>\n<input [state.bind] name=\"search\"\n    placeholder=\"Type GitHub username\" />\n<button @click:=script.fetchGitHub>Get Info</button>\n</Template>\n\n<State\n    search=\"\"\n    name=\"\"\n    location=\"\"\n    bio=\"\"\n></State>\n\n<Script>\n    function fetchGitHub() {\n        fetch(`https://api.github.com/users/${state.search}`)\n            .then(response => response.json())\n            .then(githubCallback);\n    }\n    function githubCallback(apiData) {\n        state.name = apiData.name;\n        state.location = apiData.location;\n        state.bio = apiData.bio;\n        element.rerender();\n    }\n</Script>\n\n\n",
-    "ColorSelector": "<Template>\n    <div style=\"float: right\">\n        <p><label>Hue:<br />\n            <input [state.bind] name=\"hue\" type=\"range\" min=\"0\" max=\"359\" step=\"1\" />\n        </label></p>\n        <p><label>Saturation: <br />\n            <input [state.bind] name=\"sat\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n        <p><label>Luminosity:<br />\n            <input [state.bind] name=\"lum\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" />\n            </label></p>\n    </div>\n    <div style=\"\n        width: 80px; height: 80px;\n        background: hsl({{ state.hue }}, {{ state.sat }}%, {{ state.lum }}%)\">\n    </div>\n</Template>\n<State\n    hue:=130\n    sat:=50\n    lum:=50\n></State>\n",
-    "DateNumberPicker": "<Template>\n    <p>ISO: <tt>{{ state.year }}-{{ state.month }}-{{ state.day }}</tt></p>\n    {% for part in state.ordering %}\n        <label>\n            {{ state|get:part }}\n            <div>\n                <button @click:=script.next payload=\"{{ part }}\">&uarr;</button>\n                <button @click:=script.previous payload=\"{{ part }}\">&darr;</button>\n            </div>\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    day:=1\n    month:=1\n    year:=2022\n    ordering:='[\"year\", \"month\", \"day\"]'\n></State>\n\n<Script>\n    function isValid({ year, month, day }) {\n        month--; // Months are zero indexed\n        const d = new Date(year, month, day);\n        return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;\n    }\n    function next(part) {\n        state[part]++;\n        if (!isValid(state)) { // undo if not valid\n            state[part]--;\n        }\n    }\n    function previous(part) {\n        state[part]--;\n        if (!isValid(state)) { // undo if not valid\n            state[part]++;\n        }\n    }\n</Script>\n\n<Style>\n    :host {\n        border: 1px solid black;\n        padding: 10px;\n        margin: 10px;\n        margin-left: 0;\n        display: flex;\n        flex-wrap: wrap;\n        font-weight: bold;\n    }\n    div {\n        float: right;\n    }\n    label {\n        display: block;\n        width: 100%;\n    }\n</Style>\n",
-    "PrimeSieve": "<!-- Demos mouseover, template filters, template control flow,\n     and static script exports -->\n<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n      <div @mouseover:=script.setNum\n        class=\"\n            {# If-statements to check divisibility in template: #}\n            {% if state.number == i %}number{% endif %}\n            {% if state.number lt i %}hidden{% else %}\n              {% if state.number|divisibleby:i %}whole{% endif %}\n            {% endif %}\n        \">{{ i }}</div>\n    {% endfor %}\n  </div>\n</Template>\n\n<State\n    number:=64\n></State>\n\n<Script>\n    // Getting big a range of numbers in JS. Use \"script.exports\"\n    // to export this as a one-time global constant.\n    // (Hint: Curious how it calculates prime? See CSS!)\n    script.exports.range = \n        Array.from({length: 63}, (x, i) => i + 2);\n    function setNum(payload, ev) {\n        state.number = Number(ev.target.textContent);\n    }\n</Script>\n\n<Style>\n.grid {\n    display: grid;\n    grid-template-columns: repeat(9, 1fr);\n    color: #ccc;\n    font-weight: bold;\n    width: 100%;\n    margin: -5px;\n}\n.grid > div {\n    border: 1px solid #ccc;\n    cursor: crosshair;\n    transition: 0.2s;\n}\ndiv.whole {\n    color: white;\n    background: #B90183;\n}\ndiv.hidden {\n    background: #ccc;\n    color: #ccc;\n}\n\n/* Color green and add asterisk */\ndiv.number { background: green; }\ndiv.number::after { content: \"*\"; }\n/* Check for whole factors (an adjacent div.whole).\n   If found, then hide asterisk and green */\ndiv.whole ~ div.number { background: #B90183; }\ndiv.whole ~ div.number::after { opacity: 0; }\n</Style>\n\n\n",
-    "Scatter": "<!-- StaticData can be used for data visualization as\nwell, as an quick way to bring in data sets. Here we loop\nthrough data, creating labels that appear when hovering. -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"--x: {{ user.address.geo.lng }}px;\n                    --y: {{ user.address.geo.lat }}px;\"\n        ></div>\n        <label>{{ user.name }} ({{ user.email }})</label>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      --size: 101px;\n      width: var(--size);\n      height: var(--size);\n      background-size: 10px 10px;\n      background-image: linear-gradient(to right,\n          rgba(100, 100, 100,.3) 1px, transparent 1px),\n        linear-gradient(to bottom,\n          rgba(100, 100, 100,.3) 1px, transparent 1px);\n  }\n  div {\n      position: absolute;\n      top: calc(var(--y) / 1.5 + var(--size) / 2 + 5px);\n      left: calc(var(--x) / 4.0 + var(--size) / 2 + 5px);\n      height: 10px;\n      width: 10px;\n      border-radius: 10px;\n      border: 1px solid #B90183;\n      background: rgba(255, 255, 255, 0.0);\n  }\n  div:hover {\n      background: #B90183;\n  }\n  label {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      opacity: 0;\n      height: 0;\n      font-size: 11px;\n  }\n  div:hover + label {\n      opacity: 1;\n  }\n</Style>\n",
-    "FlexibleForm": "<!-- Here, we have a form that's easy to update. If this gets used more\nthan a couple times, it could be turned into a reusable component where\nthe \"ordering\" and initial values get set via Props. -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type=\"{% if state|get:field|type == 'string' %}text{% else %}checkbox{% endif %}\"\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    name=\"Spartacus\"\n    topic=\"On the treatment of Thracian gladiators\"\n    subscribe:=true\n    private:=false\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"name\", \"topic\", \"comment\", \"private\", \"subscribe\"]'\n></State>\n",
-    "FlexibleFormWithAPI": "<!-- Combining the code from the previous exercise, we can interact with\nAPIs. Here we use a Typicode's placeholder API to make posts -->\n<Template>\n    <form>\n        {% for field in state.fields %}\n            <div class=\"field-pair\">\n                <label for=\"{{ field }}_{{ component.id }}\">\n                    <strong>{{ field|capfirst }}:</strong>\n                </label>\n                <input\n                    [state.bind]\n                    type='{% if state|get:field|type == \"number\" %}number{% else %}text{% endif %}'\n                    name=\"{{ field }}\"\n                    id=\"{{ field }}_{{ component.id }}\"\n                />\n            </div>\n        {% endfor %}\n        <button @click:=script.submit>Post comment</button>\n        <hr />\n\n        {% for post in state.posts|reversed %}\n            <p>\n                {{ post.userId }}:\n                <strong>{{ post.title|truncate:15 }}</strong>\n                {{ post.body|truncate:18 }}\n            </p>\n        {% endfor %}\n    </form>\n</Template>\n\n<State\n    user:=1337\n    topic=\"On the treatment of Thracian gladiators\"\n    comment=\"So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.\"\n    fields:='[\"user\", \"topic\", \"comment\"]'\n    posts:='[]'\n></State>\n\n<Script>\n    const URL = 'https://jsonplaceholder.typicode.com/posts';\n    const fakedPosts = [];\n    const headers = [];\n\n    function initializedCallback() {\n        refresh(); // Refresh on first load\n    }\n\n    function refresh() {\n        fetch(URL).then(r => r.json()).then(data => {\n            // Since Typicode API doesn't save it's POST\n            // data, we'll have manually fake it here\n            state.posts = data.concat(fakedPosts);\n            element.rerender();\n        });\n    }\n\n    function submit() {\n        // Rename the state variables to be what the API suggests\n        const postData = {\n              userId: state.user,\n              title: state.topic,\n              body: state.comment,\n        };\n        state.topic = ''; // clear the comment & topic text\n        state.comment = '';\n        fakedPosts.push(postData); // Required for refresh()\n\n        // Send the POST request with fetch, then refresh after\n        const opts = {\n            method: 'POST',\n            body: JSON.stringify(postData),\n            headers: { 'Content-type': 'application/json; charset=UTF-8' },\n        };\n        fetch(URL, opts).then(r => r.json()).then(refresh);\n    }\n</Script>\n\n",
-    "Components": "<!-- Once defined, Modulo web components can be used like HTML.\nDemoModal and DemoChart are already defined. Try using below! -->\n<Template>\n\n<x-DemoChart\n    data:='[1, 2, 3, 5, 8]'\n></x-DemoChart>\n\n<x-DemoModal button=\"Nicholas Cage\" title=\"Biography\">\n    <p>Prolific Hollywood actor</p>\n    <img src=\"https://www.placecage.com/640/360\" />\n</x-DemoModal>\n\n<x-DemoModal button=\"Tommy Wiseau\" title=\"Further Data\">\n    <p>Actor, director, and acclaimed fashion designer</p>\n    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>\n</x-DemoModal>\n\n</Template>\n\n",
-    "OscillatingGraph": "<Template>\n\n    <!-- Note that even with custom components, core properties like \"style\"\n        are available, making CSS variables a handy way of specifying style\n        overrides. -->\n    <x-DemoChart\n        data:=state.data\n        animated:=true\n        style=\"\n            --align: center;\n            --speed: {{ state.anim }};\n        \"\n    ></x-DemoChart>\n\n    <p>\n        {% if not state.playing %}\n            <button @click:=script.play alt=\"Play\">&#x25B6;  tick: {{ state.tick }}</button>\n        {% else %}\n            <button @click:=script.pause alt=\"Pause\">&#x2016;  tick: {{ state.tick }}</button>\n        {% endif %}\n    </p>\n\n    {% for name in script.exports.properties %}\n        <label>{{ name|capfirst }}:\n            <input [state.bind]\n                name=\"{{ name }}\"\n                type=\"range\"\n                min=\"1\" max=\"20\" step=\"1\" />\n        </label>\n    {% endfor %}\n</Template>\n\n<State\n    playing:=false\n    speed:=10\n    easing=\"linear\"\n    align=\"flex-end\"\n    tick:=1\n    width:=10\n    anim:=10\n    speed:=10\n    pulse:=1\n    offset:=1\n    data:=[]\n></State>\n<Script>\n    let timeout = null;\n    script.exports.properties = [\"anim\", \"speed\", \"width\", \"pulse\"];//, \"offset\"];\n    function play() {\n        state.playing = true;\n        nextTick();\n    }\n    function pause() {\n        state.playing = false;\n    }\n    function setEasing(payload) {\n        state.easing = payload;\n    }\n\n    function nextTick() {\n        if (timeout) {\n            clearTimeout(timeout);\n        }\n        const el = element;\n        timeout = setTimeout(() => {\n            el.rerender();\n        }, 2000 / state.speed);\n    }\n\n    function updateCallback() {\n        if (state.playing) {\n            while (state.data.length <= state.width) {\n                state.tick++;\n                state.data.push(Math.sin(state.tick / state.pulse) + 1); // add to right\n            }\n            state.data.shift(); // remove one from left\n            nextTick();\n        }\n    }\n</Script>\n<Style>\n    input {\n        width: 50px;\n    }\n</Style>\n",
-    "Search": "<!-- Modulo can be used with APIs to create interactive apps.\nThis book search shows how a Script tag can use an API -->\n<Template>\n  <input [state.bind] name=\"search\" />\n  <button @click:=script.doSearch>Go</button>\n  {% if state.loading %}<em>Loading...</em>{% endif %}\n  <ol>\n    {% for item in state.results %}\n      <li>\n        <img src=\"{{ item.cover }}\" />\n        <strong>{{ item.title }}</strong>\n      </li>\n    {% endfor %}\n  </ol>\n</Template>\n\n<State\n    search=\"the lord of the rings\"\n    loading:=false\n    results:=[]\n></State>\n\n<Script>\n    const OPTS = '&limit=6&fields=title,author_name,cover_i';\n    const COVER ='https://covers.openlibrary.org/b/id/';\n    const API = 'https://openlibrary.org/search.json?q=';\n    function doSearch() {\n        const url = API + '?q=' + state.search + OPTS;\n        state.loading = true;\n        fetch(url)\n            .then(response => response.json())\n            .then(dataBackCallback);\n    }\n\n    function dataBackCallback(data) {\n        for (const item of data.docs) {\n            // For convenience, we prepare the cover URL\n            item.cover = COVER + item.cover_i + '-S.jpg';\n        }\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n</Script>\n\n",
-    "SearchBox": "<!-- A \"type as you go\" search box implementation,\nan example of more complicated HTML and JS behavior -->\n<Template>\n<p>Type a book name for \"search as you type\"\n(e.g. try &ldquo;the lord of the rings&rdquo;)</p>\n\n<input [state.bind] name=\"search\"\n  @keyup:=script.typingCallback />\n\n<div class=\"results {% if state.search.length gt 0 %}\n                      visible {% endif %}\">\n  <div class=\"results-container\">\n    {% if state.loading %}\n      <img src=\"{{ staticdata.gif }}\" alt=\"loading\" />\n    {% else %}\n      {% for result in state.results %}\n        <div class=\"result\">\n          <img\n            src=\"{{ staticdata.cover|add:result.cover_i }}-S.jpg\"\n          /> <label>{{ result.title }}</label>\n        </div>\n      {% empty %}\n        <p>No books found.</p>\n      {% endfor %}\n    {% endif %}\n  </div>\n</div>\n</Template>\n\n<State\n    search=\"\"\n    results:=[]\n    loading:=false\n></State>\n\n<!-- Puting long URLs down here to declutter -->\n<StaticData -data-type=\"js\">\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n</StaticData>\n\n<Script>\n    function typingCallback() {\n        state.loading = true;\n        const search = `q=${state.search}`;\n        const opts = 'limit=6&fields=title,author_name,cover_i';\n        const url = `${staticdata.apiBase}?${search}&${opts}`;\n        _globalDebounce(() => {\n            fetch(url)\n                .then(response => response.json())\n                .then(dataBackCallback);\n        });\n    }\n\n    function dataBackCallback(data) {\n        state.results = data.docs;\n        state.loading = false;\n        element.rerender();\n    }\n\n    let _globalDebounceTimeout = null;\n    function _globalDebounce(func) {\n        if (_globalDebounceTimeout) {\n            clearTimeout(_globalDebounceTimeout);\n        }\n        _globalDebounceTimeout = setTimeout(func, 500);\n    }\n</Script>\n\n<Style>\n    input {\n        width: 100%;\n    }\n    .results-container {\n        display: flex;\n        flex-wrap: wrap;\n        justify-content: center;\n    }\n    .results-container > img { margin-top 30px; }\n    .results {\n        position: absolute;\n        height: 0;\n        width: 0;\n        overflow: hidden;\n        display: block;\n        border: 2px solid #B90183;\n        border-radius: 0 0 20px 20px;\n        transition: height 0.2s;\n        z-index: 20;\n        background: white;\n    }\n    .results.visible {\n        height: 200px;\n        width: 200px;\n    }\n    .result {\n        padding: 10px;\n        width: 80px;\n        position: relative;\n    }\n    .result label {\n        position: absolute;\n        width: 80px;\n        background: rgba(255, 255, 255, 0.5);\n        font-size: 0.7rem;\n        top: 0;\n        left: 0;\n    }\n</Style>\n\n\n",
-    "WorldMap": "<!-- Another example of StaticData being used to visualize data, this example\n     places API data onto a world map, and provides a slide down modal for\n     each user that shows more information about that user -->\n<Template>\n    {% for user in staticdata %}\n        <div style=\"top: {{ user.address.geo.lng|number|add:180|multiply:100|dividedinto:360 }}%;\n                    left: {{ user.address.geo.lat|number|add:90|multiply:100|dividedinto:180 }}%;\">\n            <x-DemoModal button=\"{{ user.id }}\" title=\"{{ user.name }}\">\n                {% for key, value in user %}\n                    <dl>\n                        <dt>{{ key|capfirst }}</dt>\n                        <dd>{% if value|type == \"object\" %}{{ value|json }}{% else %}{{ value }}{% endif %}</dd>\n                    </dl>\n                {% endfor %}\n            </x-DemoModal>\n        </div>\n    {% endfor %}\n</Template>\n\n<StaticData\n    -src=\"https://jsonplaceholder.typicode.com/users\"\n></StaticData>\n\n<Style>\n  :host {\n      position: relative;\n      display: block;\n      width: 160px;\n      height: 80px;\n      border-radius: 1px 5px 1px 7px;\n      border: 1px solid gray;\n      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);\n      background-size: 160px 85px;\n      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');\n  }\n  div {\n      position: absolute;\n      height: 7px;\n      width: 7px;\n      border-radius: 5px;\n      background-color: rgba(162, 228, 184);\n  }\n  div > x-DemoModal {\n      opacity: 0;\n      z-index: 50;\n  }\n  div:hover > x-DemoModal{\n      opacity: 1.0;\n  }\n  .modal-body {\n      height: 400px;\n      overflow: auto;\n  }\n  dt {\n      font-weight: 800;\n  }\n  dd {\n      max-width: 300px;\n      overflow: auto;\n      font-family: monospace;\n  }\n</Style>\n",
-    "Memory": "<!-- A much more complicated example application -->\n<Template>\n{% if not state.cards.length %}\n    <h3>The Symbolic Memory Game</h3>\n    <p>Choose your difficulty:</p>\n    <button @click:=script.setup click.payload=8>2x4</button>\n    <button @click:=script.setup click.payload=16>4x4</button>\n    <button @click:=script.setup click.payload=36>6x6</button>\n{% else %}\n    <div class=\"board\n        {% if state.cards.length > 16 %}hard{% endif %}\">\n    {# Loop through each card in the \"deck\" (state.cards) #}\n    {% for card in state.cards %}\n        {# Use \"key=\" to speed up DOM reconciler #}\n        <div key=\"c{{ card.id }}\"\n            class=\"card\n            {% if card.id in state.revealed %}\n                flipped\n            {% endif %}\n            \"\n            style=\"\n            {% if state.win %}\n                animation: flipping 0.5s infinite alternate;\n                animation-delay: {{ card.id }}.{{ card.id }}s;\n            {% endif %}\n            \"\n            @click:=script.flip\n            click.payload=\"{{ card.id }}\">\n            {% if card.id in state.revealed %}\n                {{ card.symbol }}\n            {% endif %}\n        </div>\n    {% endfor %}\n    </div>\n    <p style=\"{% if state.failedflip %}\n                color: red{% endif %}\">\n        {{ state.message }}</p>\n{% endif %}\n</Template>\n\n<State\n    message=\"Good luck!\"\n    win:=false\n    cards:=[]\n    revealed:=[]\n    lastflipped:=null\n    failedflip:=null\n></State>\n\n<Script>\nconst symbolsStr = \"%!@#=?&+~÷≠∑µ‰∂Δƒσ\"; // 16 options\nfunction setup(payload) {\n    const count = Number(payload);\n    let symbols = symbolsStr.substr(0, count/2).split(\"\");\n    symbols = symbols.concat(symbols); // duplicate cards\n    let id = 0;\n    while (id < count) {\n        const index = Math.floor(Math.random()\n                                    * symbols.length);\n        const symbol = symbols.splice(index, 1)[0];\n        state.cards.push({symbol, id});\n        id++;\n    }\n}\n\nfunction failedFlipCallback() {\n    // Remove both from revealed array & set to null\n    state.revealed = state.revealed.filter(\n            id => id !== state.failedflip\n                    && id !== state.lastflipped);\n    state.failedflip = null;\n    state.lastflipped = null;\n    state.message = \"\";\n    element.rerender();\n}\n\nfunction flip(id) {\n    if (state.failedflip !== null) {\n        return;\n    }\n    id = Number(id);\n    if (state.revealed.includes(id)) {\n        return; // double click\n    } else if (state.lastflipped === null) {\n        state.lastflipped = id;\n        state.revealed.push(id);\n    } else {\n        state.revealed.push(id);\n        const {symbol} = state.cards[id];\n        const lastCard = state.cards[state.lastflipped];\n        if (symbol === lastCard.symbol) {\n            // Successful match! Check for win.\n            const {revealed, cards} = state;\n            if (revealed.length === cards.length) {\n                state.message = \"You win!\";\n                state.win = true;\n            } else {\n                state.message = \"Nice match!\";\n            }\n            state.lastflipped = null;\n        } else {\n            state.message = \"No match.\";\n            state.failedflip = id;\n            setTimeout(failedFlipCallback, 1000);\n        }\n    }\n}\n</Script>\n\n<Style>\nh3 {\n    background: #B90183;\n    border-radius: 8px;\n    text-align: center;\n    color: white;\n    font-weight: bold;\n}\n.board {\n    display: grid;\n    grid-template-rows: repeat(4, 1fr);\n    grid-template-columns: repeat(4, 1fr);\n    grid-gap: 2px;\n    width: 100%;\n    height: 150px;\n    width: 150px;\n}\n.board.hard {\n    grid-gap: 1px;\n    grid-template-rows: repeat(6, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.board > .card {\n    background: #B90183;\n    border: 2px solid black;\n    border-radius: 1px;\n    cursor: pointer;\n    text-align: center;\n    min-height: 15px;\n    transition: background 0.3s, transform 0.3s;\n    transform: scaleX(-1);\n    padding-top: 2px;\n    color: #B90183;\n}\n.board.hard > .card {\n    border: none !important;\n    padding: 0;\n}\n.board > .card.flipped {\n    background: #FFFFFF;\n    border: 2px solid #B90183;\n    transform: scaleX(1);\n}\n\n@keyframes flipping {\n    from { transform: scaleX(-1.1); background: #B90183; }\n    to {   transform: scaleX(1.0);  background: #FFFFFF; }\n}\n</Style>\n\n\n",
-    "ConwayGameOfLife": "<Template>\n  <div class=\"grid\">\n    {% for i in script.exports.range %}\n        {% for j in script.exports.range %}\n          <div\n            @click:=script.toggle\n            payload:='[ {{ i }}, {{ j }} ]'\n            style=\"{% if state.cells|get:i %}\n                {% if state.cells|get:i|get:j %}\n                    background: #B90183;\n                {% endif %}\n            {% endif %}\"\n           ></div>\n        {% endfor %}\n    {% endfor %}\n  </div>\n  <div class=\"controls\">\n    {% if not state.playing %}\n        <button @click:=script.play alt=\"Play\">&#x25B6;</button>\n    {% else %}\n        <button @click:=script.pause alt=\"Pause\">&#x2016;</button>\n    {% endif %}\n\n    <button @click:=script.randomize alt=\"Randomize\">RND</button>\n    <button @click:=script.clear alt=\"Randomize\">CLR</button>\n    <label>Spd: <input [state.bind]\n        name=\"speed\"\n        type=\"number\" min=\"1\" max=\"10\" step=\"1\" /></label>\n  </div>\n</Template>\n\n<State\n    playing:=false\n    speed:=3\n    cells:='{\n        \"12\": { \"10\": true, \"11\": true, \"12\": true },\n        \"11\": { \"12\": true },\n        \"10\": { \"11\": true }\n    }'\n></State>\n\n<Script>\n    function toggle([ i, j ]) {\n        if (!state.cells[i]) {\n            state.cells[i] = {};\n        }\n        state.cells[i][j] = !state.cells[i][j];\n    }\n\n    function play() {\n        state.playing = true;\n        setTimeout(() => {\n            if (state.playing) {\n                updateNextFrame();\n                element.rerender(); // manually rerender\n                play(); // cue next frame\n            }\n        }, 2000 / state.speed);\n    }\n\n    function pause() {\n        state.playing = false;\n    }\n\n    function clear() {\n        state.cells = {};\n    }\n\n    function randomize() {\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!state.cells[i]) {\n                    state.cells[i] = {};\n                }\n                state.cells[i][j] = (Math.random() > 0.5);\n            }\n        }\n    }\n\n    // Helper function for getting a cell from data\n    const get = (i, j) => !!(state.cells[i] && state.cells[i][j]);\n    function updateNextFrame() {\n        const nextData = {};\n        for (const i of script.exports.range) {\n            for (const j of script.exports.range) {\n                if (!nextData[i]) {\n                    nextData[i] = {};\n                }\n                const count = countNeighbors(i, j);\n                nextData[i][j] = get(i, j) ?\n                    (count === 2 || count === 3) : // stays alive\n                    (count === 3); // comes alive\n            }\n        }\n        state.cells = nextData;\n    }\n\n    function countNeighbors(i, j) {\n        const neighbors = [get(i - 1, j), get(i - 1, j - 1), get(i, j - 1),\n                get(i + 1, j), get(i + 1, j + 1), get(i, j + 1),\n                get(i + 1, j - 1), get(i - 1, j + 1)];\n        return neighbors.filter(v => v).length;\n    }\n    script.exports.range = Array.from({length: 24}, (x, i) => i);\n</Script>\n\n<Style>\n    :host {\n        display: flex;\n    }\n    .grid {\n        display: grid;\n        grid-template-columns: repeat(24, 5px);\n        margin: -2px;\n        grid-gap: 1px;\n    }\n    .grid > div {\n        background: white;\n        width: 5px;\n        height: 5px;\n    }\n    input, button {\n        width: 40px;\n    }\n</Style>\n\n"
-   }
+  "license": "LGPL-2.1",
+  "bugs": {
+   "url": "https://github.com/modulojs/modulo/issues"
   }
- },
- "x": {
-  "Type": "Library",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content",
-   "SetAttrs"
+ }
+},  
+
+mws_ProjectInfo_template: {
+ "Parent": "mws_ProjectInfo",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_ProjectInfo_template",
+ "Hash": "Txx9t56li"
+},  
+
+mws_DevLogNav_props: {
+ "Parent": "mws_DevLogNav",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "fn": "",
+ "Name": "props",
+ "DefinitionName": "mws_DevLogNav_props"
+},  
+
+mws_DevLogNav_template: {
+ "Parent": "mws_DevLogNav",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_DevLogNav_template",
+ "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.html",
+ "Hash": "Tx1vqburp"
+},  
+
+mws_DevLogNav_state: {
+ "Parent": "mws_DevLogNav",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "nav": [
+  [
+   "2022-12",
+   "Intro slides"
   ],
-  "Name": "x",
-  "DefName": "x",
-  "Parent": null,
-  "DefinitionName": "x",
-  "Source": "http://127.0.0.1:6627/libraries/globalExamples.html",
-  "ChildrenNames": [
-   "x_DemoModal",
-   "x_DemoChart",
-   "x_ExampleBtn",
-   "x_DemoSelector"
+  [
+   "2022-09",
+   "Alpha release"
+  ],
+  [
+   "2022-07",
+   "HTML-first"
+  ],
+  [
+   "2022-03",
+   "Prealpha"
+  ],
+  [
+   "2021-09",
+   "Thoughts on framework design"
+  ],
+  [
+   "2021-01",
+   "FAQ"
   ]
- },
- "mws": {
-  "Type": "Library",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content",
-   "SetAttrs"
-  ],
-  "Name": "mws",
-  "DefName": "mws",
-  "Parent": null,
-  "DefinitionName": "mws",
-  "Source": "http://127.0.0.1:6627/libraries/mws.html",
-  "ChildrenNames": [
-   "mws_Page",
-   "mws_ProjectInfo",
-   "mws_DevLogNav",
-   "mws_DocSidebar",
-   "mws_Demo",
-   "mws_AllExamples",
-   "mws_Section"
-  ]
- },
- "docseg": {
-  "Type": "Library",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content",
-   "SetAttrs"
-  ],
-  "Name": "docseg",
-  "DefName": "docseg",
-  "Parent": null,
-  "DefinitionName": "docseg",
-  "Source": "http://127.0.0.1:6627/libraries/docseg.html",
-  "ChildrenNames": [
-   "docseg_Templating_1",
-   "docseg_Templating_PrepareCallback",
-   "docseg_Templating_Comments",
-   "docseg_Templating_Escaping",
-   "docseg_Tutorial_P1",
-   "docseg_Tutorial_P2",
-   "docseg_Tutorial_P2_filters_demo",
-   "docseg_Tutorial_P3_state_demo",
-   "docseg_Tutorial_P3_state_bind"
-  ]
- },
- "eg": {
-  "Type": "Library",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content",
-   "SetAttrs"
-  ],
-  "Name": "eg",
-  "DefName": "eg",
-  "Parent": null,
-  "DefinitionName": "eg",
-  "Source": "http://127.0.0.1:6627/libraries/eg.html",
-  "ChildrenNames": [
-   "eg_Hello",
-   "eg_Simple",
-   "eg_ToDo",
-   "eg_JSON",
-   "eg_JSONArray",
-   "eg_GitHubAPI",
-   "eg_ColorSelector",
-   "eg_DateNumberPicker",
-   "eg_PrimeSieve",
-   "eg_Scatter",
-   "eg_FlexibleForm",
-   "eg_FlexibleFormWithAPI",
-   "eg_Components",
-   "eg_OscillatingGraph",
-   "eg_Search",
-   "eg_SearchBox",
-   "eg_WorldMap",
-   "eg_Memory",
-   "eg_ConwayGameOfLife"
-  ]
- },
- "x_DemoModal": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "x",
-  "name": "DemoModal",
-  "DefName": null,
-  "Parent": "x",
-  "Name": "DemoModal",
-  "DefinitionName": "x_DemoModal",
-  "ChildrenNames": [
-   "x_DemoModal_props",
-   "x_DemoModal_template",
-   "x_DemoModal_state",
-   "x_DemoModal_script",
-   "x_DemoModal_style"
-  ],
-  "TagName": "x-demomodal"
- },
- "x_DemoChart": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "x",
-  "name": "DemoChart",
-  "DefName": null,
-  "Parent": "x",
-  "Name": "DemoChart",
-  "DefinitionName": "x_DemoChart",
-  "ChildrenNames": [
-   "x_DemoChart_props",
-   "x_DemoChart_template",
-   "x_DemoChart_script",
-   "x_DemoChart_style"
-  ],
-  "TagName": "x-demochart"
- },
- "x_ExampleBtn": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "x",
-  "name": "ExampleBtn",
-  "DefName": null,
-  "Parent": "x",
-  "Name": "ExampleBtn",
-  "DefinitionName": "x_ExampleBtn",
-  "ChildrenNames": [
-   "x_ExampleBtn_props",
-   "x_ExampleBtn_template",
-   "x_ExampleBtn_style"
-  ],
-  "TagName": "x-examplebtn"
- },
- "x_DemoSelector": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "x",
-  "name": "DemoSelector",
-  "DefName": null,
-  "Parent": "x",
-  "Name": "DemoSelector",
-  "DefinitionName": "x_DemoSelector",
-  "ChildrenNames": [
-   "x_DemoSelector_props",
-   "x_DemoSelector_template",
-   "x_DemoSelector_state",
-   "x_DemoSelector_script",
-   "x_DemoSelector_style"
-  ],
-  "TagName": "x-demoselector"
- },
- "x_DemoModal_props": {
-  "Type": "Props",
-  "button": "",
-  "title": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_DemoModal",
-  "Name": "props",
-  "DefinitionName": "x_DemoModal_props"
- },
- "x_DemoModal_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoModal",
-  "Name": "template",
-  "DefinitionName": "x_DemoModal_template",
-  "Hash": "Txx2noapr"
- },
- "x_DemoModal_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "visible": false,
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_DemoModal",
-  "Name": "state",
-  "DefinitionName": "x_DemoModal_state"
- },
- "x_DemoModal_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoModal",
-  "Name": "script",
-  "DefinitionName": "x_DemoModal_script",
-  "Directives": []
- },
- "x_DemoModal_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoModal",
-  "Name": "style",
-  "DefinitionName": "x_DemoModal_style"
- },
- "x_DemoChart_props": {
-  "Type": "Props",
-  "data": "",
-  "animated": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_DemoChart",
-  "Name": "props",
-  "DefinitionName": "x_DemoChart_props"
- },
- "x_DemoChart_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoChart",
-  "Name": "template",
-  "DefinitionName": "x_DemoChart_template",
-  "Hash": "Txx9i16tt"
- },
- "x_DemoChart_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoChart",
-  "Name": "script",
-  "DefinitionName": "x_DemoChart_script",
-  "Directives": []
- },
- "x_DemoChart_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoChart",
-  "Name": "style",
-  "DefinitionName": "x_DemoChart_style"
- },
- "x_ExampleBtn_props": {
-  "Type": "Props",
-  "label": "",
-  "shape": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_ExampleBtn",
-  "Name": "props",
-  "DefinitionName": "x_ExampleBtn_props"
- },
- "x_ExampleBtn_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "x_ExampleBtn",
-  "Name": "template",
-  "DefinitionName": "x_ExampleBtn_template",
-  "Hash": "Txx5ann6n"
- },
- "x_ExampleBtn_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "x_ExampleBtn",
-  "Name": "style",
-  "DefinitionName": "x_ExampleBtn_style"
- },
- "x_DemoSelector_props": {
-  "Type": "Props",
-  "onchange": "",
-  "options": "",
-  "name": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_DemoSelector",
-  "Name": "props",
-  "DefinitionName": "x_DemoSelector_props"
- },
- "x_DemoSelector_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoSelector",
-  "Name": "template",
-  "DefinitionName": "x_DemoSelector_template",
-  "Hash": "Txxbjtni2"
- },
- "x_DemoSelector_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "value": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "x_DemoSelector",
-  "Name": "state",
-  "DefinitionName": "x_DemoSelector_state"
- },
- "x_DemoSelector_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoSelector",
-  "Name": "script",
-  "DefinitionName": "x_DemoSelector_script",
-  "Directives": []
- },
- "x_DemoSelector_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "x_DemoSelector",
-  "Name": "style",
-  "DefinitionName": "x_DemoSelector_style"
- },
- "mws_Page": {
-  "mode": "vanish-into-document",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "Page",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "Page",
-  "DefinitionName": "mws_Page",
-  "ChildrenNames": [
-   "mws_Page_props",
-   "mws_Page_style",
-   "mws_Page_template",
-   "mws_Page_script"
-  ],
-  "TagName": "mws-page"
- },
- "mws_ProjectInfo": {
-  "mode": "vanish",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "ProjectInfo",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "ProjectInfo",
-  "DefinitionName": "mws_ProjectInfo",
-  "ChildrenNames": [
-   "mws_ProjectInfo_props",
-   "mws_ProjectInfo_staticdata",
-   "mws_ProjectInfo_template"
-  ],
-  "TagName": "mws-projectinfo"
- },
- "mws_DevLogNav": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "DevLogNav",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "DevLogNav",
-  "DefinitionName": "mws_DevLogNav",
-  "ChildrenNames": [
-   "mws_DevLogNav_props",
-   "mws_DevLogNav_template",
-   "mws_DevLogNav_state",
-   "mws_DevLogNav_style"
-  ],
-  "TagName": "mws-devlognav"
- },
- "mws_DocSidebar": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "DocSidebar",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "DocSidebar",
-  "DefinitionName": "mws_DocSidebar",
-  "ChildrenNames": [
-   "mws_DocSidebar_props",
-   "mws_DocSidebar_template",
-   "mws_DocSidebar_state",
-   "mws_DocSidebar_script",
-   "mws_DocSidebar_style"
-  ],
-  "TagName": "mws-docsidebar"
- },
- "mws_Demo": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "Demo",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "Demo",
-  "DefinitionName": "mws_Demo",
-  "ChildrenNames": [
-   "mws_Demo_props",
-   "mws_Demo_template",
-   "mws_Demo_state",
-   "mws_Demo_script",
-   "mws_Demo_style"
-  ],
-  "TagName": "mws-demo"
- },
- "mws_AllExamples": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "AllExamples",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "AllExamples",
-  "DefinitionName": "mws_AllExamples",
-  "ChildrenNames": [
-   "mws_AllExamples_template",
-   "mws_AllExamples_state",
-   "mws_AllExamples_script",
-   "mws_AllExamples_style"
-  ],
-  "TagName": "mws-allexamples"
- },
- "mws_Section": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "mws",
-  "name": "Section",
-  "DefName": null,
-  "Parent": "mws",
-  "Name": "Section",
-  "DefinitionName": "mws_Section",
-  "ChildrenNames": [
-   "mws_Section_props",
-   "mws_Section_template",
-   "mws_Section_style"
-  ],
-  "TagName": "mws-section"
- },
- "mws_Page_props": {
-  "Type": "Props",
-  "navbar": "",
-  "docbarselected": "",
-  "pagetitle": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_Page",
-  "Name": "props",
-  "DefinitionName": "mws_Page_props"
- },
- "mws_Page_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_Page",
-  "Name": "style",
-  "DefinitionName": "mws_Page_style",
-  "Source": "http://127.0.0.1:6627/libraries/mws/Page.css"
- },
- "mws_Page_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_Page",
-  "Name": "template",
-  "DefinitionName": "mws_Page_template",
-  "Source": "http://127.0.0.1:6627/libraries/mws/Page.html",
-  "Hash": "Tx18vovt8"
- },
- "mws_Page_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "mws_Page",
-  "Name": "script",
-  "DefinitionName": "mws_Page_script",
-  "Directives": []
- },
- "mws_ProjectInfo_props": {
-  "Type": "Props",
-  "version": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_ProjectInfo",
-  "Name": "props",
-  "DefinitionName": "mws_ProjectInfo_props"
- },
- "mws_ProjectInfo_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "{\n  \"name\": \"mdu.js\",\n  \"author\": \"michaelb\",\n  \"version\": \"0.0.31\",\n  \"description\": \"Lightweight, easy-to-learn Web Component JavaScript framework\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"main\": \"./src/Modulo.js\",\n  \"bin\": {\n    \"mdu-cli\": \"modulocli/modulocli.js\",\n    \"modulocli\": \"modulocli/modulocli.js\"\n  },\n  \"scripts\": {\n    \"serve\": \"npm run cli -- serve\",\n    \"srcserve\": \"npm run cli -- srcserve\",\n    \"start\": \"npm run cli -- devserve\",\n    \"build-docs\": \"npm run cli -- ssg\",\n    \"cli\": \"node ./modulocli/modulocli.js\",\n    \"test\": \"npm run cli -- test\"\n  },\n  \"peerDependencies\": {\n    \"express\": \"^4.18.2\",\n    \"node-watch\": \"^0.7.2\",\n    \"puppeteer\": \"^13.7.0\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/modulojs/modulo.git\"\n  },\n  \"exports\": {\n    \"require\": \"./src/Modulo.js\"\n  },\n  \"keywords\": [\n    \"UI\",\n    \"templates\",\n    \"templating\",\n    \"components\",\n    \"framework\"\n  ],\n  \"files\": [\n    \"src/*\",\n    \"modulocli/*\",\n    \"modulocli/**/*\",\n    \"mdu/*\",\n    \"mdu/**/*\"\n  ],\n  \"license\": \"LGPL-2.1\",\n  \"bugs\": {\n    \"url\": \"https://github.com/modulojs/modulo/issues\"\n  }\n}\n",
-  "DefName": null,
-  "Parent": "mws_ProjectInfo",
-  "Name": "staticdata",
-  "DefinitionName": "mws_ProjectInfo_staticdata",
-  "Source": "https://raw.githubusercontent.com/modulojs/modulo/main/package.json",
-  "data": {
-   "name": "mdu.js",
-   "author": "michaelb",
-   "version": "0.0.31",
-   "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
-   "homepage": "https://modulojs.org/",
-   "main": "./src/Modulo.js",
-   "bin": {
-    "mdu-cli": "modulocli/modulocli.js",
-    "modulocli": "modulocli/modulocli.js"
-   },
-   "scripts": {
-    "serve": "npm run cli -- serve",
-    "srcserve": "npm run cli -- srcserve",
-    "start": "npm run cli -- devserve",
-    "build-docs": "npm run cli -- ssg",
-    "cli": "node ./modulocli/modulocli.js",
-    "test": "npm run cli -- test"
-   },
-   "peerDependencies": {
-    "express": "^4.18.2",
-    "node-watch": "^0.7.2",
-    "puppeteer": "^13.7.0"
-   },
-   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/modulojs/modulo.git"
-   },
-   "exports": {
-    "require": "./src/Modulo.js"
-   },
-   "keywords": [
-    "UI",
-    "templates",
-    "templating",
-    "components",
-    "framework"
-   ],
-   "files": [
-    "src/*",
-    "modulocli/*",
-    "modulocli/**/*",
-    "mdu/*",
-    "mdu/**/*"
-   ],
-   "license": "LGPL-2.1",
-   "bugs": {
-    "url": "https://github.com/modulojs/modulo/issues"
-   }
+ ],
+ "Name": "state",
+ "DefinitionName": "mws_DevLogNav_state"
+},  
+
+mws_DevLogNav_style: {
+ "Parent": "mws_DevLogNav",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_DevLogNav_style",
+ "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.css"
+},  
+
+mws_DocSidebar_props: {
+ "Parent": "mws_DocSidebar",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "path": "",
+ "showall": "",
+ "Name": "props",
+ "DefinitionName": "mws_DocSidebar_props"
+},  
+
+mws_DocSidebar_template: {
+ "Parent": "mws_DocSidebar",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_DocSidebar_template",
+ "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.html",
+ "Hash": "Tx1s9cikh"
+},  
+
+mws_DocSidebar_state: {
+ "Parent": "mws_DocSidebar",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "menu": [],
+ "Name": "state",
+ "DefinitionName": "mws_DocSidebar_state"
+},  
+
+mws_DocSidebar_script: {
+ "Parent": "mws_DocSidebar",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "mws_DocSidebar_script",
+ "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.js",
+ "Directives": []
+},  
+
+mws_DocSidebar_style: {
+ "Parent": "mws_DocSidebar",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_DocSidebar_style",
+ "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.css"
+},  
+
+mws_Demo_props: {
+ "Parent": "mws_Demo",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "text": "",
+ "text2": "",
+ "text3": "",
+ "ttitle": "",
+ "ttitle2": "",
+ "ttitle3": "",
+ "demotype": "",
+ "fromlibrary": "",
+ "Name": "props",
+ "DefinitionName": "mws_Demo_props"
+},  
+
+mws_Demo_template: {
+ "Parent": "mws_Demo",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_Demo_template",
+ "Source": "http://127.0.0.1:6627/libraries/mws/Demo.html",
+ "Hash": "Txxs8mvob"
+},  
+
+mws_Demo_state: {
+ "Parent": "mws_Demo",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "tabs": [],
+ "selected": null,
+ "preview": "",
+ "text": "",
+ "nscounter": 1,
+ "showtoast": false,
+ "toasttext": "",
+ "showpreview": false,
+ "showclipboard": false,
+ "showcomponentcopy": false,
+ "fullscreen": false,
+ "Name": "state",
+ "DefinitionName": "mws_Demo_state"
+},  
+
+mws_Demo_script: {
+ "Parent": "mws_Demo",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "mws_Demo_script",
+ "Source": "http://127.0.0.1:6627/libraries/mws/Demo.js",
+ "Directives": [
+  "codemirrorMount",
+  "previewspotMount"
+ ]
+},  
+
+mws_Demo_style: {
+ "Parent": "mws_Demo",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_Demo_style",
+ "Source": "http://127.0.0.1:6627/libraries/mws/Demo.css"
+},  
+
+mws_AllExamples_template: {
+ "Parent": "mws_AllExamples",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_AllExamples_template",
+ "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.html",
+ "Hash": "Txxslhngg"
+},  
+
+mws_AllExamples_state: {
+ "Parent": "mws_AllExamples",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "selected": "",
+ "examples": [],
+ "Name": "state",
+ "DefinitionName": "mws_AllExamples_state"
+},  
+
+mws_AllExamples_script: {
+ "Parent": "mws_AllExamples",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "mws_AllExamples_script",
+ "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.js",
+ "Directives": []
+},  
+
+mws_AllExamples_style: {
+ "Parent": "mws_AllExamples",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_AllExamples_style",
+ "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.css"
+},  
+
+mws_Section_props: {
+ "Parent": "mws_Section",
+ "DefName": null,
+ "Type": "Props",
+ "Content": "",
+ "name": "",
+ "Name": "props",
+ "DefinitionName": "mws_Section_props"
+},  
+
+mws_Section_template: {
+ "Parent": "mws_Section",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "mws_Section_template",
+ "Hash": "Txx3sjna4"
+},  
+
+mws_Section_style: {
+ "Parent": "mws_Section",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "mws_Section_style"
+},  
+
+docseg_Templating_1: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Templating_1",
+ "Name": "Templating_1",
+ "DefinitionName": "docseg_Templating_1",
+ "ChildrenNames": [
+  "docseg_Templating_1_template",
+  "docseg_Templating_1_state",
+  "docseg_Templating_1_script"
+ ],
+ "TagName": "docseg-templating_1"
+},  
+
+docseg_Templating_PrepareCallback: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Templating_PrepareCallback",
+ "Name": "Templating_PrepareCallback",
+ "DefinitionName": "docseg_Templating_PrepareCallback",
+ "ChildrenNames": [
+  "docseg_Templating_PrepareCallback_template",
+  "docseg_Templating_PrepareCallback_state",
+  "docseg_Templating_PrepareCallback_script",
+  "docseg_Templating_PrepareCallback_style"
+ ],
+ "TagName": "docseg-templating_preparecallback"
+},  
+
+docseg_Templating_Comments: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Templating_Comments",
+ "Name": "Templating_Comments",
+ "DefinitionName": "docseg_Templating_Comments",
+ "ChildrenNames": [
+  "docseg_Templating_Comments_template"
+ ],
+ "TagName": "docseg-templating_comments"
+},  
+
+docseg_Templating_Escaping: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Templating_Escaping",
+ "Name": "Templating_Escaping",
+ "DefinitionName": "docseg_Templating_Escaping",
+ "ChildrenNames": [
+  "docseg_Templating_Escaping_template",
+  "docseg_Templating_Escaping_state",
+  "docseg_Templating_Escaping_style"
+ ],
+ "TagName": "docseg-templating_escaping"
+},  
+
+docseg_Tutorial_P1: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Tutorial_P1",
+ "Name": "Tutorial_P1",
+ "DefinitionName": "docseg_Tutorial_P1",
+ "ChildrenNames": [
+  "docseg_Tutorial_P1_template",
+  "docseg_Tutorial_P1_style"
+ ],
+ "TagName": "docseg-tutorial_p1"
+},  
+
+docseg_Tutorial_P2: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Tutorial_P2",
+ "Name": "Tutorial_P2",
+ "DefinitionName": "docseg_Tutorial_P2",
+ "ChildrenNames": [
+  "docseg_Tutorial_P2_template"
+ ],
+ "TagName": "docseg-tutorial_p2"
+},  
+
+docseg_Tutorial_P2_filters_demo: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Tutorial_P2_filters_demo",
+ "Name": "Tutorial_P2_filters_demo",
+ "DefinitionName": "docseg_Tutorial_P2_filters_demo",
+ "ChildrenNames": [
+  "docseg_Tutorial_P2_filters_demo_template"
+ ],
+ "TagName": "docseg-tutorial_p2_filters_demo"
+},  
+
+docseg_Tutorial_P3_state_demo: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Tutorial_P3_state_demo",
+ "Name": "Tutorial_P3_state_demo",
+ "DefinitionName": "docseg_Tutorial_P3_state_demo",
+ "ChildrenNames": [
+  "docseg_Tutorial_P3_state_demo_template",
+  "docseg_Tutorial_P3_state_demo_state",
+  "docseg_Tutorial_P3_state_demo_style"
+ ],
+ "TagName": "docseg-tutorial_p3_state_demo"
+},  
+
+docseg_Tutorial_P3_state_bind: {
+ "Parent": "docseg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "docseg",
+ "name": "Tutorial_P3_state_bind",
+ "Name": "Tutorial_P3_state_bind",
+ "DefinitionName": "docseg_Tutorial_P3_state_bind",
+ "ChildrenNames": [
+  "docseg_Tutorial_P3_state_bind_template",
+  "docseg_Tutorial_P3_state_bind_state"
+ ],
+ "TagName": "docseg-tutorial_p3_state_bind"
+},  
+
+docseg_Templating_1_template: {
+ "Parent": "docseg_Templating_1",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Templating_1_template",
+ "Hash": "Tx1nrhiqd"
+},  
+
+docseg_Templating_1_state: {
+ "Parent": "docseg_Templating_1",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "count": 42,
+ "articles": [
+  {
+   "headline": "Modulo released!",
+   "tease": "The most exciting news of the century."
+  },
+  {
+   "headline": "Can JS be fun again?"
+  },
+  {
+   "headline": "MTL considered harmful",
+   "tease": "Why constructing JS is risky business."
   }
- },
- "mws_ProjectInfo_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_ProjectInfo",
-  "Name": "template",
-  "DefinitionName": "mws_ProjectInfo_template",
-  "Hash": "Txx9t56li"
- },
- "mws_DevLogNav_props": {
-  "Type": "Props",
-  "fn": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_DevLogNav",
-  "Name": "props",
-  "DefinitionName": "mws_DevLogNav_props"
- },
- "mws_DevLogNav_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_DevLogNav",
-  "Name": "template",
-  "DefinitionName": "mws_DevLogNav_template",
-  "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.html",
-  "Hash": "Tx1vqburp"
- },
- "mws_DevLogNav_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "nav": [
-   [
-    "2022-12",
-    "Intro slides"
-   ],
-   [
-    "2022-09",
-    "Alpha release"
-   ],
-   [
-    "2022-07",
-    "HTML-first"
-   ],
-   [
-    "2022-03",
-    "Prealpha"
-   ],
-   [
-    "2021-09",
-    "Thoughts on framework design"
-   ],
-   [
-    "2021-01",
-    "FAQ"
-   ]
-  ],
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_DevLogNav",
-  "Name": "state",
-  "DefinitionName": "mws_DevLogNav_state"
- },
- "mws_DevLogNav_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_DevLogNav",
-  "Name": "style",
-  "DefinitionName": "mws_DevLogNav_style",
-  "Source": "http://127.0.0.1:6627/libraries/mws/DevLogNav.css"
- },
- "mws_DocSidebar_props": {
-  "Type": "Props",
-  "path": "",
-  "showall": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_DocSidebar",
-  "Name": "props",
-  "DefinitionName": "mws_DocSidebar_props"
- },
- "mws_DocSidebar_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_DocSidebar",
-  "Name": "template",
-  "DefinitionName": "mws_DocSidebar_template",
-  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.html",
-  "Hash": "Tx1s9cikh"
- },
- "mws_DocSidebar_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "menu": [],
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_DocSidebar",
-  "Name": "state",
-  "DefinitionName": "mws_DocSidebar_state"
- },
- "mws_DocSidebar_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "mws_DocSidebar",
-  "Name": "script",
-  "DefinitionName": "mws_DocSidebar_script",
-  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.js",
-  "Directives": []
- },
- "mws_DocSidebar_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_DocSidebar",
-  "Name": "style",
-  "DefinitionName": "mws_DocSidebar_style",
-  "Source": "http://127.0.0.1:6627/libraries/mws/DocSidebar.css"
- },
- "mws_Demo_props": {
-  "Type": "Props",
-  "text": "",
-  "text2": "",
-  "text3": "",
-  "ttitle": "",
-  "ttitle2": "",
-  "ttitle3": "",
-  "demotype": "",
-  "fromlibrary": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_Demo",
-  "Name": "props",
-  "DefinitionName": "mws_Demo_props"
- },
- "mws_Demo_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_Demo",
-  "Name": "template",
-  "DefinitionName": "mws_Demo_template",
-  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.html",
-  "Hash": "Txxs8mvob"
- },
- "mws_Demo_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "tabs": [],
-  "selected": null,
-  "preview": "",
-  "text": "",
-  "nscounter": 1,
-  "showtoast": false,
-  "toasttext": "",
-  "showpreview": false,
-  "showclipboard": false,
-  "showcomponentcopy": false,
-  "fullscreen": false,
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_Demo",
-  "Name": "state",
-  "DefinitionName": "mws_Demo_state"
- },
- "mws_Demo_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "mws_Demo",
-  "Name": "script",
-  "DefinitionName": "mws_Demo_script",
-  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.js",
-  "Directives": [
-   "codemirrorMount",
-   "previewspotMount"
-  ]
- },
- "mws_Demo_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_Demo",
-  "Name": "style",
-  "DefinitionName": "mws_Demo_style",
-  "Source": "http://127.0.0.1:6627/libraries/mws/Demo.css"
- },
- "mws_AllExamples_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_AllExamples",
-  "Name": "template",
-  "DefinitionName": "mws_AllExamples_template",
-  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.html",
-  "Hash": "Txxslhngg"
- },
- "mws_AllExamples_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "selected": "",
-  "examples": [],
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_AllExamples",
-  "Name": "state",
-  "DefinitionName": "mws_AllExamples_state"
- },
- "mws_AllExamples_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "mws_AllExamples",
-  "Name": "script",
-  "DefinitionName": "mws_AllExamples_script",
-  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.js",
-  "Directives": []
- },
- "mws_AllExamples_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_AllExamples",
-  "Name": "style",
-  "DefinitionName": "mws_AllExamples_style",
-  "Source": "http://127.0.0.1:6627/libraries/mws/AllExamples.css"
- },
- "mws_Section_props": {
-  "Type": "Props",
-  "name": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "mws_Section",
-  "Name": "props",
-  "DefinitionName": "mws_Section_props"
- },
- "mws_Section_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "mws_Section",
-  "Name": "template",
-  "DefinitionName": "mws_Section_template",
-  "Hash": "Txx3sjna4"
- },
- "mws_Section_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "mws_Section",
-  "Name": "style",
-  "DefinitionName": "mws_Section_style"
- },
- "docseg_Templating_1": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Templating_1",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Templating_1",
-  "DefinitionName": "docseg_Templating_1",
-  "ChildrenNames": [
-   "docseg_Templating_1_template",
-   "docseg_Templating_1_state",
-   "docseg_Templating_1_script"
-  ],
-  "TagName": "docseg-templating_1"
- },
- "docseg_Templating_PrepareCallback": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Templating_PrepareCallback",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Templating_PrepareCallback",
-  "DefinitionName": "docseg_Templating_PrepareCallback",
-  "ChildrenNames": [
-   "docseg_Templating_PrepareCallback_template",
-   "docseg_Templating_PrepareCallback_state",
-   "docseg_Templating_PrepareCallback_script",
-   "docseg_Templating_PrepareCallback_style"
-  ],
-  "TagName": "docseg-templating_preparecallback"
- },
- "docseg_Templating_Comments": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Templating_Comments",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Templating_Comments",
-  "DefinitionName": "docseg_Templating_Comments",
-  "ChildrenNames": [
-   "docseg_Templating_Comments_template"
-  ],
-  "TagName": "docseg-templating_comments"
- },
- "docseg_Templating_Escaping": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Templating_Escaping",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Templating_Escaping",
-  "DefinitionName": "docseg_Templating_Escaping",
-  "ChildrenNames": [
-   "docseg_Templating_Escaping_template",
-   "docseg_Templating_Escaping_state",
-   "docseg_Templating_Escaping_style"
-  ],
-  "TagName": "docseg-templating_escaping"
- },
- "docseg_Tutorial_P1": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Tutorial_P1",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Tutorial_P1",
-  "DefinitionName": "docseg_Tutorial_P1",
-  "ChildrenNames": [
-   "docseg_Tutorial_P1_template",
-   "docseg_Tutorial_P1_style"
-  ],
-  "TagName": "docseg-tutorial_p1"
- },
- "docseg_Tutorial_P2": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Tutorial_P2",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Tutorial_P2",
-  "DefinitionName": "docseg_Tutorial_P2",
-  "ChildrenNames": [
-   "docseg_Tutorial_P2_template"
-  ],
-  "TagName": "docseg-tutorial_p2"
- },
- "docseg_Tutorial_P2_filters_demo": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Tutorial_P2_filters_demo",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Tutorial_P2_filters_demo",
-  "DefinitionName": "docseg_Tutorial_P2_filters_demo",
-  "ChildrenNames": [
-   "docseg_Tutorial_P2_filters_demo_template"
-  ],
-  "TagName": "docseg-tutorial_p2_filters_demo"
- },
- "docseg_Tutorial_P3_state_demo": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Tutorial_P3_state_demo",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Tutorial_P3_state_demo",
-  "DefinitionName": "docseg_Tutorial_P3_state_demo",
-  "ChildrenNames": [
-   "docseg_Tutorial_P3_state_demo_template",
-   "docseg_Tutorial_P3_state_demo_state",
-   "docseg_Tutorial_P3_state_demo_style"
-  ],
-  "TagName": "docseg-tutorial_p3_state_demo"
- },
- "docseg_Tutorial_P3_state_bind": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "docseg",
-  "name": "Tutorial_P3_state_bind",
-  "DefName": null,
-  "Parent": "docseg",
-  "Name": "Tutorial_P3_state_bind",
-  "DefinitionName": "docseg_Tutorial_P3_state_bind",
-  "ChildrenNames": [
-   "docseg_Tutorial_P3_state_bind_template",
-   "docseg_Tutorial_P3_state_bind_state"
-  ],
-  "TagName": "docseg-tutorial_p3_state_bind"
- },
- "docseg_Templating_1_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_1",
-  "Name": "template",
-  "DefinitionName": "docseg_Templating_1_template",
-  "Hash": "Tx1nrhiqd"
- },
- "docseg_Templating_1_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "count": 42,
-  "articles": [
-   {
-    "headline": "Modulo released!",
-    "tease": "The most exciting news of the century."
-   },
-   {
-    "headline": "Can JS be fun again?"
-   },
-   {
-    "headline": "MTL considered harmful",
-    "tease": "Why constructing JS is risky business."
-   }
-  ],
-  "Content": "",
-  "DefName": null,
-  "Parent": "docseg_Templating_1",
-  "Name": "state",
-  "DefinitionName": "docseg_Templating_1_state"
- },
- "docseg_Templating_1_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_1",
-  "Name": "script",
-  "DefinitionName": "docseg_Templating_1_script",
-  "Directives": []
- },
- "docseg_Templating_PrepareCallback_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_PrepareCallback",
-  "Name": "template",
-  "DefinitionName": "docseg_Templating_PrepareCallback_template",
-  "Hash": "Txx7jgg2i"
- },
- "docseg_Templating_PrepareCallback_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "perc": 50,
-  "total": 30,
-  "Content": "",
-  "DefName": null,
-  "Parent": "docseg_Templating_PrepareCallback",
-  "Name": "state",
-  "DefinitionName": "docseg_Templating_PrepareCallback_state"
- },
- "docseg_Templating_PrepareCallback_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_PrepareCallback",
-  "Name": "script",
-  "DefinitionName": "docseg_Templating_PrepareCallback_script",
-  "Directives": []
- },
- "docseg_Templating_PrepareCallback_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_PrepareCallback",
-  "Name": "style",
-  "DefinitionName": "docseg_Templating_PrepareCallback_style"
- },
- "docseg_Templating_Comments_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_Comments",
-  "Name": "template",
-  "DefinitionName": "docseg_Templating_Comments_template",
-  "Hash": "Tx1p85et1"
- },
- "docseg_Templating_Escaping_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_Escaping",
-  "Name": "template",
-  "DefinitionName": "docseg_Templating_Escaping_template",
-  "Hash": "Tx184ue3a"
- },
- "docseg_Templating_Escaping_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "username": "Little <Bobby> <Drop> &tables",
-  "content": "\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    ",
-  "Content": "",
-  "DefName": null,
-  "Parent": "docseg_Templating_Escaping",
-  "Name": "state",
-  "DefinitionName": "docseg_Templating_Escaping_state"
- },
- "docseg_Templating_Escaping_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Templating_Escaping",
-  "Name": "style",
-  "DefinitionName": "docseg_Templating_Escaping_style"
- },
- "docseg_Tutorial_P1_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P1",
-  "Name": "template",
-  "DefinitionName": "docseg_Tutorial_P1_template",
-  "Hash": "Txxm6soph"
- },
- "docseg_Tutorial_P1_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P1",
-  "Name": "style",
-  "DefinitionName": "docseg_Tutorial_P1_style"
- },
- "docseg_Tutorial_P2_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P2",
-  "Name": "template",
-  "DefinitionName": "docseg_Tutorial_P2_template",
-  "Hash": "Tx1h93c2j"
- },
- "docseg_Tutorial_P2_filters_demo_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P2_filters_demo",
-  "Name": "template",
-  "DefinitionName": "docseg_Tutorial_P2_filters_demo_template",
-  "Hash": "Tx1h93c2j"
- },
- "docseg_Tutorial_P3_state_demo_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P3_state_demo",
-  "Name": "template",
-  "DefinitionName": "docseg_Tutorial_P3_state_demo_template",
-  "Hash": "Tx13o8260"
- },
- "docseg_Tutorial_P3_state_demo_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "verb": "toot",
-  "noun": "kazoo",
-  "count": "two",
-  "Content": "",
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P3_state_demo",
-  "Name": "state",
-  "DefinitionName": "docseg_Tutorial_P3_state_demo_state"
- },
- "docseg_Tutorial_P3_state_demo_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P3_state_demo",
-  "Name": "style",
-  "DefinitionName": "docseg_Tutorial_P3_state_demo_style"
- },
- "docseg_Tutorial_P3_state_bind_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P3_state_bind",
-  "Name": "template",
-  "DefinitionName": "docseg_Tutorial_P3_state_bind_template",
-  "Hash": "Txxonth4n"
- },
- "docseg_Tutorial_P3_state_bind_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "opacity": "0.5",
-  "color": "blue",
-  "username": "Testing_Username",
-  "Content": "",
-  "DefName": null,
-  "Parent": "docseg_Tutorial_P3_state_bind",
-  "Name": "state",
-  "DefinitionName": "docseg_Tutorial_P3_state_bind_state"
- },
- "eg_Hello": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Hello",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Hello",
-  "DefinitionName": "eg_Hello",
-  "ChildrenNames": [
-   "eg_Hello_template",
-   "eg_Hello_state",
-   "eg_Hello_script"
-  ],
-  "TagName": "eg-hello"
- },
- "eg_Simple": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Simple",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Simple",
-  "DefinitionName": "eg_Simple",
-  "ChildrenNames": [
-   "eg_Simple_template",
-   "eg_Simple_style"
-  ],
-  "TagName": "eg-simple"
- },
- "eg_ToDo": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "ToDo",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "ToDo",
-  "DefinitionName": "eg_ToDo",
-  "ChildrenNames": [
-   "eg_ToDo_template",
-   "eg_ToDo_state",
-   "eg_ToDo_script"
-  ],
-  "TagName": "eg-todo"
- },
- "eg_JSON": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "JSON",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "JSON",
-  "DefinitionName": "eg_JSON",
-  "ChildrenNames": [
-   "eg_JSON_template",
-   "eg_JSON_staticdata"
-  ],
-  "TagName": "eg-json"
- },
- "eg_JSONArray": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "JSONArray",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "JSONArray",
-  "DefinitionName": "eg_JSONArray",
-  "ChildrenNames": [
-   "eg_JSONArray_template",
-   "eg_JSONArray_staticdata"
-  ],
-  "TagName": "eg-jsonarray"
- },
- "eg_GitHubAPI": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "GitHubAPI",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "GitHubAPI",
-  "DefinitionName": "eg_GitHubAPI",
-  "ChildrenNames": [
-   "eg_GitHubAPI_template",
-   "eg_GitHubAPI_state",
-   "eg_GitHubAPI_script"
-  ],
-  "TagName": "eg-githubapi"
- },
- "eg_ColorSelector": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "ColorSelector",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "ColorSelector",
-  "DefinitionName": "eg_ColorSelector",
-  "ChildrenNames": [
-   "eg_ColorSelector_template",
-   "eg_ColorSelector_state"
-  ],
-  "TagName": "eg-colorselector"
- },
- "eg_DateNumberPicker": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "DateNumberPicker",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "DateNumberPicker",
-  "DefinitionName": "eg_DateNumberPicker",
-  "ChildrenNames": [
-   "eg_DateNumberPicker_template",
-   "eg_DateNumberPicker_state",
-   "eg_DateNumberPicker_script",
-   "eg_DateNumberPicker_style"
-  ],
-  "TagName": "eg-datenumberpicker"
- },
- "eg_PrimeSieve": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "PrimeSieve",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "PrimeSieve",
-  "DefinitionName": "eg_PrimeSieve",
-  "ChildrenNames": [
-   "eg_PrimeSieve_template",
-   "eg_PrimeSieve_state",
-   "eg_PrimeSieve_script",
-   "eg_PrimeSieve_style"
-  ],
-  "TagName": "eg-primesieve"
- },
- "eg_Scatter": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Scatter",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Scatter",
-  "DefinitionName": "eg_Scatter",
-  "ChildrenNames": [
-   "eg_Scatter_template",
-   "eg_Scatter_staticdata",
-   "eg_Scatter_style"
-  ],
-  "TagName": "eg-scatter"
- },
- "eg_FlexibleForm": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "FlexibleForm",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "FlexibleForm",
-  "DefinitionName": "eg_FlexibleForm",
-  "ChildrenNames": [
-   "eg_FlexibleForm_template",
-   "eg_FlexibleForm_state"
-  ],
-  "TagName": "eg-flexibleform"
- },
- "eg_FlexibleFormWithAPI": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "FlexibleFormWithAPI",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "FlexibleFormWithAPI",
-  "DefinitionName": "eg_FlexibleFormWithAPI",
-  "ChildrenNames": [
-   "eg_FlexibleFormWithAPI_template",
-   "eg_FlexibleFormWithAPI_state",
-   "eg_FlexibleFormWithAPI_script"
-  ],
-  "TagName": "eg-flexibleformwithapi"
- },
- "eg_Components": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Components",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Components",
-  "DefinitionName": "eg_Components",
-  "ChildrenNames": [
-   "eg_Components_template"
-  ],
-  "TagName": "eg-components"
- },
- "eg_OscillatingGraph": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "OscillatingGraph",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "OscillatingGraph",
-  "DefinitionName": "eg_OscillatingGraph",
-  "ChildrenNames": [
-   "eg_OscillatingGraph_template",
-   "eg_OscillatingGraph_state",
-   "eg_OscillatingGraph_script",
-   "eg_OscillatingGraph_style"
-  ],
-  "TagName": "eg-oscillatinggraph"
- },
- "eg_Search": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Search",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Search",
-  "DefinitionName": "eg_Search",
-  "ChildrenNames": [
-   "eg_Search_template",
-   "eg_Search_state",
-   "eg_Search_script"
-  ],
-  "TagName": "eg-search"
- },
- "eg_SearchBox": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "SearchBox",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "SearchBox",
-  "DefinitionName": "eg_SearchBox",
-  "ChildrenNames": [
-   "eg_SearchBox_template",
-   "eg_SearchBox_state",
-   "eg_SearchBox_staticdata",
-   "eg_SearchBox_script",
-   "eg_SearchBox_style"
-  ],
-  "TagName": "eg-searchbox"
- },
- "eg_WorldMap": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "WorldMap",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "WorldMap",
-  "DefinitionName": "eg_WorldMap",
-  "ChildrenNames": [
-   "eg_WorldMap_template",
-   "eg_WorldMap_staticdata",
-   "eg_WorldMap_style"
-  ],
-  "TagName": "eg-worldmap"
- },
- "eg_Memory": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "Memory",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "Memory",
-  "DefinitionName": "eg_Memory",
-  "ChildrenNames": [
-   "eg_Memory_template",
-   "eg_Memory_state",
-   "eg_Memory_script",
-   "eg_Memory_style"
-  ],
-  "TagName": "eg-memory"
- },
- "eg_ConwayGameOfLife": {
-  "mode": "regular",
-  "rerender": "event",
-  "engine": "Reconciler",
-  "RenderObj": "component",
-  "DefLoaders": [
-   "DefinedAs",
-   "Src",
-   "Content"
-  ],
-  "DefBuilders": [
-   "CustomElement",
-   "Code"
-  ],
-  "DefFinalizers": [
-   "MainRequire"
-  ],
-  "Directives": [
-   "slotLoad",
-   "eventMount",
-   "eventUnmount",
-   "dataPropMount",
-   "dataPropUnmount"
-  ],
-  "Type": "Component",
-  "namespace": "eg",
-  "name": "ConwayGameOfLife",
-  "DefName": null,
-  "Parent": "eg",
-  "Name": "ConwayGameOfLife",
-  "DefinitionName": "eg_ConwayGameOfLife",
-  "ChildrenNames": [
-   "eg_ConwayGameOfLife_template",
-   "eg_ConwayGameOfLife_state",
-   "eg_ConwayGameOfLife_script",
-   "eg_ConwayGameOfLife_style"
-  ],
-  "TagName": "eg-conwaygameoflife"
- },
- "eg_Hello_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Hello",
-  "Name": "template",
-  "DefinitionName": "eg_Hello_template",
-  "Hash": "Txx9ntrq4"
- },
- "eg_Hello_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "num": 42,
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_Hello",
-  "Name": "state",
-  "DefinitionName": "eg_Hello_state"
- },
- "eg_Hello_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_Hello",
-  "Name": "script",
-  "DefinitionName": "eg_Hello_script",
-  "Directives": []
- },
- "eg_Simple_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Simple",
-  "Name": "template",
-  "DefinitionName": "eg_Simple_template",
-  "Hash": "Txxl4an33"
- },
- "eg_Simple_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_Simple",
-  "Name": "style",
-  "DefinitionName": "eg_Simple_style"
- },
- "eg_ToDo_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_ToDo",
-  "Name": "template",
-  "DefinitionName": "eg_ToDo_template",
-  "Hash": "Txxbdh5fm"
- },
- "eg_ToDo_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "list": [
-   "Milk",
-   "Bread",
-   "Candy"
-  ],
-  "text": "Beer",
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_ToDo",
-  "Name": "state",
-  "DefinitionName": "eg_ToDo_state"
- },
- "eg_ToDo_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_ToDo",
-  "Name": "script",
-  "DefinitionName": "eg_ToDo_script",
-  "Directives": []
- },
- "eg_JSON_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_JSON",
-  "Name": "template",
-  "DefinitionName": "eg_JSON_template",
-  "Hash": "Tx1lhd4rn"
- },
- "eg_JSON_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2023-01-18T20:24:51Z\",\n  \"pushed_at\": \"2023-01-28T01:56:21Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 3035,\n  \"stargazers_count\": 2,\n  \"watchers_count\": 2,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"has_discussions\": false,\n  \"forks_count\": 0,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 24,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 0,\n  \"open_issues\": 24,\n  \"watchers\": 2,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 0,\n  \"subscribers_count\": 1\n}\n",
-  "DefName": null,
-  "Parent": "eg_JSON",
-  "Name": "staticdata",
-  "DefinitionName": "eg_JSON_staticdata",
-  "Source": "https://api.github.com/repos/modulojs/modulo",
-  "data": {
-   "id": 542682907,
-   "node_id": "R_kgDOIFivGw",
-   "name": "modulo",
-   "full_name": "modulojs/modulo",
-   "private": false,
-   "owner": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-   },
-   "html_url": "https://github.com/modulojs/modulo",
-   "description": "A drop-in JavaScript framework for modular web components, kept to about 2000 lines",
-   "fork": false,
-   "url": "https://api.github.com/repos/modulojs/modulo",
-   "forks_url": "https://api.github.com/repos/modulojs/modulo/forks",
-   "keys_url": "https://api.github.com/repos/modulojs/modulo/keys{/key_id}",
-   "collaborators_url": "https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}",
-   "teams_url": "https://api.github.com/repos/modulojs/modulo/teams",
-   "hooks_url": "https://api.github.com/repos/modulojs/modulo/hooks",
-   "issue_events_url": "https://api.github.com/repos/modulojs/modulo/issues/events{/number}",
-   "events_url": "https://api.github.com/repos/modulojs/modulo/events",
-   "assignees_url": "https://api.github.com/repos/modulojs/modulo/assignees{/user}",
-   "branches_url": "https://api.github.com/repos/modulojs/modulo/branches{/branch}",
-   "tags_url": "https://api.github.com/repos/modulojs/modulo/tags",
-   "blobs_url": "https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}",
-   "git_tags_url": "https://api.github.com/repos/modulojs/modulo/git/tags{/sha}",
-   "git_refs_url": "https://api.github.com/repos/modulojs/modulo/git/refs{/sha}",
-   "trees_url": "https://api.github.com/repos/modulojs/modulo/git/trees{/sha}",
-   "statuses_url": "https://api.github.com/repos/modulojs/modulo/statuses/{sha}",
-   "languages_url": "https://api.github.com/repos/modulojs/modulo/languages",
-   "stargazers_url": "https://api.github.com/repos/modulojs/modulo/stargazers",
-   "contributors_url": "https://api.github.com/repos/modulojs/modulo/contributors",
-   "subscribers_url": "https://api.github.com/repos/modulojs/modulo/subscribers",
-   "subscription_url": "https://api.github.com/repos/modulojs/modulo/subscription",
-   "commits_url": "https://api.github.com/repos/modulojs/modulo/commits{/sha}",
-   "git_commits_url": "https://api.github.com/repos/modulojs/modulo/git/commits{/sha}",
-   "comments_url": "https://api.github.com/repos/modulojs/modulo/comments{/number}",
-   "issue_comment_url": "https://api.github.com/repos/modulojs/modulo/issues/comments{/number}",
-   "contents_url": "https://api.github.com/repos/modulojs/modulo/contents/{+path}",
-   "compare_url": "https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}",
-   "merges_url": "https://api.github.com/repos/modulojs/modulo/merges",
-   "archive_url": "https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}",
-   "downloads_url": "https://api.github.com/repos/modulojs/modulo/downloads",
-   "issues_url": "https://api.github.com/repos/modulojs/modulo/issues{/number}",
-   "pulls_url": "https://api.github.com/repos/modulojs/modulo/pulls{/number}",
-   "milestones_url": "https://api.github.com/repos/modulojs/modulo/milestones{/number}",
-   "notifications_url": "https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}",
-   "labels_url": "https://api.github.com/repos/modulojs/modulo/labels{/name}",
-   "releases_url": "https://api.github.com/repos/modulojs/modulo/releases{/id}",
-   "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
-   "created_at": "2022-09-28T16:20:49Z",
-   "updated_at": "2023-01-18T20:24:51Z",
-   "pushed_at": "2023-01-28T01:56:21Z",
-   "git_url": "git://github.com/modulojs/modulo.git",
-   "ssh_url": "git@github.com:modulojs/modulo.git",
-   "clone_url": "https://github.com/modulojs/modulo.git",
-   "svn_url": "https://github.com/modulojs/modulo",
-   "homepage": "https://modulojs.org/",
-   "size": 3035,
-   "stargazers_count": 2,
-   "watchers_count": 2,
-   "language": "JavaScript",
-   "has_issues": true,
-   "has_projects": false,
-   "has_downloads": true,
-   "has_wiki": false,
-   "has_pages": true,
-   "has_discussions": false,
-   "forks_count": 0,
-   "mirror_url": null,
-   "archived": false,
-   "disabled": false,
-   "open_issues_count": 24,
-   "license": {
-    "key": "lgpl-2.1",
-    "name": "GNU Lesser General Public License v2.1",
-    "spdx_id": "LGPL-2.1",
-    "url": "https://api.github.com/licenses/lgpl-2.1",
-    "node_id": "MDc6TGljZW5zZTEx"
-   },
-   "allow_forking": true,
-   "is_template": false,
-   "web_commit_signoff_required": false,
-   "topics": [
-    "api",
-    "component",
-    "css",
-    "framework",
-    "html",
-    "javascript",
-    "modulo",
-    "modulojs",
-    "ui",
-    "web-components"
-   ],
-   "visibility": "public",
-   "forks": 0,
-   "open_issues": 24,
-   "watchers": 2,
-   "default_branch": "main",
-   "temp_clone_token": null,
-   "organization": {
-    "login": "modulojs",
-    "id": 104522255,
-    "node_id": "O_kgDOBjriDw",
-    "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/modulojs",
-    "html_url": "https://github.com/modulojs",
-    "followers_url": "https://api.github.com/users/modulojs/followers",
-    "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
-    "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
-    "organizations_url": "https://api.github.com/users/modulojs/orgs",
-    "repos_url": "https://api.github.com/users/modulojs/repos",
-    "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/modulojs/received_events",
-    "type": "Organization",
-    "site_admin": false
-   },
-   "network_count": 0,
-   "subscribers_count": 1
-  }
- },
- "eg_JSONArray_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_JSONArray",
-  "Name": "template",
-  "DefinitionName": "eg_JSONArray_template",
-  "Hash": "Tx1npfhrn"
- },
- "eg_JSONArray_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"delectus aut autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"quis ut nam facilis et officia qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 3,\n    \"title\": \"fugiat veniam minus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 4,\n    \"title\": \"et porro tempora\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 5,\n    \"title\": \"laboriosam mollitia et enim quasi adipisci quia provident illum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 6,\n    \"title\": \"qui ullam ratione quibusdam voluptatem quia omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 7,\n    \"title\": \"illo expedita consequatur quia in\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 8,\n    \"title\": \"quo adipisci enim quam ut ab\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 9,\n    \"title\": \"molestiae perspiciatis ipsa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 10,\n    \"title\": \"illo est ratione doloremque quia maiores aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 11,\n    \"title\": \"vero rerum temporibus dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 12,\n    \"title\": \"ipsa repellendus fugit nisi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 13,\n    \"title\": \"et doloremque nulla\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 14,\n    \"title\": \"repellendus sunt dolores architecto voluptatum\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 15,\n    \"title\": \"ab voluptatum amet voluptas\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 16,\n    \"title\": \"accusamus eos facilis sint et aut voluptatem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 17,\n    \"title\": \"quo laboriosam deleniti aut qui\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 18,\n    \"title\": \"dolorum est consequatur ea mollitia in culpa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 19,\n    \"title\": \"molestiae ipsa aut voluptatibus pariatur dolor nihil\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 20,\n    \"title\": \"ullam nobis libero sapiente ad optio sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 21,\n    \"title\": \"suscipit repellat esse quibusdam voluptatem incidunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 22,\n    \"title\": \"distinctio vitae autem nihil ut molestias quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 23,\n    \"title\": \"et itaque necessitatibus maxime molestiae qui quas velit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 24,\n    \"title\": \"adipisci non ad dicta qui amet quaerat doloribus ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 25,\n    \"title\": \"voluptas quo tenetur perspiciatis explicabo natus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 26,\n    \"title\": \"aliquam aut quasi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 27,\n    \"title\": \"veritatis pariatur delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 28,\n    \"title\": \"nesciunt totam sit blanditiis sit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 29,\n    \"title\": \"laborum aut in quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 30,\n    \"title\": \"nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 31,\n    \"title\": \"repudiandae totam in est sint facere fuga\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 32,\n    \"title\": \"earum doloribus ea doloremque quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 33,\n    \"title\": \"sint sit aut vero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 34,\n    \"title\": \"porro aut necessitatibus eaque distinctio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 35,\n    \"title\": \"repellendus veritatis molestias dicta incidunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 36,\n    \"title\": \"excepturi deleniti adipisci voluptatem et neque optio illum ad\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 37,\n    \"title\": \"sunt cum tempora\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 38,\n    \"title\": \"totam quia non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 39,\n    \"title\": \"doloremque quibusdam asperiores libero corrupti illum qui omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 40,\n    \"title\": \"totam atque quo nesciunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 41,\n    \"title\": \"aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 42,\n    \"title\": \"rerum perferendis error quia ut eveniet\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 43,\n    \"title\": \"tempore ut sint quis recusandae\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 44,\n    \"title\": \"cum debitis quis accusamus doloremque ipsa natus sapiente omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 45,\n    \"title\": \"velit soluta adipisci molestias reiciendis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 46,\n    \"title\": \"vel voluptatem repellat nihil placeat corporis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 47,\n    \"title\": \"nam qui rerum fugiat accusamus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 48,\n    \"title\": \"sit reprehenderit omnis quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 49,\n    \"title\": \"ut necessitatibus aut maiores debitis officia blanditiis velit et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 50,\n    \"title\": \"cupiditate necessitatibus ullam aut quis dolor voluptate\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 51,\n    \"title\": \"distinctio exercitationem ab doloribus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 52,\n    \"title\": \"nesciunt dolorum quis recusandae ad pariatur ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 53,\n    \"title\": \"qui labore est occaecati recusandae aliquid quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 54,\n    \"title\": \"quis et est ut voluptate quam dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 55,\n    \"title\": \"voluptatum omnis minima qui occaecati provident nulla voluptatem ratione\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 56,\n    \"title\": \"deleniti ea temporibus enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 57,\n    \"title\": \"pariatur et magnam ea doloribus similique voluptatem rerum quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 58,\n    \"title\": \"est dicta totam qui explicabo doloribus qui dignissimos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 59,\n    \"title\": \"perspiciatis velit id laborum placeat iusto et aliquam odio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 60,\n    \"title\": \"et sequi qui architecto ut adipisci\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 61,\n    \"title\": \"odit optio omnis qui sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 62,\n    \"title\": \"et placeat et tempore aspernatur sint numquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 63,\n    \"title\": \"doloremque aut dolores quidem fuga qui nulla\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 64,\n    \"title\": \"voluptas consequatur qui ut quia magnam nemo esse\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 65,\n    \"title\": \"fugiat pariatur ratione ut asperiores necessitatibus magni\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 66,\n    \"title\": \"rerum eum molestias autem voluptatum sit optio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 67,\n    \"title\": \"quia voluptatibus voluptatem quos similique maiores repellat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 68,\n    \"title\": \"aut id perspiciatis voluptatem iusto\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 69,\n    \"title\": \"doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 70,\n    \"title\": \"ut sequi accusantium et mollitia delectus sunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 71,\n    \"title\": \"aut velit saepe ullam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 72,\n    \"title\": \"praesentium facilis facere quis harum voluptatibus voluptatem eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 73,\n    \"title\": \"sint amet quia totam corporis qui exercitationem commodi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 74,\n    \"title\": \"expedita tempore nobis eveniet laborum maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 75,\n    \"title\": \"occaecati adipisci est possimus totam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 76,\n    \"title\": \"sequi dolorem sed\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 77,\n    \"title\": \"maiores aut nesciunt delectus exercitationem vel assumenda eligendi at\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 78,\n    \"title\": \"reiciendis est magnam amet nemo iste recusandae impedit quaerat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 79,\n    \"title\": \"eum ipsa maxime ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 80,\n    \"title\": \"tempore molestias dolores rerum sequi voluptates ipsum consequatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 81,\n    \"title\": \"suscipit qui totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 82,\n    \"title\": \"voluptates eum voluptas et dicta\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 83,\n    \"title\": \"quidem at rerum quis ex aut sit quam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 84,\n    \"title\": \"sunt veritatis ut voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 85,\n    \"title\": \"et quia ad iste a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 86,\n    \"title\": \"incidunt ut saepe autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 87,\n    \"title\": \"laudantium quae eligendi consequatur quia et vero autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 88,\n    \"title\": \"vitae aut excepturi laboriosam sint aliquam et et accusantium\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 89,\n    \"title\": \"sequi ut omnis et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 90,\n    \"title\": \"molestiae nisi accusantium tenetur dolorem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 91,\n    \"title\": \"nulla quis consequatur saepe qui id expedita\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 92,\n    \"title\": \"in omnis laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 93,\n    \"title\": \"odio iure consequatur molestiae quibusdam necessitatibus quia sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 94,\n    \"title\": \"facilis modi saepe mollitia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 95,\n    \"title\": \"vel nihil et molestiae iusto assumenda nemo quo ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 96,\n    \"title\": \"nobis suscipit ducimus enim asperiores voluptas\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 97,\n    \"title\": \"dolorum laboriosam eos qui iure aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 98,\n    \"title\": \"debitis accusantium ut quo facilis nihil quis sapiente necessitatibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 99,\n    \"title\": \"neque voluptates ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 100,\n    \"title\": \"excepturi a et neque qui expedita vel voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 101,\n    \"title\": \"explicabo enim cumque porro aperiam occaecati minima\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 102,\n    \"title\": \"sed ab consequatur\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 103,\n    \"title\": \"non sunt delectus illo nulla tenetur enim omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 104,\n    \"title\": \"excepturi non laudantium quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 105,\n    \"title\": \"totam quia dolorem et illum repellat voluptas optio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 106,\n    \"title\": \"ad illo quis voluptatem temporibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 107,\n    \"title\": \"praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 108,\n    \"title\": \"a eos eaque nihil et exercitationem incidunt delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 109,\n    \"title\": \"autem temporibus harum quisquam in culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 110,\n    \"title\": \"aut aut ea corporis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 111,\n    \"title\": \"magni accusantium labore et id quis provident\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 112,\n    \"title\": \"consectetur impedit quisquam qui deserunt non rerum consequuntur eius\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 113,\n    \"title\": \"quia atque aliquam sunt impedit voluptatum rerum assumenda nisi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 114,\n    \"title\": \"cupiditate quos possimus corporis quisquam exercitationem beatae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 115,\n    \"title\": \"sed et ea eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 116,\n    \"title\": \"ipsa dolores vel facilis ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 117,\n    \"title\": \"sequi quae est et qui qui eveniet asperiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 118,\n    \"title\": \"quia modi consequatur vero fugiat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 119,\n    \"title\": \"corporis ducimus ea perspiciatis iste\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 120,\n    \"title\": \"dolorem laboriosam vel voluptas et aliquam quasi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 121,\n    \"title\": \"inventore aut nihil minima laudantium hic qui omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 122,\n    \"title\": \"provident aut nobis culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 123,\n    \"title\": \"esse et quis iste est earum aut impedit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 124,\n    \"title\": \"qui consectetur id\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 125,\n    \"title\": \"aut quasi autem iste tempore illum possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 126,\n    \"title\": \"ut asperiores perspiciatis veniam ipsum rerum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 127,\n    \"title\": \"voluptatem libero consectetur rerum ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 128,\n    \"title\": \"eius omnis est qui voluptatem autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 129,\n    \"title\": \"rerum culpa quis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 130,\n    \"title\": \"nulla aliquid eveniet harum laborum libero alias ut unde\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 131,\n    \"title\": \"qui ea incidunt quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 132,\n    \"title\": \"qui molestiae voluptatibus velit iure harum quisquam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 133,\n    \"title\": \"et labore eos enim rerum consequatur sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 134,\n    \"title\": \"molestiae doloribus et laborum quod ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 135,\n    \"title\": \"facere ipsa nam eum voluptates reiciendis vero qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 136,\n    \"title\": \"asperiores illo tempora fuga sed ut quasi adipisci\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 137,\n    \"title\": \"qui sit non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 138,\n    \"title\": \"placeat minima consequatur rem qui ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 139,\n    \"title\": \"consequatur doloribus id possimus voluptas a voluptatem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 140,\n    \"title\": \"aut consectetur in blanditiis deserunt quia sed laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 141,\n    \"title\": \"explicabo consectetur debitis voluptates quas quae culpa rerum non\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 142,\n    \"title\": \"maiores accusantium architecto necessitatibus reiciendis ea aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 143,\n    \"title\": \"eum non recusandae cupiditate animi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 144,\n    \"title\": \"ut eum exercitationem sint\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 145,\n    \"title\": \"beatae qui ullam incidunt voluptatem non nisi aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 146,\n    \"title\": \"molestiae suscipit ratione nihil odio libero impedit vero totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 147,\n    \"title\": \"eum itaque quod reprehenderit et facilis dolor autem ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 148,\n    \"title\": \"esse quas et quo quasi exercitationem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 149,\n    \"title\": \"animi voluptas quod perferendis est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 150,\n    \"title\": \"eos amet tempore laudantium fugit a\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 151,\n    \"title\": \"accusamus adipisci dicta qui quo ea explicabo sed vero\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 152,\n    \"title\": \"odit eligendi recusandae doloremque cumque non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 153,\n    \"title\": \"ea aperiam consequatur qui repellat eos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 154,\n    \"title\": \"rerum non ex sapiente\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 155,\n    \"title\": \"voluptatem nobis consequatur et assumenda magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 156,\n    \"title\": \"nam quia quia nulla repellat assumenda quibusdam sit nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 157,\n    \"title\": \"dolorem veniam quisquam deserunt repellendus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 158,\n    \"title\": \"debitis vitae delectus et harum accusamus aut deleniti a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 159,\n    \"title\": \"debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 160,\n    \"title\": \"et praesentium aliquam est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 161,\n    \"title\": \"ex hic consequuntur earum omnis alias ut occaecati culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 162,\n    \"title\": \"omnis laboriosam molestias animi sunt dolore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 163,\n    \"title\": \"natus corrupti maxime laudantium et voluptatem laboriosam odit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 164,\n    \"title\": \"reprehenderit quos aut aut consequatur est sed\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 165,\n    \"title\": \"fugiat perferendis sed aut quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 166,\n    \"title\": \"quos quo possimus suscipit minima ut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 167,\n    \"title\": \"et quis minus quo a asperiores molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 168,\n    \"title\": \"recusandae quia qui sunt libero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 169,\n    \"title\": \"ea odio perferendis officiis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 170,\n    \"title\": \"quisquam aliquam quia doloribus aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 171,\n    \"title\": \"fugiat aut voluptatibus corrupti deleniti velit iste odio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 172,\n    \"title\": \"et provident amet rerum consectetur et voluptatum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 173,\n    \"title\": \"harum ad aperiam quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 174,\n    \"title\": \"similique aut quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 175,\n    \"title\": \"laudantium eius officia perferendis provident perspiciatis asperiores\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 176,\n    \"title\": \"magni soluta corrupti ut maiores rem quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 177,\n    \"title\": \"et placeat temporibus voluptas est tempora quos quibusdam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 178,\n    \"title\": \"nesciunt itaque commodi tempore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 179,\n    \"title\": \"omnis consequuntur cupiditate impedit itaque ipsam quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 180,\n    \"title\": \"debitis nisi et dolorem repellat et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 181,\n    \"title\": \"ut cupiditate sequi aliquam fuga maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 182,\n    \"title\": \"inventore saepe cumque et aut illum enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 183,\n    \"title\": \"omnis nulla eum aliquam distinctio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 184,\n    \"title\": \"molestias modi perferendis perspiciatis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 185,\n    \"title\": \"voluptates dignissimos sed doloribus animi quaerat aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 186,\n    \"title\": \"explicabo odio est et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 187,\n    \"title\": \"consequuntur animi possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 188,\n    \"title\": \"vel non beatae est\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 189,\n    \"title\": \"culpa eius et voluptatem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 190,\n    \"title\": \"accusamus sint iusto et voluptatem exercitationem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 191,\n    \"title\": \"temporibus atque distinctio omnis eius impedit tempore molestias pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 192,\n    \"title\": \"ut quas possimus exercitationem sint voluptates\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 193,\n    \"title\": \"rerum debitis voluptatem qui eveniet tempora distinctio a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 194,\n    \"title\": \"sed ut vero sit molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 195,\n    \"title\": \"rerum ex veniam mollitia voluptatibus pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 196,\n    \"title\": \"consequuntur aut ut fugit similique\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 197,\n    \"title\": \"dignissimos quo nobis earum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 198,\n    \"title\": \"quis eius est sint explicabo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 199,\n    \"title\": \"numquam repellendus a magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 200,\n    \"title\": \"ipsam aperiam voluptates qui\",\n    \"completed\": false\n  }\n]",
-  "DefName": null,
-  "Parent": "eg_JSONArray",
-  "Name": "staticdata",
-  "DefinitionName": "eg_JSONArray_staticdata",
-  "Source": "https://jsonplaceholder.typicode.com/todos",
-  "data": [
-   {
-    "userId": 1,
-    "id": 1,
-    "title": "delectus aut autem",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 2,
-    "title": "quis ut nam facilis et officia qui",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 3,
-    "title": "fugiat veniam minus",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 4,
-    "title": "et porro tempora",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 5,
-    "title": "laboriosam mollitia et enim quasi adipisci quia provident illum",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 6,
-    "title": "qui ullam ratione quibusdam voluptatem quia omnis",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 7,
-    "title": "illo expedita consequatur quia in",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 8,
-    "title": "quo adipisci enim quam ut ab",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 9,
-    "title": "molestiae perspiciatis ipsa",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 10,
-    "title": "illo est ratione doloremque quia maiores aut",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 11,
-    "title": "vero rerum temporibus dolor",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 12,
-    "title": "ipsa repellendus fugit nisi",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 13,
-    "title": "et doloremque nulla",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 14,
-    "title": "repellendus sunt dolores architecto voluptatum",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 15,
-    "title": "ab voluptatum amet voluptas",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 16,
-    "title": "accusamus eos facilis sint et aut voluptatem",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 17,
-    "title": "quo laboriosam deleniti aut qui",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 18,
-    "title": "dolorum est consequatur ea mollitia in culpa",
-    "completed": false
-   },
-   {
-    "userId": 1,
-    "id": 19,
-    "title": "molestiae ipsa aut voluptatibus pariatur dolor nihil",
-    "completed": true
-   },
-   {
-    "userId": 1,
-    "id": 20,
-    "title": "ullam nobis libero sapiente ad optio sint",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 21,
-    "title": "suscipit repellat esse quibusdam voluptatem incidunt",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 22,
-    "title": "distinctio vitae autem nihil ut molestias quo",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 23,
-    "title": "et itaque necessitatibus maxime molestiae qui quas velit",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 24,
-    "title": "adipisci non ad dicta qui amet quaerat doloribus ea",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 25,
-    "title": "voluptas quo tenetur perspiciatis explicabo natus",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 26,
-    "title": "aliquam aut quasi",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 27,
-    "title": "veritatis pariatur delectus",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 28,
-    "title": "nesciunt totam sit blanditiis sit",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 29,
-    "title": "laborum aut in quam",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 30,
-    "title": "nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 31,
-    "title": "repudiandae totam in est sint facere fuga",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 32,
-    "title": "earum doloribus ea doloremque quis",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 33,
-    "title": "sint sit aut vero",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 34,
-    "title": "porro aut necessitatibus eaque distinctio",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 35,
-    "title": "repellendus veritatis molestias dicta incidunt",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 36,
-    "title": "excepturi deleniti adipisci voluptatem et neque optio illum ad",
-    "completed": true
-   },
-   {
-    "userId": 2,
-    "id": 37,
-    "title": "sunt cum tempora",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 38,
-    "title": "totam quia non",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 39,
-    "title": "doloremque quibusdam asperiores libero corrupti illum qui omnis",
-    "completed": false
-   },
-   {
-    "userId": 2,
-    "id": 40,
-    "title": "totam atque quo nesciunt",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 41,
-    "title": "aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 42,
-    "title": "rerum perferendis error quia ut eveniet",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 43,
-    "title": "tempore ut sint quis recusandae",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 44,
-    "title": "cum debitis quis accusamus doloremque ipsa natus sapiente omnis",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 45,
-    "title": "velit soluta adipisci molestias reiciendis harum",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 46,
-    "title": "vel voluptatem repellat nihil placeat corporis",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 47,
-    "title": "nam qui rerum fugiat accusamus",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 48,
-    "title": "sit reprehenderit omnis quia",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 49,
-    "title": "ut necessitatibus aut maiores debitis officia blanditiis velit et",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 50,
-    "title": "cupiditate necessitatibus ullam aut quis dolor voluptate",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 51,
-    "title": "distinctio exercitationem ab doloribus",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 52,
-    "title": "nesciunt dolorum quis recusandae ad pariatur ratione",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 53,
-    "title": "qui labore est occaecati recusandae aliquid quam",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 54,
-    "title": "quis et est ut voluptate quam dolor",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 55,
-    "title": "voluptatum omnis minima qui occaecati provident nulla voluptatem ratione",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 56,
-    "title": "deleniti ea temporibus enim",
-    "completed": true
-   },
-   {
-    "userId": 3,
-    "id": 57,
-    "title": "pariatur et magnam ea doloribus similique voluptatem rerum quia",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 58,
-    "title": "est dicta totam qui explicabo doloribus qui dignissimos",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 59,
-    "title": "perspiciatis velit id laborum placeat iusto et aliquam odio",
-    "completed": false
-   },
-   {
-    "userId": 3,
-    "id": 60,
-    "title": "et sequi qui architecto ut adipisci",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 61,
-    "title": "odit optio omnis qui sunt",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 62,
-    "title": "et placeat et tempore aspernatur sint numquam",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 63,
-    "title": "doloremque aut dolores quidem fuga qui nulla",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 64,
-    "title": "voluptas consequatur qui ut quia magnam nemo esse",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 65,
-    "title": "fugiat pariatur ratione ut asperiores necessitatibus magni",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 66,
-    "title": "rerum eum molestias autem voluptatum sit optio",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 67,
-    "title": "quia voluptatibus voluptatem quos similique maiores repellat",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 68,
-    "title": "aut id perspiciatis voluptatem iusto",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 69,
-    "title": "doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 70,
-    "title": "ut sequi accusantium et mollitia delectus sunt",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 71,
-    "title": "aut velit saepe ullam",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 72,
-    "title": "praesentium facilis facere quis harum voluptatibus voluptatem eum",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 73,
-    "title": "sint amet quia totam corporis qui exercitationem commodi",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 74,
-    "title": "expedita tempore nobis eveniet laborum maiores",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 75,
-    "title": "occaecati adipisci est possimus totam",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 76,
-    "title": "sequi dolorem sed",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 77,
-    "title": "maiores aut nesciunt delectus exercitationem vel assumenda eligendi at",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 78,
-    "title": "reiciendis est magnam amet nemo iste recusandae impedit quaerat",
-    "completed": false
-   },
-   {
-    "userId": 4,
-    "id": 79,
-    "title": "eum ipsa maxime ut",
-    "completed": true
-   },
-   {
-    "userId": 4,
-    "id": 80,
-    "title": "tempore molestias dolores rerum sequi voluptates ipsum consequatur",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 81,
-    "title": "suscipit qui totam",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 82,
-    "title": "voluptates eum voluptas et dicta",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 83,
-    "title": "quidem at rerum quis ex aut sit quam",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 84,
-    "title": "sunt veritatis ut voluptate",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 85,
-    "title": "et quia ad iste a",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 86,
-    "title": "incidunt ut saepe autem",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 87,
-    "title": "laudantium quae eligendi consequatur quia et vero autem",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 88,
-    "title": "vitae aut excepturi laboriosam sint aliquam et et accusantium",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 89,
-    "title": "sequi ut omnis et",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 90,
-    "title": "molestiae nisi accusantium tenetur dolorem et",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 91,
-    "title": "nulla quis consequatur saepe qui id expedita",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 92,
-    "title": "in omnis laboriosam",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 93,
-    "title": "odio iure consequatur molestiae quibusdam necessitatibus quia sint",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 94,
-    "title": "facilis modi saepe mollitia",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 95,
-    "title": "vel nihil et molestiae iusto assumenda nemo quo ut",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 96,
-    "title": "nobis suscipit ducimus enim asperiores voluptas",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 97,
-    "title": "dolorum laboriosam eos qui iure aliquam",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 98,
-    "title": "debitis accusantium ut quo facilis nihil quis sapiente necessitatibus",
-    "completed": true
-   },
-   {
-    "userId": 5,
-    "id": 99,
-    "title": "neque voluptates ratione",
-    "completed": false
-   },
-   {
-    "userId": 5,
-    "id": 100,
-    "title": "excepturi a et neque qui expedita vel voluptate",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 101,
-    "title": "explicabo enim cumque porro aperiam occaecati minima",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 102,
-    "title": "sed ab consequatur",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 103,
-    "title": "non sunt delectus illo nulla tenetur enim omnis",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 104,
-    "title": "excepturi non laudantium quo",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 105,
-    "title": "totam quia dolorem et illum repellat voluptas optio",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 106,
-    "title": "ad illo quis voluptatem temporibus",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 107,
-    "title": "praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 108,
-    "title": "a eos eaque nihil et exercitationem incidunt delectus",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 109,
-    "title": "autem temporibus harum quisquam in culpa",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 110,
-    "title": "aut aut ea corporis",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 111,
-    "title": "magni accusantium labore et id quis provident",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 112,
-    "title": "consectetur impedit quisquam qui deserunt non rerum consequuntur eius",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 113,
-    "title": "quia atque aliquam sunt impedit voluptatum rerum assumenda nisi",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 114,
-    "title": "cupiditate quos possimus corporis quisquam exercitationem beatae",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 115,
-    "title": "sed et ea eum",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 116,
-    "title": "ipsa dolores vel facilis ut",
-    "completed": true
-   },
-   {
-    "userId": 6,
-    "id": 117,
-    "title": "sequi quae est et qui qui eveniet asperiores",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 118,
-    "title": "quia modi consequatur vero fugiat",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 119,
-    "title": "corporis ducimus ea perspiciatis iste",
-    "completed": false
-   },
-   {
-    "userId": 6,
-    "id": 120,
-    "title": "dolorem laboriosam vel voluptas et aliquam quasi",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 121,
-    "title": "inventore aut nihil minima laudantium hic qui omnis",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 122,
-    "title": "provident aut nobis culpa",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 123,
-    "title": "esse et quis iste est earum aut impedit",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 124,
-    "title": "qui consectetur id",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 125,
-    "title": "aut quasi autem iste tempore illum possimus",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 126,
-    "title": "ut asperiores perspiciatis veniam ipsum rerum saepe",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 127,
-    "title": "voluptatem libero consectetur rerum ut",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 128,
-    "title": "eius omnis est qui voluptatem autem",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 129,
-    "title": "rerum culpa quis harum",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 130,
-    "title": "nulla aliquid eveniet harum laborum libero alias ut unde",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 131,
-    "title": "qui ea incidunt quis",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 132,
-    "title": "qui molestiae voluptatibus velit iure harum quisquam",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 133,
-    "title": "et labore eos enim rerum consequatur sunt",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 134,
-    "title": "molestiae doloribus et laborum quod ea",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 135,
-    "title": "facere ipsa nam eum voluptates reiciendis vero qui",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 136,
-    "title": "asperiores illo tempora fuga sed ut quasi adipisci",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 137,
-    "title": "qui sit non",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 138,
-    "title": "placeat minima consequatur rem qui ut",
-    "completed": true
-   },
-   {
-    "userId": 7,
-    "id": 139,
-    "title": "consequatur doloribus id possimus voluptas a voluptatem",
-    "completed": false
-   },
-   {
-    "userId": 7,
-    "id": 140,
-    "title": "aut consectetur in blanditiis deserunt quia sed laboriosam",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 141,
-    "title": "explicabo consectetur debitis voluptates quas quae culpa rerum non",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 142,
-    "title": "maiores accusantium architecto necessitatibus reiciendis ea aut",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 143,
-    "title": "eum non recusandae cupiditate animi",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 144,
-    "title": "ut eum exercitationem sint",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 145,
-    "title": "beatae qui ullam incidunt voluptatem non nisi aliquam",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 146,
-    "title": "molestiae suscipit ratione nihil odio libero impedit vero totam",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 147,
-    "title": "eum itaque quod reprehenderit et facilis dolor autem ut",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 148,
-    "title": "esse quas et quo quasi exercitationem",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 149,
-    "title": "animi voluptas quod perferendis est",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 150,
-    "title": "eos amet tempore laudantium fugit a",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 151,
-    "title": "accusamus adipisci dicta qui quo ea explicabo sed vero",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 152,
-    "title": "odit eligendi recusandae doloremque cumque non",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 153,
-    "title": "ea aperiam consequatur qui repellat eos",
-    "completed": false
-   },
-   {
-    "userId": 8,
-    "id": 154,
-    "title": "rerum non ex sapiente",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 155,
-    "title": "voluptatem nobis consequatur et assumenda magnam",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 156,
-    "title": "nam quia quia nulla repellat assumenda quibusdam sit nobis",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 157,
-    "title": "dolorem veniam quisquam deserunt repellendus",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 158,
-    "title": "debitis vitae delectus et harum accusamus aut deleniti a",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 159,
-    "title": "debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis",
-    "completed": true
-   },
-   {
-    "userId": 8,
-    "id": 160,
-    "title": "et praesentium aliquam est",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 161,
-    "title": "ex hic consequuntur earum omnis alias ut occaecati culpa",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 162,
-    "title": "omnis laboriosam molestias animi sunt dolore",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 163,
-    "title": "natus corrupti maxime laudantium et voluptatem laboriosam odit",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 164,
-    "title": "reprehenderit quos aut aut consequatur est sed",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 165,
-    "title": "fugiat perferendis sed aut quidem",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 166,
-    "title": "quos quo possimus suscipit minima ut",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 167,
-    "title": "et quis minus quo a asperiores molestiae",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 168,
-    "title": "recusandae quia qui sunt libero",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 169,
-    "title": "ea odio perferendis officiis",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 170,
-    "title": "quisquam aliquam quia doloribus aut",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 171,
-    "title": "fugiat aut voluptatibus corrupti deleniti velit iste odio",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 172,
-    "title": "et provident amet rerum consectetur et voluptatum",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 173,
-    "title": "harum ad aperiam quis",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 174,
-    "title": "similique aut quo",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 175,
-    "title": "laudantium eius officia perferendis provident perspiciatis asperiores",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 176,
-    "title": "magni soluta corrupti ut maiores rem quidem",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 177,
-    "title": "et placeat temporibus voluptas est tempora quos quibusdam",
-    "completed": false
-   },
-   {
-    "userId": 9,
-    "id": 178,
-    "title": "nesciunt itaque commodi tempore",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 179,
-    "title": "omnis consequuntur cupiditate impedit itaque ipsam quo",
-    "completed": true
-   },
-   {
-    "userId": 9,
-    "id": 180,
-    "title": "debitis nisi et dolorem repellat et",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 181,
-    "title": "ut cupiditate sequi aliquam fuga maiores",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 182,
-    "title": "inventore saepe cumque et aut illum enim",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 183,
-    "title": "omnis nulla eum aliquam distinctio",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 184,
-    "title": "molestias modi perferendis perspiciatis",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 185,
-    "title": "voluptates dignissimos sed doloribus animi quaerat aut",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 186,
-    "title": "explicabo odio est et",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 187,
-    "title": "consequuntur animi possimus",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 188,
-    "title": "vel non beatae est",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 189,
-    "title": "culpa eius et voluptatem et",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 190,
-    "title": "accusamus sint iusto et voluptatem exercitationem",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 191,
-    "title": "temporibus atque distinctio omnis eius impedit tempore molestias pariatur",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 192,
-    "title": "ut quas possimus exercitationem sint voluptates",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 193,
-    "title": "rerum debitis voluptatem qui eveniet tempora distinctio a",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 194,
-    "title": "sed ut vero sit molestiae",
-    "completed": false
-   },
-   {
-    "userId": 10,
-    "id": 195,
-    "title": "rerum ex veniam mollitia voluptatibus pariatur",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 196,
-    "title": "consequuntur aut ut fugit similique",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 197,
-    "title": "dignissimos quo nobis earum saepe",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 198,
-    "title": "quis eius est sint explicabo",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 199,
-    "title": "numquam repellendus a magnam",
-    "completed": true
-   },
-   {
-    "userId": 10,
-    "id": 200,
-    "title": "ipsam aperiam voluptates qui",
-    "completed": false
-   }
-  ]
- },
- "eg_GitHubAPI_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_GitHubAPI",
-  "Name": "template",
-  "DefinitionName": "eg_GitHubAPI_template",
-  "Hash": "Tx130qf1i"
- },
- "eg_GitHubAPI_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "search": "",
-  "name": "",
-  "location": "",
-  "bio": "",
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_GitHubAPI",
-  "Name": "state",
-  "DefinitionName": "eg_GitHubAPI_state"
- },
- "eg_GitHubAPI_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_GitHubAPI",
-  "Name": "script",
-  "DefinitionName": "eg_GitHubAPI_script",
-  "Directives": []
- },
- "eg_ColorSelector_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_ColorSelector",
-  "Name": "template",
-  "DefinitionName": "eg_ColorSelector_template",
-  "Hash": "Tx145sdaa"
- },
- "eg_ColorSelector_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "hue": 130,
-  "sat": 50,
-  "lum": 50,
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_ColorSelector",
-  "Name": "state",
-  "DefinitionName": "eg_ColorSelector_state"
- },
- "eg_DateNumberPicker_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_DateNumberPicker",
-  "Name": "template",
-  "DefinitionName": "eg_DateNumberPicker_template",
-  "Hash": "Tx1j17irn"
- },
- "eg_DateNumberPicker_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "day": 1,
-  "month": 1,
-  "year": 2022,
-  "ordering": [
-   "year",
-   "month",
-   "day"
-  ],
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_DateNumberPicker",
-  "Name": "state",
-  "DefinitionName": "eg_DateNumberPicker_state"
- },
- "eg_DateNumberPicker_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_DateNumberPicker",
-  "Name": "script",
-  "DefinitionName": "eg_DateNumberPicker_script",
-  "Directives": []
- },
- "eg_DateNumberPicker_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_DateNumberPicker",
-  "Name": "style",
-  "DefinitionName": "eg_DateNumberPicker_style"
- },
- "eg_PrimeSieve_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_PrimeSieve",
-  "Name": "template",
-  "DefinitionName": "eg_PrimeSieve_template",
-  "Hash": "Txxn6m9dp"
- },
- "eg_PrimeSieve_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "number": 64,
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_PrimeSieve",
-  "Name": "state",
-  "DefinitionName": "eg_PrimeSieve_state"
- },
- "eg_PrimeSieve_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_PrimeSieve",
-  "Name": "script",
-  "DefinitionName": "eg_PrimeSieve_script",
-  "Directives": []
- },
- "eg_PrimeSieve_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_PrimeSieve",
-  "Name": "style",
-  "DefinitionName": "eg_PrimeSieve_style"
- },
- "eg_Scatter_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Scatter",
-  "Name": "template",
-  "DefinitionName": "eg_Scatter_template",
-  "Hash": "Tx1ejsk79"
- },
- "eg_Scatter_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
-  "DefName": null,
-  "Parent": "eg_Scatter",
-  "Name": "staticdata",
-  "DefinitionName": "eg_Scatter_staticdata",
-  "Source": "https://jsonplaceholder.typicode.com/users",
-  "data": [
-   {
-    "id": 1,
-    "name": "Leanne Graham",
-    "username": "Bret",
-    "email": "Sincere@april.biz",
-    "address": {
-     "street": "Kulas Light",
-     "suite": "Apt. 556",
-     "city": "Gwenborough",
-     "zipcode": "92998-3874",
-     "geo": {
-      "lat": "-37.3159",
-      "lng": "81.1496"
-     }
-    },
-    "phone": "1-770-736-8031 x56442",
-    "website": "hildegard.org",
-    "company": {
-     "name": "Romaguera-Crona",
-     "catchPhrase": "Multi-layered client-server neural-net",
-     "bs": "harness real-time e-markets"
-    }
-   },
-   {
-    "id": 2,
-    "name": "Ervin Howell",
-    "username": "Antonette",
-    "email": "Shanna@melissa.tv",
-    "address": {
-     "street": "Victor Plains",
-     "suite": "Suite 879",
-     "city": "Wisokyburgh",
-     "zipcode": "90566-7771",
-     "geo": {
-      "lat": "-43.9509",
-      "lng": "-34.4618"
-     }
-    },
-    "phone": "010-692-6593 x09125",
-    "website": "anastasia.net",
-    "company": {
-     "name": "Deckow-Crist",
-     "catchPhrase": "Proactive didactic contingency",
-     "bs": "synergize scalable supply-chains"
-    }
-   },
-   {
-    "id": 3,
-    "name": "Clementine Bauch",
-    "username": "Samantha",
-    "email": "Nathan@yesenia.net",
-    "address": {
-     "street": "Douglas Extension",
-     "suite": "Suite 847",
-     "city": "McKenziehaven",
-     "zipcode": "59590-4157",
-     "geo": {
-      "lat": "-68.6102",
-      "lng": "-47.0653"
-     }
-    },
-    "phone": "1-463-123-4447",
-    "website": "ramiro.info",
-    "company": {
-     "name": "Romaguera-Jacobson",
-     "catchPhrase": "Face to face bifurcated interface",
-     "bs": "e-enable strategic applications"
-    }
-   },
-   {
-    "id": 4,
-    "name": "Patricia Lebsack",
-    "username": "Karianne",
-    "email": "Julianne.OConner@kory.org",
-    "address": {
-     "street": "Hoeger Mall",
-     "suite": "Apt. 692",
-     "city": "South Elvis",
-     "zipcode": "53919-4257",
-     "geo": {
-      "lat": "29.4572",
-      "lng": "-164.2990"
-     }
-    },
-    "phone": "493-170-9623 x156",
-    "website": "kale.biz",
-    "company": {
-     "name": "Robel-Corkery",
-     "catchPhrase": "Multi-tiered zero tolerance productivity",
-     "bs": "transition cutting-edge web services"
-    }
-   },
-   {
-    "id": 5,
-    "name": "Chelsey Dietrich",
-    "username": "Kamren",
-    "email": "Lucio_Hettinger@annie.ca",
-    "address": {
-     "street": "Skiles Walks",
-     "suite": "Suite 351",
-     "city": "Roscoeview",
-     "zipcode": "33263",
-     "geo": {
-      "lat": "-31.8129",
-      "lng": "62.5342"
-     }
-    },
-    "phone": "(254)954-1289",
-    "website": "demarco.info",
-    "company": {
-     "name": "Keebler LLC",
-     "catchPhrase": "User-centric fault-tolerant solution",
-     "bs": "revolutionize end-to-end systems"
-    }
-   },
-   {
-    "id": 6,
-    "name": "Mrs. Dennis Schulist",
-    "username": "Leopoldo_Corkery",
-    "email": "Karley_Dach@jasper.info",
-    "address": {
-     "street": "Norberto Crossing",
-     "suite": "Apt. 950",
-     "city": "South Christy",
-     "zipcode": "23505-1337",
-     "geo": {
-      "lat": "-71.4197",
-      "lng": "71.7478"
-     }
-    },
-    "phone": "1-477-935-8478 x6430",
-    "website": "ola.org",
-    "company": {
-     "name": "Considine-Lockman",
-     "catchPhrase": "Synchronised bottom-line interface",
-     "bs": "e-enable innovative applications"
-    }
-   },
-   {
-    "id": 7,
-    "name": "Kurtis Weissnat",
-    "username": "Elwyn.Skiles",
-    "email": "Telly.Hoeger@billy.biz",
-    "address": {
-     "street": "Rex Trail",
-     "suite": "Suite 280",
-     "city": "Howemouth",
-     "zipcode": "58804-1099",
-     "geo": {
-      "lat": "24.8918",
-      "lng": "21.8984"
-     }
-    },
-    "phone": "210.067.6132",
-    "website": "elvis.io",
-    "company": {
-     "name": "Johns Group",
-     "catchPhrase": "Configurable multimedia task-force",
-     "bs": "generate enterprise e-tailers"
-    }
-   },
-   {
-    "id": 8,
-    "name": "Nicholas Runolfsdottir V",
-    "username": "Maxime_Nienow",
-    "email": "Sherwood@rosamond.me",
-    "address": {
-     "street": "Ellsworth Summit",
-     "suite": "Suite 729",
-     "city": "Aliyaview",
-     "zipcode": "45169",
-     "geo": {
-      "lat": "-14.3990",
-      "lng": "-120.7677"
-     }
-    },
-    "phone": "586.493.6943 x140",
-    "website": "jacynthe.com",
-    "company": {
-     "name": "Abernathy Group",
-     "catchPhrase": "Implemented secondary concept",
-     "bs": "e-enable extensible e-tailers"
-    }
-   },
-   {
-    "id": 9,
-    "name": "Glenna Reichert",
-    "username": "Delphine",
-    "email": "Chaim_McDermott@dana.io",
-    "address": {
-     "street": "Dayna Park",
-     "suite": "Suite 449",
-     "city": "Bartholomebury",
-     "zipcode": "76495-3109",
-     "geo": {
-      "lat": "24.6463",
-      "lng": "-168.8889"
-     }
-    },
-    "phone": "(775)976-6794 x41206",
-    "website": "conrad.com",
-    "company": {
-     "name": "Yost and Sons",
-     "catchPhrase": "Switchable contextually-based project",
-     "bs": "aggregate real-time technologies"
-    }
-   },
-   {
-    "id": 10,
-    "name": "Clementina DuBuque",
-    "username": "Moriah.Stanton",
-    "email": "Rey.Padberg@karina.biz",
-    "address": {
-     "street": "Kattie Turnpike",
-     "suite": "Suite 198",
-     "city": "Lebsackbury",
-     "zipcode": "31428-2261",
-     "geo": {
-      "lat": "-38.2386",
-      "lng": "57.2232"
-     }
-    },
-    "phone": "024-648-3804",
-    "website": "ambrose.net",
-    "company": {
-     "name": "Hoeger LLC",
-     "catchPhrase": "Centralized empowering task-force",
-     "bs": "target end-to-end models"
-    }
-   }
-  ]
- },
- "eg_Scatter_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_Scatter",
-  "Name": "style",
-  "DefinitionName": "eg_Scatter_style"
- },
- "eg_FlexibleForm_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_FlexibleForm",
-  "Name": "template",
-  "DefinitionName": "eg_FlexibleForm_template",
-  "Hash": "Tx1ah1gte"
- },
- "eg_FlexibleForm_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "name": "Spartacus",
-  "topic": "On the treatment of Thracian gladiators",
-  "subscribe": true,
+ ],
+ "Name": "state",
+ "DefinitionName": "docseg_Templating_1_state"
+},  
+
+docseg_Templating_1_script: {
+ "Parent": "docseg_Templating_1",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "docseg_Templating_1_script",
+ "Directives": []
+},  
+
+docseg_Templating_PrepareCallback_template: {
+ "Parent": "docseg_Templating_PrepareCallback",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Templating_PrepareCallback_template",
+ "Hash": "Txx7jgg2i"
+},  
+
+docseg_Templating_PrepareCallback_state: {
+ "Parent": "docseg_Templating_PrepareCallback",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "perc": 50,
+ "total": 30,
+ "Name": "state",
+ "DefinitionName": "docseg_Templating_PrepareCallback_state"
+},  
+
+docseg_Templating_PrepareCallback_script: {
+ "Parent": "docseg_Templating_PrepareCallback",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "docseg_Templating_PrepareCallback_script",
+ "Directives": []
+},  
+
+docseg_Templating_PrepareCallback_style: {
+ "Parent": "docseg_Templating_PrepareCallback",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "docseg_Templating_PrepareCallback_style"
+},  
+
+docseg_Templating_Comments_template: {
+ "Parent": "docseg_Templating_Comments",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Templating_Comments_template",
+ "Hash": "Tx1p85et1"
+},  
+
+docseg_Templating_Escaping_template: {
+ "Parent": "docseg_Templating_Escaping",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Templating_Escaping_template",
+ "Hash": "Tx184ue3a"
+},  
+
+docseg_Templating_Escaping_state: {
+ "Parent": "docseg_Templating_Escaping",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "username": "Little <Bobby> <Drop> &tables",
+ "content": "\n        I <i>love</i> the classic <a target=\"_blank\"\n        href=\"https://xkcd.com/327/\">xkcd #327</a> on\n        the risk of trusting <b>user inputted data</b>\n    ",
+ "Name": "state",
+ "DefinitionName": "docseg_Templating_Escaping_state"
+},  
+
+docseg_Templating_Escaping_style: {
+ "Parent": "docseg_Templating_Escaping",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "docseg_Templating_Escaping_style"
+},  
+
+docseg_Tutorial_P1_template: {
+ "Parent": "docseg_Tutorial_P1",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Tutorial_P1_template",
+ "Hash": "Txxm6soph"
+},  
+
+docseg_Tutorial_P1_style: {
+ "Parent": "docseg_Tutorial_P1",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "docseg_Tutorial_P1_style"
+},  
+
+docseg_Tutorial_P2_template: {
+ "Parent": "docseg_Tutorial_P2",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Tutorial_P2_template",
+ "Hash": "Tx1h93c2j"
+},  
+
+docseg_Tutorial_P2_filters_demo_template: {
+ "Parent": "docseg_Tutorial_P2_filters_demo",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Tutorial_P2_filters_demo_template",
+ "Hash": "Tx1h93c2j"
+},  
+
+docseg_Tutorial_P3_state_demo_template: {
+ "Parent": "docseg_Tutorial_P3_state_demo",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Tutorial_P3_state_demo_template",
+ "Hash": "Tx13o8260"
+},  
+
+docseg_Tutorial_P3_state_demo_state: {
+ "Parent": "docseg_Tutorial_P3_state_demo",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "verb": "toot",
+ "noun": "kazoo",
+ "count": "two",
+ "Name": "state",
+ "DefinitionName": "docseg_Tutorial_P3_state_demo_state"
+},  
+
+docseg_Tutorial_P3_state_demo_style: {
+ "Parent": "docseg_Tutorial_P3_state_demo",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "docseg_Tutorial_P3_state_demo_style"
+},  
+
+docseg_Tutorial_P3_state_bind_template: {
+ "Parent": "docseg_Tutorial_P3_state_bind",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "docseg_Tutorial_P3_state_bind_template",
+ "Hash": "Txxonth4n"
+},  
+
+docseg_Tutorial_P3_state_bind_state: {
+ "Parent": "docseg_Tutorial_P3_state_bind",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "opacity": "0.5",
+ "color": "blue",
+ "username": "Testing_Username",
+ "Name": "state",
+ "DefinitionName": "docseg_Tutorial_P3_state_bind_state"
+},  
+
+eg_Hello: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Hello",
+ "Name": "Hello",
+ "DefinitionName": "eg_Hello",
+ "ChildrenNames": [
+  "eg_Hello_template",
+  "eg_Hello_state",
+  "eg_Hello_script"
+ ],
+ "TagName": "eg-hello"
+},  
+
+eg_Simple: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Simple",
+ "Name": "Simple",
+ "DefinitionName": "eg_Simple",
+ "ChildrenNames": [
+  "eg_Simple_template",
+  "eg_Simple_style"
+ ],
+ "TagName": "eg-simple"
+},  
+
+eg_ToDo: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "ToDo",
+ "Name": "ToDo",
+ "DefinitionName": "eg_ToDo",
+ "ChildrenNames": [
+  "eg_ToDo_template",
+  "eg_ToDo_state",
+  "eg_ToDo_script"
+ ],
+ "TagName": "eg-todo"
+},  
+
+eg_JSON: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "JSON",
+ "Name": "JSON",
+ "DefinitionName": "eg_JSON",
+ "ChildrenNames": [
+  "eg_JSON_template",
+  "eg_JSON_staticdata"
+ ],
+ "TagName": "eg-json"
+},  
+
+eg_JSONArray: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "JSONArray",
+ "Name": "JSONArray",
+ "DefinitionName": "eg_JSONArray",
+ "ChildrenNames": [
+  "eg_JSONArray_template",
+  "eg_JSONArray_staticdata"
+ ],
+ "TagName": "eg-jsonarray"
+},  
+
+eg_GitHubAPI: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "GitHubAPI",
+ "Name": "GitHubAPI",
+ "DefinitionName": "eg_GitHubAPI",
+ "ChildrenNames": [
+  "eg_GitHubAPI_template",
+  "eg_GitHubAPI_state",
+  "eg_GitHubAPI_script"
+ ],
+ "TagName": "eg-githubapi"
+},  
+
+eg_ColorSelector: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "ColorSelector",
+ "Name": "ColorSelector",
+ "DefinitionName": "eg_ColorSelector",
+ "ChildrenNames": [
+  "eg_ColorSelector_template",
+  "eg_ColorSelector_state"
+ ],
+ "TagName": "eg-colorselector"
+},  
+
+eg_DateNumberPicker: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "DateNumberPicker",
+ "Name": "DateNumberPicker",
+ "DefinitionName": "eg_DateNumberPicker",
+ "ChildrenNames": [
+  "eg_DateNumberPicker_template",
+  "eg_DateNumberPicker_state",
+  "eg_DateNumberPicker_script",
+  "eg_DateNumberPicker_style"
+ ],
+ "TagName": "eg-datenumberpicker"
+},  
+
+eg_PrimeSieve: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "PrimeSieve",
+ "Name": "PrimeSieve",
+ "DefinitionName": "eg_PrimeSieve",
+ "ChildrenNames": [
+  "eg_PrimeSieve_template",
+  "eg_PrimeSieve_state",
+  "eg_PrimeSieve_script",
+  "eg_PrimeSieve_style"
+ ],
+ "TagName": "eg-primesieve"
+},  
+
+eg_Scatter: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Scatter",
+ "Name": "Scatter",
+ "DefinitionName": "eg_Scatter",
+ "ChildrenNames": [
+  "eg_Scatter_template",
+  "eg_Scatter_staticdata",
+  "eg_Scatter_style"
+ ],
+ "TagName": "eg-scatter"
+},  
+
+eg_FlexibleForm: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "FlexibleForm",
+ "Name": "FlexibleForm",
+ "DefinitionName": "eg_FlexibleForm",
+ "ChildrenNames": [
+  "eg_FlexibleForm_template",
+  "eg_FlexibleForm_state"
+ ],
+ "TagName": "eg-flexibleform"
+},  
+
+eg_FlexibleFormWithAPI: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "FlexibleFormWithAPI",
+ "Name": "FlexibleFormWithAPI",
+ "DefinitionName": "eg_FlexibleFormWithAPI",
+ "ChildrenNames": [
+  "eg_FlexibleFormWithAPI_template",
+  "eg_FlexibleFormWithAPI_state",
+  "eg_FlexibleFormWithAPI_script"
+ ],
+ "TagName": "eg-flexibleformwithapi"
+},  
+
+eg_Components: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Components",
+ "Name": "Components",
+ "DefinitionName": "eg_Components",
+ "ChildrenNames": [
+  "eg_Components_template"
+ ],
+ "TagName": "eg-components"
+},  
+
+eg_OscillatingGraph: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "OscillatingGraph",
+ "Name": "OscillatingGraph",
+ "DefinitionName": "eg_OscillatingGraph",
+ "ChildrenNames": [
+  "eg_OscillatingGraph_template",
+  "eg_OscillatingGraph_state",
+  "eg_OscillatingGraph_script",
+  "eg_OscillatingGraph_style"
+ ],
+ "TagName": "eg-oscillatinggraph"
+},  
+
+eg_Search: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Search",
+ "Name": "Search",
+ "DefinitionName": "eg_Search",
+ "ChildrenNames": [
+  "eg_Search_template",
+  "eg_Search_state",
+  "eg_Search_script"
+ ],
+ "TagName": "eg-search"
+},  
+
+eg_SearchBox: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "SearchBox",
+ "Name": "SearchBox",
+ "DefinitionName": "eg_SearchBox",
+ "ChildrenNames": [
+  "eg_SearchBox_template",
+  "eg_SearchBox_state",
+  "eg_SearchBox_staticdata",
+  "eg_SearchBox_script",
+  "eg_SearchBox_style"
+ ],
+ "TagName": "eg-searchbox"
+},  
+
+eg_WorldMap: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "WorldMap",
+ "Name": "WorldMap",
+ "DefinitionName": "eg_WorldMap",
+ "ChildrenNames": [
+  "eg_WorldMap_template",
+  "eg_WorldMap_staticdata",
+  "eg_WorldMap_style"
+ ],
+ "TagName": "eg-worldmap"
+},  
+
+eg_Memory: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "Memory",
+ "Name": "Memory",
+ "DefinitionName": "eg_Memory",
+ "ChildrenNames": [
+  "eg_Memory_template",
+  "eg_Memory_state",
+  "eg_Memory_script",
+  "eg_Memory_style"
+ ],
+ "TagName": "eg-memory"
+},  
+
+eg_ConwayGameOfLife: {
+ "Parent": "eg",
+ "DefName": null,
+ "mode": "regular",
+ "rerender": "event",
+ "engine": "Reconciler",
+ "RenderObj": "component",
+ "DefLoaders": [
+  "DefinedAs",
+  "Src",
+  "Content"
+ ],
+ "DefBuilders": [
+  "CustomElement",
+  "Code"
+ ],
+ "DefFinalizers": [
+  "MainRequire"
+ ],
+ "Directives": [
+  "slotLoad",
+  "eventMount",
+  "eventUnmount",
+  "dataPropMount",
+  "dataPropUnmount"
+ ],
+ "Type": "Component",
+ "namespace": "eg",
+ "name": "ConwayGameOfLife",
+ "Name": "ConwayGameOfLife",
+ "DefinitionName": "eg_ConwayGameOfLife",
+ "ChildrenNames": [
+  "eg_ConwayGameOfLife_template",
+  "eg_ConwayGameOfLife_state",
+  "eg_ConwayGameOfLife_script",
+  "eg_ConwayGameOfLife_style"
+ ],
+ "TagName": "eg-conwaygameoflife"
+},  
+
+eg_Hello_template: {
+ "Parent": "eg_Hello",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Hello_template",
+ "Hash": "Txx9ntrq4"
+},  
+
+eg_Hello_state: {
+ "Parent": "eg_Hello",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "num": 42,
+ "Name": "state",
+ "DefinitionName": "eg_Hello_state"
+},  
+
+eg_Hello_script: {
+ "Parent": "eg_Hello",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_Hello_script",
+ "Directives": []
+},  
+
+eg_Simple_template: {
+ "Parent": "eg_Simple",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Simple_template",
+ "Hash": "Txxl4an33"
+},  
+
+eg_Simple_style: {
+ "Parent": "eg_Simple",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_Simple_style"
+},  
+
+eg_ToDo_template: {
+ "Parent": "eg_ToDo",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_ToDo_template",
+ "Hash": "Txxbdh5fm"
+},  
+
+eg_ToDo_state: {
+ "Parent": "eg_ToDo",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "list": [
+  "Milk",
+  "Bread",
+  "Candy"
+ ],
+ "text": "Beer",
+ "Name": "state",
+ "DefinitionName": "eg_ToDo_state"
+},  
+
+eg_ToDo_script: {
+ "Parent": "eg_ToDo",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_ToDo_script",
+ "Directives": []
+},  
+
+eg_JSON_template: {
+ "Parent": "eg_JSON",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_JSON_template",
+ "Hash": "Tx1lhd4rn"
+},  
+
+eg_JSON_staticdata: {
+ "Parent": "eg_JSON",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "{\n  \"id\": 542682907,\n  \"node_id\": \"R_kgDOIFivGw\",\n  \"name\": \"modulo\",\n  \"full_name\": \"modulojs/modulo\",\n  \"private\": false,\n  \"owner\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"html_url\": \"https://github.com/modulojs/modulo\",\n  \"description\": \"A drop-in JavaScript framework for modular web components, kept to about 2000 lines\",\n  \"fork\": false,\n  \"url\": \"https://api.github.com/repos/modulojs/modulo\",\n  \"forks_url\": \"https://api.github.com/repos/modulojs/modulo/forks\",\n  \"keys_url\": \"https://api.github.com/repos/modulojs/modulo/keys{/key_id}\",\n  \"collaborators_url\": \"https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}\",\n  \"teams_url\": \"https://api.github.com/repos/modulojs/modulo/teams\",\n  \"hooks_url\": \"https://api.github.com/repos/modulojs/modulo/hooks\",\n  \"issue_events_url\": \"https://api.github.com/repos/modulojs/modulo/issues/events{/number}\",\n  \"events_url\": \"https://api.github.com/repos/modulojs/modulo/events\",\n  \"assignees_url\": \"https://api.github.com/repos/modulojs/modulo/assignees{/user}\",\n  \"branches_url\": \"https://api.github.com/repos/modulojs/modulo/branches{/branch}\",\n  \"tags_url\": \"https://api.github.com/repos/modulojs/modulo/tags\",\n  \"blobs_url\": \"https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}\",\n  \"git_tags_url\": \"https://api.github.com/repos/modulojs/modulo/git/tags{/sha}\",\n  \"git_refs_url\": \"https://api.github.com/repos/modulojs/modulo/git/refs{/sha}\",\n  \"trees_url\": \"https://api.github.com/repos/modulojs/modulo/git/trees{/sha}\",\n  \"statuses_url\": \"https://api.github.com/repos/modulojs/modulo/statuses/{sha}\",\n  \"languages_url\": \"https://api.github.com/repos/modulojs/modulo/languages\",\n  \"stargazers_url\": \"https://api.github.com/repos/modulojs/modulo/stargazers\",\n  \"contributors_url\": \"https://api.github.com/repos/modulojs/modulo/contributors\",\n  \"subscribers_url\": \"https://api.github.com/repos/modulojs/modulo/subscribers\",\n  \"subscription_url\": \"https://api.github.com/repos/modulojs/modulo/subscription\",\n  \"commits_url\": \"https://api.github.com/repos/modulojs/modulo/commits{/sha}\",\n  \"git_commits_url\": \"https://api.github.com/repos/modulojs/modulo/git/commits{/sha}\",\n  \"comments_url\": \"https://api.github.com/repos/modulojs/modulo/comments{/number}\",\n  \"issue_comment_url\": \"https://api.github.com/repos/modulojs/modulo/issues/comments{/number}\",\n  \"contents_url\": \"https://api.github.com/repos/modulojs/modulo/contents/{+path}\",\n  \"compare_url\": \"https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}\",\n  \"merges_url\": \"https://api.github.com/repos/modulojs/modulo/merges\",\n  \"archive_url\": \"https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}\",\n  \"downloads_url\": \"https://api.github.com/repos/modulojs/modulo/downloads\",\n  \"issues_url\": \"https://api.github.com/repos/modulojs/modulo/issues{/number}\",\n  \"pulls_url\": \"https://api.github.com/repos/modulojs/modulo/pulls{/number}\",\n  \"milestones_url\": \"https://api.github.com/repos/modulojs/modulo/milestones{/number}\",\n  \"notifications_url\": \"https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}\",\n  \"labels_url\": \"https://api.github.com/repos/modulojs/modulo/labels{/name}\",\n  \"releases_url\": \"https://api.github.com/repos/modulojs/modulo/releases{/id}\",\n  \"deployments_url\": \"https://api.github.com/repos/modulojs/modulo/deployments\",\n  \"created_at\": \"2022-09-28T16:20:49Z\",\n  \"updated_at\": \"2023-03-16T19:37:05Z\",\n  \"pushed_at\": \"2023-02-10T04:39:14Z\",\n  \"git_url\": \"git://github.com/modulojs/modulo.git\",\n  \"ssh_url\": \"git@github.com:modulojs/modulo.git\",\n  \"clone_url\": \"https://github.com/modulojs/modulo.git\",\n  \"svn_url\": \"https://github.com/modulojs/modulo\",\n  \"homepage\": \"https://modulojs.org/\",\n  \"size\": 3294,\n  \"stargazers_count\": 2,\n  \"watchers_count\": 2,\n  \"language\": \"JavaScript\",\n  \"has_issues\": true,\n  \"has_projects\": false,\n  \"has_downloads\": true,\n  \"has_wiki\": false,\n  \"has_pages\": true,\n  \"has_discussions\": false,\n  \"forks_count\": 1,\n  \"mirror_url\": null,\n  \"archived\": false,\n  \"disabled\": false,\n  \"open_issues_count\": 38,\n  \"license\": {\n    \"key\": \"lgpl-2.1\",\n    \"name\": \"GNU Lesser General Public License v2.1\",\n    \"spdx_id\": \"LGPL-2.1\",\n    \"url\": \"https://api.github.com/licenses/lgpl-2.1\",\n    \"node_id\": \"MDc6TGljZW5zZTEx\"\n  },\n  \"allow_forking\": true,\n  \"is_template\": false,\n  \"web_commit_signoff_required\": false,\n  \"topics\": [\n    \"api\",\n    \"component\",\n    \"css\",\n    \"framework\",\n    \"html\",\n    \"javascript\",\n    \"modulo\",\n    \"modulojs\",\n    \"ui\",\n    \"web-components\"\n  ],\n  \"visibility\": \"public\",\n  \"forks\": 1,\n  \"open_issues\": 38,\n  \"watchers\": 2,\n  \"default_branch\": \"main\",\n  \"temp_clone_token\": null,\n  \"organization\": {\n    \"login\": \"modulojs\",\n    \"id\": 104522255,\n    \"node_id\": \"O_kgDOBjriDw\",\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/104522255?v=4\",\n    \"gravatar_id\": \"\",\n    \"url\": \"https://api.github.com/users/modulojs\",\n    \"html_url\": \"https://github.com/modulojs\",\n    \"followers_url\": \"https://api.github.com/users/modulojs/followers\",\n    \"following_url\": \"https://api.github.com/users/modulojs/following{/other_user}\",\n    \"gists_url\": \"https://api.github.com/users/modulojs/gists{/gist_id}\",\n    \"starred_url\": \"https://api.github.com/users/modulojs/starred{/owner}{/repo}\",\n    \"subscriptions_url\": \"https://api.github.com/users/modulojs/subscriptions\",\n    \"organizations_url\": \"https://api.github.com/users/modulojs/orgs\",\n    \"repos_url\": \"https://api.github.com/users/modulojs/repos\",\n    \"events_url\": \"https://api.github.com/users/modulojs/events{/privacy}\",\n    \"received_events_url\": \"https://api.github.com/users/modulojs/received_events\",\n    \"type\": \"Organization\",\n    \"site_admin\": false\n  },\n  \"network_count\": 1,\n  \"subscribers_count\": 1\n}\n",
+ "Name": "staticdata",
+ "DefinitionName": "eg_JSON_staticdata",
+ "Source": "https://api.github.com/repos/modulojs/modulo",
+ "data": {
+  "id": 542682907,
+  "node_id": "R_kgDOIFivGw",
+  "name": "modulo",
+  "full_name": "modulojs/modulo",
   "private": false,
-  "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
-  "fields": [
-   "name",
-   "topic",
-   "comment",
-   "private",
-   "subscribe"
+  "owner": {
+   "login": "modulojs",
+   "id": 104522255,
+   "node_id": "O_kgDOBjriDw",
+   "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/modulojs",
+   "html_url": "https://github.com/modulojs",
+   "followers_url": "https://api.github.com/users/modulojs/followers",
+   "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
+   "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
+   "organizations_url": "https://api.github.com/users/modulojs/orgs",
+   "repos_url": "https://api.github.com/users/modulojs/repos",
+   "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/modulojs/received_events",
+   "type": "Organization",
+   "site_admin": false
+  },
+  "html_url": "https://github.com/modulojs/modulo",
+  "description": "A drop-in JavaScript framework for modular web components, kept to about 2000 lines",
+  "fork": false,
+  "url": "https://api.github.com/repos/modulojs/modulo",
+  "forks_url": "https://api.github.com/repos/modulojs/modulo/forks",
+  "keys_url": "https://api.github.com/repos/modulojs/modulo/keys{/key_id}",
+  "collaborators_url": "https://api.github.com/repos/modulojs/modulo/collaborators{/collaborator}",
+  "teams_url": "https://api.github.com/repos/modulojs/modulo/teams",
+  "hooks_url": "https://api.github.com/repos/modulojs/modulo/hooks",
+  "issue_events_url": "https://api.github.com/repos/modulojs/modulo/issues/events{/number}",
+  "events_url": "https://api.github.com/repos/modulojs/modulo/events",
+  "assignees_url": "https://api.github.com/repos/modulojs/modulo/assignees{/user}",
+  "branches_url": "https://api.github.com/repos/modulojs/modulo/branches{/branch}",
+  "tags_url": "https://api.github.com/repos/modulojs/modulo/tags",
+  "blobs_url": "https://api.github.com/repos/modulojs/modulo/git/blobs{/sha}",
+  "git_tags_url": "https://api.github.com/repos/modulojs/modulo/git/tags{/sha}",
+  "git_refs_url": "https://api.github.com/repos/modulojs/modulo/git/refs{/sha}",
+  "trees_url": "https://api.github.com/repos/modulojs/modulo/git/trees{/sha}",
+  "statuses_url": "https://api.github.com/repos/modulojs/modulo/statuses/{sha}",
+  "languages_url": "https://api.github.com/repos/modulojs/modulo/languages",
+  "stargazers_url": "https://api.github.com/repos/modulojs/modulo/stargazers",
+  "contributors_url": "https://api.github.com/repos/modulojs/modulo/contributors",
+  "subscribers_url": "https://api.github.com/repos/modulojs/modulo/subscribers",
+  "subscription_url": "https://api.github.com/repos/modulojs/modulo/subscription",
+  "commits_url": "https://api.github.com/repos/modulojs/modulo/commits{/sha}",
+  "git_commits_url": "https://api.github.com/repos/modulojs/modulo/git/commits{/sha}",
+  "comments_url": "https://api.github.com/repos/modulojs/modulo/comments{/number}",
+  "issue_comment_url": "https://api.github.com/repos/modulojs/modulo/issues/comments{/number}",
+  "contents_url": "https://api.github.com/repos/modulojs/modulo/contents/{+path}",
+  "compare_url": "https://api.github.com/repos/modulojs/modulo/compare/{base}...{head}",
+  "merges_url": "https://api.github.com/repos/modulojs/modulo/merges",
+  "archive_url": "https://api.github.com/repos/modulojs/modulo/{archive_format}{/ref}",
+  "downloads_url": "https://api.github.com/repos/modulojs/modulo/downloads",
+  "issues_url": "https://api.github.com/repos/modulojs/modulo/issues{/number}",
+  "pulls_url": "https://api.github.com/repos/modulojs/modulo/pulls{/number}",
+  "milestones_url": "https://api.github.com/repos/modulojs/modulo/milestones{/number}",
+  "notifications_url": "https://api.github.com/repos/modulojs/modulo/notifications{?since,all,participating}",
+  "labels_url": "https://api.github.com/repos/modulojs/modulo/labels{/name}",
+  "releases_url": "https://api.github.com/repos/modulojs/modulo/releases{/id}",
+  "deployments_url": "https://api.github.com/repos/modulojs/modulo/deployments",
+  "created_at": "2022-09-28T16:20:49Z",
+  "updated_at": "2023-03-16T19:37:05Z",
+  "pushed_at": "2023-02-10T04:39:14Z",
+  "git_url": "git://github.com/modulojs/modulo.git",
+  "ssh_url": "git@github.com:modulojs/modulo.git",
+  "clone_url": "https://github.com/modulojs/modulo.git",
+  "svn_url": "https://github.com/modulojs/modulo",
+  "homepage": "https://modulojs.org/",
+  "size": 3294,
+  "stargazers_count": 2,
+  "watchers_count": 2,
+  "language": "JavaScript",
+  "has_issues": true,
+  "has_projects": false,
+  "has_downloads": true,
+  "has_wiki": false,
+  "has_pages": true,
+  "has_discussions": false,
+  "forks_count": 1,
+  "mirror_url": null,
+  "archived": false,
+  "disabled": false,
+  "open_issues_count": 38,
+  "license": {
+   "key": "lgpl-2.1",
+   "name": "GNU Lesser General Public License v2.1",
+   "spdx_id": "LGPL-2.1",
+   "url": "https://api.github.com/licenses/lgpl-2.1",
+   "node_id": "MDc6TGljZW5zZTEx"
+  },
+  "allow_forking": true,
+  "is_template": false,
+  "web_commit_signoff_required": false,
+  "topics": [
+   "api",
+   "component",
+   "css",
+   "framework",
+   "html",
+   "javascript",
+   "modulo",
+   "modulojs",
+   "ui",
+   "web-components"
   ],
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_FlexibleForm",
-  "Name": "state",
-  "DefinitionName": "eg_FlexibleForm_state"
- },
- "eg_FlexibleFormWithAPI_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_FlexibleFormWithAPI",
-  "Name": "template",
-  "DefinitionName": "eg_FlexibleFormWithAPI_template",
-  "Hash": "Tx16ihg4b"
- },
- "eg_FlexibleFormWithAPI_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "user": 1337,
-  "topic": "On the treatment of Thracian gladiators",
-  "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
-  "fields": [
-   "user",
-   "topic",
-   "comment"
-  ],
-  "posts": [],
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_FlexibleFormWithAPI",
-  "Name": "state",
-  "DefinitionName": "eg_FlexibleFormWithAPI_state"
- },
- "eg_FlexibleFormWithAPI_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_FlexibleFormWithAPI",
-  "Name": "script",
-  "DefinitionName": "eg_FlexibleFormWithAPI_script",
-  "Directives": []
- },
- "eg_Components_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Components",
-  "Name": "template",
-  "DefinitionName": "eg_Components_template",
-  "Hash": "Tx1gk8lc3"
- },
- "eg_OscillatingGraph_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_OscillatingGraph",
-  "Name": "template",
-  "DefinitionName": "eg_OscillatingGraph_template",
-  "Hash": "Txxqlg44u"
- },
- "eg_OscillatingGraph_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "playing": false,
-  "speed": 10,
-  "easing": "linear",
-  "align": "flex-end",
-  "tick": 1,
-  "width": 10,
-  "anim": 10,
-  "pulse": 1,
-  "offset": 1,
-  "data": [],
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_OscillatingGraph",
-  "Name": "state",
-  "DefinitionName": "eg_OscillatingGraph_state"
- },
- "eg_OscillatingGraph_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_OscillatingGraph",
-  "Name": "script",
-  "DefinitionName": "eg_OscillatingGraph_script",
-  "Directives": []
- },
- "eg_OscillatingGraph_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_OscillatingGraph",
-  "Name": "style",
-  "DefinitionName": "eg_OscillatingGraph_style"
- },
- "eg_Search_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Search",
-  "Name": "template",
-  "DefinitionName": "eg_Search_template",
-  "Hash": "Tx1l103gn"
- },
- "eg_Search_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "search": "the lord of the rings",
-  "loading": false,
-  "results": [],
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_Search",
-  "Name": "state",
-  "DefinitionName": "eg_Search_state"
- },
- "eg_Search_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_Search",
-  "Name": "script",
-  "DefinitionName": "eg_Search_script",
-  "Directives": []
- },
- "eg_SearchBox_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_SearchBox",
-  "Name": "template",
-  "DefinitionName": "eg_SearchBox_template",
-  "Hash": "Tx1k5cj37"
- },
- "eg_SearchBox_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "search": "",
-  "results": [],
-  "loading": false,
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_SearchBox",
-  "Name": "state",
-  "DefinitionName": "eg_SearchBox_state"
- },
- "eg_SearchBox_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n",
-  "DefName": null,
-  "Parent": "eg_SearchBox",
-  "Name": "staticdata",
-  "DefinitionName": "eg_SearchBox_staticdata",
-  "data": {
-   "apiBase": "https://openlibrary.org/search.json",
-   "cover": "https://covers.openlibrary.org/b/id/",
-   "gif": "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif"
+  "visibility": "public",
+  "forks": 1,
+  "open_issues": 38,
+  "watchers": 2,
+  "default_branch": "main",
+  "temp_clone_token": null,
+  "organization": {
+   "login": "modulojs",
+   "id": 104522255,
+   "node_id": "O_kgDOBjriDw",
+   "avatar_url": "https://avatars.githubusercontent.com/u/104522255?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/modulojs",
+   "html_url": "https://github.com/modulojs",
+   "followers_url": "https://api.github.com/users/modulojs/followers",
+   "following_url": "https://api.github.com/users/modulojs/following{/other_user}",
+   "gists_url": "https://api.github.com/users/modulojs/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/modulojs/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/modulojs/subscriptions",
+   "organizations_url": "https://api.github.com/users/modulojs/orgs",
+   "repos_url": "https://api.github.com/users/modulojs/repos",
+   "events_url": "https://api.github.com/users/modulojs/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/modulojs/received_events",
+   "type": "Organization",
+   "site_admin": false
+  },
+  "network_count": 1,
+  "subscribers_count": 1
+ }
+},  
+
+eg_JSONArray_template: {
+ "Parent": "eg_JSONArray",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_JSONArray_template",
+ "Hash": "Tx1npfhrn"
+},  
+
+eg_JSONArray_staticdata: {
+ "Parent": "eg_JSONArray",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"delectus aut autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"quis ut nam facilis et officia qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 3,\n    \"title\": \"fugiat veniam minus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 4,\n    \"title\": \"et porro tempora\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 5,\n    \"title\": \"laboriosam mollitia et enim quasi adipisci quia provident illum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 6,\n    \"title\": \"qui ullam ratione quibusdam voluptatem quia omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 7,\n    \"title\": \"illo expedita consequatur quia in\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 8,\n    \"title\": \"quo adipisci enim quam ut ab\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 9,\n    \"title\": \"molestiae perspiciatis ipsa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 10,\n    \"title\": \"illo est ratione doloremque quia maiores aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 11,\n    \"title\": \"vero rerum temporibus dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 12,\n    \"title\": \"ipsa repellendus fugit nisi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 13,\n    \"title\": \"et doloremque nulla\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 14,\n    \"title\": \"repellendus sunt dolores architecto voluptatum\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 15,\n    \"title\": \"ab voluptatum amet voluptas\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 16,\n    \"title\": \"accusamus eos facilis sint et aut voluptatem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 17,\n    \"title\": \"quo laboriosam deleniti aut qui\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 18,\n    \"title\": \"dolorum est consequatur ea mollitia in culpa\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 19,\n    \"title\": \"molestiae ipsa aut voluptatibus pariatur dolor nihil\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 1,\n    \"id\": 20,\n    \"title\": \"ullam nobis libero sapiente ad optio sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 21,\n    \"title\": \"suscipit repellat esse quibusdam voluptatem incidunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 22,\n    \"title\": \"distinctio vitae autem nihil ut molestias quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 23,\n    \"title\": \"et itaque necessitatibus maxime molestiae qui quas velit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 24,\n    \"title\": \"adipisci non ad dicta qui amet quaerat doloribus ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 25,\n    \"title\": \"voluptas quo tenetur perspiciatis explicabo natus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 26,\n    \"title\": \"aliquam aut quasi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 27,\n    \"title\": \"veritatis pariatur delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 28,\n    \"title\": \"nesciunt totam sit blanditiis sit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 29,\n    \"title\": \"laborum aut in quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 30,\n    \"title\": \"nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 31,\n    \"title\": \"repudiandae totam in est sint facere fuga\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 32,\n    \"title\": \"earum doloribus ea doloremque quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 33,\n    \"title\": \"sint sit aut vero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 34,\n    \"title\": \"porro aut necessitatibus eaque distinctio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 35,\n    \"title\": \"repellendus veritatis molestias dicta incidunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 36,\n    \"title\": \"excepturi deleniti adipisci voluptatem et neque optio illum ad\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 2,\n    \"id\": 37,\n    \"title\": \"sunt cum tempora\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 38,\n    \"title\": \"totam quia non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 39,\n    \"title\": \"doloremque quibusdam asperiores libero corrupti illum qui omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 2,\n    \"id\": 40,\n    \"title\": \"totam atque quo nesciunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 41,\n    \"title\": \"aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 42,\n    \"title\": \"rerum perferendis error quia ut eveniet\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 43,\n    \"title\": \"tempore ut sint quis recusandae\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 44,\n    \"title\": \"cum debitis quis accusamus doloremque ipsa natus sapiente omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 45,\n    \"title\": \"velit soluta adipisci molestias reiciendis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 46,\n    \"title\": \"vel voluptatem repellat nihil placeat corporis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 47,\n    \"title\": \"nam qui rerum fugiat accusamus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 48,\n    \"title\": \"sit reprehenderit omnis quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 49,\n    \"title\": \"ut necessitatibus aut maiores debitis officia blanditiis velit et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 50,\n    \"title\": \"cupiditate necessitatibus ullam aut quis dolor voluptate\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 51,\n    \"title\": \"distinctio exercitationem ab doloribus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 52,\n    \"title\": \"nesciunt dolorum quis recusandae ad pariatur ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 53,\n    \"title\": \"qui labore est occaecati recusandae aliquid quam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 54,\n    \"title\": \"quis et est ut voluptate quam dolor\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 55,\n    \"title\": \"voluptatum omnis minima qui occaecati provident nulla voluptatem ratione\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 56,\n    \"title\": \"deleniti ea temporibus enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 3,\n    \"id\": 57,\n    \"title\": \"pariatur et magnam ea doloribus similique voluptatem rerum quia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 58,\n    \"title\": \"est dicta totam qui explicabo doloribus qui dignissimos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 59,\n    \"title\": \"perspiciatis velit id laborum placeat iusto et aliquam odio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 3,\n    \"id\": 60,\n    \"title\": \"et sequi qui architecto ut adipisci\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 61,\n    \"title\": \"odit optio omnis qui sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 62,\n    \"title\": \"et placeat et tempore aspernatur sint numquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 63,\n    \"title\": \"doloremque aut dolores quidem fuga qui nulla\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 64,\n    \"title\": \"voluptas consequatur qui ut quia magnam nemo esse\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 65,\n    \"title\": \"fugiat pariatur ratione ut asperiores necessitatibus magni\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 66,\n    \"title\": \"rerum eum molestias autem voluptatum sit optio\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 67,\n    \"title\": \"quia voluptatibus voluptatem quos similique maiores repellat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 68,\n    \"title\": \"aut id perspiciatis voluptatem iusto\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 69,\n    \"title\": \"doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 70,\n    \"title\": \"ut sequi accusantium et mollitia delectus sunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 71,\n    \"title\": \"aut velit saepe ullam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 72,\n    \"title\": \"praesentium facilis facere quis harum voluptatibus voluptatem eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 73,\n    \"title\": \"sint amet quia totam corporis qui exercitationem commodi\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 74,\n    \"title\": \"expedita tempore nobis eveniet laborum maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 75,\n    \"title\": \"occaecati adipisci est possimus totam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 76,\n    \"title\": \"sequi dolorem sed\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 77,\n    \"title\": \"maiores aut nesciunt delectus exercitationem vel assumenda eligendi at\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 78,\n    \"title\": \"reiciendis est magnam amet nemo iste recusandae impedit quaerat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 4,\n    \"id\": 79,\n    \"title\": \"eum ipsa maxime ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 4,\n    \"id\": 80,\n    \"title\": \"tempore molestias dolores rerum sequi voluptates ipsum consequatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 81,\n    \"title\": \"suscipit qui totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 82,\n    \"title\": \"voluptates eum voluptas et dicta\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 83,\n    \"title\": \"quidem at rerum quis ex aut sit quam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 84,\n    \"title\": \"sunt veritatis ut voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 85,\n    \"title\": \"et quia ad iste a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 86,\n    \"title\": \"incidunt ut saepe autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 87,\n    \"title\": \"laudantium quae eligendi consequatur quia et vero autem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 88,\n    \"title\": \"vitae aut excepturi laboriosam sint aliquam et et accusantium\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 89,\n    \"title\": \"sequi ut omnis et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 90,\n    \"title\": \"molestiae nisi accusantium tenetur dolorem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 91,\n    \"title\": \"nulla quis consequatur saepe qui id expedita\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 92,\n    \"title\": \"in omnis laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 93,\n    \"title\": \"odio iure consequatur molestiae quibusdam necessitatibus quia sint\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 94,\n    \"title\": \"facilis modi saepe mollitia\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 95,\n    \"title\": \"vel nihil et molestiae iusto assumenda nemo quo ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 96,\n    \"title\": \"nobis suscipit ducimus enim asperiores voluptas\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 97,\n    \"title\": \"dolorum laboriosam eos qui iure aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 98,\n    \"title\": \"debitis accusantium ut quo facilis nihil quis sapiente necessitatibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 5,\n    \"id\": 99,\n    \"title\": \"neque voluptates ratione\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 5,\n    \"id\": 100,\n    \"title\": \"excepturi a et neque qui expedita vel voluptate\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 101,\n    \"title\": \"explicabo enim cumque porro aperiam occaecati minima\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 102,\n    \"title\": \"sed ab consequatur\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 103,\n    \"title\": \"non sunt delectus illo nulla tenetur enim omnis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 104,\n    \"title\": \"excepturi non laudantium quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 105,\n    \"title\": \"totam quia dolorem et illum repellat voluptas optio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 106,\n    \"title\": \"ad illo quis voluptatem temporibus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 107,\n    \"title\": \"praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 108,\n    \"title\": \"a eos eaque nihil et exercitationem incidunt delectus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 109,\n    \"title\": \"autem temporibus harum quisquam in culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 110,\n    \"title\": \"aut aut ea corporis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 111,\n    \"title\": \"magni accusantium labore et id quis provident\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 112,\n    \"title\": \"consectetur impedit quisquam qui deserunt non rerum consequuntur eius\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 113,\n    \"title\": \"quia atque aliquam sunt impedit voluptatum rerum assumenda nisi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 114,\n    \"title\": \"cupiditate quos possimus corporis quisquam exercitationem beatae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 115,\n    \"title\": \"sed et ea eum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 116,\n    \"title\": \"ipsa dolores vel facilis ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 6,\n    \"id\": 117,\n    \"title\": \"sequi quae est et qui qui eveniet asperiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 118,\n    \"title\": \"quia modi consequatur vero fugiat\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 119,\n    \"title\": \"corporis ducimus ea perspiciatis iste\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 6,\n    \"id\": 120,\n    \"title\": \"dolorem laboriosam vel voluptas et aliquam quasi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 121,\n    \"title\": \"inventore aut nihil minima laudantium hic qui omnis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 122,\n    \"title\": \"provident aut nobis culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 123,\n    \"title\": \"esse et quis iste est earum aut impedit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 124,\n    \"title\": \"qui consectetur id\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 125,\n    \"title\": \"aut quasi autem iste tempore illum possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 126,\n    \"title\": \"ut asperiores perspiciatis veniam ipsum rerum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 127,\n    \"title\": \"voluptatem libero consectetur rerum ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 128,\n    \"title\": \"eius omnis est qui voluptatem autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 129,\n    \"title\": \"rerum culpa quis harum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 130,\n    \"title\": \"nulla aliquid eveniet harum laborum libero alias ut unde\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 131,\n    \"title\": \"qui ea incidunt quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 132,\n    \"title\": \"qui molestiae voluptatibus velit iure harum quisquam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 133,\n    \"title\": \"et labore eos enim rerum consequatur sunt\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 134,\n    \"title\": \"molestiae doloribus et laborum quod ea\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 135,\n    \"title\": \"facere ipsa nam eum voluptates reiciendis vero qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 136,\n    \"title\": \"asperiores illo tempora fuga sed ut quasi adipisci\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 137,\n    \"title\": \"qui sit non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 138,\n    \"title\": \"placeat minima consequatur rem qui ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 7,\n    \"id\": 139,\n    \"title\": \"consequatur doloribus id possimus voluptas a voluptatem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 7,\n    \"id\": 140,\n    \"title\": \"aut consectetur in blanditiis deserunt quia sed laboriosam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 141,\n    \"title\": \"explicabo consectetur debitis voluptates quas quae culpa rerum non\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 142,\n    \"title\": \"maiores accusantium architecto necessitatibus reiciendis ea aut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 143,\n    \"title\": \"eum non recusandae cupiditate animi\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 144,\n    \"title\": \"ut eum exercitationem sint\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 145,\n    \"title\": \"beatae qui ullam incidunt voluptatem non nisi aliquam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 146,\n    \"title\": \"molestiae suscipit ratione nihil odio libero impedit vero totam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 147,\n    \"title\": \"eum itaque quod reprehenderit et facilis dolor autem ut\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 148,\n    \"title\": \"esse quas et quo quasi exercitationem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 149,\n    \"title\": \"animi voluptas quod perferendis est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 150,\n    \"title\": \"eos amet tempore laudantium fugit a\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 151,\n    \"title\": \"accusamus adipisci dicta qui quo ea explicabo sed vero\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 152,\n    \"title\": \"odit eligendi recusandae doloremque cumque non\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 153,\n    \"title\": \"ea aperiam consequatur qui repellat eos\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 8,\n    \"id\": 154,\n    \"title\": \"rerum non ex sapiente\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 155,\n    \"title\": \"voluptatem nobis consequatur et assumenda magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 156,\n    \"title\": \"nam quia quia nulla repellat assumenda quibusdam sit nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 157,\n    \"title\": \"dolorem veniam quisquam deserunt repellendus\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 158,\n    \"title\": \"debitis vitae delectus et harum accusamus aut deleniti a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 159,\n    \"title\": \"debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 8,\n    \"id\": 160,\n    \"title\": \"et praesentium aliquam est\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 161,\n    \"title\": \"ex hic consequuntur earum omnis alias ut occaecati culpa\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 162,\n    \"title\": \"omnis laboriosam molestias animi sunt dolore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 163,\n    \"title\": \"natus corrupti maxime laudantium et voluptatem laboriosam odit\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 164,\n    \"title\": \"reprehenderit quos aut aut consequatur est sed\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 165,\n    \"title\": \"fugiat perferendis sed aut quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 166,\n    \"title\": \"quos quo possimus suscipit minima ut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 167,\n    \"title\": \"et quis minus quo a asperiores molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 168,\n    \"title\": \"recusandae quia qui sunt libero\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 169,\n    \"title\": \"ea odio perferendis officiis\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 170,\n    \"title\": \"quisquam aliquam quia doloribus aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 171,\n    \"title\": \"fugiat aut voluptatibus corrupti deleniti velit iste odio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 172,\n    \"title\": \"et provident amet rerum consectetur et voluptatum\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 173,\n    \"title\": \"harum ad aperiam quis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 174,\n    \"title\": \"similique aut quo\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 175,\n    \"title\": \"laudantium eius officia perferendis provident perspiciatis asperiores\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 176,\n    \"title\": \"magni soluta corrupti ut maiores rem quidem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 177,\n    \"title\": \"et placeat temporibus voluptas est tempora quos quibusdam\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 9,\n    \"id\": 178,\n    \"title\": \"nesciunt itaque commodi tempore\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 179,\n    \"title\": \"omnis consequuntur cupiditate impedit itaque ipsam quo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 9,\n    \"id\": 180,\n    \"title\": \"debitis nisi et dolorem repellat et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 181,\n    \"title\": \"ut cupiditate sequi aliquam fuga maiores\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 182,\n    \"title\": \"inventore saepe cumque et aut illum enim\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 183,\n    \"title\": \"omnis nulla eum aliquam distinctio\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 184,\n    \"title\": \"molestias modi perferendis perspiciatis\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 185,\n    \"title\": \"voluptates dignissimos sed doloribus animi quaerat aut\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 186,\n    \"title\": \"explicabo odio est et\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 187,\n    \"title\": \"consequuntur animi possimus\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 188,\n    \"title\": \"vel non beatae est\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 189,\n    \"title\": \"culpa eius et voluptatem et\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 190,\n    \"title\": \"accusamus sint iusto et voluptatem exercitationem\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 191,\n    \"title\": \"temporibus atque distinctio omnis eius impedit tempore molestias pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 192,\n    \"title\": \"ut quas possimus exercitationem sint voluptates\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 193,\n    \"title\": \"rerum debitis voluptatem qui eveniet tempora distinctio a\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 194,\n    \"title\": \"sed ut vero sit molestiae\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 10,\n    \"id\": 195,\n    \"title\": \"rerum ex veniam mollitia voluptatibus pariatur\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 196,\n    \"title\": \"consequuntur aut ut fugit similique\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 197,\n    \"title\": \"dignissimos quo nobis earum saepe\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 198,\n    \"title\": \"quis eius est sint explicabo\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 199,\n    \"title\": \"numquam repellendus a magnam\",\n    \"completed\": true\n  },\n  {\n    \"userId\": 10,\n    \"id\": 200,\n    \"title\": \"ipsam aperiam voluptates qui\",\n    \"completed\": false\n  }\n]",
+ "Name": "staticdata",
+ "DefinitionName": "eg_JSONArray_staticdata",
+ "Source": "https://jsonplaceholder.typicode.com/todos",
+ "data": [
+  {
+   "userId": 1,
+   "id": 1,
+   "title": "delectus aut autem",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 2,
+   "title": "quis ut nam facilis et officia qui",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 3,
+   "title": "fugiat veniam minus",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 4,
+   "title": "et porro tempora",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 5,
+   "title": "laboriosam mollitia et enim quasi adipisci quia provident illum",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 6,
+   "title": "qui ullam ratione quibusdam voluptatem quia omnis",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 7,
+   "title": "illo expedita consequatur quia in",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 8,
+   "title": "quo adipisci enim quam ut ab",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 9,
+   "title": "molestiae perspiciatis ipsa",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 10,
+   "title": "illo est ratione doloremque quia maiores aut",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 11,
+   "title": "vero rerum temporibus dolor",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 12,
+   "title": "ipsa repellendus fugit nisi",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 13,
+   "title": "et doloremque nulla",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 14,
+   "title": "repellendus sunt dolores architecto voluptatum",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 15,
+   "title": "ab voluptatum amet voluptas",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 16,
+   "title": "accusamus eos facilis sint et aut voluptatem",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 17,
+   "title": "quo laboriosam deleniti aut qui",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 18,
+   "title": "dolorum est consequatur ea mollitia in culpa",
+   "completed": false
+  },
+  {
+   "userId": 1,
+   "id": 19,
+   "title": "molestiae ipsa aut voluptatibus pariatur dolor nihil",
+   "completed": true
+  },
+  {
+   "userId": 1,
+   "id": 20,
+   "title": "ullam nobis libero sapiente ad optio sint",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 21,
+   "title": "suscipit repellat esse quibusdam voluptatem incidunt",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 22,
+   "title": "distinctio vitae autem nihil ut molestias quo",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 23,
+   "title": "et itaque necessitatibus maxime molestiae qui quas velit",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 24,
+   "title": "adipisci non ad dicta qui amet quaerat doloribus ea",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 25,
+   "title": "voluptas quo tenetur perspiciatis explicabo natus",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 26,
+   "title": "aliquam aut quasi",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 27,
+   "title": "veritatis pariatur delectus",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 28,
+   "title": "nesciunt totam sit blanditiis sit",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 29,
+   "title": "laborum aut in quam",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 30,
+   "title": "nemo perspiciatis repellat ut dolor libero commodi blanditiis omnis",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 31,
+   "title": "repudiandae totam in est sint facere fuga",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 32,
+   "title": "earum doloribus ea doloremque quis",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 33,
+   "title": "sint sit aut vero",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 34,
+   "title": "porro aut necessitatibus eaque distinctio",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 35,
+   "title": "repellendus veritatis molestias dicta incidunt",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 36,
+   "title": "excepturi deleniti adipisci voluptatem et neque optio illum ad",
+   "completed": true
+  },
+  {
+   "userId": 2,
+   "id": 37,
+   "title": "sunt cum tempora",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 38,
+   "title": "totam quia non",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 39,
+   "title": "doloremque quibusdam asperiores libero corrupti illum qui omnis",
+   "completed": false
+  },
+  {
+   "userId": 2,
+   "id": 40,
+   "title": "totam atque quo nesciunt",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 41,
+   "title": "aliquid amet impedit consequatur aspernatur placeat eaque fugiat suscipit",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 42,
+   "title": "rerum perferendis error quia ut eveniet",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 43,
+   "title": "tempore ut sint quis recusandae",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 44,
+   "title": "cum debitis quis accusamus doloremque ipsa natus sapiente omnis",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 45,
+   "title": "velit soluta adipisci molestias reiciendis harum",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 46,
+   "title": "vel voluptatem repellat nihil placeat corporis",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 47,
+   "title": "nam qui rerum fugiat accusamus",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 48,
+   "title": "sit reprehenderit omnis quia",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 49,
+   "title": "ut necessitatibus aut maiores debitis officia blanditiis velit et",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 50,
+   "title": "cupiditate necessitatibus ullam aut quis dolor voluptate",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 51,
+   "title": "distinctio exercitationem ab doloribus",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 52,
+   "title": "nesciunt dolorum quis recusandae ad pariatur ratione",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 53,
+   "title": "qui labore est occaecati recusandae aliquid quam",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 54,
+   "title": "quis et est ut voluptate quam dolor",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 55,
+   "title": "voluptatum omnis minima qui occaecati provident nulla voluptatem ratione",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 56,
+   "title": "deleniti ea temporibus enim",
+   "completed": true
+  },
+  {
+   "userId": 3,
+   "id": 57,
+   "title": "pariatur et magnam ea doloribus similique voluptatem rerum quia",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 58,
+   "title": "est dicta totam qui explicabo doloribus qui dignissimos",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 59,
+   "title": "perspiciatis velit id laborum placeat iusto et aliquam odio",
+   "completed": false
+  },
+  {
+   "userId": 3,
+   "id": 60,
+   "title": "et sequi qui architecto ut adipisci",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 61,
+   "title": "odit optio omnis qui sunt",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 62,
+   "title": "et placeat et tempore aspernatur sint numquam",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 63,
+   "title": "doloremque aut dolores quidem fuga qui nulla",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 64,
+   "title": "voluptas consequatur qui ut quia magnam nemo esse",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 65,
+   "title": "fugiat pariatur ratione ut asperiores necessitatibus magni",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 66,
+   "title": "rerum eum molestias autem voluptatum sit optio",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 67,
+   "title": "quia voluptatibus voluptatem quos similique maiores repellat",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 68,
+   "title": "aut id perspiciatis voluptatem iusto",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 69,
+   "title": "doloribus sint dolorum ab adipisci itaque dignissimos aliquam suscipit",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 70,
+   "title": "ut sequi accusantium et mollitia delectus sunt",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 71,
+   "title": "aut velit saepe ullam",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 72,
+   "title": "praesentium facilis facere quis harum voluptatibus voluptatem eum",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 73,
+   "title": "sint amet quia totam corporis qui exercitationem commodi",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 74,
+   "title": "expedita tempore nobis eveniet laborum maiores",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 75,
+   "title": "occaecati adipisci est possimus totam",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 76,
+   "title": "sequi dolorem sed",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 77,
+   "title": "maiores aut nesciunt delectus exercitationem vel assumenda eligendi at",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 78,
+   "title": "reiciendis est magnam amet nemo iste recusandae impedit quaerat",
+   "completed": false
+  },
+  {
+   "userId": 4,
+   "id": 79,
+   "title": "eum ipsa maxime ut",
+   "completed": true
+  },
+  {
+   "userId": 4,
+   "id": 80,
+   "title": "tempore molestias dolores rerum sequi voluptates ipsum consequatur",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 81,
+   "title": "suscipit qui totam",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 82,
+   "title": "voluptates eum voluptas et dicta",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 83,
+   "title": "quidem at rerum quis ex aut sit quam",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 84,
+   "title": "sunt veritatis ut voluptate",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 85,
+   "title": "et quia ad iste a",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 86,
+   "title": "incidunt ut saepe autem",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 87,
+   "title": "laudantium quae eligendi consequatur quia et vero autem",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 88,
+   "title": "vitae aut excepturi laboriosam sint aliquam et et accusantium",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 89,
+   "title": "sequi ut omnis et",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 90,
+   "title": "molestiae nisi accusantium tenetur dolorem et",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 91,
+   "title": "nulla quis consequatur saepe qui id expedita",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 92,
+   "title": "in omnis laboriosam",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 93,
+   "title": "odio iure consequatur molestiae quibusdam necessitatibus quia sint",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 94,
+   "title": "facilis modi saepe mollitia",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 95,
+   "title": "vel nihil et molestiae iusto assumenda nemo quo ut",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 96,
+   "title": "nobis suscipit ducimus enim asperiores voluptas",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 97,
+   "title": "dolorum laboriosam eos qui iure aliquam",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 98,
+   "title": "debitis accusantium ut quo facilis nihil quis sapiente necessitatibus",
+   "completed": true
+  },
+  {
+   "userId": 5,
+   "id": 99,
+   "title": "neque voluptates ratione",
+   "completed": false
+  },
+  {
+   "userId": 5,
+   "id": 100,
+   "title": "excepturi a et neque qui expedita vel voluptate",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 101,
+   "title": "explicabo enim cumque porro aperiam occaecati minima",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 102,
+   "title": "sed ab consequatur",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 103,
+   "title": "non sunt delectus illo nulla tenetur enim omnis",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 104,
+   "title": "excepturi non laudantium quo",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 105,
+   "title": "totam quia dolorem et illum repellat voluptas optio",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 106,
+   "title": "ad illo quis voluptatem temporibus",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 107,
+   "title": "praesentium facilis omnis laudantium fugit ad iusto nihil nesciunt",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 108,
+   "title": "a eos eaque nihil et exercitationem incidunt delectus",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 109,
+   "title": "autem temporibus harum quisquam in culpa",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 110,
+   "title": "aut aut ea corporis",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 111,
+   "title": "magni accusantium labore et id quis provident",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 112,
+   "title": "consectetur impedit quisquam qui deserunt non rerum consequuntur eius",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 113,
+   "title": "quia atque aliquam sunt impedit voluptatum rerum assumenda nisi",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 114,
+   "title": "cupiditate quos possimus corporis quisquam exercitationem beatae",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 115,
+   "title": "sed et ea eum",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 116,
+   "title": "ipsa dolores vel facilis ut",
+   "completed": true
+  },
+  {
+   "userId": 6,
+   "id": 117,
+   "title": "sequi quae est et qui qui eveniet asperiores",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 118,
+   "title": "quia modi consequatur vero fugiat",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 119,
+   "title": "corporis ducimus ea perspiciatis iste",
+   "completed": false
+  },
+  {
+   "userId": 6,
+   "id": 120,
+   "title": "dolorem laboriosam vel voluptas et aliquam quasi",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 121,
+   "title": "inventore aut nihil minima laudantium hic qui omnis",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 122,
+   "title": "provident aut nobis culpa",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 123,
+   "title": "esse et quis iste est earum aut impedit",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 124,
+   "title": "qui consectetur id",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 125,
+   "title": "aut quasi autem iste tempore illum possimus",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 126,
+   "title": "ut asperiores perspiciatis veniam ipsum rerum saepe",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 127,
+   "title": "voluptatem libero consectetur rerum ut",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 128,
+   "title": "eius omnis est qui voluptatem autem",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 129,
+   "title": "rerum culpa quis harum",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 130,
+   "title": "nulla aliquid eveniet harum laborum libero alias ut unde",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 131,
+   "title": "qui ea incidunt quis",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 132,
+   "title": "qui molestiae voluptatibus velit iure harum quisquam",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 133,
+   "title": "et labore eos enim rerum consequatur sunt",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 134,
+   "title": "molestiae doloribus et laborum quod ea",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 135,
+   "title": "facere ipsa nam eum voluptates reiciendis vero qui",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 136,
+   "title": "asperiores illo tempora fuga sed ut quasi adipisci",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 137,
+   "title": "qui sit non",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 138,
+   "title": "placeat minima consequatur rem qui ut",
+   "completed": true
+  },
+  {
+   "userId": 7,
+   "id": 139,
+   "title": "consequatur doloribus id possimus voluptas a voluptatem",
+   "completed": false
+  },
+  {
+   "userId": 7,
+   "id": 140,
+   "title": "aut consectetur in blanditiis deserunt quia sed laboriosam",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 141,
+   "title": "explicabo consectetur debitis voluptates quas quae culpa rerum non",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 142,
+   "title": "maiores accusantium architecto necessitatibus reiciendis ea aut",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 143,
+   "title": "eum non recusandae cupiditate animi",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 144,
+   "title": "ut eum exercitationem sint",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 145,
+   "title": "beatae qui ullam incidunt voluptatem non nisi aliquam",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 146,
+   "title": "molestiae suscipit ratione nihil odio libero impedit vero totam",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 147,
+   "title": "eum itaque quod reprehenderit et facilis dolor autem ut",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 148,
+   "title": "esse quas et quo quasi exercitationem",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 149,
+   "title": "animi voluptas quod perferendis est",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 150,
+   "title": "eos amet tempore laudantium fugit a",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 151,
+   "title": "accusamus adipisci dicta qui quo ea explicabo sed vero",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 152,
+   "title": "odit eligendi recusandae doloremque cumque non",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 153,
+   "title": "ea aperiam consequatur qui repellat eos",
+   "completed": false
+  },
+  {
+   "userId": 8,
+   "id": 154,
+   "title": "rerum non ex sapiente",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 155,
+   "title": "voluptatem nobis consequatur et assumenda magnam",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 156,
+   "title": "nam quia quia nulla repellat assumenda quibusdam sit nobis",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 157,
+   "title": "dolorem veniam quisquam deserunt repellendus",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 158,
+   "title": "debitis vitae delectus et harum accusamus aut deleniti a",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 159,
+   "title": "debitis adipisci quibusdam aliquam sed dolore ea praesentium nobis",
+   "completed": true
+  },
+  {
+   "userId": 8,
+   "id": 160,
+   "title": "et praesentium aliquam est",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 161,
+   "title": "ex hic consequuntur earum omnis alias ut occaecati culpa",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 162,
+   "title": "omnis laboriosam molestias animi sunt dolore",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 163,
+   "title": "natus corrupti maxime laudantium et voluptatem laboriosam odit",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 164,
+   "title": "reprehenderit quos aut aut consequatur est sed",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 165,
+   "title": "fugiat perferendis sed aut quidem",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 166,
+   "title": "quos quo possimus suscipit minima ut",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 167,
+   "title": "et quis minus quo a asperiores molestiae",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 168,
+   "title": "recusandae quia qui sunt libero",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 169,
+   "title": "ea odio perferendis officiis",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 170,
+   "title": "quisquam aliquam quia doloribus aut",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 171,
+   "title": "fugiat aut voluptatibus corrupti deleniti velit iste odio",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 172,
+   "title": "et provident amet rerum consectetur et voluptatum",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 173,
+   "title": "harum ad aperiam quis",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 174,
+   "title": "similique aut quo",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 175,
+   "title": "laudantium eius officia perferendis provident perspiciatis asperiores",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 176,
+   "title": "magni soluta corrupti ut maiores rem quidem",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 177,
+   "title": "et placeat temporibus voluptas est tempora quos quibusdam",
+   "completed": false
+  },
+  {
+   "userId": 9,
+   "id": 178,
+   "title": "nesciunt itaque commodi tempore",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 179,
+   "title": "omnis consequuntur cupiditate impedit itaque ipsam quo",
+   "completed": true
+  },
+  {
+   "userId": 9,
+   "id": 180,
+   "title": "debitis nisi et dolorem repellat et",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 181,
+   "title": "ut cupiditate sequi aliquam fuga maiores",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 182,
+   "title": "inventore saepe cumque et aut illum enim",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 183,
+   "title": "omnis nulla eum aliquam distinctio",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 184,
+   "title": "molestias modi perferendis perspiciatis",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 185,
+   "title": "voluptates dignissimos sed doloribus animi quaerat aut",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 186,
+   "title": "explicabo odio est et",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 187,
+   "title": "consequuntur animi possimus",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 188,
+   "title": "vel non beatae est",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 189,
+   "title": "culpa eius et voluptatem et",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 190,
+   "title": "accusamus sint iusto et voluptatem exercitationem",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 191,
+   "title": "temporibus atque distinctio omnis eius impedit tempore molestias pariatur",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 192,
+   "title": "ut quas possimus exercitationem sint voluptates",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 193,
+   "title": "rerum debitis voluptatem qui eveniet tempora distinctio a",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 194,
+   "title": "sed ut vero sit molestiae",
+   "completed": false
+  },
+  {
+   "userId": 10,
+   "id": 195,
+   "title": "rerum ex veniam mollitia voluptatibus pariatur",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 196,
+   "title": "consequuntur aut ut fugit similique",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 197,
+   "title": "dignissimos quo nobis earum saepe",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 198,
+   "title": "quis eius est sint explicabo",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 199,
+   "title": "numquam repellendus a magnam",
+   "completed": true
+  },
+  {
+   "userId": 10,
+   "id": 200,
+   "title": "ipsam aperiam voluptates qui",
+   "completed": false
   }
- },
- "eg_SearchBox_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_SearchBox",
-  "Name": "script",
-  "DefinitionName": "eg_SearchBox_script",
-  "Directives": []
- },
- "eg_SearchBox_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_SearchBox",
-  "Name": "style",
-  "DefinitionName": "eg_SearchBox_style"
- },
- "eg_WorldMap_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_WorldMap",
-  "Name": "template",
-  "DefinitionName": "eg_WorldMap_template",
-  "Hash": "Txxmbc1sp"
- },
- "eg_WorldMap_staticdata": {
-  "Type": "StaticData",
-  "DefLoaders": [
-   "DefinedAs",
-   "DataType",
-   "Src"
-  ],
-  "DefBuilders": [
-   "ContentCSV",
-   "ContentTXT",
-   "ContentJSON",
-   "ContentJS"
-  ],
-  "DefFinalizers": [
-   "Code",
-   "RequireData"
-  ],
-  "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
-  "DefName": null,
-  "Parent": "eg_WorldMap",
-  "Name": "staticdata",
-  "DefinitionName": "eg_WorldMap_staticdata",
-  "Source": "https://jsonplaceholder.typicode.com/users",
-  "data": [
-   {
-    "id": 1,
-    "name": "Leanne Graham",
-    "username": "Bret",
-    "email": "Sincere@april.biz",
-    "address": {
-     "street": "Kulas Light",
-     "suite": "Apt. 556",
-     "city": "Gwenborough",
-     "zipcode": "92998-3874",
-     "geo": {
-      "lat": "-37.3159",
-      "lng": "81.1496"
-     }
-    },
-    "phone": "1-770-736-8031 x56442",
-    "website": "hildegard.org",
-    "company": {
-     "name": "Romaguera-Crona",
-     "catchPhrase": "Multi-layered client-server neural-net",
-     "bs": "harness real-time e-markets"
+ ]
+},  
+
+eg_GitHubAPI_template: {
+ "Parent": "eg_GitHubAPI",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_GitHubAPI_template",
+ "Hash": "Tx130qf1i"
+},  
+
+eg_GitHubAPI_state: {
+ "Parent": "eg_GitHubAPI",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "search": "",
+ "name": "",
+ "location": "",
+ "bio": "",
+ "Name": "state",
+ "DefinitionName": "eg_GitHubAPI_state"
+},  
+
+eg_GitHubAPI_script: {
+ "Parent": "eg_GitHubAPI",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_GitHubAPI_script",
+ "Directives": []
+},  
+
+eg_ColorSelector_template: {
+ "Parent": "eg_ColorSelector",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_ColorSelector_template",
+ "Hash": "Tx145sdaa"
+},  
+
+eg_ColorSelector_state: {
+ "Parent": "eg_ColorSelector",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "hue": 130,
+ "sat": 50,
+ "lum": 50,
+ "Name": "state",
+ "DefinitionName": "eg_ColorSelector_state"
+},  
+
+eg_DateNumberPicker_template: {
+ "Parent": "eg_DateNumberPicker",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_DateNumberPicker_template",
+ "Hash": "Tx1j17irn"
+},  
+
+eg_DateNumberPicker_state: {
+ "Parent": "eg_DateNumberPicker",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "day": 1,
+ "month": 1,
+ "year": 2022,
+ "ordering": [
+  "year",
+  "month",
+  "day"
+ ],
+ "Name": "state",
+ "DefinitionName": "eg_DateNumberPicker_state"
+},  
+
+eg_DateNumberPicker_script: {
+ "Parent": "eg_DateNumberPicker",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_DateNumberPicker_script",
+ "Directives": []
+},  
+
+eg_DateNumberPicker_style: {
+ "Parent": "eg_DateNumberPicker",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_DateNumberPicker_style"
+},  
+
+eg_PrimeSieve_template: {
+ "Parent": "eg_PrimeSieve",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_PrimeSieve_template",
+ "Hash": "Txxn6m9dp"
+},  
+
+eg_PrimeSieve_state: {
+ "Parent": "eg_PrimeSieve",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "number": 64,
+ "Name": "state",
+ "DefinitionName": "eg_PrimeSieve_state"
+},  
+
+eg_PrimeSieve_script: {
+ "Parent": "eg_PrimeSieve",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_PrimeSieve_script",
+ "Directives": []
+},  
+
+eg_PrimeSieve_style: {
+ "Parent": "eg_PrimeSieve",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_PrimeSieve_style"
+},  
+
+eg_Scatter_template: {
+ "Parent": "eg_Scatter",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Scatter_template",
+ "Hash": "Tx1ejsk79"
+},  
+
+eg_Scatter_staticdata: {
+ "Parent": "eg_Scatter",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
+ "Name": "staticdata",
+ "DefinitionName": "eg_Scatter_staticdata",
+ "Source": "https://jsonplaceholder.typicode.com/users",
+ "data": [
+  {
+   "id": 1,
+   "name": "Leanne Graham",
+   "username": "Bret",
+   "email": "Sincere@april.biz",
+   "address": {
+    "street": "Kulas Light",
+    "suite": "Apt. 556",
+    "city": "Gwenborough",
+    "zipcode": "92998-3874",
+    "geo": {
+     "lat": "-37.3159",
+     "lng": "81.1496"
     }
    },
-   {
-    "id": 2,
-    "name": "Ervin Howell",
-    "username": "Antonette",
-    "email": "Shanna@melissa.tv",
-    "address": {
-     "street": "Victor Plains",
-     "suite": "Suite 879",
-     "city": "Wisokyburgh",
-     "zipcode": "90566-7771",
-     "geo": {
-      "lat": "-43.9509",
-      "lng": "-34.4618"
-     }
-    },
-    "phone": "010-692-6593 x09125",
-    "website": "anastasia.net",
-    "company": {
-     "name": "Deckow-Crist",
-     "catchPhrase": "Proactive didactic contingency",
-     "bs": "synergize scalable supply-chains"
-    }
-   },
-   {
-    "id": 3,
-    "name": "Clementine Bauch",
-    "username": "Samantha",
-    "email": "Nathan@yesenia.net",
-    "address": {
-     "street": "Douglas Extension",
-     "suite": "Suite 847",
-     "city": "McKenziehaven",
-     "zipcode": "59590-4157",
-     "geo": {
-      "lat": "-68.6102",
-      "lng": "-47.0653"
-     }
-    },
-    "phone": "1-463-123-4447",
-    "website": "ramiro.info",
-    "company": {
-     "name": "Romaguera-Jacobson",
-     "catchPhrase": "Face to face bifurcated interface",
-     "bs": "e-enable strategic applications"
-    }
-   },
-   {
-    "id": 4,
-    "name": "Patricia Lebsack",
-    "username": "Karianne",
-    "email": "Julianne.OConner@kory.org",
-    "address": {
-     "street": "Hoeger Mall",
-     "suite": "Apt. 692",
-     "city": "South Elvis",
-     "zipcode": "53919-4257",
-     "geo": {
-      "lat": "29.4572",
-      "lng": "-164.2990"
-     }
-    },
-    "phone": "493-170-9623 x156",
-    "website": "kale.biz",
-    "company": {
-     "name": "Robel-Corkery",
-     "catchPhrase": "Multi-tiered zero tolerance productivity",
-     "bs": "transition cutting-edge web services"
-    }
-   },
-   {
-    "id": 5,
-    "name": "Chelsey Dietrich",
-    "username": "Kamren",
-    "email": "Lucio_Hettinger@annie.ca",
-    "address": {
-     "street": "Skiles Walks",
-     "suite": "Suite 351",
-     "city": "Roscoeview",
-     "zipcode": "33263",
-     "geo": {
-      "lat": "-31.8129",
-      "lng": "62.5342"
-     }
-    },
-    "phone": "(254)954-1289",
-    "website": "demarco.info",
-    "company": {
-     "name": "Keebler LLC",
-     "catchPhrase": "User-centric fault-tolerant solution",
-     "bs": "revolutionize end-to-end systems"
-    }
-   },
-   {
-    "id": 6,
-    "name": "Mrs. Dennis Schulist",
-    "username": "Leopoldo_Corkery",
-    "email": "Karley_Dach@jasper.info",
-    "address": {
-     "street": "Norberto Crossing",
-     "suite": "Apt. 950",
-     "city": "South Christy",
-     "zipcode": "23505-1337",
-     "geo": {
-      "lat": "-71.4197",
-      "lng": "71.7478"
-     }
-    },
-    "phone": "1-477-935-8478 x6430",
-    "website": "ola.org",
-    "company": {
-     "name": "Considine-Lockman",
-     "catchPhrase": "Synchronised bottom-line interface",
-     "bs": "e-enable innovative applications"
-    }
-   },
-   {
-    "id": 7,
-    "name": "Kurtis Weissnat",
-    "username": "Elwyn.Skiles",
-    "email": "Telly.Hoeger@billy.biz",
-    "address": {
-     "street": "Rex Trail",
-     "suite": "Suite 280",
-     "city": "Howemouth",
-     "zipcode": "58804-1099",
-     "geo": {
-      "lat": "24.8918",
-      "lng": "21.8984"
-     }
-    },
-    "phone": "210.067.6132",
-    "website": "elvis.io",
-    "company": {
-     "name": "Johns Group",
-     "catchPhrase": "Configurable multimedia task-force",
-     "bs": "generate enterprise e-tailers"
-    }
-   },
-   {
-    "id": 8,
-    "name": "Nicholas Runolfsdottir V",
-    "username": "Maxime_Nienow",
-    "email": "Sherwood@rosamond.me",
-    "address": {
-     "street": "Ellsworth Summit",
-     "suite": "Suite 729",
-     "city": "Aliyaview",
-     "zipcode": "45169",
-     "geo": {
-      "lat": "-14.3990",
-      "lng": "-120.7677"
-     }
-    },
-    "phone": "586.493.6943 x140",
-    "website": "jacynthe.com",
-    "company": {
-     "name": "Abernathy Group",
-     "catchPhrase": "Implemented secondary concept",
-     "bs": "e-enable extensible e-tailers"
-    }
-   },
-   {
-    "id": 9,
-    "name": "Glenna Reichert",
-    "username": "Delphine",
-    "email": "Chaim_McDermott@dana.io",
-    "address": {
-     "street": "Dayna Park",
-     "suite": "Suite 449",
-     "city": "Bartholomebury",
-     "zipcode": "76495-3109",
-     "geo": {
-      "lat": "24.6463",
-      "lng": "-168.8889"
-     }
-    },
-    "phone": "(775)976-6794 x41206",
-    "website": "conrad.com",
-    "company": {
-     "name": "Yost and Sons",
-     "catchPhrase": "Switchable contextually-based project",
-     "bs": "aggregate real-time technologies"
-    }
-   },
-   {
-    "id": 10,
-    "name": "Clementina DuBuque",
-    "username": "Moriah.Stanton",
-    "email": "Rey.Padberg@karina.biz",
-    "address": {
-     "street": "Kattie Turnpike",
-     "suite": "Suite 198",
-     "city": "Lebsackbury",
-     "zipcode": "31428-2261",
-     "geo": {
-      "lat": "-38.2386",
-      "lng": "57.2232"
-     }
-    },
-    "phone": "024-648-3804",
-    "website": "ambrose.net",
-    "company": {
-     "name": "Hoeger LLC",
-     "catchPhrase": "Centralized empowering task-force",
-     "bs": "target end-to-end models"
-    }
-   }
-  ]
- },
- "eg_WorldMap_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_WorldMap",
-  "Name": "style",
-  "DefinitionName": "eg_WorldMap_style"
- },
- "eg_Memory_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_Memory",
-  "Name": "template",
-  "DefinitionName": "eg_Memory_template",
-  "Hash": "Tx1rfau7j"
- },
- "eg_Memory_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "message": "Good luck!",
-  "win": false,
-  "cards": [],
-  "revealed": [],
-  "lastflipped": null,
-  "failedflip": null,
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_Memory",
-  "Name": "state",
-  "DefinitionName": "eg_Memory_state"
- },
- "eg_Memory_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_Memory",
-  "Name": "script",
-  "DefinitionName": "eg_Memory_script",
-  "Directives": []
- },
- "eg_Memory_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_Memory",
-  "Name": "style",
-  "DefinitionName": "eg_Memory_style"
- },
- "eg_ConwayGameOfLife_template": {
-  "Type": "Template",
-  "DefFinalizers": [
-   "TemplatePrebuild"
-  ],
-  "DefName": null,
-  "Parent": "eg_ConwayGameOfLife",
-  "Name": "template",
-  "DefinitionName": "eg_ConwayGameOfLife_template",
-  "Hash": "Tx1spom4d"
- },
- "eg_ConwayGameOfLife_state": {
-  "Type": "State",
-  "Directives": [
-   "bindMount",
-   "bindUnmount"
-  ],
-  "Store": null,
-  "playing": false,
-  "speed": 3,
-  "cells": {
-   "10": {
-    "11": true
-   },
-   "11": {
-    "12": true
-   },
-   "12": {
-    "10": true,
-    "11": true,
-    "12": true
+   "phone": "1-770-736-8031 x56442",
+   "website": "hildegard.org",
+   "company": {
+    "name": "Romaguera-Crona",
+    "catchPhrase": "Multi-layered client-server neural-net",
+    "bs": "harness real-time e-markets"
    }
   },
-  "Content": "",
-  "DefName": null,
-  "Parent": "eg_ConwayGameOfLife",
-  "Name": "state",
-  "DefinitionName": "eg_ConwayGameOfLife_state"
- },
- "eg_ConwayGameOfLife_script": {
-  "Type": "Script",
-  "lifecycle": null,
-  "DefBuilders": [
-   "Content|ScriptAutoExport",
-   "Code"
-  ],
-  "DefName": null,
-  "Parent": "eg_ConwayGameOfLife",
-  "Name": "script",
-  "DefinitionName": "eg_ConwayGameOfLife_script",
-  "Directives": []
- },
- "eg_ConwayGameOfLife_style": {
-  "Type": "Style",
-  "DefFinalizers": [
-   "Content|PrefixCSS"
-  ],
-  "DefName": null,
-  "Parent": "eg_ConwayGameOfLife",
-  "Name": "style",
-  "DefinitionName": "eg_ConwayGameOfLife_style"
- }
-};
+  {
+   "id": 2,
+   "name": "Ervin Howell",
+   "username": "Antonette",
+   "email": "Shanna@melissa.tv",
+   "address": {
+    "street": "Victor Plains",
+    "suite": "Suite 879",
+    "city": "Wisokyburgh",
+    "zipcode": "90566-7771",
+    "geo": {
+     "lat": "-43.9509",
+     "lng": "-34.4618"
+    }
+   },
+   "phone": "010-692-6593 x09125",
+   "website": "anastasia.net",
+   "company": {
+    "name": "Deckow-Crist",
+    "catchPhrase": "Proactive didactic contingency",
+    "bs": "synergize scalable supply-chains"
+   }
+  },
+  {
+   "id": 3,
+   "name": "Clementine Bauch",
+   "username": "Samantha",
+   "email": "Nathan@yesenia.net",
+   "address": {
+    "street": "Douglas Extension",
+    "suite": "Suite 847",
+    "city": "McKenziehaven",
+    "zipcode": "59590-4157",
+    "geo": {
+     "lat": "-68.6102",
+     "lng": "-47.0653"
+    }
+   },
+   "phone": "1-463-123-4447",
+   "website": "ramiro.info",
+   "company": {
+    "name": "Romaguera-Jacobson",
+    "catchPhrase": "Face to face bifurcated interface",
+    "bs": "e-enable strategic applications"
+   }
+  },
+  {
+   "id": 4,
+   "name": "Patricia Lebsack",
+   "username": "Karianne",
+   "email": "Julianne.OConner@kory.org",
+   "address": {
+    "street": "Hoeger Mall",
+    "suite": "Apt. 692",
+    "city": "South Elvis",
+    "zipcode": "53919-4257",
+    "geo": {
+     "lat": "29.4572",
+     "lng": "-164.2990"
+    }
+   },
+   "phone": "493-170-9623 x156",
+   "website": "kale.biz",
+   "company": {
+    "name": "Robel-Corkery",
+    "catchPhrase": "Multi-tiered zero tolerance productivity",
+    "bs": "transition cutting-edge web services"
+   }
+  },
+  {
+   "id": 5,
+   "name": "Chelsey Dietrich",
+   "username": "Kamren",
+   "email": "Lucio_Hettinger@annie.ca",
+   "address": {
+    "street": "Skiles Walks",
+    "suite": "Suite 351",
+    "city": "Roscoeview",
+    "zipcode": "33263",
+    "geo": {
+     "lat": "-31.8129",
+     "lng": "62.5342"
+    }
+   },
+   "phone": "(254)954-1289",
+   "website": "demarco.info",
+   "company": {
+    "name": "Keebler LLC",
+    "catchPhrase": "User-centric fault-tolerant solution",
+    "bs": "revolutionize end-to-end systems"
+   }
+  },
+  {
+   "id": 6,
+   "name": "Mrs. Dennis Schulist",
+   "username": "Leopoldo_Corkery",
+   "email": "Karley_Dach@jasper.info",
+   "address": {
+    "street": "Norberto Crossing",
+    "suite": "Apt. 950",
+    "city": "South Christy",
+    "zipcode": "23505-1337",
+    "geo": {
+     "lat": "-71.4197",
+     "lng": "71.7478"
+    }
+   },
+   "phone": "1-477-935-8478 x6430",
+   "website": "ola.org",
+   "company": {
+    "name": "Considine-Lockman",
+    "catchPhrase": "Synchronised bottom-line interface",
+    "bs": "e-enable innovative applications"
+   }
+  },
+  {
+   "id": 7,
+   "name": "Kurtis Weissnat",
+   "username": "Elwyn.Skiles",
+   "email": "Telly.Hoeger@billy.biz",
+   "address": {
+    "street": "Rex Trail",
+    "suite": "Suite 280",
+    "city": "Howemouth",
+    "zipcode": "58804-1099",
+    "geo": {
+     "lat": "24.8918",
+     "lng": "21.8984"
+    }
+   },
+   "phone": "210.067.6132",
+   "website": "elvis.io",
+   "company": {
+    "name": "Johns Group",
+    "catchPhrase": "Configurable multimedia task-force",
+    "bs": "generate enterprise e-tailers"
+   }
+  },
+  {
+   "id": 8,
+   "name": "Nicholas Runolfsdottir V",
+   "username": "Maxime_Nienow",
+   "email": "Sherwood@rosamond.me",
+   "address": {
+    "street": "Ellsworth Summit",
+    "suite": "Suite 729",
+    "city": "Aliyaview",
+    "zipcode": "45169",
+    "geo": {
+     "lat": "-14.3990",
+     "lng": "-120.7677"
+    }
+   },
+   "phone": "586.493.6943 x140",
+   "website": "jacynthe.com",
+   "company": {
+    "name": "Abernathy Group",
+    "catchPhrase": "Implemented secondary concept",
+    "bs": "e-enable extensible e-tailers"
+   }
+  },
+  {
+   "id": 9,
+   "name": "Glenna Reichert",
+   "username": "Delphine",
+   "email": "Chaim_McDermott@dana.io",
+   "address": {
+    "street": "Dayna Park",
+    "suite": "Suite 449",
+    "city": "Bartholomebury",
+    "zipcode": "76495-3109",
+    "geo": {
+     "lat": "24.6463",
+     "lng": "-168.8889"
+    }
+   },
+   "phone": "(775)976-6794 x41206",
+   "website": "conrad.com",
+   "company": {
+    "name": "Yost and Sons",
+    "catchPhrase": "Switchable contextually-based project",
+    "bs": "aggregate real-time technologies"
+   }
+  },
+  {
+   "id": 10,
+   "name": "Clementina DuBuque",
+   "username": "Moriah.Stanton",
+   "email": "Rey.Padberg@karina.biz",
+   "address": {
+    "street": "Kattie Turnpike",
+    "suite": "Suite 198",
+    "city": "Lebsackbury",
+    "zipcode": "31428-2261",
+    "geo": {
+     "lat": "-38.2386",
+     "lng": "57.2232"
+    }
+   },
+   "phone": "024-648-3804",
+   "website": "ambrose.net",
+   "company": {
+    "name": "Hoeger LLC",
+    "catchPhrase": "Centralized empowering task-force",
+    "bs": "target end-to-end models"
+   }
+  }
+ ]
+},  
 
-// Modulo.js - Copyright 2023 - LGPL 2.1 - https://modulojs.org/
-window.ModuloPrevious = window.Modulo; // Avoid overwriting Modulo
+eg_Scatter_style: {
+ "Parent": "eg_Scatter",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_Scatter_style"
+},  
+
+eg_FlexibleForm_template: {
+ "Parent": "eg_FlexibleForm",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_FlexibleForm_template",
+ "Hash": "Tx1ah1gte"
+},  
+
+eg_FlexibleForm_state: {
+ "Parent": "eg_FlexibleForm",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "name": "Spartacus",
+ "topic": "On the treatment of Thracian gladiators",
+ "subscribe": true,
+ "private": false,
+ "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
+ "fields": [
+  "name",
+  "topic",
+  "comment",
+  "private",
+  "subscribe"
+ ],
+ "Name": "state",
+ "DefinitionName": "eg_FlexibleForm_state"
+},  
+
+eg_FlexibleFormWithAPI_template: {
+ "Parent": "eg_FlexibleFormWithAPI",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_FlexibleFormWithAPI_template",
+ "Hash": "Tx16ihg4b"
+},  
+
+eg_FlexibleFormWithAPI_state: {
+ "Parent": "eg_FlexibleFormWithAPI",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "user": 1337,
+ "topic": "On the treatment of Thracian gladiators",
+ "comment": "So, like, Romans claim to be all about virtue, but do you know what I think? I think they stink.",
+ "fields": [
+  "user",
+  "topic",
+  "comment"
+ ],
+ "posts": [],
+ "Name": "state",
+ "DefinitionName": "eg_FlexibleFormWithAPI_state"
+},  
+
+eg_FlexibleFormWithAPI_script: {
+ "Parent": "eg_FlexibleFormWithAPI",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_FlexibleFormWithAPI_script",
+ "Directives": []
+},  
+
+eg_Components_template: {
+ "Parent": "eg_Components",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Components_template",
+ "Hash": "Tx1gk8lc3"
+},  
+
+eg_OscillatingGraph_template: {
+ "Parent": "eg_OscillatingGraph",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_OscillatingGraph_template",
+ "Hash": "Txxqlg44u"
+},  
+
+eg_OscillatingGraph_state: {
+ "Parent": "eg_OscillatingGraph",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "playing": false,
+ "speed": 10,
+ "easing": "linear",
+ "align": "flex-end",
+ "tick": 1,
+ "width": 10,
+ "anim": 10,
+ "pulse": 1,
+ "offset": 1,
+ "data": [],
+ "Name": "state",
+ "DefinitionName": "eg_OscillatingGraph_state"
+},  
+
+eg_OscillatingGraph_script: {
+ "Parent": "eg_OscillatingGraph",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_OscillatingGraph_script",
+ "Directives": []
+},  
+
+eg_OscillatingGraph_style: {
+ "Parent": "eg_OscillatingGraph",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_OscillatingGraph_style"
+},  
+
+eg_Search_template: {
+ "Parent": "eg_Search",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Search_template",
+ "Hash": "Tx1l103gn"
+},  
+
+eg_Search_state: {
+ "Parent": "eg_Search",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "search": "the lord of the rings",
+ "loading": false,
+ "results": [],
+ "Name": "state",
+ "DefinitionName": "eg_Search_state"
+},  
+
+eg_Search_script: {
+ "Parent": "eg_Search",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_Search_script",
+ "Directives": []
+},  
+
+eg_SearchBox_template: {
+ "Parent": "eg_SearchBox",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_SearchBox_template",
+ "Hash": "Tx1k5cj37"
+},  
+
+eg_SearchBox_state: {
+ "Parent": "eg_SearchBox",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "search": "",
+ "results": [],
+ "loading": false,
+ "Name": "state",
+ "DefinitionName": "eg_SearchBox_state"
+},  
+
+eg_SearchBox_staticdata: {
+ "Parent": "eg_SearchBox",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "\n{\n  apiBase: 'https://openlibrary.org/search.json',\n  cover: 'https://covers.openlibrary.org/b/id/',\n  gif: 'https://cdnjs.cloudflare.com/ajax/libs/' +\n    'semantic-ui/0.16.1/images/loader-large.gif'\n}\n",
+ "Name": "staticdata",
+ "DefinitionName": "eg_SearchBox_staticdata",
+ "data": {
+  "apiBase": "https://openlibrary.org/search.json",
+  "cover": "https://covers.openlibrary.org/b/id/",
+  "gif": "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif"
+ }
+},  
+
+eg_SearchBox_script: {
+ "Parent": "eg_SearchBox",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_SearchBox_script",
+ "Directives": []
+},  
+
+eg_SearchBox_style: {
+ "Parent": "eg_SearchBox",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_SearchBox_style"
+},  
+
+eg_WorldMap_template: {
+ "Parent": "eg_WorldMap",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_WorldMap_template",
+ "Hash": "Txxmbc1sp"
+},  
+
+eg_WorldMap_staticdata: {
+ "Parent": "eg_WorldMap",
+ "DefName": null,
+ "Type": "StaticData",
+ "DefLoaders": [
+  "DefinedAs",
+  "DataType",
+  "Src"
+ ],
+ "DefBuilders": [
+  "ContentCSV",
+  "ContentTXT",
+  "ContentJSON",
+  "ContentJS"
+ ],
+ "DefFinalizers": [
+  "Code",
+  "RequireData"
+ ],
+ "Content": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\",\n    \"address\": {\n      \"street\": \"Victor Plains\",\n      \"suite\": \"Suite 879\",\n      \"city\": \"Wisokyburgh\",\n      \"zipcode\": \"90566-7771\",\n      \"geo\": {\n        \"lat\": \"-43.9509\",\n        \"lng\": \"-34.4618\"\n      }\n    },\n    \"phone\": \"010-692-6593 x09125\",\n    \"website\": \"anastasia.net\",\n    \"company\": {\n      \"name\": \"Deckow-Crist\",\n      \"catchPhrase\": \"Proactive didactic contingency\",\n      \"bs\": \"synergize scalable supply-chains\"\n    }\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Clementine Bauch\",\n    \"username\": \"Samantha\",\n    \"email\": \"Nathan@yesenia.net\",\n    \"address\": {\n      \"street\": \"Douglas Extension\",\n      \"suite\": \"Suite 847\",\n      \"city\": \"McKenziehaven\",\n      \"zipcode\": \"59590-4157\",\n      \"geo\": {\n        \"lat\": \"-68.6102\",\n        \"lng\": \"-47.0653\"\n      }\n    },\n    \"phone\": \"1-463-123-4447\",\n    \"website\": \"ramiro.info\",\n    \"company\": {\n      \"name\": \"Romaguera-Jacobson\",\n      \"catchPhrase\": \"Face to face bifurcated interface\",\n      \"bs\": \"e-enable strategic applications\"\n    }\n  },\n  {\n    \"id\": 4,\n    \"name\": \"Patricia Lebsack\",\n    \"username\": \"Karianne\",\n    \"email\": \"Julianne.OConner@kory.org\",\n    \"address\": {\n      \"street\": \"Hoeger Mall\",\n      \"suite\": \"Apt. 692\",\n      \"city\": \"South Elvis\",\n      \"zipcode\": \"53919-4257\",\n      \"geo\": {\n        \"lat\": \"29.4572\",\n        \"lng\": \"-164.2990\"\n      }\n    },\n    \"phone\": \"493-170-9623 x156\",\n    \"website\": \"kale.biz\",\n    \"company\": {\n      \"name\": \"Robel-Corkery\",\n      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n      \"bs\": \"transition cutting-edge web services\"\n    }\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Chelsey Dietrich\",\n    \"username\": \"Kamren\",\n    \"email\": \"Lucio_Hettinger@annie.ca\",\n    \"address\": {\n      \"street\": \"Skiles Walks\",\n      \"suite\": \"Suite 351\",\n      \"city\": \"Roscoeview\",\n      \"zipcode\": \"33263\",\n      \"geo\": {\n        \"lat\": \"-31.8129\",\n        \"lng\": \"62.5342\"\n      }\n    },\n    \"phone\": \"(254)954-1289\",\n    \"website\": \"demarco.info\",\n    \"company\": {\n      \"name\": \"Keebler LLC\",\n      \"catchPhrase\": \"User-centric fault-tolerant solution\",\n      \"bs\": \"revolutionize end-to-end systems\"\n    }\n  },\n  {\n    \"id\": 6,\n    \"name\": \"Mrs. Dennis Schulist\",\n    \"username\": \"Leopoldo_Corkery\",\n    \"email\": \"Karley_Dach@jasper.info\",\n    \"address\": {\n      \"street\": \"Norberto Crossing\",\n      \"suite\": \"Apt. 950\",\n      \"city\": \"South Christy\",\n      \"zipcode\": \"23505-1337\",\n      \"geo\": {\n        \"lat\": \"-71.4197\",\n        \"lng\": \"71.7478\"\n      }\n    },\n    \"phone\": \"1-477-935-8478 x6430\",\n    \"website\": \"ola.org\",\n    \"company\": {\n      \"name\": \"Considine-Lockman\",\n      \"catchPhrase\": \"Synchronised bottom-line interface\",\n      \"bs\": \"e-enable innovative applications\"\n    }\n  },\n  {\n    \"id\": 7,\n    \"name\": \"Kurtis Weissnat\",\n    \"username\": \"Elwyn.Skiles\",\n    \"email\": \"Telly.Hoeger@billy.biz\",\n    \"address\": {\n      \"street\": \"Rex Trail\",\n      \"suite\": \"Suite 280\",\n      \"city\": \"Howemouth\",\n      \"zipcode\": \"58804-1099\",\n      \"geo\": {\n        \"lat\": \"24.8918\",\n        \"lng\": \"21.8984\"\n      }\n    },\n    \"phone\": \"210.067.6132\",\n    \"website\": \"elvis.io\",\n    \"company\": {\n      \"name\": \"Johns Group\",\n      \"catchPhrase\": \"Configurable multimedia task-force\",\n      \"bs\": \"generate enterprise e-tailers\"\n    }\n  },\n  {\n    \"id\": 8,\n    \"name\": \"Nicholas Runolfsdottir V\",\n    \"username\": \"Maxime_Nienow\",\n    \"email\": \"Sherwood@rosamond.me\",\n    \"address\": {\n      \"street\": \"Ellsworth Summit\",\n      \"suite\": \"Suite 729\",\n      \"city\": \"Aliyaview\",\n      \"zipcode\": \"45169\",\n      \"geo\": {\n        \"lat\": \"-14.3990\",\n        \"lng\": \"-120.7677\"\n      }\n    },\n    \"phone\": \"586.493.6943 x140\",\n    \"website\": \"jacynthe.com\",\n    \"company\": {\n      \"name\": \"Abernathy Group\",\n      \"catchPhrase\": \"Implemented secondary concept\",\n      \"bs\": \"e-enable extensible e-tailers\"\n    }\n  },\n  {\n    \"id\": 9,\n    \"name\": \"Glenna Reichert\",\n    \"username\": \"Delphine\",\n    \"email\": \"Chaim_McDermott@dana.io\",\n    \"address\": {\n      \"street\": \"Dayna Park\",\n      \"suite\": \"Suite 449\",\n      \"city\": \"Bartholomebury\",\n      \"zipcode\": \"76495-3109\",\n      \"geo\": {\n        \"lat\": \"24.6463\",\n        \"lng\": \"-168.8889\"\n      }\n    },\n    \"phone\": \"(775)976-6794 x41206\",\n    \"website\": \"conrad.com\",\n    \"company\": {\n      \"name\": \"Yost and Sons\",\n      \"catchPhrase\": \"Switchable contextually-based project\",\n      \"bs\": \"aggregate real-time technologies\"\n    }\n  },\n  {\n    \"id\": 10,\n    \"name\": \"Clementina DuBuque\",\n    \"username\": \"Moriah.Stanton\",\n    \"email\": \"Rey.Padberg@karina.biz\",\n    \"address\": {\n      \"street\": \"Kattie Turnpike\",\n      \"suite\": \"Suite 198\",\n      \"city\": \"Lebsackbury\",\n      \"zipcode\": \"31428-2261\",\n      \"geo\": {\n        \"lat\": \"-38.2386\",\n        \"lng\": \"57.2232\"\n      }\n    },\n    \"phone\": \"024-648-3804\",\n    \"website\": \"ambrose.net\",\n    \"company\": {\n      \"name\": \"Hoeger LLC\",\n      \"catchPhrase\": \"Centralized empowering task-force\",\n      \"bs\": \"target end-to-end models\"\n    }\n  }\n]",
+ "Name": "staticdata",
+ "DefinitionName": "eg_WorldMap_staticdata",
+ "Source": "https://jsonplaceholder.typicode.com/users",
+ "data": [
+  {
+   "id": 1,
+   "name": "Leanne Graham",
+   "username": "Bret",
+   "email": "Sincere@april.biz",
+   "address": {
+    "street": "Kulas Light",
+    "suite": "Apt. 556",
+    "city": "Gwenborough",
+    "zipcode": "92998-3874",
+    "geo": {
+     "lat": "-37.3159",
+     "lng": "81.1496"
+    }
+   },
+   "phone": "1-770-736-8031 x56442",
+   "website": "hildegard.org",
+   "company": {
+    "name": "Romaguera-Crona",
+    "catchPhrase": "Multi-layered client-server neural-net",
+    "bs": "harness real-time e-markets"
+   }
+  },
+  {
+   "id": 2,
+   "name": "Ervin Howell",
+   "username": "Antonette",
+   "email": "Shanna@melissa.tv",
+   "address": {
+    "street": "Victor Plains",
+    "suite": "Suite 879",
+    "city": "Wisokyburgh",
+    "zipcode": "90566-7771",
+    "geo": {
+     "lat": "-43.9509",
+     "lng": "-34.4618"
+    }
+   },
+   "phone": "010-692-6593 x09125",
+   "website": "anastasia.net",
+   "company": {
+    "name": "Deckow-Crist",
+    "catchPhrase": "Proactive didactic contingency",
+    "bs": "synergize scalable supply-chains"
+   }
+  },
+  {
+   "id": 3,
+   "name": "Clementine Bauch",
+   "username": "Samantha",
+   "email": "Nathan@yesenia.net",
+   "address": {
+    "street": "Douglas Extension",
+    "suite": "Suite 847",
+    "city": "McKenziehaven",
+    "zipcode": "59590-4157",
+    "geo": {
+     "lat": "-68.6102",
+     "lng": "-47.0653"
+    }
+   },
+   "phone": "1-463-123-4447",
+   "website": "ramiro.info",
+   "company": {
+    "name": "Romaguera-Jacobson",
+    "catchPhrase": "Face to face bifurcated interface",
+    "bs": "e-enable strategic applications"
+   }
+  },
+  {
+   "id": 4,
+   "name": "Patricia Lebsack",
+   "username": "Karianne",
+   "email": "Julianne.OConner@kory.org",
+   "address": {
+    "street": "Hoeger Mall",
+    "suite": "Apt. 692",
+    "city": "South Elvis",
+    "zipcode": "53919-4257",
+    "geo": {
+     "lat": "29.4572",
+     "lng": "-164.2990"
+    }
+   },
+   "phone": "493-170-9623 x156",
+   "website": "kale.biz",
+   "company": {
+    "name": "Robel-Corkery",
+    "catchPhrase": "Multi-tiered zero tolerance productivity",
+    "bs": "transition cutting-edge web services"
+   }
+  },
+  {
+   "id": 5,
+   "name": "Chelsey Dietrich",
+   "username": "Kamren",
+   "email": "Lucio_Hettinger@annie.ca",
+   "address": {
+    "street": "Skiles Walks",
+    "suite": "Suite 351",
+    "city": "Roscoeview",
+    "zipcode": "33263",
+    "geo": {
+     "lat": "-31.8129",
+     "lng": "62.5342"
+    }
+   },
+   "phone": "(254)954-1289",
+   "website": "demarco.info",
+   "company": {
+    "name": "Keebler LLC",
+    "catchPhrase": "User-centric fault-tolerant solution",
+    "bs": "revolutionize end-to-end systems"
+   }
+  },
+  {
+   "id": 6,
+   "name": "Mrs. Dennis Schulist",
+   "username": "Leopoldo_Corkery",
+   "email": "Karley_Dach@jasper.info",
+   "address": {
+    "street": "Norberto Crossing",
+    "suite": "Apt. 950",
+    "city": "South Christy",
+    "zipcode": "23505-1337",
+    "geo": {
+     "lat": "-71.4197",
+     "lng": "71.7478"
+    }
+   },
+   "phone": "1-477-935-8478 x6430",
+   "website": "ola.org",
+   "company": {
+    "name": "Considine-Lockman",
+    "catchPhrase": "Synchronised bottom-line interface",
+    "bs": "e-enable innovative applications"
+   }
+  },
+  {
+   "id": 7,
+   "name": "Kurtis Weissnat",
+   "username": "Elwyn.Skiles",
+   "email": "Telly.Hoeger@billy.biz",
+   "address": {
+    "street": "Rex Trail",
+    "suite": "Suite 280",
+    "city": "Howemouth",
+    "zipcode": "58804-1099",
+    "geo": {
+     "lat": "24.8918",
+     "lng": "21.8984"
+    }
+   },
+   "phone": "210.067.6132",
+   "website": "elvis.io",
+   "company": {
+    "name": "Johns Group",
+    "catchPhrase": "Configurable multimedia task-force",
+    "bs": "generate enterprise e-tailers"
+   }
+  },
+  {
+   "id": 8,
+   "name": "Nicholas Runolfsdottir V",
+   "username": "Maxime_Nienow",
+   "email": "Sherwood@rosamond.me",
+   "address": {
+    "street": "Ellsworth Summit",
+    "suite": "Suite 729",
+    "city": "Aliyaview",
+    "zipcode": "45169",
+    "geo": {
+     "lat": "-14.3990",
+     "lng": "-120.7677"
+    }
+   },
+   "phone": "586.493.6943 x140",
+   "website": "jacynthe.com",
+   "company": {
+    "name": "Abernathy Group",
+    "catchPhrase": "Implemented secondary concept",
+    "bs": "e-enable extensible e-tailers"
+   }
+  },
+  {
+   "id": 9,
+   "name": "Glenna Reichert",
+   "username": "Delphine",
+   "email": "Chaim_McDermott@dana.io",
+   "address": {
+    "street": "Dayna Park",
+    "suite": "Suite 449",
+    "city": "Bartholomebury",
+    "zipcode": "76495-3109",
+    "geo": {
+     "lat": "24.6463",
+     "lng": "-168.8889"
+    }
+   },
+   "phone": "(775)976-6794 x41206",
+   "website": "conrad.com",
+   "company": {
+    "name": "Yost and Sons",
+    "catchPhrase": "Switchable contextually-based project",
+    "bs": "aggregate real-time technologies"
+   }
+  },
+  {
+   "id": 10,
+   "name": "Clementina DuBuque",
+   "username": "Moriah.Stanton",
+   "email": "Rey.Padberg@karina.biz",
+   "address": {
+    "street": "Kattie Turnpike",
+    "suite": "Suite 198",
+    "city": "Lebsackbury",
+    "zipcode": "31428-2261",
+    "geo": {
+     "lat": "-38.2386",
+     "lng": "57.2232"
+    }
+   },
+   "phone": "024-648-3804",
+   "website": "ambrose.net",
+   "company": {
+    "name": "Hoeger LLC",
+    "catchPhrase": "Centralized empowering task-force",
+    "bs": "target end-to-end models"
+   }
+  }
+ ]
+},  
+
+eg_WorldMap_style: {
+ "Parent": "eg_WorldMap",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_WorldMap_style"
+},  
+
+eg_Memory_template: {
+ "Parent": "eg_Memory",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_Memory_template",
+ "Hash": "Tx1rfau7j"
+},  
+
+eg_Memory_state: {
+ "Parent": "eg_Memory",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "message": "Good luck!",
+ "win": false,
+ "cards": [],
+ "revealed": [],
+ "lastflipped": null,
+ "failedflip": null,
+ "Name": "state",
+ "DefinitionName": "eg_Memory_state"
+},  
+
+eg_Memory_script: {
+ "Parent": "eg_Memory",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_Memory_script",
+ "Directives": []
+},  
+
+eg_Memory_style: {
+ "Parent": "eg_Memory",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_Memory_style"
+},  
+
+eg_ConwayGameOfLife_template: {
+ "Parent": "eg_ConwayGameOfLife",
+ "DefName": null,
+ "Type": "Template",
+ "DefFinalizers": [
+  "TemplatePrebuild"
+ ],
+ "Name": "template",
+ "DefinitionName": "eg_ConwayGameOfLife_template",
+ "Hash": "Tx1spom4d"
+},  
+
+eg_ConwayGameOfLife_state: {
+ "Parent": "eg_ConwayGameOfLife",
+ "DefName": null,
+ "Type": "State",
+ "Directives": [
+  "bindMount",
+  "bindUnmount"
+ ],
+ "Store": null,
+ "Content": "",
+ "playing": false,
+ "speed": 3,
+ "cells": {
+  "10": {
+   "11": true
+  },
+  "11": {
+   "12": true
+  },
+  "12": {
+   "10": true,
+   "11": true,
+   "12": true
+  }
+ },
+ "Name": "state",
+ "DefinitionName": "eg_ConwayGameOfLife_state"
+},  
+
+eg_ConwayGameOfLife_script: {
+ "Parent": "eg_ConwayGameOfLife",
+ "DefName": null,
+ "Type": "Script",
+ "lifecycle": null,
+ "DefBuilders": [
+  "Content|ScriptAutoExport",
+  "Code"
+ ],
+ "Name": "script",
+ "DefinitionName": "eg_ConwayGameOfLife_script",
+ "Directives": []
+},  
+
+eg_ConwayGameOfLife_style: {
+ "Parent": "eg_ConwayGameOfLife",
+ "DefName": null,
+ "Type": "Style",
+ "DefFinalizers": [
+  "Content|PrefixCSS"
+ ],
+ "Name": "style",
+ "DefinitionName": "eg_ConwayGameOfLife_style"
+},  
+ };
+window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
     constructor(parentModulo = null, registryKeys = null) {
@@ -20869,30 +21170,16 @@ window.Modulo = class Modulo {
         }
     }
 
-    loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const { mergeAttrs } = this.registry.utils;
-        const isModulo = node => this.getNodeModuloType(node, quietErrors);
-        const defArray = [];
-        for (const node of Array.from(elem.children).filter(isModulo)) {
-            const partTypeLC = this.getNodeModuloType(node); // Lowercase
-            const def = mergeAttrs(node, this.config[partTypeLC]);
-            defArray.push(def);
-            if (partTypeLC in def && !def[partTypeLC]) {
-                delete def[partTypeLC]; // Remove attribute name used as type
-            }
-            def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
-            def.DefinedAs = def.DefinedAs || null; // defaults to: Name, Type
-            def.DefName = def.Name || null; // -name only, null otherwise
-            def.Parent = def.Parent || parentName;
-        }
-        this.repeatProcessors(defArray, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
-        return defArray;
+    loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
+        this.loader = new this.registry.core.DOMLoader(this);
+        return this.loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
-    preprocessAndDefine() {
+    preprocessAndDefine(callback) {
+        callback = callback ? callback : (() => {});
         this.fetchQueue.wait(() => {
             this.repeatProcessors(null, 'DefBuilders', [ ], () => {
-                this.repeatProcessors(null, 'DefFinalizers', [ ]);
+                this.repeatProcessors(null, 'DefFinalizers', [ ], callback);
             });
         });
     }
@@ -20935,34 +21222,6 @@ window.Modulo = class Modulo {
         }
     }
 
-    getNodeModuloType(node, quietErrors = false) {
-        const { tagName, nodeType, textContent } = node;
-        const err = msg => quietErrors || console.error('Modulo Load:', msg);
-        if (nodeType !== 1) { // Text nodes, comment nodes, etc
-            if (nodeType === 3 && textContent && textContent.trim()) {
-                err(`Unexpected text found near definitions: ${textContent}`);
-            }
-            return null;
-        }
-
-        let cPartName = tagName.toLowerCase();
-        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
-            for (const attrUnknownCase of node.getAttributeNames()) {
-                const attr = attrUnknownCase.toLowerCase();
-                if (attr in this.registry.dom && !node.getAttribute(attr)) {
-                    cPartName = attr; // Is a CPart, but has empty string value
-                }
-                break; // Always exit, since we are only looking at first iter
-            }
-        }
-        if (!(cPartName in this.registry.dom)) {
-            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
-            err(`${ cPartName }. CParts: ${ Object.keys(this.registry.dom) }`);
-            return null;
-        }
-        return cPartName;
-    }
-
     applyProcessors(conf, processors) {
         for (const name of processors) {
             const [ attrName, aliasedName ] = name.split('|');
@@ -20970,6 +21229,9 @@ window.Modulo = class Modulo {
                 const value = conf[attrName];
                 delete conf[attrName];
                 const funcName = (aliasedName || attrName).toLowerCase();
+                // TODO: Look at this.registry.cparts[conf.Type][funcName] first
+                // const  { cparts, processors } = this.registry;
+                // const func = funcName in cparts[conf.Type] ? cparts[conf.Type][funcName] : processors[funcName];
                 const result = this.registry.processors[funcName](this, conf, value);
                 return result === true ? 'wait' : true;
             }
@@ -20979,7 +21241,7 @@ window.Modulo = class Modulo {
 
     assert(value, ...info) {
         if (!value) {
-            console.error(...info);
+            console.error(this.id, ...info);
             throw new Error(`Modulo Error: "${Array.from(info).join(' ')}"`);
         }
     }
@@ -21002,6 +21264,131 @@ window.modulo = (new Modulo(null, [
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
 }
+// TODO: Replace with hardcoded definitions, nameToHash, and modules (with impossible X-hashes)
+/* TODO: Change to include this logic: for (const name of Object.keys(this.nameToHash).sort()) {
+            const hash = this.nameToHash[name]; // Alphabetic by name, not hash
+*/
+// NOTE: ALWAYS assumes "name" in nameToHash is a JS safe variable name
+window.modulo.DEVLIB_SOURCE = (`
+<Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
+    <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+              {% for css in assets.cssAssetsArray %}{{ css|safe }}
+              {% endfor %}</Template>
+</Artifact>
+<Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
+    <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
+                {{ assets.moduleSources|get:hash|safe }}
+            };
+            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
+        {% endif %}{% endif %}{% endfor %}
+        window.moduloBuild.definitions = { {% for name, value in definitions %}
+            {% if name|first is not "_" %}{{ name }}: {{ value|json:1|safe }}, {% endif %} 
+        {% endfor %} };
+        {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
+        modulo.start(window.moduloBuild);
+        {% for name in assets.mainRequires %}
+            modulo.assets.require("{{ name|escapejs }}");
+        {% endfor %}
+    </Template>
+</Artifact>
+<Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
+    <Script>
+        for (const elem of window.document.querySelectorAll('*')) { // Annotate modulo-original-html
+            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
+                elem.setAttribute('modulo-original-html', elem.originalHTML);
+            }
+        }
+        script.exports.prefix = '<!DOCTYPE html><html><head>' + (window.document.head ? window.document.head.innerHTML : '');
+        script.exports.interfix = '</head><body>' + (window.document.body ? window.document.body.innerHTML : '');
+        script.exports.suffix = '</body></html>';
+    </S` + `cript>
+    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
+        {{ script.interfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
+        {{ script.suffix|safe }}</Template>
+</Artifact>
+`).replace(/^\s+/gm, '');
+
+modulo.register('core', class DOMLoader {
+    constructor(modulo) {
+        this.modulo = modulo;
+    }
+
+    loadFromDOM(elem, parentName = null, quietErrors = false) {
+        const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        const arr = [];
+        const { get, set } = modulo.registry.utils;
+        for (const node of elem.children) { // Loop through all child nodes
+            const partTypeLC = this.getDefType(node, quietErrors);
+            if (partTypeLC === null) {
+                continue; // This will be null if this is an ignorable node
+            }
+            // Valid CPart definition, now create the "def" object
+            const def = { Parent: parentName, DefinedAs: null, DefName: null };
+            arr.push(Object.assign(def, this.modulo.config[partTypeLC]));
+            def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
+            for (let name of node.getAttributeNames()) { // Loop through attrs
+                let value = node.getAttribute(name);
+                if (partTypeLC === name && !value) { // e.g. <cpart Script>
+                    continue; // This is the "Type" attribute itself, skip
+                }
+                const tmp_IsData = name.endsWith(':'); // RM TODO
+                if (name.endsWith(':')) {
+                    const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
+                    value = isVar ? get(this.modulo, value) : JSON.parse(value);
+                    name = name.slice(0, -1);
+                }
+                if (tmp_IsData) {
+                    set(def, camelCase(name), value);
+                } else {
+                    def[camelCase(name)] = value; // Store "resolved" value in definition
+                }
+                // TODO: Delete above, make it just set, once that is the default path
+                //set(def, camelCase(name), value);
+            }
+        }
+        this.modulo.repeatProcessors(arr, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
+        return arr;
+    }
+
+    getDefType(node, quietErrors = false) {
+        const { tagName, nodeType, textContent } = node;
+        const dom = this.modulo.registry.dom;
+        const err = msg => quietErrors || console.error('Modulo Load:', msg);
+        if (nodeType !== 1) { // Text nodes, comment nodes, etc
+            if (nodeType === 3 && textContent && textContent.trim()) {
+                err(`Unexpected text found near definitions: ${textContent}`);
+            }
+            return null;
+        }
+
+        let cPartName = tagName.toLowerCase();
+        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
+            for (const attrUnknownCase of node.getAttributeNames()) {
+                const attr = attrUnknownCase.toLowerCase();
+                if (attr in dom && !node.getAttribute(attr)) {
+                    cPartName = attr; // Is a CPart, but has empty string value
+                }
+                break; // Always exit, since we are only looking at first iter
+            }
+        }
+        if (!(cPartName in dom)) {
+            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
+            err(`${ cPartName }. CParts: ${ Object.keys(dom) }`);
+            return null;
+        }
+        return cPartName;
+    }
+});
+
+/*
+modulo.register('processor', function templatedValue (modulo, def, value) {
+    // TODO: Add this in for |TemplatedValue syntax, for Artifacts, etc
+    const templater = new modulo.registry.engines.Templater(modulo, {});
+    def.Value = templater.render(modulo);
+});
+*/
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
@@ -21164,6 +21551,73 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
+modulo.register('cpart', class Artifact {
+    // TODO: Refactor Component logic to be shared with Artifact (maybe using
+    // preprocessors?). Refactor this to use something more generalized for
+    // children, so it shares code flow with component.
+    static build(modulo, def) {
+        const finish = (bundle) => {
+            const { saveFileAs, getBuiltHTML, hash, fetchBundleData } = modulo.registry.utils;
+            const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
+            //for (const child of children
+            const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
+            const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
+            let result = { exports: {} };
+            if (sDef) {
+                result = modulo.assets.require(sDef.DefinitionName);
+            }
+            const ctx = Object.assign({}, modulo, { script: result.exports });
+            ctx.bundle = bundledElems;
+            const templater = new modulo.registry.engines.Templater(modulo, tDef);
+            let code = templater.render(ctx);
+            if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
+                const tDef2 = Object.assign({}, tDef, {
+                    modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
+                    modes: {
+                        ['/' + '*-{-%']: templater.modes['{%'], // alias
+                        ['/' + '*-{-{']: templater.modes['{{'], // alias
+                        ['/' + '*-{-#']: templater.modes['{#'], // alias
+                        text: templater.modes.text,
+                    },
+                    Content: code,
+                    DefinitionName: tDef.DefinitionName + '_macro',
+                    Hash: undefined,
+                });
+                const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
+                //templater2.escapeText = s => s; // turn on safe all the time
+                code = templater2.render(ctx);
+            }
+            def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
+            if (def.name === 'html') { // TODO: Make this only happen during SSG
+                def.FileName = window.location.pathname.split('/').pop() || 'index.html';
+            }
+            def.OutputPath = saveFileAs(def.FileName, code);
+        }
+
+        const bundledElems = [];
+        if (def.bundle) {
+            for (const elem of document.querySelectorAll(def.bundle)) {
+                if (def.exclude && elem.matches(def.exclude)) {
+                    continue;
+                }
+                modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
+                    delete modulo.fetchQueue.data[elem.src || elem.href]; // clear cache
+                    elem.bundledContent = text;
+                });
+                bundledElems.push(elem);
+            }
+        }
+        if (def.remove) {
+            document.querySelectorAll(def.remove).forEach(elem => elem.remove());
+        }
+        modulo.fetchQueue.enqueueAll(() => finish(bundledElems));
+    }
+}, {
+    DefinedAs: 'name',
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+});
+
+
 /*
 modulo.config.reconciler = {
     directiveShortcuts: [ [ /^@/, 'component.event' ],
@@ -21171,6 +21625,7 @@ modulo.config.reconciler = {
     directives: [ 'component.event', 'component.dataProp' ],
 };
 */
+
 
 modulo.config.component = {
     mode: 'regular',
@@ -21372,6 +21827,7 @@ modulo.register('cpart', class Modulo { }, {
 
 modulo.register('cpart', class Library { }, {
     SetAttrs: 'config.component',
+    // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
     DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
 });
 
@@ -21416,22 +21872,6 @@ modulo.register('util', function stripWord (text) {
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
 });
 
-modulo.register('util', function mergeAttrs (elem, defaults) {
-    // TODO: Write unit tests for this
-    const camelcase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
-    const obj = Object.assign({}, defaults);
-    const dataPropNames = elem.dataPropsAttributeNames || false;
-    for (const name of elem.getAttributeNames()) {
-        const dataPropKey = dataPropNames && dataPropNames[name];
-        if (dataPropKey) {
-            obj[camelcase(dataPropKey)] = elem.dataProps[dataPropKey];
-        } else {
-            obj[camelcase(name)] = elem.getAttribute(name);
-        }
-    }
-    return obj;
-});
-
 modulo.register('util', function hash (str) {
     // Simple, insecure, "hashCode()" implementation. Returns base32 hash
     let h = 0;
@@ -21456,6 +21896,10 @@ modulo.register('util', function makeDiv(html) {
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
+});
+
+modulo.register('util', function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
@@ -21611,6 +22055,7 @@ modulo.register('core', class AssetManager {
         const { fetchBundleData } = this.modulo.registry.utils;
         fetchBundleData(this.modulo, bundleData => {
             //const results = this.cssAssetsArray;
+            // TODO: This should be replaced with Artifact system (#35)
             const results = { js: [], css: this.cssAssetsArray };
             results.js.push(this.modulo.assets.buildJavaScript());
             for (const bundle of bundleData) { // Loop through bundle data
@@ -21760,6 +22205,17 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+    /*
+    updateCallback() {
+        const { isolateClass, allSelectors } = this.def;
+        if (!isolateClass || allSelectors.length < 1) {
+            return;
+        }
+        for (const elem of this.element.querySelector(allSelectors.join(','))) {
+            elem.classList.add(isolateClass); // ensure always has class added
+        }
+    }
+    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });
@@ -22055,8 +22511,8 @@ modulo.register('engine', class Templater {
 
     tokenizeText(text) {
         // Join all modeTokens with | (OR in regex).
-        // Replace space with wildcard capture.
-        const re = '(' + this.modeTokens.join('|(').replace(/ +/g, ')(.+?)');
+        const { escapeRegExp } = this.modulo.registry.utils;
+        const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
         return text.split(RegExp(re)).filter(token => token !== undefined);
     }
 
@@ -22065,7 +22521,8 @@ modulo.register('engine', class Templater {
         this.stack = []; // Template tag stack
         this.output = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
-        for (const token of this.tokenizeText(text)) {
+        const tokens = this.tokenizeText(text);
+        for (const token of tokens) {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
@@ -22671,11 +23128,12 @@ modulo.register('util', function getBuiltHTML(modulo, opts = {}) {
     let head = '<head>' + window.document.head.innerHTML;
     let body = '<body>' + window.document.body.innerHTML;
     head += `<link rel="stylesheet" href="${ opts.cssFilePath }" /></head>`;
-    body += `<script src="${ opts.jsFilePath }"></script>`;
-    body += `<script>${ opts.jsInlineText }</script></body>`;
+    body += `<script src="${ opts.jsFilePath }"></s` + `cript>`;
+    body += `<script>${ opts.jsInlineText }</s` + `cript></body>`;
     return '<!DOCTYPE HTML><html>' + head + body + '</html>';
 });
 
+/*
 modulo.register('command', function build (modulo, opts = {}) {
     const { saveFileAs, getBuiltHTML, hash } = modulo.registry.utils;
     modulo.assets.bundleAssets((js, css) => {
@@ -22694,25 +23152,89 @@ modulo.register('command', function build (modulo, opts = {}) {
         }, 0);
     });
 });
+*/
 
-if (typeof document !== 'undefined' && !window.moduloBuild) {
-    window.document.addEventListener('DOMContentLoaded', () => modulo.fetchQueue.wait(() => {
-        const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-        if (cmd || window.moduloBuild) { // Command / already built: Run & exit
-            return cmd && modulo.registry.commands[cmd](modulo);
-        } // Else: Display "COMMANDS:" menu in console
-        const commandNames = Object.keys(modulo.registry.commands);
-        const href = 'window.location.href += ';
-        const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
-        const commandGetters = commandNames.map(cmd =>
-            ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
-        const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
-        new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
-    }));
-}
 
-if (typeof document !== 'undefined' && document.head) { // Browser environ
-    modulo.start(window.moduloBuild);
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
-}
+
+modulo.start(window.moduloBuild);
+
+modulo.assets.require("configuration");
+
+modulo.assets.require("x_DemoModal");
+
+modulo.assets.require("x_DemoChart");
+
+modulo.assets.require("x_ExampleBtn");
+
+modulo.assets.require("x_DemoSelector");
+
+modulo.assets.require("mws_Page");
+
+modulo.assets.require("mws_ProjectInfo");
+
+modulo.assets.require("mws_DevLogNav");
+
+modulo.assets.require("mws_DocSidebar");
+
+modulo.assets.require("mws_Demo");
+
+modulo.assets.require("mws_AllExamples");
+
+modulo.assets.require("mws_Section");
+
+modulo.assets.require("docseg_Templating_1");
+
+modulo.assets.require("docseg_Templating_PrepareCallback");
+
+modulo.assets.require("docseg_Templating_Comments");
+
+modulo.assets.require("docseg_Templating_Escaping");
+
+modulo.assets.require("docseg_Tutorial_P1");
+
+modulo.assets.require("docseg_Tutorial_P2");
+
+modulo.assets.require("docseg_Tutorial_P2_filters_demo");
+
+modulo.assets.require("docseg_Tutorial_P3_state_demo");
+
+modulo.assets.require("docseg_Tutorial_P3_state_bind");
+
+modulo.assets.require("eg_Hello");
+
+modulo.assets.require("eg_Simple");
+
+modulo.assets.require("eg_ToDo");
+
+modulo.assets.require("eg_JSON");
+
+modulo.assets.require("eg_JSONArray");
+
+modulo.assets.require("eg_GitHubAPI");
+
+modulo.assets.require("eg_ColorSelector");
+
+modulo.assets.require("eg_DateNumberPicker");
+
+modulo.assets.require("eg_PrimeSieve");
+
+modulo.assets.require("eg_Scatter");
+
+modulo.assets.require("eg_FlexibleForm");
+
+modulo.assets.require("eg_FlexibleFormWithAPI");
+
+modulo.assets.require("eg_Components");
+
+modulo.assets.require("eg_OscillatingGraph");
+
+modulo.assets.require("eg_Search");
+
+modulo.assets.require("eg_SearchBox");
+
+modulo.assets.require("eg_WorldMap");
+
+modulo.assets.require("eg_Memory");
+
+modulo.assets.require("eg_ConwayGameOfLife");
+
