@@ -200,7 +200,7 @@ window.modulo.DEVLIB_SOURCE = (`
             window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
         {% endif %}{% endif %}{% endfor %}
         window.moduloBuild.definitions = { {% for name, value in definitions %}
-            {% if name|first is not "_" %}{{ name }}: {{ value|json:1|safe }}, {% endif %} 
+            {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %} 
         {% endfor %} };
         {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
         modulo.start(window.moduloBuild);
@@ -464,7 +464,7 @@ modulo.register('cpart', class Artifact {
     // preprocessors?). Refactor this to use something more generalized for
     // children, so it shares code flow with component.
     static build(modulo, def) {
-        const finish = (bundle) => {
+        const finish = () => {
             const { saveFileAs, hash } = modulo.registry.utils;
             const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
             //for (const child of children
@@ -508,10 +508,12 @@ modulo.register('cpart', class Artifact {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
-                    delete modulo.fetchQueue.data[elem.src || elem.href]; // clear cache
-                    elem.bundledContent = text;
-                });
+                if (elem.src || elem.href) {
+                    modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
+                        delete modulo.fetchQueue.data[elem.src || elem.href];
+                        elem.bundledContent = text;
+                    });
+                }
                 bundledElems.push(elem);
             }
         }
@@ -1951,8 +1953,7 @@ modulo.register('command', function build (modulo, opts = {}) {
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
         } else {
-            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
-                build</a>: ${ opts.htmlFilePath }</h1>`;
+            window.document.body.innerHTML = '<h1><a href="?mod-cmd=build">&#10227; build</a></h1>';
             if (opts && opts.callback) {
                 opts.callback();
             }

@@ -200,7 +200,7 @@ window.modulo.DEVLIB_SOURCE = (`
             window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
         {% endif %}{% endif %}{% endfor %}
         window.moduloBuild.definitions = { {% for name, value in definitions %}
-            {% if name|first is not "_" %}{{ name }}: {{ value|json:1|safe }}, {% endif %} 
+            {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %} 
         {% endfor %} };
         {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
         modulo.start(window.moduloBuild);
@@ -464,7 +464,7 @@ modulo.register('cpart', class Artifact {
     // preprocessors?). Refactor this to use something more generalized for
     // children, so it shares code flow with component.
     static build(modulo, def) {
-        const finish = (bundle) => {
+        const finish = () => {
             const { saveFileAs, hash } = modulo.registry.utils;
             const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
             //for (const child of children
@@ -508,10 +508,12 @@ modulo.register('cpart', class Artifact {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
-                    delete modulo.fetchQueue.data[elem.src || elem.href]; // clear cache
-                    elem.bundledContent = text;
-                });
+                if (elem.src || elem.href) {
+                    modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
+                        delete modulo.fetchQueue.data[elem.src || elem.href];
+                        elem.bundledContent = text;
+                    });
+                }
                 bundledElems.push(elem);
             }
         }
@@ -1106,6 +1108,7 @@ modulo.register('cpart', class Template {
     DefFinalizers: [ 'TemplatePrebuild' ]
 });
 
+
 modulo.register('processor', function contentCSV (modulo, def, value) {
     const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
     def.Code = 'return ' + js;
@@ -1239,6 +1242,8 @@ modulo.register('cpart', class Script {
     lifecycle: null,
     DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
 });
+
+
 
 modulo.register('cpart', class State {
     static factoryCallback(renderObj, def, modulo) {
@@ -1520,7 +1525,7 @@ modulo.config.templater.tags = {
         const condition = condStructure.replace(/([XY])/g,
             (k, m) => tmplt.parseExpr(m === 'X' ? lHand : rHand));
         const start = `if (${condition}) {`;
-        return {start, end: '}'};
+        return { start, end: '}' };
     },
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
@@ -1548,7 +1553,7 @@ modulo.config.templater.tags = {
         const oldEndCode = stack.pop().end; // get rid of dangling for
         const start = `${varName}=true; ${oldEndCode} if (!${varName}) {`;
         const end = `}${varName} = false;`;
-        return {start, end, close: 'endfor'};
+        return { start, end, close: 'endfor' };
     },
 };
 
@@ -1810,6 +1815,7 @@ modulo.register('engine', class Reconciler {
             }
 
             if (!child && rival) { // we have less than rival, take rival
+                // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                 this.patch(cursor.parentNode, 'appendChild', rival);
                 this.patchAndDescendants(rival, 'Mount');
             }
@@ -1825,6 +1831,7 @@ modulo.register('engine', class Reconciler {
                     if (rival.hasAttribute('modulo-ignore')) {
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
+                        // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
@@ -1951,8 +1958,7 @@ modulo.register('command', function build (modulo, opts = {}) {
         if (artifacts.length > 0) {
             modulo.fetchQueue.enqueueAll(buildNext);
         } else {
-            window.document.body.innerHTML = `<h1><a href="?mod-cmd=build">&#10227;
-                build</a>: ${ opts.htmlFilePath }</h1>`;
+            window.document.body.innerHTML = '<h1><a href="?mod-cmd=build">&#10227; build</a></h1>';
             if (opts && opts.callback) {
                 opts.callback();
             }
