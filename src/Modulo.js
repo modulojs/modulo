@@ -222,10 +222,10 @@ modulo.register('core', class DOMLoader {
         const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
         const arr = [];
         const { get, set } = modulo.registry.utils;
-        for (const node of elem.children) { // Loop through all child nodes
+        for (const node of elem.children || []) {
             const partTypeLC = this.getDefType(node, quietErrors);
             if (node._moduloLoadedBy || partTypeLC === null) {
-                continue; // This will be null if this is an ignorable node
+                continue; // Already loaded, or an ignorable or silenced error
             }
             node._moduloLoadedBy = this.modulo.id; // First time loading, mark
             // Valid CPart definition, now create the "def" object
