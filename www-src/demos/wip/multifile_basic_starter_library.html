@@ -4,7 +4,7 @@
   ></Props>
 
   <Template
-      -src="/demos/wip/multifile_basic_starter_library_template.html"
+      -src="./multifile_basic_starter_library_template.html"
   ></Template>
 
   <!-- (Hint: The ="" syntax is for strings, while :='' is for other types) -->
@@ -15,7 +15,7 @@
       json:='{"more": "data"}'
   ></State>
 
-  <cpart Script>
+  <Script>
       // (Hint: All named functions defined at the top level will be exported)
       function addToList(payload) {
           state.items.push(payload);
@@ -23,7 +23,7 @@
       function increment() {
           state.num++;
       }
-  </cpart>
+  </Script>
 
   <!-- (Note: "cpart Script" and "/cpart" is necessary while embedded. When
   you move to a seprate file, use simply "Script" and "/Script") -->

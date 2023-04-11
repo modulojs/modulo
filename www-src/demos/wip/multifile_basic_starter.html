@@ -1,6 +1,5 @@
 <script Modulo
     src="/js/Modulo.js"
-    -src="/demos/wip/multifile_basic_starter_library.html"
 ></script>
 
 <hr />
@@ -8,3 +7,55 @@
 <hr />
 <x-HelloWorld label="Another one:"></x-HelloWorld>
 <hr />
+
+
+<template Modulo>
+<Component name="HelloWorld">
+  <Props
+      label
+  ></Props>
+
+  <Template
+      -src="./multifile_basic_starter_library_template.html"
+  ></Template>
+
+  <!-- (Hint: The ="" syntax is for strings, while :='' is for other types) -->
+  <State
+      message="Hello world"
+      num:=1
+      items:=[]
+      json:='{"more": "data"}'
+  ></State>
+
+  <Script>
+      // (Hint: All named functions defined at the top level will be exported)
+      function addToList(payload) {
+          state.items.push(payload);
+      }
+      function increment() {
+          state.num++;
+      }
+  </Script>
+
+  <!-- (Note: "cpart Script" and "/cpart" is necessary while embedded. When
+  you move to a seprate file, use simply "Script" and "/Script") -->
+
+  <Style>
+      /* (Hint: Use :host to reference the component itself) */
+      :host, button, span {
+          background-color: #B90183;
+          color: white;
+          margin: 20px;
+          border-radius: 5px;
+          display: inline-block;
+      }
+
+      /* (Hint: All selectors are automatically prefixed) */
+      button {
+          padding: 5px;
+          border: 3px solid white;
+      }
+  </Style>
+</Component>
+
+</template>
