@@ -1,3 +1,4 @@
+/* Modulo.js | (C) 2023 Michael Bethencourt | Use in compliance with LGPL 2.1 */
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -37,25 +38,9 @@ window.Modulo = class Modulo {
         }
     }
 
-    start(build = null) {
-        const elem = build && build.tagName ? build : window.document.head;
-        if (build && !build.tagName) {
-            if (build.loadedBy) {
-                return;
-            }
-            this.assets.modules = build.modules;
-            this.assets.nameToHash = build.nameToHash;
-            this.definitions = build.definitions;
-            build.loadedBy = this.id;
-        } else if (elem) { // Loadable tag exists, load sync/blocking
-            this.loadFromDOM(elem, null, true);
-            this.preprocessAndDefine();
-        } else { // Doesn't exist, wait for page to load
-            window.document.addEventListener('DOMContentLoaded', () => {
-                this.loadFromDOM(window.document.head, null, true);
-                this.preprocessAndDefine();
-            });
-        }
+    start(elem, callback = null) { // XXX DEAD CODE
+        this.loadFromDOM(elem, null, true);
+        this.preprocessAndDefine(callback);
     }
 
     register(type, cls, defaults = undefined) {
@@ -203,7 +188,9 @@ window.modulo.DEVLIB_SOURCE = (`
             {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %} 
         {% endfor %} };
         {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-        modulo.start(window.moduloBuild);
+        modulo.assets.modules = window.moduloBuild.modules;
+        modulo.assets.nameToHash = window.moduloBuild.nameToHash;
+        modulo.definitions = window.moduloBuild.definitions;
         {% for name in assets.mainRequires %}
             modulo.assets.require("{{ name|escapejs }}");
         {% endfor %}
@@ -235,11 +222,12 @@ modulo.register('core', class DOMLoader {
         const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
         const arr = [];
         const { get, set } = modulo.registry.utils;
-        for (const node of elem.children) { // Loop through all child nodes
+        for (const node of elem.children || []) {
             const partTypeLC = this.getDefType(node, quietErrors);
-            if (partTypeLC === null) {
-                continue; // This will be null if this is an ignorable node
+            if (node._moduloLoadedBy || partTypeLC === null) {
+                continue; // Already loaded, or an ignorable or silenced error
             }
+            node._moduloLoadedBy = this.modulo.id; // First time loading, mark
             // Valid CPart definition, now create the "def" object
             const def = { Parent: parentName, DefinedAs: null, DefName: null };
             arr.push(Object.assign(def, this.modulo.config[partTypeLC]));
@@ -249,7 +237,8 @@ modulo.register('core', class DOMLoader {
                 if (partTypeLC === name && !value) { // e.g. <cpart Script>
                     continue; // This is the "Type" attribute itself, skip
                 }
-                const tmp_IsData = name.endsWith(':'); // RM TODO
+                // TODO: Needs to delete below and uncomment set, make it just set, once that is the default path
+                const tmp_IsData = name.endsWith(':');
                 if (name.endsWith(':')) {
                     const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
                     value = isVar ? get(this.modulo, value) : JSON.parse(value);
@@ -260,7 +249,6 @@ modulo.register('core', class DOMLoader {
                 } else {
                     def[camelCase(name)] = value; // Store "resolved" value in definition
                 }
-                // TODO: Delete above, make it just set, once that is the default path
                 //set(def, camelCase(name), value);
             }
         }
@@ -1108,6 +1096,7 @@ modulo.register('cpart', class Template {
     DefFinalizers: [ 'TemplatePrebuild' ]
 });
 
+
 modulo.register('processor', function contentCSV (modulo, def, value) {
     const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
     def.Code = 'return ' + js;
@@ -1241,6 +1230,8 @@ modulo.register('cpart', class Script {
     lifecycle: null,
     DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
 });
+
+
 
 modulo.register('cpart', class State {
     static factoryCallback(renderObj, def, modulo) {
@@ -1522,7 +1513,7 @@ modulo.config.templater.tags = {
         const condition = condStructure.replace(/([XY])/g,
             (k, m) => tmplt.parseExpr(m === 'X' ? lHand : rHand));
         const start = `if (${condition}) {`;
-        return {start, end: '}'};
+        return { start, end: '}' };
     },
     'else': () => '} else {',
     'elif': (s, tmplt) => '} else ' + tmplt.tags['if'](s, tmplt).start,
@@ -1550,7 +1541,7 @@ modulo.config.templater.tags = {
         const oldEndCode = stack.pop().end; // get rid of dangling for
         const start = `${varName}=true; ${oldEndCode} if (!${varName}) {`;
         const end = `}${varName} = false;`;
-        return {start, end, close: 'endfor'};
+        return { start, end, close: 'endfor' };
     },
 };
 
@@ -1812,6 +1803,7 @@ modulo.register('engine', class Reconciler {
             }
 
             if (!child && rival) { // we have less than rival, take rival
+                // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                 this.patch(cursor.parentNode, 'appendChild', rival);
                 this.patchAndDescendants(rival, 'Mount');
             }
@@ -1827,6 +1819,7 @@ modulo.register('engine', class Reconciler {
                     if (rival.hasAttribute('modulo-ignore')) {
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
+                        // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
@@ -1944,48 +1937,42 @@ modulo.register('util', function getAutoExportNames(contents) {
 });
 
 /*-{-% if not config.IS_BUILD %-}-*/
+modulo.register('util', function showDevMenu() {
+    const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
+    const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
+    if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
+        const callback = () => { window.document.body.innerHTML = rerun; };
+        return modulo.registry.commands[cmd](modulo, { callback });
+    } // Else: Display "COMMANDS:" menu in console
+    const commandNames = Object.keys(modulo.registry.commands);
+    const href = 'window.location.href += ';
+    const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
+    const commandGetters = commandNames.map(cmd =>
+        ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
+    const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
+    new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
+});
+
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     modulo.config.IS_BUILD = true;
+    opts.callback = opts.callback || (() => {});
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
         modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
-        if (artifacts.length > 0) {
-            modulo.fetchQueue.enqueueAll(buildNext);
-        } else {
-            window.document.body.innerHTML = '<h1><a href="?mod-cmd=build">&#10227; build</a></h1>';
-            if (opts && opts.callback) {
-                opts.callback();
-            }
-        }
+        modulo.fetchQueue.enqueueAll(artifacts.length > 0 ? buildNext : opts.callback);
     };
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');
     buildNext();
 });
 
-if (typeof document !== 'undefined' && !window.moduloBuild) {
+if (typeof window.document !== 'undefined') {
+    modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
     window.document.addEventListener('DOMContentLoaded', () => {
-        if (window.moduloBuild) {
-            return;
-        }
-        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact');
-        modulo.preprocessAndDefine(() => {
-            const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-            if (cmd) { // Command specified, run and exit right away
-                return modulo.registry.commands[cmd](modulo);
-            } // Else: Display "COMMANDS:" menu in console
-            const commandNames = Object.keys(modulo.registry.commands);
-            const href = 'window.location.href += ';
-            const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
-            const commandGetters = commandNames.map(cmd =>
-                ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
-            const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
-            new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
-        });
+        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
+        modulo.loadFromDOM(window.document.body, null, true); // Load new tags
+        modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
     });
-}
-if (typeof document !== 'undefined' && document.head) { // Browser environ
-    modulo.start(window.moduloBuild);
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
     exports = { Modulo, modulo };
 }
