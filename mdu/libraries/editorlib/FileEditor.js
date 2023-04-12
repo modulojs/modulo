@@ -28,6 +28,16 @@ function prepareCallback() {
                 rerender();
             });
     }
+    if (optstate.ls) {
+        const PREFIX = 'mdufs-';
+        const text = window.localStorage.getItem(PREFIX + optstate.ls);
+        state.content = text || '';
+        state.loading = false;
+        /* very hacky -V */
+        setTimeout(() => {
+            cparts.datastate.propagate('value', text);
+        }, 10);
+    }
 }
 
 // Subscribe to editor_options

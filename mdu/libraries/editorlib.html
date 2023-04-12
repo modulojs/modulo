@@ -35,7 +35,7 @@
         simple-mode:=false
         profile="syntax"
         font-size:=18
-        syntax-mode="twig"
+        syntax-mode="html"
         theme="eclipse"
         theme-dark="vibrant_ink"
         theme-light="eclipse"
@@ -43,6 +43,7 @@
 
     <State
         -store="editor_data"
+        -name="editor_data"
     ></State>
 
     <Script>
@@ -57,6 +58,13 @@
                 state.simpleMode = true;
                 state.src = urlParams.get('file');
                 const split = state.src.split('/');
+                filename = split[split.length - 1];
+            }
+            if (urlParams.has('ls')) {
+                state.showPreview = true;
+                state.simpleMode = true;
+                state.ls = urlParams.get('ls');
+                const split = state.ls.split('/');
                 filename = split[split.length - 1];
             }
             return {
