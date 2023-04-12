@@ -18,9 +18,7 @@
             ">
             <x-EditorSidebar></x-EditorSidebar>
             <x-FileEditor
-                content="print('hello world')"
-                name="example.py"
-                mode="python"
+                name="{{ script.filename }}"
             ></x-FileEditor>
             {% if state.showPreview %}
                 <x-EditorPreview></x-EditorPreview>
@@ -53,11 +51,17 @@
             // TODO: Remove this, replace with Props, then just do a thin
             // wrapper on an HTML file to connect urlParams to Props (maybe
             // even a helper)
+            let filename = 'demo.html';
             if (urlParams.has('file')) {
                 state.showPreview = true;
                 state.simpleMode = true;
                 state.src = urlParams.get('file');
+                const split = state.src.split('/');
+                filename = split[split.length - 1];
             }
+            return {
+                filename,
+            };
         }
     </Script>
 
