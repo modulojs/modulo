@@ -340,11 +340,12 @@ through data, creating labels that appear when hovering. -->
       --size: 101px;
       width: var(--size);
       height: var(--size);
-      background-size: 10px 10px;
+      background-image: url('https://i.imgur.com/jsOnZz0.png');
+      /*background-size: 10px 10px;
       background-image: linear-gradient(to right,
           rgba(100, 100, 100,.3) 1px, transparent 1px),
         linear-gradient(to bottom,
-          rgba(100, 100, 100,.3) 1px, transparent 1px);
+          rgba(100, 100, 100,.3) 1px, transparent 1px);*/
   }
   div {
       position: absolute;
@@ -825,18 +826,16 @@ an example of more complicated HTML and JS behavior -->
       display: block;
       width: 160px;
       height: 80px;
-      border-radius: 1px 5px 1px 7px;
       border: 1px solid gray;
-      box-shadow: inset -2px -3px 1px 1px hsla(0,0%,39.2%,.3);
       background-size: 160px 85px;
-      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Mercator_Blank_Map_World.png/800px-Mercator_Blank_Map_World.png?20120629044350');
+      background-image: url('https://i.imgur.com/jsOnZz0.png');
   }
   div {
       position: absolute;
       height: 7px;
       width: 7px;
       border-radius: 5px;
-      background-color: rgba(162, 228, 184);
+      background: #B90183;
   }
   div > x-DemoModal {
       opacity: 0;
