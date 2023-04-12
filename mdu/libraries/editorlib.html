@@ -1,7 +1,6 @@
-<!--<script Configuration -src="https://unpkg.com/ace-builds">-->
-<script Configuration>
+<script Configuration -src="https://unpkg.com/ace-builds">
     modulo.register('util', function getEditor(elem) {
-        return {}; // XXX RM
+        //return {}; // XXX RM
         ace.config.set('basePath', 'https://unpkg.com/ace-builds/src-min-noconflict');
         return ace.edit(elem);
     });
@@ -31,13 +30,14 @@
 
     <State
         -store="editor_options"
-        layout="center"
+        layout="full"
         color-scheme="l-mintygoo"
-        show-preview:=false
+        show-preview:=true
+        auto-preview:=true
         simple-mode:=false
         profile="syntax"
         font-size:=18
-        syntax-mode="text"
+        syntax-mode="twig"
         theme="eclipse"
         theme-dark="vibrant_ink"
         theme-light="eclipse"
@@ -69,23 +69,64 @@
 <Component name="EditorPreview">
     <Template>
         <h3>preview</h3>
-        <div id="preview" [script.previewspot]></div>
+        {% if not optstate.autoPreview %}
+            <div class="right-toolbar">
+                <x-Btn @click:=script.refresh>⟳</x-Btn>
+            </div>
+        {% endif %}
+        <div id="preview" [script.previewspot] modulo-ignore></div>
     </Template>
 
-    <Style
-        -src="./editorlib/FileEditor.css"
-    ></Style>
+    <State
+        -name="optstate"
+        -store="editor_options"
+    ></State>
+
+    <State
+        -name="datastate"
+        -store="editor_data"
+    ></State>
 
     <Script>
-        function previewspotMount ({ el }) {
+        function refresh () {
+            if (element.iframe) {
+                element.iframe.remove();
+            }
             element.iframe = document.createElement('iframe');
-            el.appendChild(element.iframe);
+            element.previewWrapper.appendChild(element.iframe);
             element.iframe.contentWindow.document.open();
-            element.iframe.contentWindow.document.write();
+            element.iframe.contentWindow.document.write(datastate.value);
             element.iframe.contentWindow.document.close();
-            console.log(element.iframe);
+        }
+
+        function previewspotMount ({ el }) {
+            element.previewWrapper = el;
+            refresh();
+        }
+
+        function updateCallback() {
+            if (element.previewWrapper && optstate.autoPreview) {
+                refresh();
+            }
         }
     </Script>
+
+    <Style -src="./editorlib/FileEditor.css">
+        .right-toolbar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            display: flex;
+            background: white;
+        }
+        .right-toolbar  > div {
+            height: 20px;
+        }
+        label {
+            font-size: 10px;
+        }
+    </Style>
 </Component>
 
 <Component name="FileBrowser">
@@ -139,7 +180,6 @@
         mode
     ></Props>
 
-        <!--
     <Template
         -src="./editorlib/FileEditor.html"
     ></Template>
@@ -153,7 +193,7 @@
     <State
         -name="datastate"
         -store="editor_data"
-        text=""
+        value=""
     ></State>
 
     <State
@@ -165,7 +205,7 @@
         lifecycle="initialized"
         -src="./editorlib/FileEditor.js"
     ></Script>
-    -->
+
     <Style
         -src="./editorlib/FileEditor.css"
     ></Style>
@@ -209,6 +249,12 @@
             name="showPreview"
             label="Show file preview"
         ></x-Checkbox>
+
+        <x-Checkbox [state.bind]
+            name="autoPreview"
+            label="Automatically refresh on changes"
+        ></x-Checkbox>
+
         <h3>Theme</h3>
         <x-Options [state.bind] name="colorScheme"
             options:=staticdata.colorSchemes
