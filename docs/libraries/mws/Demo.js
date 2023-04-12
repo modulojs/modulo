@@ -99,9 +99,9 @@ function toEmbedTemplate(text, selected) {
     /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
                             .replace(/<\/script\s*>/gi, '</cpart>');*/
     const componentName = selected || 'Demo';
-    const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
+    const usage = `<p>Example usage:</p><hr /> <x-${componentName}></x-${componentName}>`;
     // Generate pastable snippet
-    const fullText = '<template Modulo>\n' +
+    const fullText = '<!DOCTYPE html>\n<template Modulo>\n' +
                       `  <Component name="${ componentName }">` + indentText + '\n' +
                       '  </Component>\n' +
                       '</template>\n' +
@@ -109,7 +109,22 @@ function toEmbedTemplate(text, selected) {
     return fullText;
 }
 
+function doOpenInEditor() {
+    const fullText = toEmbedTemplate(state.text, state.selected);
+    const PREFIX = 'mdufs-';
+    const fn = (state.selected || 'example').replace(/[^a-zA-Z0-9_\.-]/g, '_') + '.html';
+    const PATH = ('/home/demo/' + fn);
+    localStorage.setItem(PREFIX + PATH, fullText);
+    document.body.style.cursor = "wait";
+    document.body.style.transition = 'opacity 0.5s';
+    document.body.style.opacity = 0.01;
+    setTimeout(() => {
+        window.location.href = '/demos/editor/?ls=' + PATH;
+    }, 500);
+}
+
 function doCopy(componentCopy = false) {
+    const fullText = toEmbedTemplate(state.text, state.selected);
     const { copyTextToClipboard } = modulo.registry.utils;
     if (componentCopy) {
         const fullText = toEmbedTemplate(state.text, state.selected);

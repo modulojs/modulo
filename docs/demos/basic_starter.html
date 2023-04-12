@@ -62,21 +62,3 @@
 <!-- Use the component, as much as you'd like, each instance is isolated: -->
 <x-HelloWorld label="Shopping list"></x-HelloWorld>
 
-<!-- Remember - Specify version, and move components to a library file later:
-<script Modulo
-    src="https://unpkg.com/mdu.js@0.0.21/src/Modulo.js"
-    -src="/static/libraries/all.html"
-></script> -->
-
-<!-- ######################################################################### -->
-<!-- # BOILERPLATE FOR MODULO DEMOS    ####################################### -->
-<div style="position: absolute; top: 0; right: 0; font-size: 20px; background: #ddd;">
-    <a href="https://modulojs.org/demos/">&#x300A; BACK</a> | <a href="#" onclick="
-    modulo.fetchQueue.enqueue(String(location.href), text => {
-        this.nextSibling.textContent = text;
-        window.navigator.clipboard.writeText(text); 
-        this.textContent += '  [☑ Copied to clipboard!]';
-    })">COPY DEMO</a><pre></pre>
-</div>
-<!-- ######################################################################### -->
-

@@ -38,8 +38,8 @@
 
         {% if state.showcomponentcopy %}
             <button class="m-Btn"
-                    title="Copy the code to make this component" @click:=script.doCopy payload:=true>
-                <span alt="Copy component symbol">&lsaquo;&#11041;&rsaquo;</span>
+                    title="Open in full screen demo editor" @click:=script.doOpenInEditor>
+                <span alt="Pencil and arrow symbol">✎↗</span>
             </button>&nbsp;
         {% endif %}
 

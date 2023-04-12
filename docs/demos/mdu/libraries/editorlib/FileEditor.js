@@ -20,12 +20,23 @@ function prepareCallback() {
                 if (editor) {
                     editor.getSession().setValue(text);
                 }
-                rerender();
+                cparts.datastate.propagate('value', text);
+                //rerender();
             })
             .catch(err => {
                 state.err = err;
                 rerender();
             });
+    }
+    if (optstate.ls) {
+        const PREFIX = 'mdufs-';
+        const text = window.localStorage.getItem(PREFIX + optstate.ls);
+        state.content = text || '';
+        state.loading = false;
+        /* very hacky -V */
+        setTimeout(() => {
+            cparts.datastate.propagate('value', text);
+        }, 10);
     }
 }
 
@@ -78,8 +89,9 @@ function editspotMount ({ el }) {
     editor.setTheme('ace/theme/' + optstate.theme || optstate.themeLight);
     editor.session.setMode("ace/mode/" + props.mode);
     editor.setOptions({ fontSize: optstate.fontSize });
-    const changeEv = () => datastate.propagate('value', editor.session.getValue());
+    const changeEv = () => cparts.datastate.propagate('value', editor.session.getValue());
     editor.session.on('change', _debounce(changeEv));
+    cparts.datastate.propagate('value', editor.session.getValue());
 }
 
 function editspotUnmount () {
