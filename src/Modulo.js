@@ -18,7 +18,6 @@ window.Modulo = class Modulo {
             this.assets = parentModulo.assetManager;
         } else {
             this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
-            this.registry.dom = { _: {  } }; // Create the container for top level
         }
     }
 
@@ -51,32 +50,16 @@ window.Modulo = class Modulo {
         }
         this.assert(type in this.registry, 'Unknown registry type: ' + type);
         this.registry[type][cls.name] = cls;
-
         if (cls.name[0].toUpperCase() === cls.name[0]) { // is CapFirst
             // TODO: Refactor below:
             const conf = Object.assign(this.config[cls.name.toLowerCase()] || {}, { Type: cls.name }, cls.defaults, defaults);
             this.config[cls.name.toLowerCase()] = conf;
 
-            // Global / core utility class getting registered
-            if (type === 'core') {
-                // TODO: Implement differently, like { fetchQ: utils.FetchQueue
-                // } or something, since right now it doesn't even get cloned.
+            if (type === 'core') { // Global / core class getting registered
                 const lowerName = cls.name[0].toLowerCase() + cls.name.slice(1);
                 this[lowerName] = new cls(this);
                 this.assets = this.assetManager;
             }
-
-            for (const pConf of Object.values(this.config)) { // See if contains
-                if (pConf.Contains === type) {
-                    this.registry.dom[pConf.Type] = this.registry.dom[pConf.Type] || {};
-                    this.registry.dom[pConf.Type][cls.name.toLowerCase()] = cls;
-                }
-            }
-
-        }
-        if (type === 'cparts') { // XXX Remove this when dom and _ is refactored
-            this.registry.dom['_'][cls.name.toLowerCase()] = cls;
-            //this.config[cls.name.toLowerCase()].DefLoaders = [ 'DefinedAs', 'Src' ]; // daed
         }
         if (type === 'processors') {
             this.registry.processors[cls.name.toLowerCase()] = cls;
@@ -84,8 +67,8 @@ window.Modulo = class Modulo {
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
-        this.loader = new this.registry.core.DOMLoader(this);
-        return this.loader.loadFromDOM(elem, parentName, quietErrors);
+        const loader = new this.registry.core.DOMLoader(this);
+        return loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
     preprocessAndDefine(callback) {
@@ -136,7 +119,7 @@ window.Modulo = class Modulo {
     }
 
     applyProcessors(def, processorNameArray) {
-        const cls = this.registry.cparts[def.Type];
+        const cls = this.registry.cparts[def.Type] || this.registry.core[def.Type]; // TODO: Fix this
         for (const name of processorNameArray) {
             const [ attrName, aliasedName ] = name.split('|');
             if (attrName in def) {
@@ -176,12 +159,6 @@ window.modulo = (new Modulo(null, [
 window.modulo.register('registryCallback', function commands(modulo, func, defaults) {
     window.m = window.m || {}; // Avoid overwriting existing truthy m
     window.m[func.name] = () => func(this); // Attach shortcut to global "m"
-});
-
-window.modulo.register('registryCallback', function cparts(modulo, cls, defaults) {
-});
-
-window.modulo.register('registryCallback', function processors(modulo, func, defaults) {
 });
 
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
@@ -231,26 +208,28 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 `).replace(/^\s+/gm, '');
 
+modulo.config.domloader = { topLevelTags: [ 'modulo'] }; // Only "Modulo" is top
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
-        this.modulo = modulo;
+        this.modulo = modulo; // TODO: need to standardize back references to prevent mismatches
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        const arr = [];
         const { get, set } = this.modulo.registry.utils;
-        //let tagsLower = [ 'modulo' ];
-        let tagsLower = [ 'modulo', 'library', 'artifact', 'component' ];
-        let parentDef = null;
-        if (parentName && !/^_[a-z]+$/.test(parentName)) { // _justlower
-            parentDef = this.modulo.definitions[parentName];
-            this.modulo.assert(parentDef, `Could not find ${ parentName }!`);
-        }
-        if (parentDef && parentDef.Contains) { // Construct an array of DOM name
+        const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+        let tagsLower = this.modulo.config.domloader.topLevelTags; // "Modulo"
+        if (/^_[a-z][a-zA-Z]+$/.test(parentName)) { // _likethis, e.g. _artifact
+            tagsLower = [ parentName.toLowerCase().replace('_', '') ];
+        } else if (parentName) { // Normal parent, e.g. Library, Component etc
+            const parentDef = this.modulo.definitions[parentName];
+            const msg = `Invalid parent: ${ parentName } (${ parentDef })`;
+            this.modulo.assert(parentDef && parentDef.Contains, msg);
             const names = Object.keys(this.modulo.registry[parentDef.Contains]);
             tagsLower = names.map(s => s.toLowerCase()); // Ignore case
         }
+
+        const arr = [];
         for (const node of elem.children || []) {
             const partTypeLC = this.getDefType(node, tagsLower, quietErrors);
             if (node._moduloLoadedBy || partTypeLC === null) {
@@ -288,7 +267,6 @@ modulo.register('core', class DOMLoader {
     getDefType(node, tagsLower, quietErrors = false) {
         const { tagName, nodeType, textContent } = node;
 
-        // Build possible DOM
         const err = msg => quietErrors || console.error('Modulo Load:', msg);
         if (nodeType !== 1) { // Text nodes, comment nodes, etc
             if (nodeType === 3 && textContent && textContent.trim()) {
@@ -333,7 +311,9 @@ modulo.register('processor', function content (modulo, conf, value) {
 
 modulo.register('processor', function definedAs (modulo, def, value) {
     def.Name = value ? def[value] : (def.Name || def.Type.toLowerCase());
-    const parentPrefix = def.Parent ? def.Parent + '_' : '';
+    const parentDef = modulo.definitions[def.Parent];
+    const parentPrefix = parentDef && ('ChildPrefix' in parentDef) ?
+        parentDef.ChildPrefix : (def.Parent ? def.Parent + '_' : '');
     def.DefinitionName = parentPrefix + def.Name;
     // Search for the next free Name by suffixing numbers
     while (def.DefinitionName in modulo.definitions) {
@@ -755,8 +735,9 @@ modulo.register('cpart', class Component {
 });
 
 modulo.register('cpart', class Modulo { }, {
+    ChildPrefix: '', // Prevents all children from getting modulo_ prefixed
     Contains: 'cparts',
-    DefLoaders: [ 'Src', 'Content' ],
+    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
 });
 
 modulo.register('cpart', class Library { }, {

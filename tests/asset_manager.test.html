@@ -99,6 +99,7 @@ window.moduloBuild.nameToHash = {
             mod2.registry = originalRegistry;
             mod2.config = deepClone(originalConfig, modulo);
             mod2.assets = new mod2.registry.core.AssetManager(mod2);
+            mod2.config.domloader.topLevelTags = [ 'modulo', 'component' ];
             mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
 
             // Copy over devlib
