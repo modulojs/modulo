@@ -241,7 +241,7 @@ modulo.register('core', class DOMLoader {
         const arr = [];
         const { get, set } = this.modulo.registry.utils;
         //let tagsLower = [ 'modulo' ];
-        let tagsLower = [ 'modulo', 'library', 'artifact' ];
+        let tagsLower = [ 'modulo', 'library', 'artifact', 'component' ];
         let parentDef = null;
         if (parentName !== null && !parentName.startsWith('_')) {
             parentDef = this.modulo.definitions[parentName];
