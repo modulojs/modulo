@@ -243,7 +243,7 @@ modulo.register('core', class DOMLoader {
         //let tagsLower = [ 'modulo' ];
         let tagsLower = [ 'modulo', 'library', 'artifact', 'component' ];
         let parentDef = null;
-        if (parentName !== null && !parentName.startsWith('_')) {
+        if (parentName && !/^_[a-z]+$/.test(parentName)) { // _justlower
             parentDef = this.modulo.definitions[parentName];
             this.modulo.assert(parentDef, `Could not find ${ parentName }!`);
         }
@@ -489,7 +489,7 @@ modulo.register('cpart', class Artifact {
             const { saveFileAs, hash } = modulo.registry.utils;
             const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
             //for (const child of children
-            const tDef = children.filter(({ Type }) => Type === 'Template')[0] || {};
+            const tDef = children.filter(({ Type }) => Type === 'Template')[0] || null;
             const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
             let result = { exports: {} };
             if (sDef) {
