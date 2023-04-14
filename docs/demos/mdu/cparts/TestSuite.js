@@ -5,6 +5,20 @@ if (typeof UNIFIED_DEFINITIONS === "undefined") { // XXX RM
     UNIFIED_DEFINITIONS = true;
 }
 
+/*
+modulo.definitions.testSteps = {
+    state: () => {},
+    script: () => {},
+    props: () => {},
+    template: () => {},
+};
+modulo.config.testsuite = {
+    Contains: 'testSteps',
+};
+*/
+modulo.config.testsuite = { Contains: 'cparts' };
+modulo.config.test = { Contains: 'cparts' };
+
 modulo.register('cpart', class TestSuite {
     /*
     static configureCallback(modulo, conf) {
@@ -308,10 +322,10 @@ modulo.register('cpart', class TestSuite {
                 continue;
             }
 
-            // Ensure always a globally unique prefix:
-            window._moduloTestNumber = (window._moduloTestNumber || 0) + 1;
-            const prefix = 't' + window._moduloTestNumber;
-            const stepArray = testLoaderModulo.loadString(testNode.innerHTML, prefix, true);
+            // Ensure always a globally unique prefix: XXX rm
+            //window._moduloTestNumber = (window._moduloTestNumber || 0) + 1;
+            //const parentName = '_t' + window._moduloTestNumber;
+            const stepArray = testLoaderModulo.loadString(testNode.innerHTML, suite.DefinitionName, true);
             const testName = testNode.getAttribute('name') || '<test>';
             console.group('[%]', '         ? TEST', testName);
             let testTotal = 0;

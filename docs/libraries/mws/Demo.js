@@ -99,9 +99,15 @@ function toEmbedTemplate(text, selected) {
     /*const safeText = indentText.replace(/<script/gi, '<cpart Script')
                             .replace(/<\/script\s*>/gi, '</cpart>');*/
     const componentName = selected || 'Demo';
+    let dependency = '';
     const usage = `<p>Example usage:</p><hr /> <x-${componentName}></x-${componentName}>`;
     // Generate pastable snippet
+    if (text.includes('<x-DemoChart') || text.includes('<x-DemoModal')) {
+        // need to insert the demo library
+        dependency = '//modulojs.org/libraries/globalExamples.html';
+    }
     const fullText = '<!DOCTYPE html>\n<template Modulo>\n' +
+                      (dependency ? `  <Library -src="${ dependency }"></Library>\n` : '') +
                       `  <Component name="${ componentName }">` + indentText + '\n' +
                       '  </Component>\n' +
                       '</template>\n' +

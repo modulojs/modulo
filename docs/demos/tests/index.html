@@ -1,67 +1,35 @@
-<script Modulo src="/js/Modulo.js"></script>
-<script src="/demos/mdu/cparts/TestSuite.js"></script>
-<template id="modulo">
-    <Component name="TestReporter">
-        <Template>
-            {% if state.success != null %}
-                {% if state.success %}
-                    <h1 style="background: seagreen">OK</h1>
-                {% else %}
-                    <h1 style="background: red">FAILURE</h1>
-                {% endif %}
-            {% else %}
-                <button @click:=script.doTests>Run tests</button>
-            {% endif %}
-            <p><em>Tip: Use the Developer Console to see the output.</em></p>
-        </Template>
-        <State
-            success:=null
-        ></State>
-        <Script>
-            function doTests() {
-                if (state.success === null) { // prevent double runs
-                    state.success = modulo.registry.commands.test(modulo);
-                }
-            }
-        </Script>
-    </Component>
+<!DOCTYPE html>
+<template Modulo>
+    <!-- At least 230 assertions total -->
+    <Library -src="./core_functionality.test.html"></Library>
+    <Library -src="./mtl.test.html"></Library>
+    <Library -src="./domcursor.test.html"></Library>
+    <Library -src="./utils.test.html"></Library>
+    <Library -src="./cparts/state.test.html"></Library>
+    <Library -src="./cparts/component.test.html"></Library>
+    <Library -src="./reconciler-directives.test.html"></Library>
+    <Library -src="./core_loading.test.html"></Library>
+    <Library -src="./asset_manager.test.html"></Library>
+    <Library -src="./multi-file-tests/loading_src.test.html"></Library>
+    <Library -src="./multi-file-tests/relative_sources.test.html"></Library>
+    <Library -src="./cparts/component_mode.test.html"></Library>
+    <Library -src="./cparts/script.test.html"></Library>
+    <Library -src="./cparts/template.test.html"></Library>
 
-    <!-- At least 237 assertions total -->
-    <!-- TODO: Now that there's auto-naming, remove -name="..."  nonsense -->
-    <Library -name="a" -src="/demos/tests/core_functionality.test.html"></Library>
-    <Library -name="b" -src="/demos/tests/mtl.test.html"></Library>
-    <Library -name="c" -src="/demos/tests/domcursor.test.html"></Library>
-    <Library -name="d" -src="/demos/tests/utils.test.html"></Library>
-    <Library -name="e" -src="/demos/tests/cparts/state.test.html"></Library>
-    <Library -name="f" -src="/demos/tests/cparts/component.test.html"></Library>
-    <Library -name="g" -src="/demos/tests/reconciler-directives.test.html"></Library>
-    <Library -name="h" -src="/demos/tests/core_loading.test.html"></Library>
-    <Library -name="i" -src="/demos/tests/asset_manager.test.html"></Library>
-    <Library -name="j" -src="/demos/tests/multi-file-tests/loading_src.test.html"></Library>
-    <Library -name="k" -src="/demos/tests/multi-file-tests/relative_sources.test.html"></Library>
-    <Library -name="l" -src="/demos/tests/cparts/component_mode.test.html"></Library>
-    <Library -name="m" -src="/demos/tests/cparts/script.test.html"></Library>
-    <Library -name="n" -src="/demos/tests/cparts/template.test.html"></Library>
-    <Library -name="docseg" -src="/libraries/docseg.html"></Library>
-    <Library -name="eg" -src="/libraries/eg.html"></Library>
+    <!-- Also, do doc tests -->
+    <Library -src="/libraries/docseg.html"></Library>
+    <Library -src="/libraries/eg.html"></Library>
 </template>
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/TestSuite.js"></script>
 
 <!--
 Composition tests are disabled because:
 1. Require component.slot to work 100%
 2. Require <PassThrough to be rewritten as <x-PassThrough
-<Library -name="h" -src="/demos/tests/composition.test.html"></Library>
+<Library -src="/demos/tests/composition.test.html"></Library>
 <Library -src="/demos/tests/cparts/component_mode.test.html"></Library>
-<Library src="/demos/tests/reconciler1.test.html"></Library>
-<Library src="/demos/tests/reconciler2.test.html"></Library>
-<Library src="/demos/tests/reconciler3.test.html"></Library>
+<Library -src="/demos/tests/reconciler1.test.html"></Library>
+<Library -src="/demos/tests/reconciler2.test.html"></Library>
+<Library -src="/demos/tests/reconciler3.test.html"></Library>
 -->
-
-<button onClick="this.textContent = 'Success: ' + modulo.registry.commands.test(modulo)">
-   Run tests
-</button>
-<script>
-    modulo.loadFromDOM(document.getElementById('modulo').content);
-    modulo.preprocessAndDefine();
-</script>
-
