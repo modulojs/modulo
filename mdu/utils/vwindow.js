@@ -481,6 +481,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         }
         const lc = this._lcName;
         if (lc in modulo.registry.dom) {
+            // TODO: Needs updated to new Modulo system
             return modulo.registry.dom[lc].name;
         }
         return lc;
