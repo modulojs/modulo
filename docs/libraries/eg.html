@@ -340,12 +340,11 @@ through data, creating labels that appear when hovering. -->
       --size: 101px;
       width: var(--size);
       height: var(--size);
-      background-image: url('https://i.imgur.com/jsOnZz0.png');
-      /*background-size: 10px 10px;
+      background-size: 10px 10px;
       background-image: linear-gradient(to right,
           rgba(100, 100, 100,.3) 1px, transparent 1px),
         linear-gradient(to bottom,
-          rgba(100, 100, 100,.3) 1px, transparent 1px);*/
+          rgba(100, 100, 100,.3) 1px, transparent 1px);
   }
   div {
       position: absolute;
@@ -500,19 +499,20 @@ APIs. Here we use a Typicode's placeholder API to make posts -->
 DemoModal and DemoChart are already defined. Try using below! -->
 <Template>
 
+<x-DemoModal button="Show data" title="Further information">
+    <h2>Example chart:</h2>
+    <x-DemoChart data:='[50, 13, 100]' ></x-DemoChart>
+</x-DemoModal>
+
 <x-DemoChart
     data:='[1, 2, 3, 5, 8]'
 ></x-DemoChart>
 
-<x-DemoModal button="Nicholas Cage" title="Biography">
-    <p>Prolific Hollywood actor</p>
-    <img src="https://www.placecage.com/640/360" />
+<x-DemoModal button="Bio: Nicholas Cage" title="Biography">
+    <p>Prolific and varied Hollywood actor</p>
+    <img src="https://i.imgur.com/hJwIMx7.png" />
 </x-DemoModal>
 
-<x-DemoModal button="Tommy Wiseau" title="Further Data">
-    <p>Actor, director, and acclaimed fashion designer</p>
-    <x-DemoChart data:='[50, 13, 94]' ></x-DemoChart>
-</x-DemoModal>
 
 </Template>
 

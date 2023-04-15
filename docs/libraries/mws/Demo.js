@@ -241,6 +241,8 @@ function _newModulo() {
     mod.globals = modulo.globals; // XXX
     mod.config = modulo.config;
     mod.registry = modulo.registry;
+    // Allow for loading components at top level
+    mod.config.domloader.topLevelTags = [ 'modulo', 'component' ];
     // Refresh queue & asset manager
     mod.register('core', modulo.registry.core.FetchQueue);
     mod.register('core', modulo.registry.core.AssetManager);
