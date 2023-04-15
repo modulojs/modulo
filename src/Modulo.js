@@ -81,7 +81,7 @@ window.Modulo = class Modulo {
     }
 
     loadString(text, parentName = null) { // TODO: Move or refactor, or add StringLoader
-        const tmp_Cmp = new this.registry.cparts.Component({}, {}, this);
+        const tmp_Cmp = new this.registry.coreDefs.Component({}, {}, this);
         tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
         this.reconciler = new this.registry.engines.Reconciler(this, {
             directives: { 'modulo.dataPropLoad': tmp_Cmp }, // TODO: Change to "this", + resolve to conf stuff
@@ -152,7 +152,7 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Create a new modulo instance to be the global default instance
 window.modulo = (new Modulo(null, [
-    'registryCallbacks', 'cparts', 'dom', 'utils', 'core', 'engines',
+    'registryCallbacks', 'cparts', 'coreDefs', 'utils', 'core', 'engines',
     'commands', 'templateFilters', 'templateTags', 'processors', 'elements',
 ]));//.pushGlobal();
 
@@ -423,7 +423,12 @@ modulo.register('util', function mountElement (modulo, def, elem) {
     const { cparts } = elem.modulo.registry;
     const isLower = key => key[0].toLowerCase() === key[0];
     for (const def of allNames.map(name => modulo.definitions[name])) {
-        const instance = new cparts[def.Type](elem.modulo, def, elem);
+        let instance;
+        if (def.Type === 'Component') {
+            instance = new elem.modulo.registry.coreDefs.Component(elem.modulo, def, elem);
+        } else {
+            instance = new cparts[def.Type](elem.modulo, def, elem);
+        }
         instance.element = elem;
         instance.modulo = elem.modulo;
         instance.conf = def;
@@ -431,15 +436,6 @@ modulo.register('util', function mountElement (modulo, def, elem) {
         instance.id = ++window._moduloID;
         elem.cparts[def.RenderObj || def.Name] = instance;
     }
-    /*
-    for (const instance of Object.values(elem.cparts)) {
-        instance.element = elem;
-        instance.modulo = elem.modulo;
-        instance.conf = def;
-        instance.attrs = elem.modulo.registry.utils.keyFilter(def, isLower);
-        elem.cparts[def.RenderObj || def.Name] = instance;
-    }
-    */
     ////////
 
     ////////
@@ -556,7 +552,7 @@ modulo.config.component = {
     //InstBuilders: [ 'CreateChildren' ],
 };
 
-modulo.register('cpart', class Component {
+modulo.register('coreDef', class Component {
     rerender(original = null) {
         if (original) {
             if (this.element.originalHTML === null) {
@@ -734,14 +730,14 @@ modulo.register('cpart', class Component {
     }
 });
 
-modulo.register('cpart', class Modulo { }, {
+modulo.register('coreDef', class Modulo { }, {
     ChildPrefix: '', // Prevents all children from getting modulo_ prefixed
-    Contains: 'cparts',
+    Contains: 'coreDefs',
     DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
 });
 
-modulo.register('cpart', class Library { }, {
-    Contains: 'cparts',
+modulo.register('coreDef', class Library { }, {
+    Contains: 'coreDefs',
     SetAttrs: 'config.component',
     // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
     DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
@@ -1176,7 +1172,7 @@ modulo.register('cpart', class StaticData {
     DefFinalizers: [ 'Code', 'RequireData' ],
 });
 
-modulo.register('cpart', class Configuration { }, {
+modulo.register('coreDef', class Configuration { }, {
     SetAttrs: 'config',
     DefLoaders: [ 'DefinedAs', 'SetAttrs', 'Src' ],
     DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
