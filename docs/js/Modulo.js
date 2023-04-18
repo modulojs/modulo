@@ -66,11 +66,6 @@ window.Modulo = class Modulo {
         }
     }
 
-    loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
-        const loader = new this.registry.core.DOMLoader(this);
-        return loader.loadFromDOM(elem, parentName, quietErrors);
-    }
-
     preprocessAndDefine(callback) {
         callback = callback ? callback : (() => {});
         this.fetchQueue.wait(() => {
@@ -80,19 +75,17 @@ window.Modulo = class Modulo {
         });
     }
 
-    loadString(text, parentName = null) { // TODO: Move or refactor, or add StringLoader
-        const tmp_Cmp = new this.registry.coreDefs.Component({}, {}, this);
-        tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
-        this.reconciler = new this.registry.engines.Reconciler(this, {
-            directives: { 'modulo.dataPropLoad': tmp_Cmp }, // TODO: Change to "this", + resolve to conf stuff
-            directiveShortcuts: [ [ /:$/, 'modulo.dataProp' ] ],
-        });
-        const div = this.reconciler.loadString(text, {});
-        const result = this.loadFromDOM(div, parentName);
-        return result;
+    loadString(text, parentName = null) {
+        return this.loadFromDOM(this.registry.utils.makeDiv(text), parentName);
+    }
+
+    loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
+        const loader = new this.registry.core.DOMLoader(this);
+        return loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
     repeatProcessors(confs, field, defaults, cb) {
+        // TODO: Move defaults into global modulo config
         let changed = true; // Run at least once
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
@@ -210,32 +203,24 @@ window.modulo.DEVLIB_SOURCE = (`
 
 
 modulo.register('core', class ValueResolver {
-    constructor(modulo, contextObj = null) {
-        this.modulo = modulo; // TODO: need to standardize back references to prevent mismatches
-        this.ctxObj = contextObj || modulo;
+    constructor(contextObj = null) {
+        this.ctxObj = contextObj;
     }
-    isLiteral(s) {
-        return !/^[a-z]/i.test(s) || Modulo.INVALID_WORDS.has(s); // XXX global ref
-    }
-    get(key) {
-        if (key in this.ctxObj) { // Fast look-up for common case
-            return this.ctxObj[key]; // Simple object property look up
-        }
-        //TODO: maybe bind? target[key] = typeof val === 'function' ? val.bind(target) : val;
+
+    get(key, ctxObj = null) {
+        ctxObj = ctxObj || this.ctxObj;
         if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
             return JSON.parse(key); // Not a valid identifier, try JSON
         } // Otherwise, split and return:
-        return (key + '').split('.').reduce((o, name) => o[name], this.ctxObj);
+        return modulo.registry.utils.get(ctxObj, key);
     }
+
     set(obj, keyPath, val) {
         const index = keyPath.lastIndexOf('.') + 1; // Index at 1 (0 if missing)
         const key = keyPath.slice(index).replace(/:$/, ''); // Between "." & ":"
         const path = keyPath.slice(0, index - 1); // Exclude "."
-        const target = index ? this.get(path) : obj; // Assign to ctxObj or obj
-        if (val === '15') {
-            console.log([ path ], this.ctxObj, this.get(path));
-            console.log([ keyPath ], 'index', index, 'key', key, 'path', path, 'target', target);
-        }
+        const target = index ? this.get(path, obj) : obj; // Get ctxObj or obj
+        //TODO: maybe bind? target[key] = typeof val === 'function' ? val.bind(target) : val;
         target[key] = keyPath.endsWith(':') ? this.get(val) : val;
     }
 });
@@ -247,12 +232,7 @@ modulo.register('core', class DOMLoader {
         this.modulo = modulo; // TODO: need to standardize back references to prevent mismatches
     }
 
-    loadFromDOM(elem, parentName = null, quietErrors = false) {
-        //const { get, set } = new this.modulo.registry.core.ValueResolver(this.modulo);
-        const resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
-        const { get, set } = this.modulo.registry.utils;
-        const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
-
+    getAllowedChildTags(parentName) {
         let tagsLower = this.modulo.config.domloader.topLevelTags; // "Modulo"
         if (/^_[a-z][a-zA-Z]+$/.test(parentName)) { // _likethis, e.g. _artifact
             tagsLower = [ parentName.toLowerCase().replace('_', '') ];
@@ -263,8 +243,15 @@ modulo.register('core', class DOMLoader {
             const names = Object.keys(this.modulo.registry[parentDef.Contains]);
             tagsLower = names.map(s => s.toLowerCase()); // Ignore case
         }
+        return tagsLower;
+    }
 
-        const arr = [];
+    loadFromDOM(elem, parentName = null, quietErrors = false) {
+        const resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
+        const { defaultDef } = this.modulo.config.modulo;
+        const toCamel = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        const tagsLower = this.getAllowedChildTags(parentName);
+        const array = [];
         for (const node of elem.children || []) {
             const partTypeLC = this.getDefType(node, tagsLower, quietErrors);
             if (node._moduloLoadedBy || partTypeLC === null) {
@@ -272,33 +259,19 @@ modulo.register('core', class DOMLoader {
             }
             node._moduloLoadedBy = this.modulo.id; // First time loading, mark
             // Valid definition, now create the "def" object
-            const def = { Parent: parentName, DefinedAs: null, DefName: null };
-            arr.push(Object.assign(def, this.modulo.config[partTypeLC]));
+            const def = Object.assign({ Parent: parentName }, defaultDef);
             def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
+            array.push(Object.assign(def, this.modulo.config[partTypeLC]));
             for (let name of node.getAttributeNames()) { // Loop through attrs
-                let value = node.getAttribute(name);
+                const value = node.getAttribute(name);
                 if (partTypeLC === name && !value) { // e.g. <def Script>
                     continue; // This is the "Type" attribute itself, skip
                 }
-                resolver.set(def, camelCase(name), value);
-                continue;
-                // TODO: Needs to delete below and uncomment set, make it just set, once that is the default path
-                const tmp_IsData = name.endsWith(':');
-                if (name.endsWith(':')) {
-                    const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
-                    value = isVar ? get(this.modulo, value) : JSON.parse(value);
-                    name = name.slice(0, -1);
-                }
-                if (tmp_IsData) {
-                    set(def, camelCase(name), value);
-                } else {
-                    def[camelCase(name)] = value; // Store "resolved" value in definition
-                }
-                //set(def, camelCase(name), value);
+                def[toCamel(name)] = value; // "-kebab-case" to "CamelCase"
             }
         }
-        this.modulo.repeatProcessors(arr, 'DefLoaders', [ 'DefinedAs', 'Src' ]);
-        return arr;
+        this.modulo.repeatProcessors(array, 'DefLoaders', [ 'DefTarget', 'DefinedAs', 'Src' ]);
+        return array;
     }
 
     getDefType(node, tagsLower, quiet = false) {
@@ -338,6 +311,18 @@ modulo.register('processor', function src (modulo, def, value) {
     modulo.fetchQueue.fetch(def.Source).then(text => {
         def.Content = (text || '') + (def.Content || '');
     });
+});
+
+modulo.register('processor', function defTarget (modulo, def, value) {
+    const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document, make it switch to TemplaterResolver if there is {% or {{
+    const resolver = new modulo.registry.core[resolverName](modulo);
+    const target = value === null ? def : resolver.get(value);
+    for (const [ key, defValue ] of Object.entries(def)) {
+        if (key.endsWith(':') || key.includes('.')) {
+            delete def[key]; // Remove & replace unresolved value
+            resolver.set(/^[a-z]/.test(key) ? target : def, key, defValue);
+        }
+    }
 });
 
 modulo.register('processor', function content (modulo, conf, value) {
@@ -557,7 +542,7 @@ modulo.register('cpart', class Artifact {
 }, {
     Contains: 'cparts',
     DefinedAs: 'name',
-    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
 
@@ -580,7 +565,7 @@ modulo.config.component = {
     DefinedAs: 'name',
     RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
-    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
     DefBuilders: [ 'CustomElement', 'Code' ],
     DefFinalizers: [ 'MainRequire' ],
     Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
@@ -652,6 +637,7 @@ modulo.register('coreDef', class Component {
             }
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
+        this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
     }
 
     prepareCallback() {
@@ -740,20 +726,15 @@ modulo.register('coreDef', class Component {
     }
 
     dataPropMount({ el, value, attrName, rawName }) { // element, 
-        const { get, set } = modulo.registry.utils;
         // Resolve the given value and attach to dataProps
         if (!el.dataProps) {
             el.dataProps = {};
             el.dataPropsAttributeNames = {};
         }
-        const isVar = /^[a-z]/i.test(value) && !Modulo.INVALID_WORDS.has(value);
-        const renderObj = isVar ? this.element.getCurrentRenderObj() : {};
-        let val = isVar ? get(renderObj, value) : JSON.parse(value);
-        /* XXX */ if (attrName === 'click' && !val) { val = ()=> console.log('XXX ERROR: (DEBUGGING Wrong Script Tag) click is undefined', renderObj); }
-        //modulo.assert(val !== undefined, 'Error: Cannot assign value "undefined" to dataProp')
-        set(el.dataProps, attrName, val); // set according to path given
+        const resolver = new modulo.registry.core.ValueResolver(// TODO: Global modulo
+                      this.element && this.element.getCurrentRenderObj());
+        resolver.set(el.dataProps, attrName + ':', value);
         el.dataPropsAttributeNames[rawName] = attrName;
-        ///* XXX */ if (attrName === 'click') { console.log('XXX click', el, value, val); }
     }
 
     dataPropUnmount({ el, attrName, rawName }) {
@@ -768,14 +749,15 @@ modulo.register('coreDef', class Component {
 modulo.register('coreDef', class Modulo { }, {
     ChildPrefix: '', // Prevents all children from getting modulo_ prefixed
     Contains: 'coreDefs',
-    DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
+    defaultDef: { DefTarget: null, DefinedAs: null, DefName: null },
 });
 
 modulo.register('coreDef', class Library { }, {
     Contains: 'coreDefs',
-    SetAttrs: 'config.component',
+    DefTarget: 'config.component',
     // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
-    DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
 modulo.register('util', function keyFilter (obj, func) {
@@ -861,18 +843,11 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    if (key in obj) { // Shortcut for common case
-        return obj[key];
-    }
-    return (key + '').split('.').reduce((o, name) => o[name], obj);
+    return (key in obj) ? obj[key] : (key + '').split('.').reduce((o, name) => o[name], obj);
 });
 
-modulo.register('util', function set(obj, keyPath, val, ctx = null) {
-    const index = keyPath.lastIndexOf('.') + 1; // 0 if not found
-    const key = keyPath.slice(index);
-    const path = keyPath.slice(0, index - 1); // exclude .
-    const dataObj = index ? modulo.registry.utils.get(obj, path) : obj;
-    dataObj[key] = val;// typeof val === 'function' ? val.bind(ctx) : val;
+modulo.register('util', function set(obj, keyPath, val) {
+    return new modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // TODO: Global modulo
 });
 
 modulo.register('util', function getParentDefPath(modulo, def) {
@@ -1180,14 +1155,6 @@ modulo.register('processor', function code (modulo, def, value) {
     modulo.assets.define(def.DefinitionName, value);
 });
 
-modulo.register('processor', function setAttrs (modulo, def, value) {
-    for (const [ key, val ] of Object.entries(def)) {
-        if (/^[a-z]/.test(key) && (value + key).includes('.')) { // Set anything with dots
-            modulo.registry.utils.set(modulo, (value + '.' + key), val);
-        }
-    }
-});
-
 modulo.register('processor', function requireData (modulo, def, value) {
     def.data = modulo.assets.require(def[value]);
 });
@@ -1202,14 +1169,13 @@ modulo.register('cpart', class StaticData {
 }, {
     DataType: '?', // Default behavior is to guess based on Src ext
     RequireData: 'DefinitionName',
-    DefLoaders: [ 'DefinedAs', 'DataType', 'Src' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'DataType', 'Src' ],
     DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
     DefFinalizers: [ 'Code', 'RequireData' ],
 });
 
 modulo.register('coreDef', class Configuration { }, {
-    SetAttrs: 'config',
-    DefLoaders: [ 'DefinedAs', 'SetAttrs', 'Src' ],
+    DefTarget: 'config',
     DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
