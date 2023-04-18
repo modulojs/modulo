@@ -81,7 +81,7 @@ window.Modulo = class Modulo {
     }
 
     loadString(text, parentName = null) { // TODO: Move or refactor, or add StringLoader
-        const tmp_Cmp = new this.registry.cparts.Component({}, {}, this);
+        const tmp_Cmp = new this.registry.coreDefs.Component({}, {}, this);
         tmp_Cmp.dataPropLoad = tmp_Cmp.dataPropMount; // XXX
         this.reconciler = new this.registry.engines.Reconciler(this, {
             directives: { 'modulo.dataPropLoad': tmp_Cmp }, // TODO: Change to "this", + resolve to conf stuff
@@ -152,7 +152,7 @@ Modulo.INVALID_WORDS = new Set((`
 
 // Create a new modulo instance to be the global default instance
 window.modulo = (new Modulo(null, [
-    'registryCallbacks', 'cparts', 'dom', 'utils', 'core', 'engines',
+    'registryCallbacks', 'cparts', 'coreDefs', 'utils', 'core', 'engines',
     'commands', 'templateFilters', 'templateTags', 'processors', 'elements',
 ]));//.pushGlobal();
 
@@ -208,6 +208,39 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 `).replace(/^\s+/gm, '');
 
+
+modulo.register('core', class ValueResolver {
+    constructor(modulo, contextObj = null) {
+        this.modulo = modulo; // TODO: need to standardize back references to prevent mismatches
+        this.ctxObj = contextObj || modulo;
+    }
+    isLiteral(s) {
+        return !/^[a-z]/i.test(s) || Modulo.INVALID_WORDS.has(s); // XXX global ref
+    }
+    get(key) {
+        if (key in this.ctxObj) { // Fast look-up for common case
+            return this.ctxObj[key]; // Simple object property look up
+        }
+        //TODO: maybe bind? target[key] = typeof val === 'function' ? val.bind(target) : val;
+        if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
+            return JSON.parse(key); // Not a valid identifier, try JSON
+        } // Otherwise, split and return:
+        return (key + '').split('.').reduce((o, name) => o[name], this.ctxObj);
+    }
+    set(obj, keyPath, val) {
+        const index = keyPath.lastIndexOf('.') + 1; // Index at 1 (0 if missing)
+        const key = keyPath.slice(index).replace(/:$/, ''); // Between "." & ":"
+        const path = keyPath.slice(0, index - 1); // Exclude "."
+        const target = index ? this.get(path) : obj; // Assign to ctxObj or obj
+        if (val === '15') {
+            console.log([ path ], this.ctxObj, this.get(path));
+            console.log([ keyPath ], 'index', index, 'key', key, 'path', path, 'target', target);
+        }
+        target[key] = keyPath.endsWith(':') ? this.get(val) : val;
+    }
+});
+
+
 modulo.config.domloader = { topLevelTags: [ 'modulo'] }; // Only "Modulo" is top
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
@@ -215,6 +248,8 @@ modulo.register('core', class DOMLoader {
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
+        //const { get, set } = new this.modulo.registry.core.ValueResolver(this.modulo);
+        const resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
         const { get, set } = this.modulo.registry.utils;
         const camelCase = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
 
@@ -236,15 +271,17 @@ modulo.register('core', class DOMLoader {
                 continue; // Already loaded, or an ignorable or silenced error
             }
             node._moduloLoadedBy = this.modulo.id; // First time loading, mark
-            // Valid CPart definition, now create the "def" object
+            // Valid definition, now create the "def" object
             const def = { Parent: parentName, DefinedAs: null, DefName: null };
             arr.push(Object.assign(def, this.modulo.config[partTypeLC]));
             def.Content = node.tagName === 'SCRIPT' ? node.textContent : node.innerHTML;
             for (let name of node.getAttributeNames()) { // Loop through attrs
                 let value = node.getAttribute(name);
-                if (partTypeLC === name && !value) { // e.g. <cpart Script>
+                if (partTypeLC === name && !value) { // e.g. <def Script>
                     continue; // This is the "Type" attribute itself, skip
                 }
+                resolver.set(def, camelCase(name), value);
+                continue;
                 // TODO: Needs to delete below and uncomment set, make it just set, once that is the default path
                 const tmp_IsData = name.endsWith(':');
                 if (name.endsWith(':')) {
@@ -264,36 +301,34 @@ modulo.register('core', class DOMLoader {
         return arr;
     }
 
-    getDefType(node, tagsLower, quietErrors = false) {
+    getDefType(node, tagsLower, quiet = false) {
         const { tagName, nodeType, textContent } = node;
-
-        const err = msg => quietErrors || console.error('Modulo Load:', msg);
         if (nodeType !== 1) { // Text nodes, comment nodes, etc
-            if (nodeType === 3 && textContent && textContent.trim()) {
-                err(`Unexpected text found near definitions: ${textContent}`);
+            if (nodeType === 3 && textContent && textContent.trim() && !quiet) {
+                console.error(`Unexpected text in definition: ${textContent}`);
             }
             return null;
         }
 
-        let cPartName = tagName.toLowerCase();
-        //if (cPartName in { cpart: 1, script: 1, template: 1, style: 1 }) {
-        if (cPartName in { cpart: 1, script: 1, template: 1, style: 1, def: 1 }) { /* TODO: Remove "cpart", replace with def */
+        let defType = tagName.toLowerCase();
+        //if (defType in { cpart: 1, script: 1, template: 1, style: 1 }) {
+        if (defType in { cpart: 1, script: 1, template: 1, style: 1, def: 1 }) { /* TODO: Remove "cpart", replace with def */
             for (const attrUnknownCase of node.getAttributeNames()) {
                 const attr = attrUnknownCase.toLowerCase();
-                if (tagsLower.includes(attr) && !node.getAttribute(attr)) {
-                    cPartName = attr; // Is a CPart, and has empty string value
+                if (!node.getAttribute(attr) && tagsLower.includes(attr)) {
+                    defType = attr; // Has an empty string value, is a def
                 }
                 break; // Always break: We will only look at first attribute
             }
         }
-        if (!(tagsLower.includes(cPartName))) {
-            if (cPartName === 'testsuite') { /* XXX HACK */ return null;}
-            /*const msg = !parentDef ? 'Debugging tip: Remember to start with' :
-                        `${ parentDef.Type } expects ${ parentDef.Contains }`;*/
-            err(`"${ cPartName }" not found. Expected one of: ${ tagsLower }`);
-            return null;
+        if (!(tagsLower.includes(defType))) { // Were any discovered?
+            if (defType === 'testsuite') { return null; } /* XXX Remove and add recipe to stub / silence TestSuite not found errors */
+            if (!quiet) { // Invalid def / cPart: This type is not allowed here
+                console.error(`"${ defType }" is not one of: ${ tagsLower }`);
+            }
+            return null // Return null to signify not a definition
         }
-        return cPartName;
+        return defType; // Valid, expected definition: Return lowercase type
     }
 });
 
@@ -423,7 +458,12 @@ modulo.register('util', function mountElement (modulo, def, elem) {
     const { cparts } = elem.modulo.registry;
     const isLower = key => key[0].toLowerCase() === key[0];
     for (const def of allNames.map(name => modulo.definitions[name])) {
-        const instance = new cparts[def.Type](elem.modulo, def, elem);
+        let instance;
+        if (def.Type === 'Component') {
+            instance = new elem.modulo.registry.coreDefs.Component(elem.modulo, def, elem);
+        } else {
+            instance = new cparts[def.Type](elem.modulo, def, elem);
+        }
         instance.element = elem;
         instance.modulo = elem.modulo;
         instance.conf = def;
@@ -431,15 +471,6 @@ modulo.register('util', function mountElement (modulo, def, elem) {
         instance.id = ++window._moduloID;
         elem.cparts[def.RenderObj || def.Name] = instance;
     }
-    /*
-    for (const instance of Object.values(elem.cparts)) {
-        instance.element = elem;
-        instance.modulo = elem.modulo;
-        instance.conf = def;
-        instance.attrs = elem.modulo.registry.utils.keyFilter(def, isLower);
-        elem.cparts[def.RenderObj || def.Name] = instance;
-    }
-    */
     ////////
 
     ////////
@@ -556,7 +587,7 @@ modulo.config.component = {
     //InstBuilders: [ 'CreateChildren' ],
 };
 
-modulo.register('cpart', class Component {
+modulo.register('coreDef', class Component {
     rerender(original = null) {
         if (original) {
             if (this.element.originalHTML === null) {
@@ -734,14 +765,14 @@ modulo.register('cpart', class Component {
     }
 });
 
-modulo.register('cpart', class Modulo { }, {
+modulo.register('coreDef', class Modulo { }, {
     ChildPrefix: '', // Prevents all children from getting modulo_ prefixed
-    Contains: 'cparts',
+    Contains: 'coreDefs',
     DefLoaders: [ 'DefinedAs', 'Src', 'Content' ],
 });
 
-modulo.register('cpart', class Library { }, {
-    Contains: 'cparts',
+modulo.register('coreDef', class Library { }, {
+    Contains: 'coreDefs',
     SetAttrs: 'config.component',
     // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
     DefLoaders: [ 'DefinedAs', 'Src', 'Content', 'SetAttrs' ],
@@ -1176,7 +1207,7 @@ modulo.register('cpart', class StaticData {
     DefFinalizers: [ 'Code', 'RequireData' ],
 });
 
-modulo.register('cpart', class Configuration { }, {
+modulo.register('coreDef', class Configuration { }, {
     SetAttrs: 'config',
     DefLoaders: [ 'DefinedAs', 'SetAttrs', 'Src' ],
     DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],

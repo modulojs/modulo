@@ -4,7 +4,7 @@
 -->
 
 <Configuration
-    component.foo="bif"
+    component.foo:='"bif"'
     component.bar="baf"
 ></Configuration>
 
@@ -62,7 +62,7 @@
 
         <Script name="config properties got set and code is executed">
             const { foo, bar, quux } = modulo.config.component;
-            assert: foo === 'bif' && bar === 'baf' && quux == 'mux';
+            assert: foo === 'bif' && bar === 'baf' && quux === 'mux';
         </Script>
     </Test>
 </TestSuite>
