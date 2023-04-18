@@ -75,7 +75,7 @@ window.Modulo = class Modulo {
         });
     }
 
-    loadString(text, parentName = null) {
+    loadString(text, parentName = null) { // TODO: Refactor this method away
         return this.loadFromDOM(this.registry.utils.makeDiv(text), parentName);
     }
 
