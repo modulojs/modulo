@@ -204,6 +204,7 @@ as static data in with JS, so it does not refresh. -->
 <Script>
     function isValid({ year, month, day }) {
         month--; // Months are zero indexed
+        // Use the JavaScript date object to check validity:
         const d = new Date(year, month, day);
         return d.getMonth() === month && d.getDate() === day && d.getFullYear() === year;
     }
@@ -1039,7 +1040,8 @@ h3 {
           <div
             @click:=script.toggle
             payload:='[ {{ i }}, {{ j }} ]'
-            style="{% if state.cells|get:i %}
+            style="
+            {% if state.cells|get:i %}
                 {% if state.cells|get:i|get:j %}
                     background: #B90183;
                 {% endif %}
@@ -1157,6 +1159,10 @@ h3 {
         width: 40px;
     }
 </Style>
+
+<TestSuite
+    -src="/libraries/docseg-tests/ConwayGameOfLife-tests.html"
+></TestSuite>
 
 </Component>
 

@@ -209,13 +209,10 @@ modulo.register('core', class ValueResolver {
 
     get(key, ctxObj = null) {
         ctxObj = ctxObj || this.ctxObj;
-        if (key in ctxObj) { // Fast look-up for common case
-            return ctxObj[key]; // Simple, fast object property look up
-        }
         if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
             return JSON.parse(key); // Not a valid identifier, try JSON
         } // Otherwise, split and return:
-        return (key + '').split('.').reduce((o, name) => o[name], ctxObj);
+        return modulo.registry.utils.get(ctxObj, key);
     }
 
     set(obj, keyPath, val) {
@@ -846,7 +843,7 @@ modulo.register('util', function saveFileAs(filename, text) {
 });
 
 modulo.register('util', function get(obj, key) {
-    return new modulo.registry.core.ValueResolver(obj).get(key); // TODO: Global modulo
+    return (key in obj) ? obj[key] : (key + '').split('.').reduce((o, name) => o[name], obj);
 });
 
 modulo.register('util', function set(obj, keyPath, val) {

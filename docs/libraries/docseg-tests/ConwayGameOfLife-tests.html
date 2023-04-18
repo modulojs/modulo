@@ -1,0 +1,25 @@
+<Test name="Renders based on state & simulates step">
+
+    <script name="Ensure expected number of children in grid">
+        const grid = element.querySelector('.grid');
+        const lit = Array.from(grid.children).filter(n => (n.getAttribute('style') || '').trim());
+        //      total children           24x24
+        assert: grid.children.length === 576 && lit.length === 5;
+    </script>
+
+    <script name="Simulate one step">
+        script.setLocalVariables({ state, script }); // TODO: Not sure why i need to do this
+        script.updateNextFrame();
+        assert: true
+    </script>
+
+    <script name="Ensure expected number of children in grid after simulation">
+        const grid = element.querySelector('.grid');
+        const lit = Array.from(grid.children).filter(n => (n.getAttribute('style') || '').trim());
+        //      total children           24x24
+        assert: grid.children.length === 576 && lit.length === 5;
+    </script>
+
+
+</Test>
+
