@@ -1,6 +1,6 @@
 <!DOCTYPE html><html><head>
 
-<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Templating - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-x1j5q0v9.css">
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Templating - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-xxfpa1hp.css">
 </head><body>
 
 
@@ -32,14 +32,7 @@
     </ul>
 
     <div class="Navbar-rightInfo">
-        
-        
-            v: 0.0.41<br>
-            <!--SLOC: undefined lines<br />-->
-            <a href="https://github.com/modulojs/modulo/">github</a> |
-            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
-        
-    
+        <mws-projectinfo></mws-projectinfo>
         <!--
         
             <a href="https://github.com/modulojs/modulo/">Source Code
@@ -57,124 +50,7 @@
             <h3><span alt="Lower-case delta">%</span></h3>
             <nav class="TitleAside-navigation">
                 <h3>Documentation</h3>
-                <mws-docsidebar path="/templating.html" modulo-original-html=""><ul>
-    
-        <li class="
-            
-            "><a href="/docs/">Table of Contents</a>
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/docs/tutorial_part1.html">Tutorial</a>
-            
-        </li>
-    
-        <li class="
-            
-                gactive
-            
-            "><a href="/docs/templating.html">Templating</a>
-            
-                
-                    <ul>
-                    
-                        <li><a href="/docs/templating.html#templates">Templates</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#variables">Variables</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#filters">Filters</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#tags">Tags</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#comments">Comments</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#debugging">Debugging</a>
-                        
-                        </li>
-                    
-                        <li><a href="/docs/templating.html#escaping">Escaping</a>
-                        
-                        </li>
-                    
-                    </ul>
-                
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/docs/templating-reference.html">Template Reference</a>
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/docs/cparts.html">CParts</a>
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/docs/lifecycle.html">Lifecycle</a>
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/docs/directives.html">Directives</a>
-            
-        </li>
-    
-        <li class="
-            
-                ginactive
-            
-            "><a href="/demos/">Examples</a>
-            
-        </li>
-    
-
-
-    <!--
-    <li>
-        Other resources:
-
-        <ul>
-            <li>
-                <a href="/docs/faq.html">FAQ</a>
-            <li title="Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.">
-                Literate Source*<br /><em>* Coming soon!</em>
-            </li>
-        </ul>
-
-    </li>
-    -->
-    <!--<a href="/literate/src/Modulo.html">Literate source</a>-->
-</ul>
-
-</mws-docsidebar>
+                <mws-docsidebar path="/templating.html"></mws-docsidebar>
             </nav>
         </aside>
         <aside style="border:none">
@@ -227,10 +103,7 @@ set for editing Modulo template or library files. Thanks, Django!</p>
     in general (such as Ruby, Python, or PHP developers).</p>
 </div>
 
-<mws-section name="templates" modulo-original-html="Templates">
-        <a class="secanchor" title="Click to focus on this section." id="templates" name="templates" href="#templates">#</a>
-        <h2>Templates</h2>
-    </mws-section>
+<mws-section name="templates">Templates</mws-section>
 
 <p>A "template" is the text within a Template CPart. Most Components defined
 within Modulo will also define a Template CPart in order to render their
@@ -243,93 +116,12 @@ template is evaluated, and tags, which control the logic of the template.</p>
 be explained later in this document.</p>
 
 
-<mws-demo demotype="minipreview" fromlibrary="Templating_1" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-             demo-wrapper__minipreview
-        
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-
-        
-            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
-                <span alt="Pencil and arrow symbol">✎↗</span>
-            </button>&nbsp;
-        
-
-        
-            <!--
-            <button class="m-Btn demo-fs-button"
-                    title="Toggle full screen view of code" @click:=script.doFullscreen>
-                
-                    <span alt="Go Full Screen">&nearr;</span>
-                
-            </button>
-            &nbsp;
-            -->
-            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
-                Run <span alt="Refresh">⟳</span>
-            </button>
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; display: block; bottom: 0px;"><div style="min-width: 1px; height: 596px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 30px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 519.609px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 596px; min-width: 519.609px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>28</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>There are <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">em</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">count</span><span class="cm-null"> </span><span class="cm-tag">}}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">  <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">count</span><span class="cm-null">|</span><span class="cm-variable-2">pluralize</span><span class="cm-null">:</span><span class="cm-string">"articles,article"</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">em</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">  on <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">script</span><span class="cm-null">.</span><span class="cm-property">exports</span><span class="cm-null">.</span><span class="cm-property">title</span><span class="cm-null"> </span><span class="cm-tag">}}</span>.<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">{# Show the articles #}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">for</span><span class="cm-null"> </span><span class="cm-variable">article</span><span class="cm-null"> </span><span class="cm-keyword">in</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">articles</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h4</span> <span class="cm-attribute">style</span>=<span class="cm-string">"color: blue"</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">article</span><span class="cm-null">.</span><span class="cm-property">headline</span><span class="cm-null">|</span><span class="cm-variable-2">upper</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h4</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">if</span><span class="cm-null"> </span><span class="cm-variable">article</span><span class="cm-null">.</span><span class="cm-property">tease</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">      <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">article</span><span class="cm-null">.</span><span class="cm-property">tease</span><span class="cm-null">|</span><span class="cm-variable">truncate</span><span class="cm-null">:</span><span class="cm-number">30</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endif</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endfor</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">&lt;!-- The data below was used to render the template above --&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">count:</span>=<span class="cm-string">42</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">articles:</span>=<span class="cm-string">'[</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">      <span class="cm-string">{"headline": "Modulo released!",</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 596px;"></div><div class="CodeMirror-gutters" style="height: 646px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
-        </div>
-
-        
-            <div class="editor-minipreview">
-                <div modulo-ignore="">
-                    <docseg-templating_1 modulo-original-html="">
-<p>There are <em>42
-  articles</em>
-  on ModuloNews.</p>
-
-
-
-    <h4 style="color: blue">MODULO RELEASED!</h4>
-    
-      <p>The most exciting news of the…</p>
-    
-
-    <h4 style="color: blue">CAN JS BE FUN AGAIN?</h4>
-    
-
-    <h4 style="color: blue">MTL CONSIDERED HARMFUL</h4>
-    
-      <p>Why constructing JS is risky …</p>
-    
-
-</docseg-templating_1>
-                </div>
-            </div>
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+<mws-demo demotype="minipreview" fromlibrary="Templating_1"></mws-demo>
 
 
 
 
-<mws-section name="variables" modulo-original-html="Variables">
-        <a class="secanchor" title="Click to focus on this section." id="variables" name="variables" href="#variables">#</a>
-        <h2>Variables</h2>
-    </mws-section>
+<mws-section name="variables">Variables</mws-section>
 
 <p>Variables look like this: <code>{{ variable }}</code>. When the template
 engine encounters a variable, it evaluates that variable and replaces it with
@@ -390,69 +182,7 @@ a more thorough look at this.</p>
 custom <code>prepare</code> lifecycle callback in your Script CPart tag as
 follows. Examine the following example:</p>
 
-<mws-demo demotype="minipreview" fromlibrary="Templating_PrepareCallback" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-             demo-wrapper__minipreview
-        
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-
-        
-            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
-                <span alt="Pencil and arrow symbol">✎↗</span>
-            </button>&nbsp;
-        
-
-        
-            <!--
-            <button class="m-Btn demo-fs-button"
-                    title="Toggle full screen view of code" @click:=script.doFullscreen>
-                
-                    <span alt="Go Full Screen">&nearr;</span>
-                
-            </button>
-            &nbsp;
-            -->
-            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
-                Run <span alt="Refresh">⟳</span>
-            </button>
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; display: block; bottom: 0px;"><div style="min-width: 1px; height: 449px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="right: 0px; left: 30px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 449px; min-width: 511.219px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>21</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">name</span>=<span class="cm-string">"perc"</span> <span class="cm-attribute">[state.bind]</span> <span class="cm-tag cm-bracket">/&gt;</span>% of</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">name</span>=<span class="cm-string">"total"</span> <span class="cm-attribute">[state.bind]</span> <span class="cm-tag cm-bracket">/&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    is: <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">script</span><span class="cm-null">.</span><span class="cm-property">calcResult</span><span class="cm-null"> </span><span class="cm-tag">}}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">perc:</span>=<span class="cm-string">50</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">total:</span>=<span class="cm-string">30</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">State</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">prepareCallback</span>() {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-keyword">const</span> <span class="cm-def">calcResult</span> <span class="cm-operator">=</span> (<span class="cm-variable">state</span>.<span class="cm-property">perc</span> <span class="cm-operator">/</span> <span class="cm-number">100</span>) <span class="cm-operator">*</span> <span class="cm-variable">state</span>.<span class="cm-property">total</span>;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-keyword">return</span> { <span class="cm-property">calcResult</span> };</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Style</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 449px;"></div><div class="CodeMirror-gutters" style="height: 499px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
-        </div>
-
-        
-            <div class="editor-minipreview">
-                <div modulo-ignore="">
-                    <docseg-templating_preparecallback modulo-original-html="">
-    <input name="perc" [state.bind]="">% of
-    <input name="total" [state.bind]="">
-    is: 15
-</docseg-templating_preparecallback>
-                </div>
-            </div>
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+<mws-demo demotype="minipreview" fromlibrary="Templating_PrepareCallback"></mws-demo>
 
 
 
@@ -494,46 +224,7 @@ into the mix as well. As a sneak-peak, examine the following code:</p>
 {% for athlete in state.athletes %}
     <p>{{ athlete.name }}</p>
 {% endfor %}
-" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-        
-           demo-wrapper__clipboard  
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
-                Copy <span alt="Clipboard">📋</span>
-            </button>
-        
-
-        
-
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; bottom: 0px;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 80px; min-width: 343.125px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">for</span><span class="cm-null"> </span><span class="cm-variable">athlete</span><span class="cm-null"> </span><span class="cm-keyword">in</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">athlete</span><span class="cm-null">.</span><span class="cm-property">name</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endfor</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 80px;"></div><div class="CodeMirror-gutters" style="display: none; height: 130px;"></div></div></div></div>
-        </div>
-
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+"></mws-demo>
 
 <p>Note how <code>athlete</code> declares a new variable, which can be reused
 in <code>{{ athlete.name }}</code>. For more on for-loops, see the 
@@ -542,10 +233,7 @@ template-tag reference.</a></p>
 
 
 
-<mws-section name="filters" modulo-original-html="Filters">
-        <a class="secanchor" title="Click to focus on this section." id="filters" name="filters" href="#filters">#</a>
-        <h2>Filters</h2>
-    </mws-section>
+<mws-section name="filters">Filters</mws-section>
 
 <p>You can modify variables for display by using filters.</p>
 
@@ -606,10 +294,7 @@ for the complete list.</p>
 tags and filters.</p>
 
 
-<mws-section name="tags" modulo-original-html="Tags">
-        <a class="secanchor" title="Click to focus on this section." id="tags" name="tags" href="#tags">#</a>
-        <h2>Tags</h2>
-    </mws-section>
+<mws-section name="tags">Tags</mws-section>
 
 <p>Tags look like this: <code>{% tag %}</code> (except  with the word "tag"
 replaced with something else). Tags can be more complex than variables: Some
@@ -640,46 +325,7 @@ stored as an array of objects within <code>state.athletes</code>:</p>
         <li>{{ athlete.name }}</li>
     {% endfor %}
 </ul>
-" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-        
-           demo-wrapper__clipboard  
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
-                Copy <span alt="Clipboard">📋</span>
-            </button>
-        
-
-        
-
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 128px; min-width: 381.531px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">for</span><span class="cm-null"> </span><span class="cm-variable">athlete</span><span class="cm-null"> </span><span class="cm-keyword">in</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">athlete</span><span class="cm-null">.</span><span class="cm-property">name</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">li</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endfor</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">ul</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 128px;"></div><div class="CodeMirror-gutters" style="display: none; height: 178px;"></div></div></div></div>
-        </div>
-
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+"></mws-demo>
 
 <h4>if</h4>
 <p>Evaluates a variable, and if that variable is "true" the contents of the
@@ -689,46 +335,7 @@ block are displayed:</p>
 {% if state.athletes %}
     Number of athletes: {{ state.athletes|length }}
 {% endif %}
-" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-        
-           demo-wrapper__clipboard  
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
-                Copy <span alt="Clipboard">📋</span>
-            </button>
-        
-
-        
-
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; bottom: 0px;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 80px; min-width: 496.719px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">if</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    Number of athletes: <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null">|</span><span class="cm-variable-2">length</span><span class="cm-null"> </span><span class="cm-tag">}}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endif</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 80px;"></div><div class="CodeMirror-gutters" style="display: none; height: 130px;"></div></div></div></div>
-        </div>
-
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+"></mws-demo>
 
 <p>In the above, if state.athletes is not empty, the number of athletes will be
 displayed by the {{ state.athletes|length }} variable.</p>
@@ -741,46 +348,7 @@ displayed by the {{ state.athletes|length }} variable.</p>
 {% else %}
    Athlete: {{ state.athletes|first }}
 {% endif %}
-" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-        
-           demo-wrapper__clipboard  
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
-                Copy <span alt="Clipboard">📋</span>
-            </button>
-        
-
-        
-
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 128px; min-width: 592.797px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">if</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null">|</span><span class="cm-variable-2">length</span><span class="cm-null"> </span><span class="cm-variable">gt</span><span class="cm-null"> </span><span class="cm-number">1</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">   Team: <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">for</span><span class="cm-null"> </span><span class="cm-variable">athlete</span><span class="cm-null"> </span><span class="cm-keyword">in</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null"> </span><span class="cm-tag">%}</span> ... <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endfor</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">else</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">   Athlete: <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">athletes</span><span class="cm-null">|</span><span class="cm-variable-2">first</span><span class="cm-null"> </span><span class="cm-tag">}}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endif</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 128px;"></div><div class="CodeMirror-gutters" style="display: none; height: 178px;"></div></div></div></div>
-        </div>
-
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+"></mws-demo>
 </div>
 
 
@@ -805,10 +373,7 @@ work as you expect. <code>|length</code> is an exception. You can use
 tags; see <a href="/docs/templating-reference.html">Templating Reference</a>.</p>
 
 
-<mws-section name="comments" modulo-original-html="Comments">
-        <a class="secanchor" title="Click to focus on this section." id="comments" name="comments" href="#comments">#</a>
-        <h2>Comments</h2>
-    </mws-section>
+<mws-section name="comments">Comments</mws-section>
 
 <p>To comment-out part of a line in a template, use the comment syntax:
 <code>{# text in here is ignored #}</code>. This syntax should only be used for
@@ -821,76 +386,11 @@ looks like: <code>{% comment %}text in here is ignored{% endcomment %}</code></p
 
 <p>Examples of both are below:</p>
 
-<mws-demo demotype="minipreview" fromlibrary="Templating_Comments" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-             demo-wrapper__minipreview
-        
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-
-        
-            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
-                <span alt="Pencil and arrow symbol">✎↗</span>
-            </button>&nbsp;
-        
-
-        
-            <!--
-            <button class="m-Btn demo-fs-button"
-                    title="Toggle full screen view of code" @click:=script.doFullscreen>
-                
-                    <span alt="Go Full Screen">&nearr;</span>
-                
-            </button>
-            &nbsp;
-            -->
-            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
-                Run <span alt="Refresh">⟳</span>
-            </button>
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="right: 0px; left: 547px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 176px; min-width: 385.062px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>8</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>hello <span class="cm-comment">{# greeting #}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">comment</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">      {% if a %}&lt;div&gt;{{ b }}&lt;/div&gt;{% endif %}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">      &lt;h3&gt;{{ state.items|first }}&lt;/h3&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">    </span><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endcomment</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>Below the greeting...<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 176px;"></div><div class="CodeMirror-gutters" style="height: 226px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
-        </div>
-
-        
-            <div class="editor-minipreview">
-                <div modulo-ignore="">
-                    <docseg-templating_comments modulo-original-html="">
-    <h1>hello </h1>
-    
-    <p>Below the greeting...</p>
-</docseg-templating_comments>
-                </div>
-            </div>
-        
-
-    </div>
-</div>
+<mws-demo demotype="minipreview" fromlibrary="Templating_Comments"></mws-demo>
 
 
 
-</mws-demo>
-
-
-
-<mws-section name="debugging" modulo-original-html="Debugging">
-        <a class="secanchor" title="Click to focus on this section." id="debugging" name="debugging" href="#debugging">#</a>
-        <h2>Debugging</h2>
-    </mws-section>
+<mws-section name="debugging">Debugging</mws-section>
 
 
 <p>Modulo templates generate JavaScript code which mirrors the logic found in
@@ -918,46 +418,7 @@ was used:</p>
     {{ item.user_id }} {# Bug: Keeps on coming back as &quot;undefined&quot; #}
     {% debugger %}
 {% endfor %}
-" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-        
-           demo-wrapper__clipboard  
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
-                Copy <span alt="Clipboard">📋</span>
-            </button>
-        
-
-        
-
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; bottom: 0px;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="right: 0px; left: 0px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 104px; min-width: 669.547px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">for</span><span class="cm-null"> </span><span class="cm-variable">item</span><span class="cm-null"> </span><span class="cm-keyword">in</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">data</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">item</span><span class="cm-null">.</span><span class="cm-property">user_id</span><span class="cm-null"> </span><span class="cm-tag">}}</span> <span class="cm-comment">{# Bug: Keeps on coming back as "undefined" #}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-variable">debugger</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">{%</span><span class="cm-null"> </span><span class="cm-keyword">endfor</span><span class="cm-null"> </span><span class="cm-tag">%}</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 104px;"></div><div class="CodeMirror-gutters" style="display: none; height: 154px;"></div></div></div></div>
-        </div>
-
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+"></mws-demo>
 
 
 <p><strong>Note:</strong> For obvious reasons, it's very important to remember
@@ -965,10 +426,7 @@ to delete all your "debugger" statements before you release your code, or your
 app may freeze for other people as well.</p>
 
 
-<mws-section name="escaping" modulo-original-html="Escaping">
-        <a class="secanchor" title="Click to focus on this section." id="escaping" name="escaping" href="#escaping">#</a>
-        <h2>Escaping</h2>
-    </mws-section>
+<mws-section name="escaping">Escaping</mws-section>
 
 <p>By default in Modulo, every template automatically escapes the output of
 every variable value. Specifically, these five characters are escaped:</p>
@@ -1037,73 +495,7 @@ is only editable by a trusted source (e.g. yourself or a member of your team).
 Examine the code below for a concrete example of how this escaping behaves:</p>
 
 
-<mws-demo demotype="minipreview" fromlibrary="Templating_Escaping" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
-             demo-wrapper__minipreview
-        
-        
-        demo-wrapper__notabs     
-        
-    ">
-    
-
-    <div class="editor-toolbar">
-        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
-                     display: none; ">
-            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
-        </p>
-
-        
-
-        
-            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
-                <span alt="Pencil and arrow symbol">✎↗</span>
-            </button>&nbsp;
-        
-
-        
-            <!--
-            <button class="m-Btn demo-fs-button"
-                    title="Toggle full screen view of code" @click:=script.doFullscreen>
-                
-                    <span alt="Go Full Screen">&nearr;</span>
-                
-            </button>
-            &nbsp;
-            -->
-            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
-                Run <span alt="Refresh">⟳</span>
-            </button>
-        
-
-    </div>
-
-    <div class="side-by-side-panes">
-        <div class="editor-wrapper">
-            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; pointer-events: none; display: block; bottom: 0px;"><div style="min-width: 1px; height: 470px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="right: 0px; left: 547px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 470px; min-width: 502.828px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>22</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>User "<span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">em</span><span class="cm-tag cm-bracket">&gt;</span><span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">username</span><span class="cm-null"> </span><span class="cm-tag">}}</span><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">em</span><span class="cm-tag cm-bracket">&gt;</span>" sent a message:<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">div</span> <span class="cm-attribute">class</span>=<span class="cm-string">"msgcontent"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag">{{</span><span class="cm-null"> </span><span class="cm-variable">state</span><span class="cm-null">.</span><span class="cm-property">content</span><span class="cm-null">|</span><span class="cm-variable-2">safe</span><span class="cm-null"> </span><span class="cm-tag">}}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">div</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">username</span>=<span class="cm-string">"Little &lt;Bobby&gt; &lt;Drop&gt; &amp;tables"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">content</span>=<span class="cm-string">'</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-string">I &lt;i&gt;love&lt;/i&gt; the classic &lt;a target="_blank"</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-string">href="https://xkcd.com/327/"&gt;xkcd #327&lt;/a&gt; on</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-string">the risk of trusting &lt;b&gt;user inputted data&lt;/b&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-string">'</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">State</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Style</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-qualifier">.msgcontent</span> {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-property">background</span>: <span class="cm-atom">#999</span>;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-property">padding</span>: <span class="cm-number">10px</span>;</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 470px;"></div><div class="CodeMirror-gutters" style="height: 520px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
-        </div>
-
-        
-            <div class="editor-minipreview">
-                <div modulo-ignore="">
-                    <docseg-templating_escaping modulo-original-html="">
-<p>User "<em>Little &lt;Bobby&gt; &lt;Drop&gt; &amp;tables</em>" sent a message:</p>
-<div class="msgcontent">
-    
-        I <i>love</i> the classic <a target="_blank" href="https://xkcd.com/327/">xkcd #327</a> on
-        the risk of trusting <b>user inputted data</b>
-    
-</div>
-</docseg-templating_escaping>
-                </div>
-            </div>
-        
-
-    </div>
-</div>
-
-
-
-</mws-demo>
+<mws-demo demotype="minipreview" fromlibrary="Templating_Escaping"></mws-demo>
 
 </slot>
         </aside>
@@ -1118,5 +510,5 @@ Examine the code below for a concrete example of how this escaping behaves:</p>
 
 
 
-<script src="/_modulo/modulo-build-xx5i2flf.js"></script>
+<script src="/_modulo/modulo-build-xx9vmi60.js"></script>
 </body></html>

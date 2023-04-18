@@ -77,13 +77,9 @@ script.exports.menu = [
     },
 
     {
-        label: 'CParts',
+        label: 'Component Parts',
         filename: '/docs/cparts.html',
         children: [
-            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
-                                'rendering mode', 'manual rerender', 'shadow',
-                                'vanish', 'vanish-into-document', 'component.event',
-                                'component.slot', 'component.dataProp']),
             _child('Props', 'props', ['accessing props', 'defining props',
                                 'setting props', 'using props']),
             _child('Script', 'script', ['javascript', 'events', 'computed properties',
@@ -99,18 +95,32 @@ script.exports.menu = [
     },
 
     {
+        label: 'Core',
+        filename: '/docs/core.html',
+        children: [
+            _child('Artifact', 'artifact', ['bundle', 'build', 'custom builds']),
+            _child('Component', 'component', ['name', 'innerHTML', 'patches', 'reconciliation',
+                                'rendering mode', 'manual rerender', 'shadow',
+                                'vanish', 'vanish-into-document', 'component.event',
+                                'component.slot', 'component.dataProp']),
+            _child('Configuration', 'configuration', ['config', 'loading', 'unpkg', 'npm', 'dependency',
+                            'registering helpers', 'registering custom cparts']),
+            _child('Library', 'library', ['src', 'namespace'],
+            _child('Modulo', 'modulo', ['starting', 'mounting', 'custom loading', 'custom mounting'],
+        ],
+    },
+    {
         label: 'Lifecycle',
         filename: '/docs/lifecycle.html',
         children: [
-            _child('Global lifecycle', 'global',
-                ['lifestyle phases', 'prebuild', 'define', 'factory']),
+            /*_child('Global lifecycle', 'global',
+                ['lifestyle phases', 'prebuild', 'define', 'factory']),*/
             _child('Component lifecycle', 'global',
-                ['consturctor', 'initialized', 'prepare', 'render',
+                ['constructor', 'initialized', 'prepare', 'render',
                 'reconcile', 'update', 'event', 'eventCleanup']),
             _child('Lifecycle callbacks', 'callbacks',
                 ['hooking into lifecycle', 'callbacks', 'script tag callbacks',
-                'renderobj', 'baseRenderObj', 'loadObj',
-                'dependency injection', 'middleware']),
+                'renderobj', 'dependency injection', 'middleware']),
         ],
     },
 

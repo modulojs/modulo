@@ -40,9 +40,10 @@ minification, split bundles, or other file types. This gives very fine-grained
 control over output in a declarative way.</p>
 
 <p><strong>Alpha API</strong>: Note that the <em>Artifact</em> definition is
-still in flux. In lieu of fully documenting while it is being changed, here is
-the default build artifacts:</p>
+still in flux. In lieu of fully documenting while it is being changed, examine
+the default build artifacts in DEVLIB.</p>
 
+<!--
 <mws-Demo
 text='
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
@@ -91,7 +92,7 @@ text='
     </Template>
 </Artifact>
 '></mws-Demo>
-
+-->
 
 
 <mws-Section name="component">Component</mws-Section>
@@ -482,7 +483,7 @@ this situation, as they will get executed when the page loads causing "leakage")
 <mws-Demo
 text='
 <Modulo>
-    <Configuration -src="./my-config-script.js""></Configuration>
+    <Configuration -src="./my-config-script.js"></Configuration>
     <Component name="HelloWorld">
         <Template>
             Hello <strong>Modulo</strong> World!
@@ -499,7 +500,7 @@ text='
 <mws-Demo
 text='
 <template Modulo>
-    <Configuration -src="./my-config-script.js""></Configuration>
+    <Configuration -src="./my-config-script.js"></Configuration>
     <Component name="HelloWorld">
         <Template>
             Hello <strong>Modulo</strong> World!
