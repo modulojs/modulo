@@ -271,6 +271,7 @@ function doRun() {
     if (element.codeMirrorEditor) {
         state.text = element.codeMirrorEditor.getValue(); // make sure most up-to-date
     }
+    //console.log('about to run:', namespace, tagName, state.text);
     runModuloText(`<Component namespace="${namespace}" name="${tagName}">` +
                   `\n${state.text}\n</Component>`);
 

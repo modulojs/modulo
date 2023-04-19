@@ -191,7 +191,6 @@ function processBrowserConsoleLog(args) {
     if (!args || !args.length) {
         return; // do nothing with falsy args or empty lists
     }
-
     if (!args[0].startsWith('%c')) {
         return; // It's NOT a CSS declaration, nothing to change
     }
@@ -200,7 +199,13 @@ function processBrowserConsoleLog(args) {
 
     let style = args.pop(); // remove style specification
     if (typeof style !== 'string' || style === '[object Object]') {
-        style = args.pop(); // Delete bogus style string
+        style = args.pop(); // Delete bogus (buggy?) style string
+    }
+    if (args[0] === '%') {
+        args.pop(); // delete a solitary %
+    }
+    if (!args || !args.length) {
+        return; // do nothing with falsy args or empty lists
     }
 
     if (style.includes('red')) {

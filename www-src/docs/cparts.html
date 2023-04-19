@@ -100,17 +100,6 @@ directive syntax for (e.g.
 
 
 
-<!--
-
-NOTE: Moved the PropTypes documentation to API.html, for now
-
-<h3>Examples</h3>
-
-TODO: Need example here where you can control both "sides", both the prop
-definition and use of the component.
-
--->
-
 
 <mws-Section name="script">Script</mws-Section>
 
@@ -515,7 +504,9 @@ contents.</p>
 
 <p>See below for an example of defining a <em>State</em> CPart:</p>
 
+
 <mws-Demo
+ttitle="StateExamples"
 text='
 <!-- Example 1: Two variables specified -->
 <State
@@ -652,11 +643,6 @@ function itself).</p>
     </li>
 </ul>
 
-<!-- 
-    <h3>Example</h3>
-    TODO: Replace with simpler one
--->
-
 
 <mws-Section name="staticdata">StaticData</mws-Section>
 
@@ -723,16 +709,20 @@ in Script, Template, etc).</p>
 <br />
 <mws-Demo
 demotype="minipreview"
-ttitle="Package.json"
+ttitle="PackageJSON"
 text='
 <!-- Load package.json file directly from GitHub -->
 <Template>
+    {% comment %}
     {{ staticdata.name }} v{{ staticdata.version }}
     (by {{ staticdata.author }})
+    {% endcomment %}
 </Template>
+<!--
 <StaticData
     -src="https://raw.githubusercontent.com/modulojs/modulo/main/package.json"
 ></StaticData>
+-->
 '
 ttitle2="FromAPI"
 text2='
@@ -865,7 +855,6 @@ above</a>.)</p>
 various CPart's contributions to the <em>renderObj</em> as Template variables
 that can be inserted into the HTML.  For more discussion of Template, see
 <a href="/docs/tutorial_part2.html#templating">Tutorial Part 2</a>.</p>
-
 
 
 </mws-Page>
