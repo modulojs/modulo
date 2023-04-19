@@ -105,8 +105,8 @@ script.exports.menu = [
                                 'component.slot', 'component.dataProp']),
             _child('Configuration', 'configuration', ['config', 'loading', 'unpkg', 'npm', 'dependency',
                             'registering helpers', 'registering custom cparts']),
-            _child('Library', 'library', ['src', 'namespace'],
-            _child('Modulo', 'modulo', ['starting', 'mounting', 'custom loading', 'custom mounting'],
+            _child('Library', 'library', ['src', 'namespace']),
+            _child('Modulo', 'modulo', ['starting', 'mounting', 'custom loading', 'custom mounting']),
         ],
     },
     {
