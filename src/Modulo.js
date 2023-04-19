@@ -2,40 +2,14 @@
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
-    constructor(parentModulo = null, registryKeys = null) {
-        window._moduloID = (window._moduloID || 0) + 1; // Global ID
-        window._moduloStack = (window._moduloStack || [ ]);
-        this.id = window._moduloID;
-        this._configSteps = 0;
-        this.config = {};
-        this.definitions = {};
-        this.stores = {};
-        if (parentModulo) { // TODO: Delete code path (Note: parentModulo arg is still being used by mws/Demo.js)
-            this.parentModulo = parentModulo;
-            const { deepClone } = modulo.registry.utils;
-            this.config = deepClone(parentModulo.config, parentModulo);
-            this.registry = deepClone(parentModulo.registry, parentModulo);
-            this.assets = parentModulo.assetManager;
-        } else {
-            this.registry = Object.fromEntries(registryKeys.map(cat => [ cat, {} ] ));
-        }
-    }
-
-    static moduloClone(modulo, other) {
-        return modulo; // Never clone Modulos to prevent reference loops
-    }
-
-    pushGlobal() {
-        if (window.modulo && window.modulo.id !== this.id) {
-            window._moduloStack.push(window.modulo);
-        }
-        window.modulo = this;
-    }
-
-    popGlobal() {
-        if (window._moduloStack.length > 0) {
-            window.modulo = window._moduloStack.pop();
-        }
+    constructor() {
+        window._moduloID = (window._moduloID || 0) + 1;
+        this.id = window._moduloID; // Every Modulo instance gets a unique ID.
+        this._configSteps = 0; // Used to check for an infinite loop during load
+        this.registry = {}; // All classes and functions get put here
+        this.config = {}; // For default configurations (e.g. all Components)
+        this.definitions = {}; // For specific definitions (e.g. one Component)
+        this.stores = {}; // Global data store (by default, only used by State)
     }
 
     start(elem, callback = null) { // XXX DEAD CODE
@@ -144,19 +118,19 @@ Modulo.INVALID_WORDS = new Set((`
 `).split(/\s+/ig));
 
 // Create a new modulo instance to be the global default instance
-window.modulo = (new Modulo(null, [
+window.modulo = new Modulo();
+if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
+    var modulo = window.modulo; // TODO: RM when global modulo is cleaned up
+}
+window.modulo.registry = Object.fromEntries([
     'registryCallbacks', 'cparts', 'coreDefs', 'utils', 'core', 'engines',
     'commands', 'templateFilters', 'templateTags', 'processors', 'elements',
-]));//.pushGlobal();
+].map(registryType => ([ registryType, {} ])));
 
 window.modulo.register('registryCallback', function commands(modulo, func, defaults) {
     window.m = window.m || {}; // Avoid overwriting existing truthy m
     window.m[func.name] = () => func(this); // Attach shortcut to global "m"
 });
-
-if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
-    var modulo = window.modulo; // TODO: RM (Hack for VirtualWindow)
-}
 
 window.modulo.DEVLIB_SOURCE = (`
 <Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
@@ -226,7 +200,10 @@ modulo.register('core', class ValueResolver {
 });
 
 
-modulo.config.domloader = { topLevelTags: [ 'modulo'] }; // Only "Modulo" is top
+modulo.config.domloader = {
+    topLevelTags: [ 'modulo' ], // Only "Modulo" is top
+    genericDefTags: { def: 1, script: 1, template: 1, style: 1 },
+};
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
         this.modulo = modulo; // TODO: need to standardize back references to prevent mismatches
@@ -282,10 +259,8 @@ modulo.register('core', class DOMLoader {
             }
             return null;
         }
-
         let defType = tagName.toLowerCase();
-        //if (defType in { cpart: 1, script: 1, template: 1, style: 1 }) {
-        if (defType in { cpart: 1, script: 1, template: 1, style: 1, def: 1 }) { /* TODO: Remove "cpart", replace with def */
+        if (defType in this.modulo.config.domloader.genericDefTags) {
             for (const attrUnknownCase of node.getAttributeNames()) {
                 const attr = attrUnknownCase.toLowerCase();
                 if (!node.getAttribute(attr) && tagsLower.includes(attr)) {
@@ -765,25 +740,6 @@ modulo.register('util', function keyFilter (obj, func) {
     return Object.fromEntries(keys.map(key => [ key, obj[key] ]));
 });
 
-modulo.register('util', function deepClone (obj, modulo) {
-    if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
-        return obj;
-    }
-    const { constructor } = obj;
-    if (constructor.moduloClone) {
-        // Use a custom modulo-specific cloning function
-        return constructor.moduloClone(modulo, obj);
-    }
-    const clone = new constructor();
-    const { deepClone } = modulo.registry.utils;
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            clone[key] = deepClone(obj[key], modulo);
-        }
-    }
-    return clone;
-});
-
 modulo.register('util', function resolveDataProp (key, elem, defaultVal) {
     if (elem.dataProps && key in elem.dataProps) {
         return elem.dataProps[key];
@@ -928,10 +884,10 @@ modulo.register('core', class AssetManager {
             this.moduleSources[hash] = code;
             const assignee = `window.modulo.assets.modules["${ hash }"] = `;
             const prefix = assignee + `function ${ name } (modulo) {\n`;
-            this.modulo.assets = this;// TODO Should investigate why needed
-            this.modulo.pushGlobal();
+            //this.modulo.assets = this;// TODO Should investigate why needed
+            //this.modulo.pushGlobal();
             this.appendToHead('script', `"use strict";${ prefix }${ code }};\n`);
-            this.modulo.popGlobal();
+            //this.modulo.popGlobal();
         }
         return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }

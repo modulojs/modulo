@@ -171,7 +171,7 @@ ideal solution is to simply move the component to a separate library file,
 included with <code>-src=</code> syntax, since that is preferred in general,
 and solves other issues as well (e.g. templating instructions in HTML tags).
 However, if you simply must include a <em>Script</em> tag in an embedded
-component definition you can write <code>&lt;cpart Script&gt;</code> as the
+component definition you can write <code>&lt;def Script&gt;</code> as the
 opening tag, and <code>&lt;/cpart&gt;</code> as the closing tag.  See the
 following:</p>
 
@@ -179,9 +179,9 @@ following:</p>
 text='
 <script Modulo src="https://modulojs.org/js/Modulo.js">
     <Component name="ButtonExample">
-        <cpart Script>
+        <def Script>
             console.log("Hello, world!");
-        </cpart>
+        </def>
     </Component>
 </script>
 '></mws-Demo>

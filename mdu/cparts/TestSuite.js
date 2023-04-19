@@ -239,7 +239,7 @@ modulo.register('cpart', class TestSuite {
         const { TestSuite } = modulo.registry.cparts;
         const { makeDiv, deepClone, registerTestElement } = modulo.registry.utils;
         const Modulo = window.Modulo;
-        const testLoaderModulo = new Modulo(modulo); // "Fork" modulo obj
+        const testLoaderModulo = _newModulo();
         let componentFac;
 
         // REFACTOR this garbage
@@ -676,4 +676,27 @@ modulo.register('util', function doTestRerender (elem, testInfo) {
     }
 });
 
+
+
+modulo.register('util', function deepClone (obj, modulo) {
+    Modulo.prototype.moduloClone = function (modulo, other) {
+        return modulo;
+    };
+    if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
+        return obj;
+    }
+    const { constructor } = obj;
+    if (constructor.moduloClone) {
+        // Use a custom modulo-specific cloning function
+        return constructor.moduloClone(modulo, obj);
+    }
+    const clone = new constructor();
+    const { deepClone } = modulo.registry.utils;
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            clone[key] = deepClone(obj[key], modulo);
+        }
+    }
+    return clone;
+});
 
