@@ -37,7 +37,7 @@
         font-size:=18
         syntax-mode="html"
         theme="eclipse"
-        theme-dark="vibrant_ink"
+        theme-dark="eclipse"
         theme-light="eclipse"
     ></State>
 
@@ -228,14 +228,17 @@
         onchange
     ></Props>
     <Template>
+        {% comment %}
         <h3>Syntax highlighting</h3>
         <x-Options [state.bind] name="syntaxMode"
             options:=staticdata.modes.options
         ></x-Options>
+        {% endcomment %}
         <h3>Appearance</h3>
         <x-Options [state.bind] name="fontSize"
             options:=staticdata.editorFontSizes
         ></x-Options>
+        {% comment %}
         <h4>Themes: Light</h4>
         <x-Options [state.bind] name="themeLight"
             options:=staticdata.editorThemesLight
@@ -244,6 +247,7 @@
         <x-Options [state.bind] name="themeDark"
             options:=staticdata.editorThemesDark
         ></x-Options>
+        {% endcomment %}
     </Template>
     <State
         -store="editor_options"
