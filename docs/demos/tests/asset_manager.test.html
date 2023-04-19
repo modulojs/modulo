@@ -45,16 +45,23 @@
     </script>
 
     <script name="Associates compiled function code with hash">
-        const assets = new modulo.registry.core.AssetManager(modulo);
+        //const assets = new modulo.registry.core.AssetManager(modulo);
+        const assets = modulo.assets; // more of an integration test: just test against existing one
+        const { nameToHash } = assets;
+        assets.nameToHash = {};
         assets.define('Test_x_x_x', 'return "testing123"');
-        const actual = JSON.stringify(Object.keys(assets.modules));
+        const actual = JSON.stringify(Object.values(assets.nameToHash));
         const expected = JSON.stringify([ "x1bqrlhi" ]);
+        assets.nameToHash = nameToHash; // (Note: Purely defensive programming, rm if not needed)
         assert: actual === expected
     </script>
 
     <script name="Compiled function is executable">
-        const assets = new modulo.registry.core.AssetManager(modulo);
+        //const assets = new modulo.registry.core.AssetManager(modulo);
+        const assets = modulo.assets; // more of an integration test: just test against existing one
+        const { nameToHash } = assets;
         const func = assets.define('Test_x_x_x', 'return "testing123"');
+        assets.nameToHash = nameToHash; // (Note: Purely defensive programming, rm if not needed)
         assert: func() === 'testing123'
     </script>
 

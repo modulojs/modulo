@@ -2,7 +2,23 @@
     These tests are useful as unit tests testing the loadString method &
     loadFromDOM methods
 -->
-<Component name="CoreLoading"><TestSuite>
+<Component name="CoreLoading">
+
+<State -name="state_a" abc="def" ></State>
+<def State -name="state_b" hij="jkl" ></def>
+<script State -name="state_d" abc="def2" ></script>
+<template State -name="state_e" hij="jkl2" ></template>
+<style State -name="state_f" mno="pqr" ></style>
+
+<TestSuite>
+<Test name="core parsing tests">
+    <script name="named state defined in generic ways (direct, def) is loaded">
+        assert: state_a.abc === 'def' && state_b.hij === 'jkl'
+    </script>
+    <script name="named state defined in other ways (template, script, style) is loaded">
+        assert: state_d.abc === 'def2' && state_e.hij === 'jkl2' && state_f.mno === 'pqr';
+    </script>
+</Test>
 
 <Test name="modulo.loadString tests">
     <script name="modulo.loadString exists">

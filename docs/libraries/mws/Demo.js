@@ -81,7 +81,7 @@ function toEmbedScript(text, selected) {
     const indentText = ('\n' + text.trim()).replace(/\n/g, '\n    ');
 
     // Escape all "script" tags, so it's safe according to HTML syntax:
-    const safeText = indentText.replace(/<script/gi, '<cpart Script')
+    const safeText = indentText.replace(/<script/gi, '<def Script')
                             .replace(/<\/script\s*>/gi, '</cpart>');
     const componentName = selected || 'Demo';
     const usage = `<p>Example usage: <x-${componentName}></x-${componentName}></p>`;
@@ -316,6 +316,51 @@ function doFullscreen() {
         //element.codeMirrorEditor.refresh()
     }
 }
+
+
+modulo.register('util', function deepClone (obj, modulo) {
+    Modulo.prototype.moduloClone = function moduloClone (modulo, other) {
+        return modulo; // Prevent Modulo objects from ever getting cloned (e.g. in case of back references)
+    };
+    if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
+        return obj;
+    }
+    const { constructor } = obj;
+    if (constructor.moduloClone) {
+        // Use a custom modulo-specific cloning function
+        return constructor.moduloClone(modulo, obj);
+    }
+    const clone = new constructor();
+    const { deepClone } = modulo.registry.utils;
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            clone[key] = deepClone(obj[key], modulo);
+        }
+    }
+    return clone;
+});
+
+
+
+/*
+function _newModulo(includeDefs = false) {
+    Modulo.prototype.moduloClone = function (modulo, other) {
+        return modulo;
+    };
+    const { deepClone } = modulo.registry.utils;
+    const mod = new Modulo(null, []); // TODO
+    mod.config = deepClone(modulo.config, modulo);
+    mod.registry = deepClone(modulo.registry, modulo);
+    // Refresh queue & asset manager
+    if (includeDefs) {
+        mod.definitions = deepClone(modulo.definitions, modulo);
+    }
+    mod.assets = modulo.assets; // Copy over asset manager
+    mod.assets.modulo = mod; // TODO Rethink these back references
+    return mod;
+}
+*/
+
 
 /*
 function previewspotMount({ el }) {
