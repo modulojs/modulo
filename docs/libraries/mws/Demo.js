@@ -250,11 +250,15 @@ function _newModulo() {
 }
 
 function runModuloText(componentDef) {
+    const oldModulo = window.modulo;
     const defDiv = document.createElement('div');
     defDiv.innerHTML = componentDef;
     const mod = _newModulo();
+    window.modulo = mod;
     mod.loadFromDOM(defDiv);
-    mod.preprocessAndDefine();
+    mod.preprocessAndDefine(() => {
+      window.modulo = oldModulo; // restore
+    });
 }
 
 function doRun() {
