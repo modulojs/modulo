@@ -92,6 +92,8 @@ function editspotMount ({ el }) {
     const changeEv = () => cparts.datastate.propagate('value', editor.session.getValue());
     editor.session.on('change', _debounce(changeEv));
     cparts.datastate.propagate('value', editor.session.getValue());
+    editor.session.setMode('ace/mode/html'); // XXX TODO force HTML
+    editor.setTheme('ace/theme/eclipse'); // XXX TODO force ECLIPSE
 }
 
 function editspotUnmount () {

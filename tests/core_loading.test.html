@@ -92,7 +92,7 @@
 
 <Test name="Processor tests">
     <script name="modulo.preprocessAndDefine exists">
-        assert: modulo && modulo.preprocessAndDefine && modulo.applyProcessors
+        assert: modulo && modulo.preprocessAndDefine && modulo.applyNextProcessor
     </script>
 
     <script name="Preprocesses an empty component with expected values">
@@ -124,7 +124,7 @@
 
     <script name="Applies processors as expected to an empty conf">
         const mod = window._newModulo();
-        const result = mod.applyProcessors({ }, [ 'A', 'B', 'C' ]);
+        const result = mod.applyNextProcessor({ }, [ 'A', 'B', 'C' ]);
         assert: result === false
     </script>
 
@@ -136,7 +136,7 @@
         mod.registry.processors.testa = function (m, k, v) { runA = v; }
         mod.registry.processors.testb = function (m, k, v) { runB = v; }
         mod.registry.processors.testc = function (m, k, v) { runC = v; }
-        const result = mod.applyProcessors({
+        const result = mod.applyNextProcessor({
             TestA: 'eyy',
             TestB: 'bee',
             TestC: 'sea',
@@ -156,7 +156,7 @@
         let keepGoing = 0;
         let results = [];
         while (keepGoing++ < 5) {
-            results.push(mod.applyProcessors(conf, [ 'TestA', 'TestB' ]));
+            results.push(mod.applyNextProcessor(conf, [ 'TestA', 'TestB' ]));
         }
         const expected = JSON.stringify({ TestC: 'sea' });
         const actual = JSON.stringify(conf);
@@ -178,7 +178,7 @@
         let keepGoing = 0;
         let results = [];
         while (keepGoing++ < 5) {
-            results.push(mod.applyProcessors(conf, [ 'TestC|TestA', 'TestB' ]));
+            results.push(mod.applyNextProcessor(conf, [ 'TestC|TestA', 'TestB' ]));
         }
         const expected = JSON.stringify({ TestA: 'eyy' });
         const actual = JSON.stringify(conf);

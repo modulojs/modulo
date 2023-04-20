@@ -682,6 +682,10 @@ modulo.register('util', function deepClone (obj, modulo) {
     Modulo.prototype.moduloClone = function (modulo, other) {
         return modulo;
     };
+    modulo.registry.engines.Templater.prototype.moduloClone = function (modulo, other) {
+        // Possible idea: Return a serializable array as args for new()
+        return new this('', other);
+    }
     if (obj === null || typeof obj !== 'object' || (obj.exec && obj.test)) {
         return obj;
     }
