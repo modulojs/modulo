@@ -41,11 +41,10 @@ window.Modulo = class Modulo {
         return Object.assign(inst, { id, attrs, conf }, args, { modulo: this });
     }
 
-    preprocessAndDefine(callback) {
-        callback = callback ? callback : (() => {});
+    preprocessAndDefine(cb) {
         this.fetchQueue.wait(() => {
-            this.repeatProcessors(null, 'DefBuilders', [ ], () => {
-                this.repeatProcessors(null, 'DefFinalizers', [ ], callback);
+            this.repeatProcessors(null, 'DefBuilders', () => {
+                this.repeatProcessors(null, 'DefFinalizers', cb || (() => {}));
             });
         });
     }
@@ -59,16 +58,16 @@ window.Modulo = class Modulo {
         return loader.loadFromDOM(elem, parentName, quietErrors);
     }
 
-    repeatProcessors(confs, field, defaults, cb) {
-        // TODO: Move defaults into global modulo config
+    repeatProcessors(defs, field, cb) {
         let changed = true; // Run at least once
+        const defaults = this.config.modulo['default' + field] || [];
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
             changed = false;
-            for (const conf of confs || Object.values(this.definitions)) {
-                const processors = conf[field] || defaults;
-                //changed = changed || this.applyProcessors(conf, processors);
-                const result = this.applyProcessors(conf, processors);
+            for (const def of (defs || Object.values(this.definitions))) {
+                const processors = def[field] || defaults;
+                //changed = changed || this.applyProcessors(def, processors);
+                const result = this.applyNextProcessor(def, processors);
                 if (result === 'wait') { // TODO: Test or document, or delete
                     changed = false;
                     break;
@@ -76,7 +75,7 @@ window.Modulo = class Modulo {
                 changed = changed || result;
             }
         }
-        const repeat = () => this.repeatProcessors(confs, field, defaults, cb);
+        const repeat = () => this.repeatProcessors(defs, field, cb);
         if (Object.keys(this.fetchQueue ? this.fetchQueue.queue : {}).length === 0) { // TODO: Remove ?: after core object refactor
             if (cb) {
                 cb(); // Synchronous path
@@ -86,20 +85,21 @@ window.Modulo = class Modulo {
         }
     }
 
-    applyProcessors(def, processorNameArray) {
-        const cls = this.registry.cparts[def.Type] || this.registry.core[def.Type]; // TODO: Fix this
+    applyNextProcessor(def, processorNameArray) {
+        const cls = this.registry.cparts[def.Type] || this.registry.coreDefs[def.Type] || {}; // TODO: Fix this
+        const { processors } = this.registry;
         for (const name of processorNameArray) {
             const [ attrName, aliasedName ] = name.split('|');
             if (attrName in def) {
-                const funcName = (aliasedName || attrName).toLowerCase();
-                const func = cls && cls[funcName] ? cls[funcName] :
-                    this.registry.processors[funcName];
+                const funcName = aliasedName || attrName;
+                const proc = this.registry.processors[funcName.toLowerCase()];
+                const func = funcName in cls ? cls[funcName] : proc;
                 const value = def[attrName]; // Pluck value & remove attribute
                 delete def[attrName]; // TODO: document 'wait' or rm -v
                 return func(this, def, value) === true ? 'wait' : true;
             }
         }
-        return false;
+        return false; // No processors were applied, return false
     }
 
     assert(value, ...info) {
@@ -258,7 +258,7 @@ modulo.register('core', class DOMLoader {
                 def[toCamel(name)] = value; // "-kebab-case" to "CamelCase"
             }
         }
-        this.modulo.repeatProcessors(array, 'DefLoaders', [ 'DefTarget', 'DefinedAs', 'Src' ]);
+        this.modulo.repeatProcessors(array, 'DefLoaders');
         return array;
     }
 
@@ -336,59 +336,8 @@ modulo.register('processor', function definedAs (modulo, def, value) {
     }
 });
 
-modulo.register('processor', function customElement (modulo, def, value) {
-    if (!def.ChildrenNames || def.ChildrenNames.length === 0) {
-        console.warn('Empty ChildrenNames specified:', def.DefinitionName);
-        return;
-    }
-    //if (def.namespace === 'modulo') { console.log("AWHAT modulo"); }
-    //if (!def.namespace || def.namespace === 'modulo') { def.namespace = 'x'; }
-    /*
-    let s = '';
-    for (const child of def.ChildrenNames.map(n => modulo.definitions[n])) {
-        const cpName = def.RenderObj || def.Name;
-        s += `        this.cparts.${ cpName } = `;
-        s += `new modulo.registry.cparts.${ child.Type }(modulo, `;
-        s += `modulo.defs['${ child.DefinitionName }'], this);\n`;
-        s += `        this.cparts.${ cpName }.def = `
-        s += `modulo.defs['${ child.DefinitionName }'];\n`;
-    }
-    */
-    def.namespace = def.namespace || 'x';
-    def.name = def.name || def.DefName || def.Name;
-    def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
-    def.MainRequire = def.DefinitionName;
-    const className =  `${ def.namespace }_${ def.name }`;
-    def.Code = `
-        const def = modulo.definitions['${ def.DefinitionName }'];
-        class ${ className } extends ${ value } {
-            constructor() {
-                super();
-                modulo.registry.utils.initElement(modulo, def, this);
-            }
-            connectedCallback() {
-                window.setTimeout(() => this.parsedCallback(), 0);
-            }
-            parsedCallback() {
-                modulo.registry.utils.mountElement(modulo, def, this);
-            }
-        }
-        modulo.registry.utils.initComponentClass(modulo, def, ${ className });
-        window.customElements.define(def.TagName, ${ className });
-        return ${ className };
-    `;
-});
-
-modulo.register('util', function initElement (modulo, def, elem) {
-    elem.modulo = modulo;
-    elem.isMounted = false;
-    elem.isModulo = true;
-    elem.originalHTML = null;
-    elem.originalChildren = [];
-    elem.cparts = {};
-});
-
 modulo.register('util', function initComponentClass (modulo, def, cls) {
+    // Run factoryCallback static lifecycle method to create initRenderObj
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
         const cpartDef = modulo.definitions[defName];
@@ -398,36 +347,45 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
             initRenderObj[cpartDef.Name] = result;
         }
     }
+
+    cls.prototype.init = function init () {
+        this.modulo = modulo;
+        this.isMounted = false;
+        this.isModulo = true;
+        this.originalHTML = null;
+        this.originalChildren = [];
+        this.cparts = {};
+        // Loop through all children, instancing each class with configuration
+        const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
+        for (const def of allNames.map(name => modulo.definitions[name])) {
+            this.cparts[def.RenderObj || def.Name] = modulo.instance(def, { element: this });
+        }
+    };
+
+    // Mount the element, optionally "merging" in the modulo-original-html attr
+    cls.prototype.parsedCallback = function parsedCallback() {
+        const htmlOriginal = this.getAttribute('modulo-original-html');
+        const original = ((!htmlOriginal || htmlOriginal === '') ? this :
+                          modulo.registry.utils.makeDiv(htmlOriginal));
+        this.cparts.component.lifecycle([ 'initialized' ]);
+        this.rerender(original); // render and re-mount it's own childNodes
+        if (this.hasAttribute('modulo-original-html')) {
+            const { reconciler } = this.cparts.component;
+            reconciler.patch = reconciler.applyPatch; // Apply immediately
+            reconciler.patchAndDescendants(this, 'Mount'); // Trigger "Mount"
+            reconciler.patch = reconciler.pushPatch; // (undo apply)
+        }
+        this.isMounted = true;
+    };
     cls.prototype.initRenderObj = initRenderObj;
-    // Alias a method from the component class (TODO rm at some point)
+    // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
         this.cparts.component.rerender(original);
     };
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
     };
-    modulo.register('element', cls);
-});
-
-modulo.register('util', function mountElement (modulo, def, elem) {
-    // Loop through all children, instancing each class with configuration
-    const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
-    for (const def of allNames.map(name => modulo.definitions[name])) {
-        elem.cparts[def.RenderObj || def.Name] = elem.modulo.instance(def, { element: elem });
-    }
-    // Mount the element, optionally "merging" in the modulo-original-html attr
-    const htmlOriginal = elem.getAttribute('modulo-original-html');
-    const original = ((!htmlOriginal || htmlOriginal === '') ? elem :
-                      modulo.registry.utils.makeDiv(htmlOriginal));
-    elem.cparts.component.lifecycle([ 'initialized' ]);
-    elem.rerender(original); // render and re-mount it's own childNodes
-    if (elem.hasAttribute('modulo-original-html')) { // Need to mount directives
-        const { reconciler } = elem.cparts.component;
-        reconciler.patch = reconciler.applyPatch; // Apply patches immediately
-        reconciler.patchAndDescendants(elem, 'Mount'); // Trigger every "Mount"
-        reconciler.patch = reconciler.pushPatch;
-    }
-    elem.isMounted = true;
+    modulo.register('element', cls); // All elements get registered centrally
 });
 
 modulo.register('util', function makeStore (modulo, def) {
@@ -539,6 +497,27 @@ modulo.config.component = {
 };
 
 modulo.register('coreDef', class Component {
+    static CustomElement (modulo, def, value) {
+        if (!def.ChildrenNames || def.ChildrenNames.length === 0) {
+            console.warn('Empty ChildrenNames specified:', def.DefinitionName);
+            return;
+        }
+        def.namespace = def.namespace || 'x';
+        def.name = def.name || def.DefName || def.Name;
+        def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
+        def.MainRequire = def.DefinitionName;
+        const className =  `${ def.namespace }_${ def.name }`;
+        def.Code = `
+            const def = modulo.definitions['${ def.DefinitionName }'];
+            class ${ className } extends ${ value } {
+                constructor() { super(); this.init(); }
+                connectedCallback() { window.setTimeout(() => this.parsedCallback(), 0); }
+            }
+            modulo.registry.utils.initComponentClass(modulo, def, ${ className });
+            window.customElements.define(def.TagName, ${ className });
+            return ${ className };
+        `;
+    }
     rerender(original = null) {
         if (original) {
             if (this.element.originalHTML === null) {
@@ -717,6 +696,7 @@ modulo.register('coreDef', class Modulo { }, {
     Contains: 'coreDefs',
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
     defaultDef: { DefTarget: null, DefinedAs: null, DefName: null },
+    defaultDefLoaders: [ 'DefTarget', 'DefinedAs', 'Src' ],
 });
 
 modulo.register('coreDef', class Library { }, {
@@ -1000,55 +980,42 @@ modulo.register('cpart', class Props {
     }
 });
 
-modulo.register('processor', function prefixCSS (modulo, def, value) {
-    const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
-    if (mode === 'regular') {
-        value = modulo.registry.utils.prefixAllSelectors(namespace, Name, value);
-    }
-    if (mode !== 'shadow') {
-        modulo.assets.registerStylesheet(value);
-    }
-});
-
 modulo.register('cpart', class Style {
+    static PrefixCSS (modulo, def, value) {
+        const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
+        if (mode === 'regular') {
+            value = modulo.registry.utils.prefixAllSelectors(namespace, Name, value);
+        }
+        if (mode !== 'shadow') {
+            modulo.assets.registerStylesheet(value);
+        }
+    }
     initializedCallback(renderObj) {
         const { component, style } = renderObj;
         if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
             const style = window.document.createElement('style');
             style.setAttribute('modulo-ignore', 'true');
-            style.textContent = style.content;// `<style modulo-ignore>${style.content}</style>`;
+            style.textContent = style.content;
             this.element.shadowRoot.append(style);
         }
     }
-    /*
-    updateCallback() {
-        const { isolateClass, allSelectors } = this.def;
-        if (!isolateClass || allSelectors.length < 1) {
-            return;
-        }
-        for (const elem of this.element.querySelector(allSelectors.join(','))) {
-            elem.classList.add(isolateClass); // ensure always has class added
-        }
-    }
-    */
 }, {
     DefFinalizers: [ 'Content|PrefixCSS' ]
 });
 
-modulo.register('processor', function templatePrebuild (modulo, def, value) {
-    if (!def.Content) {
-        console.error('No Template Content specified:', def.DefinitionName, JSON.stringify(def));
-        return;
-    }
-    const engine = def.engine || 'Templater';
-    const instance = new modulo.registry.engines[engine](modulo, def);
-    def.Hash = instance.Hash;
-    //console.log('Template code:', def.Content);
-    delete def.Content;
-    delete def.TemplatePrebuild;
-});
-
 modulo.register('cpart', class Template {
+    static TemplatePrebuild (modulo, def, value) {
+        if (!def.Content) {
+            console.error('No Template Content specified:', def.DefinitionName, JSON.stringify(def));
+            return;
+        }
+        const engine = def.engine || 'Templater';
+        const instance = new modulo.registry.engines[engine](modulo, def);
+        def.Hash = instance.Hash;
+        //console.log('Template code:', def.Content);
+        delete def.Content;
+        delete def.TemplatePrebuild;
+    }
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
         this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
@@ -1060,10 +1027,9 @@ modulo.register('cpart', class Template {
         renderObj.component.innerHTML = this.templater.render(renderObj);
     }
 }, {
-    TemplatePrebuild: "yes",
+    TemplatePrebuild: "y", // TODO: Refactor
     DefFinalizers: [ 'TemplatePrebuild' ]
 });
-
 
 modulo.register('processor', function contentCSV (modulo, def, value) {
     const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
@@ -1123,30 +1089,30 @@ modulo.register('coreDef', class Configuration { }, {
     DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
-modulo.register('processor', function scriptAutoExport (modulo, def, value) {
-    const { getAutoExportNames } = modulo.registry.utils;
-    if (def.lifecycle && def.lifecycle !== 'initialized') {
-        value = `function ${ def.lifecycle }Callback (renderObj) {${ value }}`;
-    }
-    const isDirRegEx = /(Unmount|Mount)$/;
-    def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
-    const { ChildrenNames } = modulo.definitions[def.Parent] || { };
-    const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
-    sibNames.push('component', 'element', 'cparts'); // Add in extras
-    const varNames = sibNames.filter(name => value.includes(name));
-    // Build def.Code to wrap the user-provided code and export local vars
-    def.Code = `var script = { exports: {} }; `;
-    def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
-    def.Code += '\n' + value + '\nreturn {';
-    for (const s of getAutoExportNames(value)) {
-        def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
-    }
-    def.Code += `setLocalVariables: function(o) {`
-    def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
-    def.Code += `}, exports: script.exports }\n`
-});
-
 modulo.register('cpart', class Script {
+    static AutoExport (modulo, def, value) {
+        const { getAutoExportNames } = modulo.registry.utils;
+        if (def.lifecycle && def.lifecycle !== 'initialized') {
+            value = `function ${ def.lifecycle }Callback (renderObj) {${ value }}`;
+        }
+        const isDirRegEx = /(Unmount|Mount)$/;
+        def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
+        const { ChildrenNames } = modulo.definitions[def.Parent] || { };
+        const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
+        sibNames.push('component', 'element', 'cparts'); // Add in extras
+        const varNames = sibNames.filter(name => value.includes(name));
+        // Build def.Code to wrap the user-provided code and export local vars
+        def.Code = `var script = { exports: {} }; `;
+        def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
+        def.Code += '\n' + value + '\nreturn {';
+        for (const s of getAutoExportNames(value)) {
+            def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
+        }
+        def.Code += `setLocalVariables: function(o) {`
+        def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
+        def.Code += `}, exports: script.exports }\n`
+    }
+
     static factoryCallback(renderObj, def, modulo) {
         //modulo.assert(results || !def.Parent, 'Invalid script return');
         const hash = modulo.assets.nameToHash[def.DefinitionName];
@@ -1187,9 +1153,8 @@ modulo.register('cpart', class Script {
     }
 }, {
     lifecycle: null,
-    DefBuilders: [ 'Content|ScriptAutoExport', 'Code' ],
+    DefBuilders: [ 'Content|AutoExport', 'Code' ],
 });
-
 
 
 modulo.register('cpart', class State {
@@ -1205,9 +1170,8 @@ modulo.register('cpart', class State {
     }
 
     initializedCallback(renderObj) {
-        if (!this.def && this.conf) { this.def = this.conf; } // XXX rm
-        const store = this.def.Store ? this.modulo.stores[this.def.Store]
-                : this.modulo.registry.utils.makeStore(this.modulo, this.def);
+        const store = this.conf.Store ? this.modulo.stores[this.conf.Store]
+                : this.modulo.registry.utils.makeStore(this.modulo, this.conf);
         store.subscribers.push(Object.assign(this, store));
         return store.data; // TODO: Possibly, push ALL sibling CParts with stateChangedCallback
     }
@@ -1246,7 +1210,7 @@ modulo.register('cpart', class State {
 
     stateChangedCallback(name, value, el) {
         this.modulo.registry.utils.set(this.data, name, value);
-        if (!this.def.Only || this.def.Only.includes(name)) { // TODO: Test & document
+        if (!this.conf.Only || this.conf.Only.includes(name)) { // TODO: Test & document
             this.element.rerender();
         }
     }
@@ -1311,11 +1275,6 @@ modulo.register('engine', class Templater {
             }
             this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
         }
-    }
-
-    static moduloClone(modulo, other) {
-        // Possible idea: Return a serializable array as args for new()
-        return new this('', other);
     }
 
     tokenizeText(text) {
@@ -1681,7 +1640,6 @@ modulo.register('engine', class Reconciler {
     }
 
     reconcile(node, rival, tagTransforms) {
-        // TODO: should normalize <!DOCTYPE html>
         if (typeof rival === 'string') {
             rival = this.loadString(rival, tagTransforms);
         }
