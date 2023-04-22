@@ -1,5 +1,593 @@
 <!DOCTYPE html><html><head>
 
-<link rel="stylesheet" href="/_modulo/modulo-build-xx666h5d.css">
-</head><body><script src="/_modulo/modulo-build-x1kr5v33.js"></script>
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Modulo Developer Utilities - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-x1j5q0v9.css">
+</head><body>
+
+
+    
+    
+    
+    
+
+    <!-- Some global CSS that is not tied to any component: -->
+    
+
+
+
+<slot name="above-navbar"></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about">About</a>
+        </li>
+        <li>
+            <a href="/start.html">Start</a>
+        </li>
+        <li>
+            <a href="/docs/" class="Navbar--selected">Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        
+        
+            v: 0.0.44<br>
+            <!--SLOC: undefined lines<br />-->
+            <a href="https://github.com/modulojs/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
+        
+    
+        <!--
+        
+            <a href="https://github.com/modulojs/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        
+        -->
+    </div>
+</nav>
+
+
+    <main class="Main Main--fluid Main--withSidebar">
+        <aside class="TitleAside TitleAside--navBar">
+            <h3><span alt="Lower-case delta">%</span></h3>
+            <nav class="TitleAside-navigation">
+                <h3>Documentation</h3>
+                <mws-docsidebar path="mdu.html" modulo-original-html=""><ul>
+    
+        <li class="
+            
+            "><a href="/docs/">Table of Contents</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/tutorial_part1.html">Tutorial</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/templating.html">Templating</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/templating-reference.html">Template Reference</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/cparts.html">Component Parts</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/core.html">Core</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/lifecycle.html">Lifecycle</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/directives.html">Directives</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/demos/">Examples</a>
+            
+        </li>
+    
+
+
+    <!--
+    <li>
+        Other resources:
+
+        <ul>
+            <li>
+                <a href="/docs/faq.html">FAQ</a>
+            <li title="Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.">
+                Literate Source*<br /><em>* Coming soon!</em>
+            </li>
+        </ul>
+
+    </li>
+    -->
+    <!--<a href="/literate/src/Modulo.html">Literate source</a>-->
+</ul>
+
+</mws-docsidebar>
+            </nav>
+        </aside>
+        <aside style="border:none">
+            <slot>
+
+<h1>MDU: Modulo Developer Utilities</h1>
+
+<h3>What is "MDU"?</h3>
+
+<p>When the letters <code>olo</code> of "Modulo" are rearranged into a
+<code>%</code> symbol, the remaining letters are <code>mdu</code>. This can be
+backformed then into an acronym: Modulo Developer Utilities—or, if you
+prefer, it can be "Modulo Developer <em>Universe</em>", to make the acronym
+similar to that of a popular movie franchise. Obviously none of this was
+planned, but given that naming things is one of the (tongue-in-cheek)
+<em>hardest problems in computer science</em>, this naive solution should be
+sufficient. Take that, hardest problem!</p>
+
+<p>There are several goals of the MDU project. The first is to develop a
+command-line utility (as <code>modulocli</code>) to aid in Modulo development.
+This consists of tools developed while developing Modulo and it's
+documentation. This will also consist of examples showing how Modulo can be
+used as a JAMStack-style SSG, and (eventually) a full-stack, database based
+multi-page app.</p>
+
+<p>The second goal is to develop a standard library of useful components (as
+the <em>MDU Component Library</em>). This will include common widgets (e.g.
+Buttons, Dropdowns, Modals, and the like) with a bare-bones (but theme-able)
+appearance. The goal of these common widgets is to both provide example code
+for Modulo best practices, and also be useful for rapid-prototyping, with the
+assumption that eventually they will be swapped out for something more
+sophisticated or fine-tuned. This website will then be rewritten to be built
+only with these components. In addition to common widgets, there is a plan to
+develop a full set of widgets for "story-book" style documentation. This will
+be used for both this documentation, but also allow for easily launching your
+own well-documented component libraries, and thus providing a standard
+structure for Modulo component library documentation in general.</p>
+
+<p>The third goal is similar to the second, but instead of full components,
+it's to develop a standard library of more <em>CParts</em>. The intention here
+is to keep Modulo.js itself to only to core behavior, while still showing off
+more functionality. These extra CParts should make easier to avoid using
+<em>Script</em> tags: The plan is to include <em>CParts</em> that allow for
+easier integration with APIs (e.g. a "fetch" CPart for hooking REST and/or
+GraphQL APIs directly to state) and legacy code (e.g. a "jQuery" CPart that
+will make it easier to embed old jQuery plug-ins as though they were Modulo
+components).</p>
+
+<p>Of the 3 goals, only <code>modulocli</code> and the <em>TestSuite</em> CPart
+(which may get included later, in some reduced form, in Modulo.js base) have
+any documentation.  <strong>The documentation below is on experimental features
+for Modulo.  Experimental features may have incomplete documentation or an API
+that might change drastically in the future.</strong></p>
+
+
+
+<mws-section modulo-original-html="modulocli">
+        <a class="secanchor" title="Click to focus on this section." id="" name="" href="#">#</a>
+        <h2>modulocli</h2>
+    </mws-section>
+
+<p>Modulo CLI allows you to use Modulo Console Commands in a regular
+command-line interface. It is included in the repo and will soon be installable
+via npm.</p>
+
+
+<pre>Usage:   modulocli CMD [preload(s)] [--flag(s)]
+</pre>
+
+<pre>Example: modulocli ssg --input ./src/ --output ./public/
+</pre>
+
+<h3>Available sub-commands:</h3>
+<ul>
+     <li><strong>build</strong> - Builds your Modulo project as a single JS
+     file.</li>
+
+     <li><strong>buildpreload</strong> - Builds a "preload" file, defaulting to
+     "m.js", to pre-pack layouts and allow for easier development of static
+     sites without needing to "load" everything each time. Note that this is
+     also done automatically when you do a <code>ssg</code> build.</li>
+
+     <li><strong>generate</strong> - Does the SSG "generate" step on a single,
+     specified file. Useful for debugging SSG behavior, but rarely useful
+     outside of that.</li>
+
+     <li><strong>help</strong> - Shows help</li>
+
+     <li><strong>serve</strong> - Runs the SSG, and starts an express server on
+     the resulting directory, while watching for changes. By default, it will
+     also serve up the source on a separate PORT. If <code>serverAppPath</code>
+     is specified, it can also run an arbitrary backend Express
+     application, allowing for full-stack development.</li>
+
+     <li><strong>servesrc</strong> - Like "serve", except only for the source
+     directory</li>
+
+
+     <li><strong>shell</strong> - Begins an interactive Node.js REPL shell that
+     allows for Modulo Console Commands (just like in the browser console),
+     useful for interactive debugging</li>
+
+     <li><strong>ssg</strong> - The main SSG command: Copies from the input
+     directory into the output directory, pre-rendering any Modulo components
+     that it finds in HTML files.</li>
+
+     <li><strong>target</strong> - (Incomplete) - Used for targeting components
+     for introspection while debugging, especially useful in conjunction with
+     "shell".</li>
+
+     <li><strong>test</strong> - Runs all test-suites associated with loaded
+     components.</li>
+
+     <li><strong>watch</strong> - Similar to "SSG", except it will use
+     <code>node-watch</code> to watch for changes in the input directory, and
+     rerun the SSG if anything changes.</li>
+</ul>
+
+
+<h3>Available flags:</h3>
+
+<h4>How to configure</h4>
+<p>All below settings can be specified in one of 3 places:</p>
+<ol>
+    <li> ./modulo.json    (this path can be changed with <code>MODULO_CONF</code> env var)</li>
+    <li> ./package.json   (will look under a "modulo" key)</li>
+    <li> As a CLI flag    (using below "--ouput=/docs" style syntax)</li>
+</ol>
+<p>For the greatest control, specify a JSON file (1 or 2)</p>
+
+
+<h4>Full list of configuration flags</h4>
+<ul>
+    <li><code>--help=false</code>
+         [alias: -h] Show this online help text (same as "help" command)
+    </li>
+
+    <li><code>--verbose=false</code>
+         [alias: -v] Produce noisier logging output for debugging
+    </li>
+
+    <li><code>--host=127.0.0.1</code>
+         [alias: -a] For modulo server: Specifies address to bind
+    </li>
+
+    <li><code>--port=3333</code>
+         [alias: -p] For modulo server: Specifies port to bind
+    </li>
+
+    <li><code>--input=srcwww</code>
+         Specifies input directory for static site, which will be copied 1:1
+         and transformed into output
+    </li>
+
+    <li><code>--output=www</code>
+         Specifies output directory for static site. This directory
+         is the one that should be served up as your site (e.g. for sites
+         hosted on GitHub Pages, this should be "docs").
+    </li>
+
+    <li><code>--buildOutput=./modulo-build-{{versiondate}}-{{hash}}.js</code>
+         Use this to specify the path of the BUILD JS bundle output during
+         the SSG step. This file will contain the Modulo source code, all of
+         your components, preloads, and any extra bundled JS files. Also,
+         during the postprocessing step, each GENERATE'd page will be
+         revisited and get a script-tag inserted with the path to this file.
+         This path gets templated using MTL syntax and the following
+         variables available:
+         input, output (the same as config)
+         versiondate (an Ubuntu-esque version number, e.g. 1.10 for a release
+                      in the 10th month of 2021)
+         hash        (the hash uniquely identifying the new build)
+    </li>
+
+
+    <li><code>--buildPreload={{input}}/m.js</code>
+         The path to the preload build. This typically should go into your
+         input directory, being the only thing to do so. The default is to
+         name it "/m.js", thus facilitating a very short script tag in your
+         input files. All preloaded files (along with their dependencies)
+         will be built into this file.
+    </li>
+
+    <li><code>--serverApp=null</code>
+         If you are building a JAMstack-style app, you can use point this
+         path to the file that sets up your backend routes. You can already
+         get this behavior by simply placing a file in "srv/index.js" that
+         exports an Express.js-like "app". When you run "modulocli serve", it
+         will find this file, require it, and then use whatever exported as
+         the server that Modulo attaches it's own middleware to.
+    </li>
+
+    <li><code>--serverAppPath=srv/index.js</code>
+         This is the default value of serverApp if not specified, and
+         changing this behaves the same way with one exception: If it's not
+         found, it will simply warn (in verbose mode) and move on. 
+         Typically this is not changed (instead you should change serverApp).
+    </li>
+
+    <li><code>--serverFramework=express</code>
+         Specify a package to be "required" to host the server. If you change
+         this from "express", the interface of this package should be
+         generally Express.js-like. Typically not changed, but could be
+         useful for upgrading to alternate packages, or specifying a local
+         path to allow middleware or patching.
+    </li>
+
+    <li><code>--serverAutoFixSlashes=false</code>
+         Set to true to automatically attach "/" to requests that need it
+         (e.g. requesting "/site/news", where "news" is a directory, might
+         turn into "/site/news/" and thus "/site/news/index.html".) Note that
+         this setting ONLY affects the server, it will not affect the SSG
+         output, which will never attempt to fix this or alter paths.
+    </li>
+
+    <li><code>--serverAutoFixExtensions=true</code>
+         Set to true to automatically attach ".html" to requests that need
+         it, allowing you to skip the .html ending in your links. Note that
+         this setting ONLY affects the server, it will not affect the SSG
+         output, which will always attach .html endings. If you want to hide
+         .html endings for an static-deployed site, you will need to
+         configure this with your static host. Many hosts support this,
+         in fact GitHub Pages does this automatically already, so no
+         configuration necessary there.
+    </li>
+
+    <li><code>--ssgRenderDepth=10</code>
+         During the SSG step, this important setting specifies how many times
+         GENERATE will rerender, discovering and attaching Modulo components,
+         before deciding that the page is "good enough" and copying over the
+         results. How many steps do you need? Each time a component renders a
+         subcomponent, or renders in an unpredictable manner (e.g. produces
+         random output), Modulo will need to do another rendering step, since
+         it will keep on rendering until the HTML "stabilizes". Thus, if you
+         expect many nested components, you should set this to a high number.
+         The purpose of this limit is to prevent infinite recursion caused by
+         non-deterministic components. However, you should still avoid
+         non-deterministic components for other reasons.
+    </li>
+
+    <li><code>--ssgBuildOutput={{output}}/js/modulo-build-{{versiondate}}-{{hash}}.js</code>
+         Use this to specify the path of the BUILD JS bundle output during
+         the SSG step. This file will contain the Modulo source code, all of
+         your components, preloads, and any extra bundled JS files. Also,
+         during the postprocessing step, each GENERATE'd page will be
+         revisited and get a script-tag inserted with the path to this file.
+         As with other BUILD paths, this path gets templated using MTL syntax
+         with the same variables available (see buildPath)
+    </li>
+
+    <li><code>--testAllowPreload=false</code>
+         The "test" command is the only one which will NOT automatically
+         preload before running, in order to save time and keep tests better
+         isolated. Enable this if your test-suites need the preloads.
+    </li>
+
+    <li><code>--testLog=false</code>
+         Enable the test log file will keep track of the maximum number of
+         assertions that pass and fail when running. If enabled, an OMISSION
+         FAILURE will occur if the number of assertions ever goes down. This
+         is to ensure that no regressions get introduced which cause tests to
+         not even be "picked up" or fail silently (e.g. Regressions during
+         CPart load-steps can cause tests to not even load).
+    </li>
+
+    <li><code>--testLogPath=.modulo.testlog.json</code>
+         Specify the desired file path of your test log file. Do not ignore
+         this file in VCS: Share when collaborating to "lock in" test count.
+    </li>
+
+    <li><code>--isSkip=^(\\.|_)</code>
+         For SSG, specify a RegExp string that is tested against every "path
+         part", or each directory or filename that make up a file path. If
+         any path part matches this, it will skip that path and everything
+         under it.  The default behavior is to ignore dot-prefixed and
+         underscore-prefixed hidden files. Since most OS's do not treat
+         underscore-prefixed files to be hidden, this is a handy way to get
+         the SSG to skip a directory, without it being fully hidden.
+    </li>
+
+    <li><code>--isCopyOnly=^components?$</code>
+         For SSG, specify a RegExp string that is tested against every "path
+         part", or each directory or filename that make up a file path. If
+         any path part matches this, it will refuse to apply the GENERATE
+         action (i.e.  prerender the file as an Modulo HTML file), even if it
+         otherwise would have. You should set this to match whatever
+         directory (or directories) contain your component files, so it
+         doesn't attempt to "prerender" the component definitions, which
+         might be fine, but more likely will lead to unexpected results.
+    </li>
+
+    <li><code>--isGenerate=.*\\.html$</code>
+         For SSG, specify a RegExp string that is tested against each file's
+         entire path (e.g. the $ is the end of the full path).
+    </li>
+
+    <li><code>--preload=[]</code>
+         For modulo.json (or package.json) configurations, this specifies
+         extra preloaded HTML files (like positional arguments on the CLI).
+    </li>
+</ul>
+
+<mws-section modulo-original-html="MDU CPart Library">
+        <a class="secanchor" title="Click to focus on this section." id="" name="" href="#">#</a>
+        <h2>MDU CPart Library</h2>
+    </mws-section>
+
+<h3>Test suites</h3>
+
+<p>Modulo comes with a unit testing framework, specifically for testing
+components. Note that without any extra add-ons or modifications, Modulo's
+testing framework is focused on components unit tests only, and thus is
+strictly synchronous. This means its incapable of integration testing with HTTP
+API's, or asynchronous code. That said, through proper mocking, state, and
+props manipulation, you should be more than equipped to test component behavior
+in most scenarios, without actually issuing the request itself.</p>
+
+<p>A test suite is a collection of tests. Test suites can be embedded in
+Component definitions. In this case, the test suite will be applied to the
+component definition that it exists inside.</p>
+
+<p>For an overview of what the Modulo test suite framework is capable of, see
+the below example:</p>
+
+<mws-demo text="
+<testsuite>
+    <test name=&quot;ensure fine&quot;>
+        <!-- SETUP -->
+        <!-- Using Props and State we can setup the component for testing -->
+        <Props text=&quot;Hi&quot;></Props>
+        <State
+            search=&quot;the lord of the rings&quot;
+            loading:=true
+        ></State>
+
+        <!-- ASSERTIONS -->
+        <!-- run arbitrary scripts, if ends in &quot;assert: &quot; it will then be a test -->
+        <!-- If the assertion fails, the test runner will attempt to expose the
+            values of any variable in the &quot;assert:&quot; line. For better debugging,
+            keep the &quot;assert:&quot; line one simple expression with variables -->
+        <Script name=&quot;ensure no longer loading&quot;>
+            const words = state.search.split(&quot; &quot;);
+            const firstWord = words[0];
+            assert: firstWord === &quot;the&quot;
+        </Script>
+
+        <!-- Style lets us test CSS. Here we ensure all li elements are blue
+            (no matter how they were colored that way, e.g. even if inline or
+            inherited) -->
+        <!-- TODO: Not implemented yet -->
+        <Style name=&quot;blue is cool&quot;>
+            li { color: blue; }
+        </Style>
+
+        <!-- Most powerful assertion of all, the Template: Check if the
+             contents of the component match the given DOM. This compares as DOM
+             (not string), so excess whitespace, etc is ignored.
+        -->
+        <Template>
+            <p>Hello 3 world!</p>
+            <h1>I have 5 bananas</h1>
+        </Template>
+
+        <!-- We can use &quot;test-values&quot; to expose the values of inputs: -->
+        <Template test-values>
+            <input [state.bind] name=&quot;bananas&quot; value=&quot;5&quot; />
+            <h1>I have 5 bananas</h1>
+        </Template>
+
+        <!-- Fuzzy DOM match, default (eg, can actual DOM be
+              transformed into this DOM, by only doing &quot;delete&quot;?) -->
+        <!-- TODO: Not implemented yet -->
+        <Template subdom>
+            <p>Hello 3 world!</p>
+        </Template>
+
+        <!-- Can check for exact string occurrences within innerHTML, with any
+        count (including 0 to &quot;ban&quot; a string from occurring) -->
+        <Template string-count=1>
+            name=&quot;bananas&quot;
+        </Template>
+    </test>
+</testsuite>
+
+
+" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
+        
+           demo-wrapper__clipboard  
+        
+        demo-wrapper__notabs     
+        
+    ">
+    
+
+    <div class="editor-toolbar">
+        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
+                     display: none; ">
+            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
+        </p>
+
+        
+            <button class="m-Btn m-Btn--sm m-Btn--faded" title="Copy this code" @click:="script.doCopy">
+                Copy <span alt="Clipboard">📋</span>
+            </button>
+        
+
+        
+
+        
+
+    </div>
+
+    <div class="side-by-side-panes">
+        <div class="editor-wrapper">
+            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 4px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="bottom: 0px; width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 0px; height: 18px; pointer-events: auto;"><div style="height: 100%; min-height: 1px; width: 813.531px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; margin-bottom: 0px; border-right-width: 50px; min-height: 1400px; min-width: 813.531px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 24px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">testsuite</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">test</span> <span class="cm-attribute">name</span>=<span class="cm-string">"ensure fine"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- SETUP --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Using Props and State we can setup the component for testing --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Props</span> <span class="cm-attribute">text</span>=<span class="cm-string">"Hi"</span><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">Props</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-attribute">search</span>=<span class="cm-string">"the lord of the rings"</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-attribute">loading:</span>=<span class="cm-string">true</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">State</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- ASSERTIONS --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- run arbitrary scripts, if ends in "assert: " it will then be a test --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- If the assertion fails, the test runner will attempt to expose the</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-comment">values of any variable in the "assert:" line. For better debugging,</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-comment">keep the "assert:" line one simple expression with variables --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Script</span> <span class="cm-attribute">name</span>=<span class="cm-string">"ensure no longer loading"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-keyword">const</span> <span class="cm-def">words</span> <span class="cm-operator">=</span> <span class="cm-variable">state</span>.<span class="cm-property">search</span>.<span class="cm-property">split</span>(<span class="cm-string">" "</span>);</span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-keyword">const</span> <span class="cm-def">firstWord</span> <span class="cm-operator">=</span> <span class="cm-variable">words</span>[<span class="cm-number">0</span>];</span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-variable">assert</span>: <span class="cm-variable">firstWord</span> <span class="cm-operator">===</span> <span class="cm-string">"the"</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Style lets us test CSS. Here we ensure all li elements are blue</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-comment">(no matter how they were colored that way, e.g. even if inline or</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-comment">inherited) --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- TODO: Not implemented yet --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Style</span> <span class="cm-attribute">name</span>=<span class="cm-string">"blue is cool"</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag">li</span> { <span class="cm-property">color</span>: <span class="cm-keyword">blue</span>; }</span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Style</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Most powerful assertion of all, the Template: Check if the</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">             <span class="cm-comment">contents of the component match the given DOM. This compares as DOM</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">             <span class="cm-comment">(not string), so excess whitespace, etc is ignored.</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">--&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>Hello 3 world!<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>I have 5 bananas<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- We can use "test-values" to expose the values of inputs: --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span> <span class="cm-attribute">test-values</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">[state.bind]</span> <span class="cm-attribute">name</span>=<span class="cm-string">"bananas"</span> <span class="cm-attribute">value</span>=<span class="cm-string">"5"</span> <span class="cm-tag cm-bracket">/&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span>I have 5 bananas<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">h1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Fuzzy DOM match, default (eg, can actual DOM be</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">              <span class="cm-comment">transformed into this DOM, by only doing "delete"?) --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- TODO: Not implemented yet --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span> <span class="cm-attribute">subdom</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span>Hello 3 world!<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">p</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">&lt;!-- Can check for exact string occurrences within innerHTML, with any</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">count (including 0 to "ban" a string from occurring) --&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span> <span class="cm-attribute">string-count</span>=<span class="cm-string">1</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            name="bananas"</span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">test</span><span class="cm-tag cm-bracket">&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">testsuite</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 1400px;"></div><div class="CodeMirror-gutters" style="display: none; height: 1450px;"></div></div></div></div>
+        </div>
+
+        
+
+    </div>
+</div>
+
+
+
+</mws-demo>
+
+
+</slot>
+        </aside>
+    </main>
+
+
+<footer>
+    <main>
+        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1
+    </main>
+</footer>
+
+
+
+<script src="/_modulo/modulo-build-xx2frtu8.js"></script>
 </body></html>

@@ -1,5 +1,660 @@
 <!DOCTYPE html><html><head>
 
-<link rel="stylesheet" href="/_modulo/modulo-build-xx666h5d.css">
-</head><body><script src="/_modulo/modulo-build-x1kr5v33.js"></script>
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Lifecycle - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-x1j5q0v9.css">
+</head><body>
+
+
+    
+    
+    
+    
+
+    <!-- Some global CSS that is not tied to any component: -->
+    
+
+
+
+<slot name="above-navbar"></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about">About</a>
+        </li>
+        <li>
+            <a href="/start.html">Start</a>
+        </li>
+        <li>
+            <a href="/docs/" class="Navbar--selected">Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        
+        
+            v: 0.0.44<br>
+            <!--SLOC: undefined lines<br />-->
+            <a href="https://github.com/modulojs/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
+        
+    
+        <!--
+        
+            <a href="https://github.com/modulojs/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        
+        -->
+    </div>
+</nav>
+
+
+    <main class="Main Main--fluid Main--withSidebar">
+        <aside class="TitleAside TitleAside--navBar">
+            <h3><span alt="Lower-case delta">%</span></h3>
+            <nav class="TitleAside-navigation">
+                <h3>Documentation</h3>
+                <mws-docsidebar path="lifecycle.html" modulo-original-html=""><ul>
+    
+        <li class="
+            
+            "><a href="/docs/">Table of Contents</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/tutorial_part1.html">Tutorial</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/templating.html">Templating</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/templating-reference.html">Template Reference</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/cparts.html">Component Parts</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/core.html">Core</a>
+            
+        </li>
+    
+        <li class="
+            
+                gactive
+            
+            "><a href="/docs/lifecycle.html">Lifecycle</a>
+            
+                
+                    <ul>
+                    
+                        <li><a href="/docs/lifecycle.html#global">Component lifecycle</a>
+                        
+                        </li>
+                    
+                        <li><a href="/docs/lifecycle.html#callbacks">Lifecycle callbacks</a>
+                        
+                        </li>
+                    
+                    </ul>
+                
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/docs/directives.html">Directives</a>
+            
+        </li>
+    
+        <li class="
+            
+                ginactive
+            
+            "><a href="/demos/">Examples</a>
+            
+        </li>
+    
+
+
+    <!--
+    <li>
+        Other resources:
+
+        <ul>
+            <li>
+                <a href="/docs/faq.html">FAQ</a>
+            <li title="Work in progress: Finalizing source code and methodically annotating entire file with extensive comments.">
+                Literate Source*<br /><em>* Coming soon!</em>
+            </li>
+        </ul>
+
+    </li>
+    -->
+    <!--<a href="/literate/src/Modulo.html">Literate source</a>-->
+</ul>
+
+</mws-docsidebar>
+            </nav>
+        </aside>
+        <aside style="border:none">
+            <slot>
+
+<h1>Lifecycle</h1>
+
+<p>Every Modulo Component goes through a certain "lifecycle". Here's an
+analogy: If CParts are the stage-hands and actors who put on a play, then the
+"lifecycle" is the pre-described arrangement of each "act", intermission, and
+so on, such that every CPart stage-hand "jumps in" at the right moment to do
+it's job and set up for the next act.</p>
+
+<mws-section name="global" modulo-original-html="Global lifecycle">
+        <a class="secanchor" title="Click to focus on this section." id="global" name="global" href="#global">#</a>
+        <h2>Global lifecycle</h2>
+    </mws-section>
+
+<p>Every <em>Component</em> that you define triggers a certain set of lifecycle
+phases. The lifecycle phases that a Modulo <em>Component</em> progresses
+through can be categorized into a few groups. One way to think of these phases
+is that typically, the "output" of a previous lifecycle phase in a group is the
+"input" of the next phase. As an example,  <code>prepare</code> figures out the
+template variables, <code>render</code> causes the template to actually perform
+the render based on the variables in the previous phase, and
+<code>update</code> updates the HTML of the element based on the rendered
+output of the previous phase.</p>
+
+<!--<code>prebuild</code> generates a
+flat, serializable structure that <code>define</code> uses to instantiate more
+complicated JavaScript instances.  Similarly,-->
+<!--
+<h3>Global Modulo lifecycle phases</h3>
+
+<p>These phases happen <em>once per CPart definition</em>. These will happen
+even if the component is never used or instantiated anywhere, but only defined
+and loaded. They are intended for setting up the component "definition" (data
+structure blueprint for component instances).</p>
+
+<ul>
+    <li><code>prebuild</code> - A stage for prebuild processing of data. This
+    is for static analysis and similar pre-processing. Note that if Modulo
+    components are built or cached, or if they are ever pre-compiled into a
+    single JS file, this <code>prebuild</code> phase happens BEFORE saving, and
+    thus gets "baked-in".  This means that the results of a
+    <code>prebuild</code> phase must be "serializable", such as in a JSON
+    format.  Note that this happens after <code>confPreprocessors</code>,
+    meaning it will already have things like <code>-src=</code> resolved for
+    you. This is also when you want to define any assets for the asset manager,
+    such as JS functions or CSS.</li>
+
+    <li><code>define</code> - Use this to actually define and register
+    Components, or run global script tags. This happens after the
+    <code>prebuild</code>, but before the component is used.</li>
+</ul>
+
+<p><strong>Note:</strong> "Modulo lifecycle phases" are only accessible to
+<em>CPart</em> developers, and <em>not</em> accessible to component developers
+using script tags.</p>
+-->
+
+
+<mws-section name="component" modulo-original-html="Component lifecycle">
+        <a class="secanchor" title="Click to focus on this section." id="component" name="component" href="#component">#</a>
+        <h2>Component lifecycle</h2>
+    </mws-section>
+
+<h3>Factory</h3>
+
+<p>The factory phase happen <em>once per Component definition</em>. It will
+happen even if the component is never used or instantiated anywhere, but only
+defined. This <code>factory</code> thus happens during the <code>define</code>
+global phase of Modulo, and is invoked to prepare the Component definition.</p>
+
+<ul>
+    <li><code>factory</code> - Happens while a component is getting defined.
+    This happens after the <code>prebuild</code> and <code>define</code> phases,
+    but before the component is used.  Unlike the <code>prebuild</code> and
+    <code>define</code> phases, <code>factory</code> happens after the page
+    loads, and thus has no restrictions on what it does or generate. (E.g. it's
+    output does <em>not</em> need to be serializeable, since it will be run
+    after built JS files as well).</li>
+</ul>
+
+
+<h3>Construction and initialization lifecycle</h3>
+
+<p>Two methods are triggered when a component is mounted on the
+page:</p>
+<ul>
+    <li><em>constructor()</em> - While technically not a lifecycle method, the
+    constructor() method will be invoked when creating an instance of the CPart
+    class. This happens <em>before</em> the Component's HTML Element is
+    guaranteed to be fully loaded on the DOM.</li>
+    <li><code>initialized</code> - Happens once per instance, every time a
+    component is fully mounted (i.e. used) on a page, but before the first
+    render. Useful for fetching or setting up initial data on a component, as
+    all the component will be fully ready for use at this point. Note that this
+    will only be invoked after the initial DOM is fully loaded, but before the
+    <em>prepare</em> of the first rerender (described below).</li>
+</ul>
+
+
+<h3>Rendering lifecycle</h3>
+
+<p>All of 4 these lifecycle phases trigger in the following sequence every time
+a component renders. This including the first time, every manual rerender (e.g.
+invoking <code>element.rerender()</code>), and ever automatic rerender (e.g.
+after events or state manipulation). These will phases even trigger if you
+don't have a <em>Template</em> CPart defined (although without a
+<em>Template</em> there will be nothing to render, <em>per se</em>).</p>
+
+<ul>
+    <li><code>prepare</code> - Gather data needed before rendering (e.g. gather
+    variables for template). Return values from here to have "computed
+    variables" within the Template and Script code.</li>
+    <li><code>render</code> - The Template CPart will use this phase to to
+    render HTML code from the template specified
+    (by setting <code>renderObj.component.innerHTML</code></li>
+    <li><code>reconcile</code> - The Component CPart will compare the new
+    rendered HTML to the DOM, and generates a "patch-set" or array of
+    operations necessary to reconcile the DOM to the new HTML (by setting
+    <code>renderObj.component.patches</code>)</li>
+    <li><code>update</code> - Finally, the Component will apply the patch-set
+    generated in the previous step, actually modifying the DOM and invoking any
+    directive callbacks specified</li>
+</ul>
+
+
+<h3>Directives that invoke lifecycle methods</h3>
+
+<p>Directives can can cause lifecycle phases as well. With the built-in CParts,
+there is only one directive that will trigger any lifecycle phases: The
+<code>event</code> directive (e.g. <code>@click</code>).  More information on
+directives is <a href="/docs/directives.html">covered in the Directives
+section</a>. </p>
+
+<ul>
+    <li><code>event</code> - Triggers when an event is about to happen.</li>
+    <li><code>eventCleanup</code> - Triggers after an event happened. A common
+    pattern is to use this and the previous to figure out what has "changed"
+    due to the event, and respond accordingly.</li>
+</ul>
+
+
+<!--
+<mws-Section name="factory">Mechanics of <em>factory</em> lifecycle</mws-Section>
+
+<p>The "factory" lifecycle behaves slightly differently. Most lifecycle methods
+can be invoked by using the <code>lifecycle</code> method of
+<code>ModuloElement</code>, e.g.  <code>element.lifecycle('prepare')</code>.
+The "factory" lifecycle, however, is run with <code>runFactoryLifecycle</code>,
+a method of <code>ComponentFactory</code>, before any components or actual
+elements are created.</p>
+
+<p>The is a special lifecycle for any global or one-time setup, after component
+definitions are loaded, but before before any components are constructed.
+Examples: the Style CPart uses this stage to set up global CSS, the Template
+CPart uses this to compile the template and include it in a script tag in the
+head, and the Script CPart will actually wrap the script-tag and include into
+the head.</p>
+
+<p>Like every other "lifecycle" in Modulo, it passes around a "renderObj"
+called baseRenderObj. After this method, this baseRenderObj is not modified,
+but instead gets copied into every other renderObj to form, as the name
+implies, the "base" of future renderObj.</p>
+
+<p>In total, the <code>runFactoryLifecycle(cPartOpts)</code> method of
+<code>ComponentFactory</code> loops through all the CPart names, finding
+each relevant CPart Classes, and then invoking each CPart static method
+<code>factoryCallback</code>, which is what does the necessary preprocessing.
+If there are multiples of the same CPart, then whichever appears last will
+overwrite and/or merge data with the previous ones.  However, that particular
+behavior can be controlled from within each CPart factoryCallback itself.</p>
+-->
+
+
+<mws-section name="callbacks" modulo-original-html="Lifecycle Callbacks">
+        <a class="secanchor" title="Click to focus on this section." id="callbacks" name="callbacks" href="#callbacks">#</a>
+        <h2>Lifecycle Callbacks</h2>
+    </mws-section>
+
+<p>The purpose of <em>lifecycle phases</em> is the <em>lifecycle methods</em>
+or callback functions that "hook into" each phase and run during them.</p>
+
+<p>You can get the name for a <em>lifecycle method</em> by simply suffixing the
+name of the phase with the word <code>Callback</code>. For example,
+<code>prepare</code> thus becomes
+<code>function&nbsp;prepareCallback()&nbsp;{...</code>.  Every CPart has the
+ability to hook into lifecycle methods by defining a method with an expected
+name. This is useful for CPart developers to implement the actual behavior and
+functionality of a CPart. In fact, most of CPart code is just hooking into
+these different methods!</p>
+
+<p>The <em>Script</em> CPart also exposes this interface to component
+developers. This is so that you can write custom code in each component to
+execute during any one of the phases. Note that you cannot hook into the global
+phases (e.g., prebuild, define, factory) this way, since those need to happen
+before your script tag is even ready.</p>
+
+<p>Directives also have callback functions, <a href="/docs/directives.html">covered in a
+the directive section</a>.</p>
+
+<p><strong>Try it out below:</strong></p>
+
+<mws-demo demotype="minipreview" text="
+<Template>
+Hello <strong>Modulo</strong> World!
+Open your browser dev console to see messages...
+<button @click:=script.gotClicked>Click me to generate an event</button>
+</Template>
+
+<Script>
+    function initializedCallback() {
+        console.log(&quot;initalizedCallback: Got mounted&quot;);
+    }
+
+    function prepareCallback() {
+        console.log(&quot;prepareCallback: Starting to render&quot;);
+    }
+
+    function renderCallback() {
+        console.log(&quot;renderCallback: Rendering!&quot;);
+    }
+
+    function reconcileCallback() {
+        console.log(&quot;reconcileCallback: Reconciling the DOM!&quot;);
+    }
+
+    function updateCallback() {
+        console.log(&quot;updateCallback: Applying patches&quot;);
+    }
+
+    function eventCallback() {
+        console.log(&quot;eventCallback: An event happened&quot;);
+    }
+
+    function eventCleanupCallback() {
+        console.log(&quot;eventCleanupCallback: After the event&quot;);
+    }
+
+    function gotClicked() {
+        console.log(&quot;(the button got clicked)&quot;);
+    }
+</Script>
+" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
+             demo-wrapper__minipreview
+        
+        
+        demo-wrapper__notabs     
+        
+    ">
+    
+
+    <div class="editor-toolbar">
+        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
+                     display: none; ">
+            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
+        </p>
+
+        
+
+        
+            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
+                <span alt="Pencil and arrow symbol">✎↗</span>
+            </button>&nbsp;
+        
+
+        
+            <!--
+            <button class="m-Btn demo-fs-button"
+                    title="Toggle full screen view of code" @click:=script.doFullscreen>
+                
+                    <span alt="Go Full Screen">&nearr;</span>
+                
+            </button>
+            &nbsp;
+            -->
+            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
+                Run <span alt="Refresh">⟳</span>
+            </button>
+        
+
+    </div>
+
+    <div class="side-by-side-panes">
+        <div class="editor-wrapper">
+            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="display: block; bottom: 0px; width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 827px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 30px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 611.969px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 827px; min-width: 611.969px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>39</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">Hello <span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">strong</span><span class="cm-tag cm-bracket">&gt;</span>Modulo<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">strong</span><span class="cm-tag cm-bracket">&gt;</span> World!</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">Open your browser dev console to see messages...</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">button</span> <span class="cm-attribute">@click:</span>=<span class="cm-string">script.gotClicked</span><span class="cm-tag cm-bracket">&gt;</span>Click me to generate an event<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">button</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">initializedCallback</span>() {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">"initalizedCallback: Got mounted"</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">prepareCallback</span>() {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">"prepareCallback: Starting to render"</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">renderCallback</span>() {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-string">"renderCallback: Rendering!"</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 827px;"></div><div class="CodeMirror-gutters" style="height: 877px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
+        </div>
+
+        
+            <div class="editor-minipreview">
+                <div modulo-ignore="">
+                    <e1g1-democomponent></e1g1-democomponent>
+                </div>
+            </div>
+        
+
+    </div>
+</div>
+
+
+
+</mws-demo>
+
+
+
+
+
+
+<a name="renderobj"></a>
+<h3>renderObj</h3>
+
+<blockquote>
+<p><strong>renderObj is like "req" </strong> -
+<code>renderObj</code> is comparable to the "request" or "response" objects
+in many backend MVC frameworks, such as in Express.js or Django. In these,
+middleware works behind the scenes to modify or construct the "request" object.
+They prepare it for the controller functions that accept it as an argument, by
+attaching data and injecting dependencies.  For a concrete example, enabling
+Express's JSON parsing middleware adds the <code>req.json</code> attribute to
+request objects, for parsing of JSON data.</p>
+<p>This is what inspired the <code>renderObj</code>, which is a plain object
+that gets passed along throughout the lifecycle phases. The Component Parts act
+just like middleware in other web frameworks: Work together to construct the
+<code>renderObj</code> for users of the framework.</p>
+</blockquote>
+
+<p>So far in this document, we covered how lifecycle methods are central to
+CParts, and that CParts are central to Modulo components in general.
+Now, we will learn how <code>renderObj</code> is central to lifecycle methods.
+It's how lifecycle methods pass data and communicate, as a component passes
+through the different phases.</p>
+
+
+<h3>renderObj and lifecycle</h3>
+
+<p>The renderObj goes through 3 phases. The first is during set-up, the second
+during component factory initialization, and the third happens every time a
+component rerenders.</p>
+
+<ol>
+    <li><code>loadObj</code> - This is the version created during the
+    <code>load</code> phase, and is typically just the text and attributes of
+    the component definition with any pre-processing done. Unlike the other
+    objects, <code>loadObj</code> <em>can only</em> contain plain or
+    JSON-friendly data types.</li>
+
+    <li><code>baseRenderObj</code> - The <code>loadObj</code> is copied to the
+    <code>baseRenderObj</code>, which is the result of the <code>factory</code>
+    phase. This might have more dependencies injected, e.g. the template CPart
+    at this point will have compiled the template code a JS function.</li>
+
+    <li><code>renderObj</code> - This is the one that component developers are
+    more likely to encounter. During first render, and every time a
+    <code>.rerender()</code> method is called, <code>renderObj</code> is
+    duplicated from the <code>baseRenderObj</code>, and then gets passed around
+    through the <code>prepare</code>, <code>render</code>, <code>reconcile</code>,
+    and <code>update</code> phases.</li>
+</ol>
+
+
+
+
+<p>Typically, unless developing new CParts, you will have little need to
+directly interact with the <code>renderObj</code>. You already implicitly use
+it in several cases. For example,
+whenever you access variables in the <em>Script</em> CPart, the
+<code>state</code> variable is in fact shorthand for
+<code>element.renderObj.state</code>, or whenever you access <a href="http://icheb.local:8080/docs/templating.html#variables">variables in the
+template</a> <em>CPart</em> (e.g., <code>props.text</code> is
+shorthand for <code>element.renderObj.props.text</code>).
+So, if you are a component developer and not a CPart developer, and you find
+yourself thinking that it doesn't make a lot of sense why you'd need to access
+or modify the <code>renderObj</code> explicitly... You probably don't!</p>
+
+<p>Nevertheless, use the following example to examine the output of the
+following example to see what information is available or modified at each
+step:</p>
+
+
+<mws-demo demotype="minipreview" text="
+<Template>
+<label>
+<input [state.bind] name=&quot;enabled&quot; type=&quot;checkbox&quot; />
+Show messages in console</label>
+</Template>
+
+<State
+    enabled:=false
+></State>
+
+<Script>
+    function _logInfo(message, renderObj) {
+        // Little helper function to do messages in console
+        if (state.enabled) {
+            const formattedOutput = JSON.stringify(renderObj, null, 2);
+            console.log(message, formattedOutput);
+        }
+    }
+
+    function prepareCallback(renderObj) {
+        _logInfo(&quot;prepareCallback:&quot;,  renderObj);
+    }
+
+    function renderCallback(renderObj) {
+        _logInfo(&quot;renderCallback:&quot;, renderObj);
+    }
+
+    function reconcileCallback(renderObj) {
+        _logInfo(&quot;reconcileCallback:&quot;, renderObj);
+    }
+
+    function updateCallback(renderObj) {
+        _logInfo(&quot;updateCallback:&quot;, renderObj);
+    }
+</Script>
+" modulo-original-html=""><div @mouseenter:="script.rerenderFirstTime" class="demo-wrapper
+             demo-wrapper__minipreview
+        
+        
+        demo-wrapper__notabs     
+        
+    ">
+    
+
+    <div class="editor-toolbar">
+        <p style="font-size: 11px; width: 120px; margin-right: 10px; text-align: right;
+                     display: none; ">
+            <em>Note: This is meant for exploring features. Your work will not be saved.</em>
+        </p>
+
+        
+
+        
+            <button class="m-Btn" title="Open in full screen demo editor" @click:="script.doOpenInEditor">
+                <span alt="Pencil and arrow symbol">✎↗</span>
+            </button>&nbsp;
+        
+
+        
+            <!--
+            <button class="m-Btn demo-fs-button"
+                    title="Toggle full screen view of code" @click:=script.doFullscreen>
+                
+                    <span alt="Go Full Screen">&nearr;</span>
+                
+            </button>
+            &nbsp;
+            -->
+            <button class="m-Btn" title="Run a preview of this code" @click:="script.doRun">
+                Run <span alt="Refresh">⟳</span>
+            </button>
+        
+
+    </div>
+
+    <div class="side-by-side-panes">
+        <div class="editor-wrapper">
+            <div [script.codemirror]="" modulo-ignore=""><div class="CodeMirror cm-s-eclipse" translate="no"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="display: block; bottom: 0px; width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 743px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 30px; height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 603.625px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 743px; min-width: 603.625px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>35</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 21px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">label</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">input</span> <span class="cm-attribute">[state.bind]</span> <span class="cm-attribute">name</span>=<span class="cm-string">"enabled"</span> <span class="cm-attribute">type</span>=<span class="cm-string">"checkbox"</span> <span class="cm-tag cm-bracket">/&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">Show messages in console<span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">label</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;/</span><span class="cm-tag">Template</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">State</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-attribute">enabled:</span>=<span class="cm-string">false</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&gt;&lt;/</span><span class="cm-tag">State</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag cm-bracket">&lt;</span><span class="cm-tag">Script</span><span class="cm-tag cm-bracket">&gt;</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    <span class="cm-keyword">function</span> <span class="cm-def">_logInfo</span>(<span class="cm-def">message</span>, <span class="cm-def">renderObj</span>) {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-comment">// Little helper function to do messages in console</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        <span class="cm-keyword">if</span> (<span class="cm-variable">state</span>.<span class="cm-property">enabled</span>) {</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-keyword">const</span> <span class="cm-def">formattedOutput</span> <span class="cm-operator">=</span> <span class="cm-variable">JSON</span>.<span class="cm-property">stringify</span>(<span class="cm-variable-2">renderObj</span>, <span class="cm-atom">null</span>, <span class="cm-number">2</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">            <span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable-2">message</span>, <span class="cm-variable-2">formattedOutput</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">        }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">    }</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 743px;"></div><div class="CodeMirror-gutters" style="height: 793px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
+        </div>
+
+        
+            <div class="editor-minipreview">
+                <div modulo-ignore=""><e4g1-democomponent modulo-original-html="">
+<label>
+<input [state.bind]="" name="enabled" type="checkbox">
+Show messages in console</label>
+</e4g1-democomponent></div>
+            </div>
+        
+
+    </div>
+</div>
+
+
+
+</mws-demo>
+
+
+</slot>
+        </aside>
+    </main>
+
+
+<footer>
+    <main>
+        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1
+    </main>
+</footer>
+
+
+
+<script src="/_modulo/modulo-build-xx2frtu8.js"></script>
 </body></html>

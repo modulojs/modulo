@@ -1,5 +1,286 @@
 <!DOCTYPE html><html><head>
 
-<link rel="stylesheet" href="/_modulo/modulo-build-xx666h5d.css">
-</head><body><script src="/_modulo/modulo-build-xxl2iiqa.js"></script>
+<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>Alpha Reached - DevLog - 2022-09 - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-x1j5q0v9.css">
+</head><body>
+
+
+    
+    
+    
+    
+
+    <!-- Some global CSS that is not tied to any component: -->
+    
+
+
+
+<slot name="above-navbar"></slot>
+
+<nav class="Navbar">
+    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
+    <a href="/index.html" class="Navbar-tinyText">[%] modulo.js</a>
+    <ul>
+        <li>
+            <a href="/index.html#about" class="Navbar--selected">About</a>
+        </li>
+        <li>
+            <a href="/start.html">Start</a>
+        </li>
+        <li>
+            <a href="/docs/">Docs</a>
+        </li>
+    </ul>
+
+    <div class="Navbar-rightInfo">
+        
+        
+            v: 0.0.44<br>
+            <!--SLOC: undefined lines<br />-->
+            <a href="https://github.com/modulojs/modulo/">github</a> |
+            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
+        
+    
+        <!--
+        
+            <a href="https://github.com/modulojs/modulo/">Source Code
+                <br />
+                (on GitHub)
+            </a>
+        
+        -->
+    </div>
+</nav>
+
+
+    <main class="Main">
+        <slot>
+
+<mws-devlognav fn="2022-09" modulo-original-html=""><nav style="border-bottom: none">
+    <h4>DEV LOG</h4>
+
+    <ul>
+        
+            <li>
+                
+                    <a href="/devlog/2022-12.html">
+                        2022-12&nbsp;(Intro slides)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <span style="text-decoration: overline underline;">
+                        2022-09&nbsp;(Alpha release)
+                    </span>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-07.html">
+                        2022-07&nbsp;(HTML-first)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2022-03.html">
+                        2022-03&nbsp;(Prealpha)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-09.html">
+                        2021-09&nbsp;(Thoughts on framework design)
+                    </a>
+                
+            </li>
+        
+            <li>
+                
+                    <a href="/devlog/2021-01.html">
+                        2021-01&nbsp;(FAQ)
+                    </a>
+                
+            </li>
+        
+    </ul>
+</nav>
+
+
+    
+
+    
+        <h1>Alpha release</h1>
+    
+
+    
+
+    
+
+    
+
+    
+
+
+</mws-devlognav>
+
+
+<p>After years of development as a side-project, I'm super excited to announce
+that Modulo is now ready to be shown as an "alpha" quality framework! The plan
+for this alpha release is to get early feedback before we finalize the external
+API, or spend time optimizing for DOM performance or the readability of
+source-code.</p>
+
+<h2>What to expect</h2>
+
+<p>Are you evaluating different frameworks for a project? I put together this
+post so you have a better idea of what to expect, and whether or not Modulo
+might be already useful, despite it's early stage of development.  In a
+nutshell, <code>"alpha"</code> means: Modulo is ready for use, that is, if you
+don't mind large bugs or incomplete docs if you stray too far beyond the
+examples.</p>
+
+
+<br>
+
+<section class="Tutorial-tryit" style="margin-top: 10px">
+    <h4>Good</h4>
+
+    <p>"Alpha" means "things kinda work".  Here are things I'd recommend using
+    Modulo for:</p>
+
+    <ul>
+        <li><em>Trying it out &amp; and giving feedback </em> - The primary
+        purpose of this alpha is to collect early feedback. Maybe you're a
+        JavaScript head and just want to learn each new thing.  Or maybe you're
+        shopping for a new lightweight framework, or love experimenting with
+        new ideas in terms of framework structure. I hope Modulo's unique
+        approach might be interesting to you!</li>
+
+        <li><em>A "glue language" for building simple component libraries for
+        primarily server-side web apps</em> - Despite the bugs and potential
+        API changes, the Modulo JS framework is already now useful for building
+        JavaScript components to fill in gaps in your existing web apps. Once
+        you develop a functional component library, you can export the JS and
+        CSS file, and include it into other projects, without any of the other
+        Modulo boilerplate. This allows for easing into frontend development on
+        backend-focused apps. If you are only making a few components here and
+        there, it's fast enough you might even be able to get away with never
+        even building, but just running the development version.</li>
+
+        <li><em>Greenfielding simple SSG sites</em> - Although the CLI-based
+        SSG isn't fully documented, it's still usable, and easy to get going.
+        In fact, <code>npm&nbsp;init&nbsp;modulo</code> is all it takes to
+        begin. The website you are using right now was built like this. Despite
+        it's early stage of development, I think it's one of the simplest and
+        most "KISS" SSR / SSG approaches out there!</li>
+    </ul>
+</section>
+
+
+
+<section class="Tutorial-tryit" style="margin-top: 10px">
+    <h4>Bad</h4>
+
+    <p>Alpha may mean "things kinda work", but it also means "things kinda don't
+    work". Here are known bugs &amp; API changes as of <del>September 2022</del> March 2023: :</p>
+
+    <ul>
+        <li><em>Unknown Bugs</em> - While developing the websites using Modulo,
+        I often encounter bugs and/or confusing or unclear behavior the further
+        I stray from simple, well-tested components. If you are building
+        anything that strays from the beaten path yourself, you might discover
+        a few as well!</li>
+
+        <li><em>Nested components that use slots</em> -
+        <a href="https://github.com/modulojs/modulo/issues/6">#6</a>
+        There are some bugs and unexpected behavior around nested components
+        and dataProps referencing the context of parent components in "slotted"
+        DOM elements.</li>
+
+        <li><em>Undocumented CPart API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/3">#3</a>
+        Most of the custom Component Part extension API is undocumented, and
+        some of it is subject to change.  This means that a big feature of
+        Modulo (developing custom Component Parts) is still a bit in flux.
+        However, as of this first alpha, it's unlikely to change <em>too</em>
+        much from the API demonstrated in the <a href="/demos/#experiments">"Experiments" examples in the Demo page</a>,
+        in case you wanted to jump the gun.</li>
+
+        <li><em>Undocumented engine API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/3">#3</a>
+        Similarly, extending or substituting various "engine" classes in Modulo
+        is undocumented (e.g.  Reconcile, DOMCursor, AssetManager). The
+        eventual goal is full customization of these as well, so that you can
+        incorporate image-packing or transformations during the build-step, for
+        example, or a more clever DOM resolver that better guesses element
+        changes. The Templater has an example in the Experiments page.</li>
+
+        <li><em>Undocumented CLI</em> -
+        <a href="https://github.com/modulojs/modulo/issues/4">#4</a>
+        The CLI is mostly complete, but may undergo UI changes, and is mostly
+        undocumented.</li>
+
+        <li><em>Browser compatibility</em> -
+        <a href="https://github.com/modulojs/modulo/issues/5">#5</a>
+        While it's tested on recent-ish versions of the most popular browsers
+        (e.g. Chrom(ium), Firefox, etc), there is no automated browser
+        compatibility testing or browser "matrix" or anything. The eventual
+        goal is something like the (now legacy) Polymer system of shims:
+        Clearly show which browsers are it's core target for compatibility
+        (e.g. shim-free), which ones require shims, and which ones will not be
+        targeted at all.</li>
+
+        <li><del><em>Unstable builds</em> - <a href="https://github.com/modulojs/modulo/issues/7">#7</a> Builds are
+        unpredictable and inconsistent.  The same boilerplate sometimes
+        generates different hashes.</del></li>
+
+        <li><em>Poorly documented Library, namespace, and loading logic</em> -
+        <a href="https://github.com/modulojs/modulo/issues/8">#8</a>
+        The <code>&lt;Library&gt;</code> CPart tag is intended to make it easier
+        to keep your library files encapsulated and redistributable. Currently,
+        the behavior is non-ideal and will likely be changed, especially around
+        distinguishing "configuration" from "definition", "namespace" from the
+        unique "definition names" that CParts get, and so on. The documentation
+        will need updates on this as well.</li>
+
+        <li><em>Undocumented and config logic and changing API</em> -
+        <a href="https://github.com/modulojs/modulo/issues/9">#9</a>
+        Much like Library and loading, Modulo has an undocumented configuration
+        system, intended to be leveraged both internally and by CPart
+        developers for a consistent way to configure third party middleware as
+        it gets integrated (similar to Django's "settings.py"). The API for
+        this is likely to change, and thus is mostly undocumented.</li>
+
+        <li><em>Poor code quality</em> -
+        <a href="https://github.com/modulojs/modulo/issues/10">#10</a>
+        While I try to keep it below 2000 lines, the framework is filled with
+        commented out code, repeated code, hacked-together messes just to get
+        tests running, and so on. As of updating (March 2023) this post, there
+        are 55 instances of <code>TODO</code> and 11 instances of
+        <code>XXX</code> in the Modulo.js file. The goal is to keep it to 2000
+        lines of cleanly written and documented code, free of TODO or XXX, so
+        clearly some work to be done there!</li>
+    </ul>
+</section>
+
+
+</slot>
+    </main>
+
+
+<footer>
+    <main>
+        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1
+    </main>
+</footer>
+
+
+
+<script src="/_modulo/modulo-build-x1bceqpp.js"></script>
 </body></html>
