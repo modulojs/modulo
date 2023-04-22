@@ -1258,7 +1258,12 @@ modulo.register('engine', class Templater {
         Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-        if (this.Hash) {
+        // XXX TODO: This is a broken hack
+        if (this.DefinitionName in this.modulo.assets.nameToHash) {
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
+        }
+        // XXX
+        else if (this.Hash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);
