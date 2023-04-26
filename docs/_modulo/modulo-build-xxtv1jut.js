@@ -1,3 +1,54 @@
+window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+
+window.moduloBuild.modules["xxbu5a70"] = function Page (modulo) {
+
+            const def = modulo.definitions['Page'];
+            class mws_Page extends window.HTMLElement {
+                constructor() { super(); this.init(); }
+                connectedCallback() { window.setTimeout(() => this.parsedCallback(), 0); }
+            }
+            modulo.registry.utils.initComponentClass(modulo, def, mws_Page);
+            window.customElements.define(def.TagName, mws_Page);
+            return mws_Page;
+        
+};
+window.moduloBuild.nameToHash.Page = "xxbu5a70";
+
+window.moduloBuild.modules["x1skf4rq"] = function Page_template (modulo) {
+return function (CTX, G) { var OUT=[];
+  OUT.push("\n        <div>"); // "<div>"
+  OUT.push(G.escapeText(CTX.state.test)); // "state.test"
+  OUT.push("</div>\n    "); // "</div>"
+
+return OUT.join(""); };
+};
+window.moduloBuild.nameToHash.Page_template = "x1skf4rq";
+
+window.moduloBuild.definitions = { 
+modulo: {"Parent":null,"DefName":null,"Type":"Modulo","ChildPrefix":"","Contains":"coreDefs","DefLoaders":["DefTarget","DefinedAs","Src","Content"],"defaultDef":{"DefTarget":null,"DefinedAs":null,"DefName":null},"defaultDefLoaders":["DefTarget","DefinedAs","Src"],"src":"/js/Modulo.js","Name":"modulo","DefinitionName":"modulo","ChildrenNames":["Page"]}, 
+
+Page: {"Parent":"modulo","DefName":null,"mode":"regular","rerender":"event","engine":"Reconciler","Contains":"cparts","RenderObj":"component","DefLoaders":["DefTarget","DefinedAs","Src","Content"],"DefBuilders":["CustomElement","Code"],"DefFinalizers":["MainRequire"],"Directives":["slotLoad","eventMount","eventUnmount","dataPropMount","dataPropUnmount"],"Type":"Component","namespace":"mws","name":"Page","Name":"Page","DefinitionName":"Page","ChildrenNames":["Page_template","Page_state","Page_style"],"TagName":"mws-page"}, 
+
+Page_template: {"Parent":"Page","DefName":null,"Type":"Template","DefFinalizers":["TemplatePrebuild"],"Name":"template","DefinitionName":"Page_template","Hash":"Tx1skf4rq"}, 
+
+Page_state: {"Parent":"Page","DefName":null,"Content":"","Type":"State","Directives":["bindMount","bindUnmount"],"Store":null,"test":"okay","Name":"state","DefinitionName":"Page_state"}, 
+
+Page_style: {"Parent":"Page","DefName":null,"Type":"Style","DefFinalizers":["Content|PrefixCSS"],"Name":"style","DefinitionName":"Page_style"}, 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ };
 /* Modulo.js | (C) 2023 Michael Bethencourt | Use in compliance with LGPL 2.1 */
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
@@ -1258,12 +1309,7 @@ modulo.register('engine', class Templater {
         Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-        // XXX TODO: This is a broken hack
-        if (this.DefinitionName in this.modulo.assets.nameToHash) {
-            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-        }
-        // XXX
-        else if (this.Hash) {
+        if (this.Hash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);
@@ -1858,44 +1904,11 @@ modulo.register('util', function getAutoExportNames(contents) {
         .filter(s => s && !Modulo.INVALID_WORDS.has(s));
 });
 
-/*-{-% if not config.IS_BUILD %-}-*/
-modulo.register('util', function showDevMenu() {
-    const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
-    const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
-    if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
-        const callback = () => { window.document.body.innerHTML = rerun; };
-        return modulo.registry.commands[cmd](modulo, { callback });
-    } // Else: Display "COMMANDS:" menu in console
-    const commandNames = Object.keys(modulo.registry.commands);
-    const href = 'window.location.href += ';
-    const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
-    const commandGetters = commandNames.map(cmd =>
-        ('get ' + cmd + ' () {' + href + '"?mod-cmd=' + cmd + '";}'));
-    const clsCode = 'class COMMANDS {' + commandGetters.join('\n') + '}';
-    new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
-});
 
-modulo.register('command', function build (modulo, opts = {}) {
-    const filter = opts.filter || (({ Type }) => Type === 'Artifact');
-    modulo.config.IS_BUILD = true;
-    opts.callback = opts.callback || (() => {});
-    const artifacts = Object.values(modulo.definitions).filter(filter);
-    const buildNext = () => {
-        modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
-        modulo.fetchQueue.enqueueAll(artifacts.length > 0 ? buildNext : opts.callback);
-    };
-    modulo.assert(artifacts.length, 'Build filter produced no artifacts');
-    buildNext();
-});
 
-if (typeof window.document !== 'undefined') {
-    modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
-    window.document.addEventListener('DOMContentLoaded', () => {
-        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
-        modulo.loadFromDOM(window.document.body, null, true); // Load new tags
-        modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
-    });
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
-}
-/*-{-% endif %-}-*/
+modulo.assets.modules = window.moduloBuild.modules;
+modulo.assets.nameToHash = window.moduloBuild.nameToHash;
+modulo.definitions = window.moduloBuild.definitions;
+
+modulo.assets.require("Page");
+
