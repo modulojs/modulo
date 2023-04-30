@@ -1259,11 +1259,10 @@ modulo.register('engine', class Templater {
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         // XXX TODO: This is a broken hack
-        if (this.DefinitionName in this.modulo.assets.nameToHash) {
+        /*if (this.DefinitionName in this.modulo.assets.nameToHash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         }
-        // XXX
-        else if (this.Hash) {
+        else*/ if (this.Hash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);
