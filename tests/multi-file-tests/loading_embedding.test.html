@@ -1,0 +1,198 @@
+<script Configuration>
+    let iframe = null;
+    let fragment = null;
+    let asyncChecks = [];
+    let moduloText = null;
+    //modulo.fetchQueue.fetch('/js/Modulo.older.js').then(text => {
+    modulo.fetchQueue.fetch('/js/Modulo.js').then(text => {
+        moduloText = text + `
+            modulo.register('util', function showDevMenu() {
+                window._testModLoaded(modulo);
+            });
+        `;
+    }); // Stash away src right away, and patch
+
+    modulo.register('util', function makeFrameModulo(text, doDispatch = false) {
+          if (iframe) {
+              iframe.remove(); // delete existing
+          }
+          let newText = text.replace('src="M"', 'type="temp/modulodummy"');
+          if (text !== newText) {
+              const combined = closeTag + openTag + moduloText + closeTag;
+              newText = newText.replace(closeTag, combined); // Add into at next close tag
+          }
+          iframe = document.createElement('iframe');
+          iframe.style.display = 'none'; // ensure invisible
+          document.body.append(iframe);
+          let testMod = undefined;
+          iframe.contentWindow.window._testModLoaded = modulo => { testMod = modulo; };
+          iframe.contentWindow.document.open();
+          iframe.contentWindow.document.write(newText);
+          iframe.contentWindow.document.close();
+          if (doDispatch) {
+              iframe.contentWindow.document.dispatchEvent(new Event("DOMContentLoaded")); // Ensure gets dispatched
+          }
+          return testMod;
+    });
+
+
+    const openTag = '\x3Cscript>';
+    const closeTag = '\x3C' + '/script>';
+    const openTagSrc = '\x3Cscript src="M">';
+    const openTagModulo = '\x3Cscript Modulo src="M">'; // NOTE: Hack src="M"
+    modulo.config._snippets = {};
+    modulo.config._snippets.noModulo = `
+        ${ openTag }
+            if (typeof modulo !== "undefined") throw new Error('Modulo should not be defined');
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.noEmbed = `
+        ${ openTagSrc }${ closeTag }
+        ${ openTag }
+            modulo._noEmbedCount = (modulo._noEmbedCount || 0) + 1;
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.emptyEmbed = `
+        ${ openTagModulo }
+        ${ closeTag }
+        ${ openTag }
+            modulo._emptyEmbedCount = (modulo._emptyEmbedCount || 0) + 1;
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.singleConfEmbed = `
+        ${ openTagModulo }
+            <def Configuration>
+                modulo._singleConfEmbedCount = (modulo._singleConfEmbedCount || 0) + 1;
+            </def>
+        ${ closeTag }
+        ${ openTag }
+            modulo._singleConfEmbedCountTag = (modulo._singleConfEmbedCountTag || 0) + 1;
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.singleComponentEmbed = `
+        ${ openTagModulo }
+            <Component name="LoadEmbedSubCompA">
+                <def Template>AAA BBB CCC</def>
+                <def Script>
+                    modulo._sinComponentStatic = (modulo._sinComponentStatic || 0) + 1;
+                </def>
+            </Component>
+        ${ closeTag }
+        ${ openTag }
+            modulo._sinConfEmbed = (modulo._sinConfEmbed || 0) + 1;
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.singleComponentTemplateEmbed = `
+        <template Modulo>
+            <Component name="LoadEmbedSubCompB">
+                <def Template>AAA BBB CCC</def>
+                <def Script>
+                    modulo._sinComponentTemplateStatic = (modulo._sinComponentTemplateStatic || 0) + 1;
+                </def>
+            </Component>
+        </template>
+        ${ openTagSrc }${ closeTag }
+        ${ openTag }
+            modulo._sinConfTemplateEmbed = (modulo._sinConfTemplateEmbed || 0) + 1;
+        ${ closeTag }
+    `;
+
+    modulo.config._snippets.basicStarter = `
+      <template Modulo>
+        <Component name="HelloWorld">
+          <Props label></Props>
+          <def Template>
+              <h2>{{ props.label|upper }}</h2>
+          </def>
+          <def Script>
+              modulo._basicStarter = (modulo._basicStarter || 0) + 1;
+          </def>
+          <State
+              num:=1
+          ></State>
+        </Component>
+      </template>
+      ${ openTagSrc }${ closeTag }
+      <x-HelloWorld label="Shopping list"></x-HelloWorld>
+    `;
+
+</script>
+
+<Component name="TestLoadingAndEmbedding">
+    <TestSuite >
+        <Test name="Basic Modulo bootstrapping snippets">
+            <Script name="loads script tag without modulo at all">
+                const mod = modulo.registry.utils.makeFrameModulo(modulo.config._snippets.noModulo);
+                assert: mod === undefined
+            </Script>
+
+            <Script name="loads Modulo only">
+                const mod = modulo.registry.utils.makeFrameModulo(modulo.config._snippets.noEmbed);
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 7; // _artifact namespace starts with 7
+                const conExpected = 18;
+                assert: mod._noEmbedCount === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+            <Script name="loads empty embed">
+                const mod = modulo.registry.utils.makeFrameModulo(modulo.config._snippets.emptyEmbed);
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 8; // adds in modulo
+                const conExpected = 18;
+                assert: mod._emptyEmbedCount === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+            <Script name="loads single conf embed">
+                const mod = modulo.registry.utils.makeFrameModulo(modulo.config._snippets.singleConfEmbed);
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 9; // adds in configuration
+                const conExpected = 18;
+                assert: mod._singleConfEmbedCount === 1 && mod._singleConfEmbedCountTag === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+
+            <Script name="loads basic component def">
+                const mod = modulo.registry.utils.makeFrameModulo(modulo.config._snippets.singleComponentEmbed);
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 11; // adds in Component, _script, and _template
+                const conExpected = 18;
+                assert: mod._sinComponentStatic === 1 && mod._sinConfEmbed === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+
+            <Script name="loads basic component def when embedded in template tag">
+                const mod = modulo.registry.utils.makeFrameModulo(
+                    modulo.config._snippets.singleComponentTemplateEmbed,
+                );
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 11; // adds in Component, _script, and _template
+                const conExpected = 18;
+                assert: mod._sinComponentTemplateStatic === 1 && mod._sinConfTemplateEmbed  === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+            <Script name="loads basic component def when basicStarter ">
+                const mod = modulo.registry.utils.makeFrameModulo(
+                    modulo.config._snippets.basicStarter,
+                );
+                const defActual = Object.keys(mod.definitions).length;
+                const conActual = Object.keys(mod.config).length;
+                const defExpected = 13; // adds in Component, _props, _template, _script, and _state
+                const conExpected = 18;
+                assert: mod._basicStarter === 1 && defActual === defExpected && conActual === conExpected
+            </Script>
+
+        </Test>
+    </TestSuite>
+</Component>
+
+

@@ -1,4 +1,4 @@
-/* Modulo.js | (C) 2023 Michael Bethencourt | Use in compliance with LGPL 2.1 */
+/* Copyright 2023 modulojs.org michaelb | Use in compliance with LGPL 2.1 */
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -740,10 +740,6 @@ modulo.register('util', function hash (str) {
 });
 
 modulo.register('util', function makeDiv(html) {
-    /* TODO: Have an options for doing <script  / etc preprocessing here:
-      <state -> <script type="modulo/state"
-      <\s*(state|props|template)([\s>]) -> <script type="modulo/\1"\2
-      </(state|props|template)> -> </script>*/
     const div = window.document.createElement('div');
     div.innerHTML = html;
     return div;
@@ -754,8 +750,8 @@ modulo.register('util', function normalize(html) {
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
 });
 
-modulo.register('util', function escapeRegExp(s) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+modulo.register('util', function escapeRegExp(s) { // XXX XXX XXX
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\" + "\x24" + "&");
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
@@ -1255,6 +1251,7 @@ modulo.register('engine', class Templater {
     }
 
     setup(text, def) {
+        console.log('Running setup for def.DefinitionName', def.DefinitionName);
         Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
