@@ -6,10 +6,16 @@
         ></Props>
         <Template>
             <button><em>{{ props.txt }}</em></button>
+            <h1>{{ staticdata.thing }}</h1>
         </Template>
         <def Script>
             console.log('script is getting run!');
         </def>
+        <StaticData>
+        {
+          "thing": "okay"
+        }
+        </StaticData>
         <Style>
             em { background-color: tomato }
         </Style>
