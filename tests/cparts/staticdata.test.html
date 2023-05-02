@@ -1,0 +1,85 @@
+<Component name="StaticData_TestCoreUsage">
+    <Template>
+        {% if state.testnum == 0 %}
+            <span>{{ staticdata.abc }}</span>
+        {% elif state.testnum == 1 %}
+            <p>{{ staticdata_test_js.abc }}</p>
+        {% elif state.testnum == 2 %}
+            {% for row in staticdata_test_csv %}
+              <div>
+              {% for cell in row %}
+                  <span>{{ cell }}</span>
+              {% endfor %}
+              </div>
+            {% endfor %}
+        {% elif state.testnum == 3 %}
+            <div>{{ staticdata_test_json.nop }}</div>
+        {% elif state.testnum == 4 %}
+            <article>{{ staticdata_test_txt }}</article>
+        {% endif %}
+    </Template>
+
+    <!-- try with default properties -->
+    <StaticData>
+      {
+        "abc": "1337"
+      }
+    </StaticData>
+
+    <StaticData -name="staticdata_test_js" -data-type="js">
+      {
+        abc: 'd' + 'ef'
+      }
+    </StaticData>
+
+    <StaticData -name="staticdata_test_csv" -data-type="csv">
+      abc,def
+      hij,klm
+    </StaticData>
+
+    <StaticData -name="staticdata_test_json" -data-type="json">
+      {
+        "nop": "qrs"
+      }
+    </StaticData>
+
+    <StaticData -name="staticdata_test_txt" -data-type="txt">
+      {just"content\That/gets'Escaped
+    </StaticData>
+
+    <State
+        testnum:='-1'
+    ></State>
+
+    <TestSuite>
+        <Test name="Testing core formats basic usage">
+            <state testnum:=0></state>
+            <template>
+                <span>1337</span>
+            </template>
+
+            <state testnum:=1></state>
+            <template>
+                <p>def</p>
+            </template>
+
+            <state testnum:=2></state>
+            <template>
+                <div><span>abc</span><span>def</span></div>
+                <div><span>hij</span><span>klm</span></div>
+            </template>
+
+            <state testnum:=3></state>
+            <template>
+                <div>qrs</div>
+            </template>
+
+            <state testnum:=4></state>
+            <template>
+                <article>
+                    {just"content\That/gets'Escaped
+                </article>
+            </template>
+        </Test>
+    </TestSuite>
+</Component>

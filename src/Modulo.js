@@ -336,15 +336,27 @@ modulo.register('processor', function definedAs (modulo, def, value) {
     }
 });
 
+    /*
+modulo.register('processor', function renderObj (modulo, def, value) {
+    const parentDef = modulo.definitions[def.Parent];
+    const isLower = key => key[0].toLowerCase() === key[0];
+    const data = modulo.registry.utils.keyFilter(def, isLower);
+    parendDef.initRenderObj[value || def.Name] = data;
+});
+    */
+
 modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Run factoryCallback static lifecycle method to create initRenderObj
+
+
+    // TODO INP: Refactor this as RenderObj processor
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
         const cpartDef = modulo.definitions[defName];
         const cpartCls = modulo.registry.cparts[cpartDef.Type];
         if (cpartCls.factoryCallback) {
             const result = cpartCls.factoryCallback(initRenderObj, cpartDef, modulo);
-            initRenderObj[cpartDef.Name] = result;
+            initRenderObj[cpartDef.RenderObj || cpartDef.Name] = result;
         }
     }
 
@@ -1045,8 +1057,8 @@ modulo.register('cpart', class Template {
 });
 
 modulo.register('processor', function contentCSV (modulo, def, value) {
-    const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
-    def.Code = 'return ' + js;
+    const parse = s => s.trim().split('\n').map(line => line.trim().split(','));
+    def.Code = 'return ' + JSON.stringify(parse(def.Content || ''));
 });
 
 modulo.register('processor', function contentJS (modulo, def, value) {
@@ -1078,11 +1090,10 @@ modulo.register('processor', function code (modulo, def, value) {
     modulo.assets.define(def.DefinitionName, value);
 });
 
-modulo.register('processor', function requireData (modulo, def, value) {
-    def.data = modulo.assets.require(def[value]);
-});
-
 modulo.register('cpart', class StaticData {
+    static RequireData (modulo, def, value) {
+        def.data = modulo.assets.require(def[value]);
+    }
     static factoryCallback(renderObj, def, modulo) {
         return def.data;
     }
@@ -1093,8 +1104,7 @@ modulo.register('cpart', class StaticData {
     DataType: '?', // Default behavior is to guess based on Src ext
     RequireData: 'DefinitionName',
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'DataType', 'Src' ],
-    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
-    DefFinalizers: [ 'Code', 'RequireData' ],
+    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS', 'Code', 'RequireData' ],
 });
 
 modulo.register('coreDef', class Configuration { }, {
