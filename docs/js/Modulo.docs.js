@@ -1,4 +1,4 @@
-/* Copyright 2023 modulojs.org michaelb | Use in compliance with LGPL 2.1 */
+/* Modulo.js | (C) 2023 Michael Bethencourt | Use in compliance with LGPL 2.1 */
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -336,27 +336,15 @@ modulo.register('processor', function definedAs (modulo, def, value) {
     }
 });
 
-    /*
-modulo.register('processor', function renderObj (modulo, def, value) {
-    const parentDef = modulo.definitions[def.Parent];
-    const isLower = key => key[0].toLowerCase() === key[0];
-    const data = modulo.registry.utils.keyFilter(def, isLower);
-    parendDef.initRenderObj[value || def.Name] = data;
-});
-    */
-
 modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Run factoryCallback static lifecycle method to create initRenderObj
-
-
-    // TODO INP: Refactor this as RenderObj processor
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
         const cpartDef = modulo.definitions[defName];
         const cpartCls = modulo.registry.cparts[cpartDef.Type];
         if (cpartCls.factoryCallback) {
             const result = cpartCls.factoryCallback(initRenderObj, cpartDef, modulo);
-            initRenderObj[cpartDef.RenderObj || cpartDef.Name] = result;
+            initRenderObj[cpartDef.Name] = result;
         }
     }
 
@@ -431,12 +419,7 @@ modulo.register('cpart', class Artifact {
             }
             const ctx = Object.assign({}, modulo, { script: result.exports });
             ctx.bundle = bundledElems;
-            //const templater = new modulo.registry.engines.Templater(modulo, tDef);
-
-            if (!(tDef.DefinitionName in modulo.assets.nameToHash)) {
-                modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef);
-            }
-            const templater = modulo.registry.engines.Templater.loadFromBuild(modulo, tDef);
+            const templater = new modulo.registry.engines.Templater(modulo, tDef);
             let code = templater.render(ctx);
             if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
                 const tDef2 = Object.assign({}, tDef, {
@@ -451,11 +434,7 @@ modulo.register('cpart', class Artifact {
                     DefinitionName: tDef.DefinitionName + '_macro',
                     Hash: undefined,
                 });
-                if (!(tDef2.DefinitionName in modulo.assets.nameToHash)) {
-                    modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef2);
-                }
-                const templater2 = modulo.registry.engines.Templater.loadFromBuild(modulo, tDef2);
-                //const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
+                const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
                 //templater2.escapeText = s => s; // turn on safe all the time
                 code = templater2.render(ctx);
             }
@@ -761,6 +740,10 @@ modulo.register('util', function hash (str) {
 });
 
 modulo.register('util', function makeDiv(html) {
+    /* TODO: Have an options for doing <script  / etc preprocessing here:
+      <state -> <script type="modulo/state"
+      <\s*(state|props|template)([\s>]) -> <script type="modulo/\1"\2
+      </(state|props|template)> -> </script>*/
     const div = window.document.createElement('div');
     div.innerHTML = html;
     return div;
@@ -771,8 +754,8 @@ modulo.register('util', function normalize(html) {
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
 });
 
-modulo.register('util', function escapeRegExp(s) { // XXX XXX XXX
-    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\" + "\x24" + "&");
+modulo.register('util', function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 });
 
 modulo.register('util', function saveFileAs(filename, text) {
@@ -1022,14 +1005,6 @@ modulo.register('cpart', class Style {
 
 modulo.register('cpart', class Template {
     static TemplatePrebuild (modulo, def, value) {
-        modulo.assert(def.Content, `Empty Template: ${def.DefinitionName}`);
-        const engine = def.engine || 'Templater';
-        const code = modulo.registry.engines[engine].build(modulo, def);
-        modulo.assets.define(def.DefinitionName, code);
-        delete def.Content;
-    }
-
-    static TemplatePrebuildOld (modulo, def, value) {
         if (!def.Content) {
             console.error('No Template Content specified:', def.DefinitionName, JSON.stringify(def));
             return;
@@ -1043,7 +1018,7 @@ modulo.register('cpart', class Template {
     }
     initializedCallback() {
         const engine = this.conf.engine || 'Templater';
-        this.templater = this.modulo.registry.engines[engine].loadFromBuild(this.modulo, this.conf);
+        this.templater = new this.modulo.registry.engines[engine](this.modulo, this.conf);
         const render = this.templater.render.bind(this.templater);
         return { render }; // Expose render to include, renderas etc
     }
@@ -1057,8 +1032,8 @@ modulo.register('cpart', class Template {
 });
 
 modulo.register('processor', function contentCSV (modulo, def, value) {
-    const parse = s => s.trim().split('\n').map(line => line.trim().split(','));
-    def.Code = 'return ' + JSON.stringify(parse(def.Content || ''));
+    const js = JSON.stringify((def.Content || '').split('\n').map(line => line.split(',')));
+    def.Code = 'return ' + js;
 });
 
 modulo.register('processor', function contentJS (modulo, def, value) {
@@ -1090,10 +1065,11 @@ modulo.register('processor', function code (modulo, def, value) {
     modulo.assets.define(def.DefinitionName, value);
 });
 
+modulo.register('processor', function requireData (modulo, def, value) {
+    def.data = modulo.assets.require(def[value]);
+});
+
 modulo.register('cpart', class StaticData {
-    static RequireData (modulo, def, value) {
-        def.data = modulo.assets.require(def[value]);
-    }
     static factoryCallback(renderObj, def, modulo) {
         return def.data;
     }
@@ -1104,7 +1080,8 @@ modulo.register('cpart', class StaticData {
     DataType: '?', // Default behavior is to guess based on Src ext
     RequireData: 'DefinitionName',
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'DataType', 'Src' ],
-    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS', 'Code', 'RequireData' ],
+    DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS' ],
+    DefFinalizers: [ 'Code', 'RequireData' ],
 });
 
 modulo.register('coreDef', class Configuration { }, {
@@ -1272,49 +1249,21 @@ modulo.register('cpart', class State {
 
 /* Implementation of Modulo Templating Language */
 modulo.register('engine', class Templater {
-    static loadFromBuild(modulo, def) {
-        class TemplaterHack extends modulo.registry.engines.Templater { // XXX
-            setup(text, def) {
-                Object.assign(this, this.modulo.config.templater, def);
-                this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-                this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-                this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-            }
-        }
-        return new TemplaterHack(modulo, def);
-    }
-
-    static build(modulo, def) {
-        class TemplaterHack extends modulo.registry.engines.Templater { // XXX
-            setup(text, def) {
-                Object.assign(this, this.modulo.config.templater, def);
-                this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-                this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-                this.compiledCode = this.compile(text);
-                const unclosed = this.stack.map(({ close }) => close).join(', ');
-                this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-                this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
-            }
-        }
-        const tmp = new TemplaterHack(modulo, def);
-        return tmp.compiledCode;
-    }
-
     constructor(modulo, def) {
         this.modulo = modulo;
         this.setup(def.Content, def);
     }
 
     setup(text, def) {
-        //console.log('Running setup for def.DefinitionName', def.DefinitionName);
         Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         // XXX TODO: This is a broken hack
-        /*if (this.DefinitionName in this.modulo.assets.nameToHash) {
+        if (this.DefinitionName in this.modulo.assets.nameToHash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         }
-        else*/ if (this.Hash) {
+        // XXX
+        else if (this.Hash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
             this.compiledCode = this.compile(text);

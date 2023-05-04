@@ -1,3 +1,26 @@
+<!--
+Bug discovered, and fixed discovered:
+    preprocessAndDefineBroken(cb) {
+        // Preprocess And Define is what starts up the dev environment: It runs
+        // through DefBuilders, DefFinalizers, and then finally loops through
+        // resulting mainRequires, requiring each one (and thus activating
+        // those tags)
+        this.fetchQueue.wait(() => {
+            this.repeatProcessors(null, 'DefBuilders', () => {
+                this.repeatProcessors(null, 'DefFinalizers', () => {
+                    for (const name of this.assets.mainRequires) {
+                        this.assets.require(name);
+                    }
+                    if (cb) {
+                        cb();
+                    }
+                });
+            });
+        });
+    }
+-->
+
+
 <!-- Include JS source, and define a button inline -->
 <script Modulo src="/js/Modulo.js">
     <Component name="ButtonExample">
