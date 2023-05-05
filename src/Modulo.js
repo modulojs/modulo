@@ -436,7 +436,8 @@ modulo.register('cpart', class Artifact {
             if (!(tDef.DefinitionName in modulo.assets.nameToHash)) {
                 modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef);
             }
-            const templater = modulo.registry.engines.Templater.loadFromBuild(modulo, tDef);
+            const templater = modulo.instance(tDef, { });
+            templater.initializedCallback();
             let code = templater.render(ctx);
             if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
                 const tDef2 = Object.assign({}, tDef, {
@@ -454,9 +455,8 @@ modulo.register('cpart', class Artifact {
                 if (!(tDef2.DefinitionName in modulo.assets.nameToHash)) {
                     modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef2);
                 }
-                const templater2 = modulo.registry.engines.Templater.loadFromBuild(modulo, tDef2);
-                //const templater2 = new modulo.registry.engines.Templater(modulo, tDef2);
-                //templater2.escapeText = s => s; // turn on safe all the time
+                const templater2 = modulo.instance(tDef2, { });
+                templater2.initializedCallback();
                 code = templater2.render(ctx);
             }
             def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
@@ -1101,9 +1101,6 @@ modulo.register('cpart', class Template {
     }
 
     initializedCallback() {
-        /*const engine = this.conf.engine || 'Templater';
-        this.templater = this.modulo.registry.engines[engine].loadFromBuild(this.modulo, this.conf);
-        const render = this.templater.render.bind(this.templater);*/
         Object.assign(this, this.modulo.config.templater, this.conf);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
@@ -1338,55 +1335,7 @@ modulo.register('cpart', class State {
     }
 }, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
 
-
-/* Implementation of Modulo Templating Language */
-modulo.register('engine', class Templater extends modulo.registry.cparts.Template {
-    static loadFromBuild(modulo, def) {
-        class TemplaterHack extends modulo.registry.engines.Templater { // XXX
-            setup(text, def) {
-                Object.assign(this, this.modulo.config.templater, def);
-                this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-                this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-                this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-            }
-        }
-        return new TemplaterHack(modulo, def);
-    }
-
-    constructor(modulo, def) {
-        super();
-        this.modulo = modulo;
-        this.setup(def.Content, def);
-    }
-
-    setup(text, def) {
-        //console.log('Running setup for def.DefinitionName', def.DefinitionName);
-        Object.assign(this, this.modulo.config.templater, def);
-        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-        // XXX TODO: This is a broken hack
-        /*if (this.DefinitionName in this.modulo.assets.nameToHash) {
-            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-        }
-        else*/ if (this.Hash) {
-            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
-        } else {
-            this.compiledCode = this.compile(text);
-            const unclosed = this.stack.map(({ close }) => close).join(', ');
-            this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-
-            this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
-            const { hash } = this.modulo.registry.utils;
-            this.Hash = 'T' + hash(this.compiledCode);
-            if (this.DefinitionName in this.modulo.assets.nameToHash) { // TODO RM
-                console.error("ERROR: Duped template:", def.DefinitionName);
-                this.renderFunc = () => '';
-                return;
-            }
-            this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
-        }
-    }
-}, {
+modulo.config.templater = {
     modeTokens: ['{% %}', '{{ }}', '{# #}'],
     opTokens: '==,>,<,>=,<=,!=,not in,is not,is,in,not,gt,lt',
     opAliases: {
@@ -1399,7 +1348,7 @@ modulo.register('engine', class Templater extends modulo.registry.cparts.Templat
         'in': '(Y).includes ? (Y).includes(X) : (X in Y)',
         'not in': '!((Y).includes ? (Y).includes(X) : (X in Y))',
     },
-});
+};
 
 // TODO: Consider patterns like this to avoid excess reapplication of
 // filters:
