@@ -38,7 +38,11 @@ window.Modulo = class Modulo {
         const id = ++window._moduloID;
         const conf = Object.assign({}, this.config[name.toLowerCase()], def);
         const attrs = this.registry.utils.keyFilter(conf, isLower);
-        return Object.assign(inst, { id, attrs, conf }, args, { modulo: this });
+        Object.assign(inst, { id, attrs, conf }, args, { modulo: this });
+        if (inst.constructedCallback) {
+            inst.constructedCallback();
+        }
+        return inst;
     }
 
     preprocessAndDefine(cb) {
@@ -118,6 +122,8 @@ Modulo.INVALID_WORDS = new Set((`
     typeof var let void  while with await async true false
 `).split(/\s+/ig));
 
+// TODO: Condense window.moduloBuild into window.modulo as well, gets "hydrated"
+//window.modulo = Object.assign(new Modulo(), window.modulo || {});
 // Create a new modulo instance to be the global default instance
 window.modulo = new Modulo();
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
@@ -152,6 +158,7 @@ modulo.register('coreDef', class Modulo {}, {
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
     defaultDef: { DefTarget: null, DefinedAs: null, DefName: null },
     defaultDefLoaders: [ 'DefTarget', 'DefinedAs', 'Src' ],
+    defaultFactory: [ 'RenderObj', 'factoryCallback' ],
 });
 
 window.modulo.DEVLIB_SOURCE = (`
@@ -345,19 +352,8 @@ modulo.register('processor', function definedAs (modulo, def, value) {
     }
 });
 
-/*
-modulo.register('processor', function renderObj (modulo, def, value) {
-    const parentDef = modulo.definitions[def.Parent];
-    const isLower = key => key[0].toLowerCase() === key[0];
-    const data = modulo.registry.utils.keyFilter(def, isLower);
-    parendDef.initRenderObj[value || def.Name] = data;
-});
-*/
-
 modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Run factoryCallback static lifecycle method to create initRenderObj
-
-    // TODO INP: Refactor this as RenderObj processor
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
         const cpartDef = modulo.definitions[defName];
@@ -367,6 +363,20 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
             initRenderObj[cpartDef.RenderObj || cpartDef.Name] = result;
         }
     }
+
+    /*
+    // TODO INP: Refactor away factoryCallback, or turn into processor
+    modulo.register('processor', function renderObj (modulo, def, value) {
+        const parentDef = modulo.definitions[def.Parent];
+        const isLower = key => key[0].toLowerCase() === key[0];
+        const data = modulo.registry.utils.keyFilter(def, isLower);
+        parendDef.initRenderObj[value || def.Name] = data;
+    });
+    const defs = def.ChildrenNames.map(defName => modulo.definitions[defName]);
+    def.initRenderObj = { elementClass: cls };
+    modulo.repeatProcessors(defs, 'Factory');
+    const initRenderObj = def.initRenderObj;
+    */
 
     cls.prototype.init = function init () {
         this.modulo = modulo;
@@ -769,7 +779,7 @@ modulo.register('util', function normalize(html) {
     return html.replace(/\s+/g, ' ').replace(/(^|>)\s*(<|$)/g, '$1$2').trim();
 });
 
-modulo.register('util', function escapeRegExp(s) { // XXX XXX XXX
+modulo.register('util', function escapeRegExp(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\" + "\x24" + "&");
 });
 
@@ -1020,43 +1030,44 @@ modulo.register('cpart', class Style {
 modulo.register('cpart', class Template {
     static TemplatePrebuild (modulo, def, value) {
         modulo.assert(def.Content, `Empty Template: ${def.DefinitionName}`);
-        const template = modulo.instance(def, { compileOnly: true });
-        template.initializedCallback();
+        const template = modulo.instance(def, { });
         const compiledCode = template.compileFunc(def.Content);
         const code = `return function (CTX, G) { ${ compiledCode } };`;
         modulo.assets.define(def.DefinitionName, code);
         delete def.Content;
     }
 
-    constructor() {
-        this.stack = []; // Template tag stack
-    }
-
-    initializedCallback() {
-        // Combine configuration, defaults, and "registered" filters
+    constructedCallback() {
+        this.stack = []; // Parsing tag stack, used to detect unclosed tags
+        // Combine conf from all sources: config, defaults, and "registered"
         const { filters, tags } = this.conf;
         const { defaultFilters, defaultTags } = this.modulo.config.template;
         const { templateFilters, templateTags } = this.modulo.registry;
         Object.assign(this, this.modulo.config.template, this.conf);
+        // Set "filters" and "tags" with combined / squashed configuration
         this.filters = Object.assign({}, defaultFilters, templateFilters, filters);
         this.tags = Object.assign({}, defaultTags, templateTags, tags);
-        if (!this.compileOnly) {
-            this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
-            return { render: this.render.bind(this) }; // Expose render
-        }
+    }
+
+    initializedCallback() {
+        // When component mounts, expose a reference to the "render" function
+        this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
+        return { render: this.render.bind(this) };
     }
 
     renderCallback(renderObj) {
+        // Set component.innerHTML (for DOM reconciliation) with render() call
         renderObj.component.innerHTML = this.render(renderObj);
     }
 
     parseExpr(text) {
-        // TODO: Store a list of variables / paths, so there can be warnings or
-        // errors when variables are unspecified
-        // TODO: Support this-style-variable being turned to thisStyleVariable
+        // Output JS code that evaluates an equivalent template code expression
         const filters = text.split('|');
         let results = this.parseVal(filters.shift()); // Get left-most val
         for (const [ fName, arg ] of filters.map(s => s.trim().split(':'))) {
+            // TODO: Store a list of variables / paths, so there can be
+            // warnings or errors when variables are unspecified
+            // TODO: Support this-style-var being turned to thisStyleVar
             const argList = arg ? ',' + this.parseVal(arg) : '';
             results = `G.filters["${fName}"](${results}${argList})`;
         }
@@ -1064,14 +1075,13 @@ modulo.register('cpart', class Template {
     }
 
     parseCondExpr(string) {
-        // This RegExp splits around the tokens, with spaces added
+        // Return an Array that splits around ops in an "if"-style statement
         const regExpText = ` (${this.opTokens.split(',').join('|')}) `;
         return string.split(RegExp(regExpText));
     }
 
     parseVal(string) {
-        // Parses string literals, de-escaping as needed, numbers, and context
-        // variables
+        // Parses str literals, de-escaping as needed, numbers, and context vars
         const { cleanWord } = this.modulo.registry.utils;
         const s = string.trim();
         if (s.match(/^('.*'|".*")$/)) { // String literal
@@ -1102,7 +1112,7 @@ modulo.register('cpart', class Template {
         let mode = 'text'; // Start in text mode
         const tokens = this.tokenizeText(text);
         for (const token of tokens) {
-            if (mode) { // if in a "mode" (text or token), then call mode func
+            if (mode) { // If in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
                     const comment = !this.disableComments ? '' :
@@ -1276,10 +1286,7 @@ modulo.register('cpart', class StaticData {
     static RequireData (modulo, def, value) {
         def.data = modulo.assets.require(def[value]);
     }
-    static factoryCallback(renderObj, def, modulo) {
-        return def.data;
-    }
-    prepareCallback() { // XXX remove when fac gets to be default
+    prepareCallback() {
         return this.conf.data;
     }
 }, {
@@ -1449,7 +1456,10 @@ modulo.register('cpart', class State {
         }
         this._oldData = null;
     }
-}, { Directives: [ 'bindMount', 'bindUnmount' ], Store: null });
+}, {
+    Directives: [ 'bindMount', 'bindUnmount' ],
+    Store: null,
+});
 
 modulo.register('engine', class DOMCursor {
     constructor(parentNode, parentRival) {
