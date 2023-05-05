@@ -93,7 +93,7 @@ window.Modulo = class Modulo {
             if (attrName in def) {
                 const funcName = aliasedName || attrName;
                 const proc = this.registry.processors[funcName.toLowerCase()];
-                const func = funcName in cls ? cls[funcName] : proc;
+                const func = funcName in cls ? cls[funcName].bind(cls) : proc;
                 const value = def[attrName]; // Pluck value & remove attribute
                 delete def[attrName]; // TODO: document 'wait' or rm -v
                 return func(this, def, value) === true ? 'wait' : true;
@@ -1023,33 +1023,102 @@ modulo.register('cpart', class Style {
 modulo.register('cpart', class Template {
     static TemplatePrebuild (modulo, def, value) {
         modulo.assert(def.Content, `Empty Template: ${def.DefinitionName}`);
-        const engine = def.engine || 'Templater';
-        const code = modulo.registry.engines[engine].build(modulo, def);
+        const template = modulo.instance(def, { compileOnly: true });
+        template.initializedCallback();
+        const compiledCode = template.compile(def.Content);
+        const unclosed = template.stack.map(({ close }) => close).join(', ');
+        modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
+        const code = `return function (CTX, G) { ${ compiledCode } };`;
         modulo.assets.define(def.DefinitionName, code);
         delete def.Content;
     }
 
-    static TemplatePrebuildOld (modulo, def, value) {
-        if (!def.Content) {
-            console.error('No Template Content specified:', def.DefinitionName, JSON.stringify(def));
-            return;
+    parseExpr(text) {
+        // TODO: Store a list of variables / paths, so there can be warnings or
+        // errors when variables are unspecified
+        // TODO: Support this-style-variable being turned to thisStyleVariable
+        const filters = text.split('|');
+        let results = this.parseVal(filters.shift()); // Get left-most val
+        for (const [ fName, arg ] of filters.map(s => s.trim().split(':'))) {
+            const argList = arg ? ',' + this.parseVal(arg) : '';
+            results = `G.filters["${fName}"](${results}${argList})`;
         }
-        const engine = def.engine || 'Templater';
-        const instance = new modulo.registry.engines[engine](modulo, def);
-        def.Hash = instance.Hash;
-        //console.log('Template code:', def.Content);
-        delete def.Content;
-        delete def.TemplatePrebuild;
+        return results;
     }
+
+    parseCondExpr(string) {
+        // This RegExp splits around the tokens, with spaces added
+        const regExpText = ` (${this.opTokens.split(',').join('|')}) `;
+        return string.split(RegExp(regExpText));
+    }
+
+    parseVal(string) {
+        // Parses string literals, de-escaping as needed, numbers, and context
+        // variables
+        const { cleanWord } = this.modulo.registry.utils;
+        const s = string.trim();
+        if (s.match(/^('.*'|".*")$/)) { // String literal
+            return JSON.stringify(s.substr(1, s.length - 2));
+        }
+        return s.match(/^\d+$/) ? s : `CTX.${cleanWord(s)}`
+    }
+
+    escapeText(text) {
+        if (text && text.safe) {
+            return text;
+        }
+        return (text + '').replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/'/g, '&#x27;').replace(/"/g, '&quot;');
+    }
+
+    tokenizeText(text) {
+        // Join all modeTokens with | (OR in regex).
+        const { escapeRegExp } = this.modulo.registry.utils;
+        const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
+        return text.split(RegExp(re)).filter(token => token !== undefined);
+    }
+
+    compile(text) {
+        const { normalize } = this.modulo.registry.utils;
+        this.stack = []; // Template tag stack
+        this.code = 'var OUT=[];\n'; // Variable used to accumulate code
+        let mode = 'text'; // Start in text mode
+        const tokens = this.tokenizeText(text);
+        for (const token of tokens) {
+            if (mode) { // if in a "mode" (text or token), then call mode func
+                const result = this.modes[mode](token, this, this.stack);
+                if (result) { // Mode generated text output, add to code
+                    const comment = JSON.stringify(normalize(token).trim());
+                    this.code += `  ${result} // ${ comment }\n`;
+                }
+            }
+            // FSM for mode: ('text' -> null) (null -> token) (* -> 'text')
+            mode = (mode === 'text') ? null : (mode ? 'text' : token);
+        }
+        this.code += '\nreturn OUT.join("");'
+        return this.code;
+    }
+
     initializedCallback() {
-        const engine = this.conf.engine || 'Templater';
+        /*const engine = this.conf.engine || 'Templater';
         this.templater = this.modulo.registry.engines[engine].loadFromBuild(this.modulo, this.conf);
-        const render = this.templater.render.bind(this.templater);
-        return { render }; // Expose render to include, renderas etc
+        const render = this.templater.render.bind(this.templater);*/
+        Object.assign(this, this.modulo.config.templater, this.conf);
+        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
+        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
+        if (!this.compileOnly) {
+            this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
+            return { render: this.render.bind(this) }; // Expose render
+        }
     }
+
+    render(renderObj) {
+        return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
+    }
+
     renderCallback(renderObj) {
-        if (!renderObj.component)renderObj.component={};// XXX fix
-        renderObj.component.innerHTML = this.templater.render(renderObj);
+        renderObj.component.innerHTML = this.render(renderObj);
     }
 }, {
     TemplatePrebuild: "y", // TODO: Refactor
@@ -1282,22 +1351,6 @@ modulo.register('engine', class Templater {
             }
         }
         return new TemplaterHack(modulo, def);
-    }
-
-    static build(modulo, def) {
-        class TemplaterHack extends modulo.registry.engines.Templater { // XXX
-            setup(text, def) {
-                Object.assign(this, this.modulo.config.templater, def);
-                this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-                this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-                this.compiledCode = this.compile(text);
-                const unclosed = this.stack.map(({ close }) => close).join(', ');
-                this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
-                this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
-            }
-        }
-        const tmp = new TemplaterHack(modulo, def);
-        return tmp.compiledCode;
     }
 
     constructor(modulo, def) {
