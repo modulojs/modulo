@@ -1033,9 +1033,13 @@ modulo.register('cpart', class Template {
     }
 
     initializedCallback() {
-        Object.assign(this, this.modulo.config.template, this.conf); // TODO remove template legacy word
-        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
+        // Combine configuration, defaults, and "registered" filters
+        const { filters, tags } = this.conf;
+        const { defaultFilters, defaultTags } = this.modulo.config.template;
+        const { templateFilters, templateTags } = this.modulo.registry;
+        Object.assign(this, this.modulo.config.template, this.conf);
+        this.filters = Object.assign({}, defaultFilters, templateFilters, filters);
+        this.tags = Object.assign({}, defaultTags, templateTags, tags);
         if (!this.compileOnly) {
             this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
             return { render: this.render.bind(this) }; // Expose render
@@ -1157,7 +1161,7 @@ modulo.config.template.modes = {
     text: (text, tmplt) => text && `OUT.push(${JSON.stringify(text)});`,
 };
 
-modulo.config.template.filters = (function () {
+modulo.config.template.defaultFilters = (function () {
     const { get } = modulo.registry.utils;
     const safe = s => Object.assign(new String(s), { safe: true });
     const filters = {
@@ -1194,7 +1198,7 @@ modulo.config.template.filters = (function () {
     return Object.assign(filters, extra);
 })();
 
-modulo.config.template.tags = {
+modulo.config.template.defaultTags = {
     'debugger': () => 'debugger;',
     'if': (text, tmplt) => {
         // Limit to 3 (L/O/R)
