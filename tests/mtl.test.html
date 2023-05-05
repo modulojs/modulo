@@ -1,21 +1,32 @@
 <component name="MTLTester"><testsuite>
 
-<test name="ensure modulo.engines.Templater is defined">
+<test name="ensure modulo.engines.Template is defined">
     <script>
         //const { MTL } = Modulo.templating;
         // Attach simple helper function used below
         // TODO: Replace this window. silliness with a way to register helpers,
         // maybe something exposed to Configuration
         window._uudn = 0;
-        window._r = (tText, context) => {
-            const conf = {
+        window._makeTemplate = (tText, context, extras) => {
+            const tDef = {
                 Content: tText,
                 DefinitionName: 'TestTemplate' + (++window._uudn),
+                Type: 'Template',
+                ...extras,
             };
-            const tmpl = new modulo.registry.engines.Templater(modulo, conf);
+            if (!(tDef.DefinitionName in modulo.assets.nameToHash)) {
+                modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef);
+            }
+            const tmpl = modulo.instance(tDef, extras);
+            tmpl.initializedCallback();
+            return tmpl;
+        };
+        window._r = (tText, context) => {
+            const tmpl = window._makeTemplate(tText, context, { });
             return tmpl.render(context);
+
         }
-        assert: modulo.registry.engines.Templater && window._r
+        assert: modulo.registry.cparts.Template && window._r
     </script>
 </test>
 
@@ -510,7 +521,7 @@
         const text = '{% for num in test|first %}{{ num }},{% endfor %}';
         const first = arr => arr[0];
         const conf = { Content: text, filters: { first } };
-        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const template = window._makeTemplate(text,modulo,  conf);
         const result = template.render({test: ['ab', 1, 2]});
 
         assert: result === 'a,b,'
@@ -530,7 +541,7 @@
                 'lol': function (n, G) { return "OUT.push(" + G.parseExpr(n) + ".indexOf('S'));"; },
             },
         };
-        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const template = window._makeTemplate(text,modulo,  conf);
         const result = template.render({'test': 'tester'});
 
         assert: result === 'This is a CORRECT 3'
@@ -549,7 +560,7 @@
             Content: text,
             DefinitionName: 'TemplateTesterForLoop',
         };
-        const template = new modulo.registry.engines.Templater(modulo, conf);
+        const template = window._makeTemplate(text,modulo,  conf);
         const result = template.render({state: { data: [ [10, 30] ]} });
 
         assert: result === 'A\n A\n A<tr><td>10</td><td>30</td></tr>Z\n Z\n Z\n '

@@ -6,8 +6,8 @@ if (typeof UNIFIED_DEFINITIONS === "undefined") { // XXX RM
 }
 
 
-// TODO: Remove Templater (Dead code snipped off from Modulo to keep Tests running)
-modulo.register('engine', class Templater extends modulo.registry.cparts.Template {
+// TODO: Remove Template (Dead code snipped off from Modulo to keep Tests running)
+modulo.register('engine', class Template extends modulo.registry.cparts.Template {
     constructor(modulo, def) {
         super();
         this.modulo = modulo;
@@ -17,7 +17,6 @@ modulo.register('engine', class Templater extends modulo.registry.cparts.Templat
     setup(text, def) {
         //console.log('Running setup for def.DefinitionName', def.DefinitionName);
         Object.assign(this, this.modulo.config.template, def);
-        Object.assign(this, this.modulo.config.templater, def);
         this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
         this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
         // XXX TODO: This is a broken hack
@@ -737,7 +736,7 @@ modulo.register('util', function deepClone (obj, modulo) {
     Modulo.prototype.moduloClone = function (modulo, other) {
         return modulo;
     };
-    modulo.registry.engines.Templater.prototype.moduloClone = function (modulo, other) {
+    modulo.registry.engines.Template.prototype.moduloClone = function (modulo, other) {
         // Possible idea: Return a serializable array as args for new()
         return new this('', other);
     }
