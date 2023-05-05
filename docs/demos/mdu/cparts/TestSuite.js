@@ -5,6 +5,60 @@ if (typeof UNIFIED_DEFINITIONS === "undefined") { // XXX RM
     UNIFIED_DEFINITIONS = true;
 }
 
+
+// TODO: Remove Template (Dead code snipped off from Modulo to keep Tests running)
+modulo.register('engine', class Template extends modulo.registry.cparts.Template {
+    constructor(modulo, def) {
+        super();
+        this.modulo = modulo;
+        this.setup(def.Content, def);
+    }
+
+    setup(text, def) {
+        //console.log('Running setup for def.DefinitionName', def.DefinitionName);
+        Object.assign(this, this.modulo.config.template, def);
+        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
+        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
+        // XXX TODO: This is a broken hack
+        /*if (this.DefinitionName in this.modulo.assets.nameToHash) {
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
+        }
+        else*/ if (this.Hash) {
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
+        } else {
+            this.compiledCode = this.compileFunc(text);
+            const unclosed = this.stack.map(({ close }) => close).join(', ');
+            this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
+
+            this.compiledCode = `return function (CTX, G) { ${ this.compiledCode } };`;
+            const { hash } = this.modulo.registry.utils;
+            this.Hash = 'T' + hash(this.compiledCode);
+            if (this.DefinitionName in this.modulo.assets.nameToHash) { // TODO RM
+                console.error("ERROR: Duped template:", def.DefinitionName);
+                this.renderFunc = () => '';
+                return;
+            }
+            this.modulo.assets.define(this.DefinitionName, this.compiledCode);
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
+        }
+    }
+}, {
+    modeTokens: ['{% %}', '{{ }}', '{# #}'],
+    opTokens: '==,>,<,>=,<=,!=,not in,is not,is,in,not,gt,lt',
+    opAliases: {
+        '==': 'X === Y',
+        'is': 'X === Y',
+        'gt': 'X > Y',
+        'lt': 'X < Y',
+        'is not': 'X !== Y',
+        'not': '!(Y)',
+        'in': '(Y).includes ? (Y).includes(X) : (X in Y)',
+        'not in': '!((Y).includes ? (Y).includes(X) : (X in Y))',
+    },
+});
+
+
+
 /*
 modulo.definitions.testSteps = {
     state: () => {},
@@ -682,7 +736,7 @@ modulo.register('util', function deepClone (obj, modulo) {
     Modulo.prototype.moduloClone = function (modulo, other) {
         return modulo;
     };
-    modulo.registry.engines.Templater.prototype.moduloClone = function (modulo, other) {
+    modulo.registry.engines.Template.prototype.moduloClone = function (modulo, other) {
         // Possible idea: Return a serializable array as args for new()
         return new this('', other);
     }
