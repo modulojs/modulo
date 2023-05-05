@@ -1340,7 +1340,7 @@ modulo.register('cpart', class State {
 
 
 /* Implementation of Modulo Templating Language */
-modulo.register('engine', class Templater {
+modulo.register('engine', class Templater extends modulo.registry.cparts.Template {
     static loadFromBuild(modulo, def) {
         class TemplaterHack extends modulo.registry.engines.Templater { // XXX
             setup(text, def) {
@@ -1354,6 +1354,7 @@ modulo.register('engine', class Templater {
     }
 
     constructor(modulo, def) {
+        super();
         this.modulo = modulo;
         this.setup(def.Content, def);
     }
@@ -1384,77 +1385,6 @@ modulo.register('engine', class Templater {
             }
             this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
         }
-    }
-
-    tokenizeText(text) {
-        // Join all modeTokens with | (OR in regex).
-        const { escapeRegExp } = this.modulo.registry.utils;
-        const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
-        return text.split(RegExp(re)).filter(token => token !== undefined);
-    }
-
-    compile(text) {
-        const { normalize } = this.modulo.registry.utils;
-        this.stack = []; // Template tag stack
-        this.output = 'var OUT=[];\n'; // Variable used to accumulate code
-        let mode = 'text'; // Start in text mode
-        const tokens = this.tokenizeText(text);
-        for (const token of tokens) {
-            if (mode) { // if in a "mode" (text or token), then call mode func
-                const result = this.modes[mode](token, this, this.stack);
-                if (result) { // Mode generated text output, add to code
-                    const comment = JSON.stringify(normalize(token).trim());
-                    this.output += `  ${result} // ${ comment }\n`;
-                }
-            }
-            // FSM for mode: ('text' -> null) (null -> token) (* -> 'text')
-            mode = (mode === 'text') ? null : (mode ? 'text' : token);
-        }
-        this.output += '\nreturn OUT.join("");'
-        return this.output;
-    }
-
-    render(renderObj) {
-        return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
-    }
-
-    parseExpr(text) {
-        // TODO: Store a list of variables / paths, so there can be warnings or
-        // errors when variables are unspecified
-        // TODO: Support this-style-variable being turned to thisStyleVariable
-        const filters = text.split('|');
-        let results = this.parseVal(filters.shift()); // Get left-most val
-        for (const [ fName, arg ] of filters.map(s => s.trim().split(':'))) {
-            const argList = arg ? ',' + this.parseVal(arg) : '';
-            results = `G.filters["${fName}"](${results}${argList})`;
-        }
-        return results;
-    }
-
-    parseCondExpr(string) {
-        // This RegExp splits around the tokens, with spaces added
-        const regExpText = ` (${this.opTokens.split(',').join('|')}) `;
-        return string.split(RegExp(regExpText));
-    }
-
-    parseVal(string) {
-        // Parses string literals, de-escaping as needed, numbers, and context
-        // variables
-        const { cleanWord } = this.modulo.registry.utils;
-        const s = string.trim();
-        if (s.match(/^('.*'|".*")$/)) { // String literal
-            return JSON.stringify(s.substr(1, s.length - 2));
-        }
-        return s.match(/^\d+$/) ? s : `CTX.${cleanWord(s)}`
-    }
-
-    escapeText(text) {
-        if (text && text.safe) {
-            return text;
-        }
-        return (text + '').replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/'/g, '&#x27;').replace(/"/g, '&quot;');
     }
 }, {
     modeTokens: ['{% %}', '{{ }}', '{# #}'],
