@@ -300,7 +300,7 @@ modulo.register('processor', function src (modulo, def, value) {
 });
 
 modulo.register('processor', function defTarget (modulo, def, value) {
-    const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document, make it switch to TemplaterResolver if there is {% or {{
+    const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document, make it switch to Template Resolver if there is {% or {{
     const resolver = new modulo.registry.core[resolverName](modulo);
     const target = value === null ? def : resolver.get(value);
     for (const [ key, defValue ] of Object.entries(def)) {
@@ -336,18 +336,17 @@ modulo.register('processor', function definedAs (modulo, def, value) {
     }
 });
 
-    /*
+/*
 modulo.register('processor', function renderObj (modulo, def, value) {
     const parentDef = modulo.definitions[def.Parent];
     const isLower = key => key[0].toLowerCase() === key[0];
     const data = modulo.registry.utils.keyFilter(def, isLower);
     parendDef.initRenderObj[value || def.Name] = data;
 });
-    */
+*/
 
 modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Run factoryCallback static lifecycle method to create initRenderObj
-
 
     // TODO INP: Refactor this as RenderObj processor
     const initRenderObj = { elementClass: cls };
@@ -431,8 +430,6 @@ modulo.register('cpart', class Artifact {
             }
             const ctx = Object.assign({}, modulo, { script: result.exports });
             ctx.bundle = bundledElems;
-            //const templater = new modulo.registry.engines.Templater(modulo, tDef);
-
             if (!(tDef.DefinitionName in modulo.assets.nameToHash)) {
                 modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef);
             }
@@ -842,11 +839,11 @@ modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
 modulo.register('core', class AssetManager {
     constructor (modulo) {
         this.modulo = modulo;
-        this.stylesheets = {};
-        this.cssAssetsArray = [];
-        this.modules = {};
-        this.moduleSources = {};
-        this.nameToHash = {};
+        this.stylesheets = {}; // Object with hash of CSS (prevents double add)
+        this.cssAssetsArray = []; // List of CSS assets added, in order
+        this.modules = {}; // Object containing JS functions with hashed keys
+        this.moduleSources = {}; // Source code of JS functions (for build)
+        this.nameToHash = {}; // Reversable hash / human name for modules
         this.mainRequires = []; // List of globally invoked modules
     }
 
@@ -874,7 +871,6 @@ modulo.register('core', class AssetManager {
             const prefix = assignee + `function ${ name } (modulo) {\n`;
             this.appendToHead('script', `"use strict";${ prefix }${ code }};\n`);
         }
-        return () => this.modules[hash].call(window, modulo); // TODO: Rm this, and also rm the extra () in Templater
     }
 
     registerStylesheet(text) {
@@ -1025,12 +1021,28 @@ modulo.register('cpart', class Template {
         modulo.assert(def.Content, `Empty Template: ${def.DefinitionName}`);
         const template = modulo.instance(def, { compileOnly: true });
         template.initializedCallback();
-        const compiledCode = template.compile(def.Content);
-        const unclosed = template.stack.map(({ close }) => close).join(', ');
-        modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
+        const compiledCode = template.compileFunc(def.Content);
         const code = `return function (CTX, G) { ${ compiledCode } };`;
         modulo.assets.define(def.DefinitionName, code);
         delete def.Content;
+    }
+
+    constructor() {
+        this.stack = []; // Template tag stack
+    }
+
+    initializedCallback() {
+        Object.assign(this, this.modulo.config.templater, this.conf);
+        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
+        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
+        if (!this.compileOnly) {
+            this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
+            return { render: this.render.bind(this) }; // Expose render
+        }
+    }
+
+    renderCallback(renderObj) {
+        renderObj.component.innerHTML = this.render(renderObj);
     }
 
     parseExpr(text) {
@@ -1079,43 +1091,31 @@ modulo.register('cpart', class Template {
         return text.split(RegExp(re)).filter(token => token !== undefined);
     }
 
-    compile(text) {
+    compileFunc(text) {
         const { normalize } = this.modulo.registry.utils;
-        this.stack = []; // Template tag stack
-        this.code = 'var OUT=[];\n'; // Variable used to accumulate code
+        let code = 'var OUT=[];\n'; // Variable used to accumulate code
         let mode = 'text'; // Start in text mode
         const tokens = this.tokenizeText(text);
         for (const token of tokens) {
             if (mode) { // if in a "mode" (text or token), then call mode func
                 const result = this.modes[mode](token, this, this.stack);
                 if (result) { // Mode generated text output, add to code
-                    const comment = JSON.stringify(normalize(token).trim());
-                    this.code += `  ${result} // ${ comment }\n`;
+                    const comment = !this.disableComments ? '' :
+                        ' // ' + JSON.stringify(normalize(token).trim());
+                    code += `  ${ result }${ comment }\n`;
                 }
             }
             // FSM for mode: ('text' -> null) (null -> token) (* -> 'text')
             mode = (mode === 'text') ? null : (mode ? 'text' : token);
         }
-        this.code += '\nreturn OUT.join("");'
-        return this.code;
-    }
-
-    initializedCallback() {
-        Object.assign(this, this.modulo.config.templater, this.conf);
-        this.filters = Object.assign({}, this.modulo.registry.templateFilters, this.filters);
-        this.tags = Object.assign({}, this.modulo.registry.templateTags, this.tags);
-        if (!this.compileOnly) {
-            this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
-            return { render: this.render.bind(this) }; // Expose render
-        }
+        code += '\nreturn OUT.join("");'
+        const unclosed = this.stack.map(({ close }) => close).join(', ');
+        this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
+        return code;
     }
 
     render(renderObj) {
         return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
-    }
-
-    renderCallback(renderObj) {
-        renderObj.component.innerHTML = this.render(renderObj);
     }
 }, {
     TemplatePrebuild: "y", // TODO: Refactor

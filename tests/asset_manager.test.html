@@ -56,13 +56,14 @@
         assert: actual === expected
     </script>
 
-    <script name="Compiled function is executable">
+    <script name="Compiled function is executed on require">
         //const assets = new modulo.registry.core.AssetManager(modulo);
         const assets = modulo.assets; // more of an integration test: just test against existing one
         const { nameToHash } = assets;
-        const func = assets.define('Test_x_x_x', 'return "testing123"');
+        assets.define('Test_x_x_x', 'return "testing123"');
+        const result = assets.require('Test_x_x_x');
         assets.nameToHash = nameToHash; // (Note: Purely defensive programming, rm if not needed)
-        assert: func() === 'testing123'
+        assert: result === 'testing123'
     </script>
 
     <!--

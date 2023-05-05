@@ -27,7 +27,7 @@ modulo.register('engine', class Templater extends modulo.registry.cparts.Templat
         else*/ if (this.Hash) {
             this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         } else {
-            this.compiledCode = this.compile(text);
+            this.compiledCode = this.compileFunc(text);
             const unclosed = this.stack.map(({ close }) => close).join(', ');
             this.modulo.assert(!unclosed, `Unclosed tags: ${ unclosed }`);
 
@@ -39,7 +39,8 @@ modulo.register('engine', class Templater extends modulo.registry.cparts.Templat
                 this.renderFunc = () => '';
                 return;
             }
-            this.renderFunc = this.modulo.assets.define(this.DefinitionName, this.compiledCode)();
+            this.modulo.assets.define(this.DefinitionName, this.compiledCode);
+            this.renderFunc = this.modulo.assets.require(this.DefinitionName);
         }
     }
 }, {
