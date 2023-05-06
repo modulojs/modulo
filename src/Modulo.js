@@ -31,14 +31,14 @@ window.Modulo = class Modulo {
         }
     }
 
-    instance(def, args) {
+    instance(def, extra) {
         const isLower = key => key[0].toLowerCase() === key[0];
         const registry = def.Type === 'Component' ? 'coreDefs' : 'cparts'; // TODO: make compatible with any registration type
-        const inst = new this.registry[registry][def.Type](this, def, args.element || null); // TODO rm the element arg
+        const inst = new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
         const conf = Object.assign({}, this.config[name.toLowerCase()], def);
         const attrs = this.registry.utils.keyFilter(conf, isLower);
-        Object.assign(inst, { id, attrs, conf }, args, { modulo: this });
+        Object.assign(inst, { id, attrs, conf }, extra, { modulo: this });
         if (inst.constructedCallback) {
             inst.constructedCallback();
         }
@@ -363,20 +363,6 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
             initRenderObj[cpartDef.RenderObj || cpartDef.Name] = result;
         }
     }
-
-    /*
-    // TODO INP: Refactor away factoryCallback, or turn into processor
-    modulo.register('processor', function renderObj (modulo, def, value) {
-        const parentDef = modulo.definitions[def.Parent];
-        const isLower = key => key[0].toLowerCase() === key[0];
-        const data = modulo.registry.utils.keyFilter(def, isLower);
-        parendDef.initRenderObj[value || def.Name] = data;
-    });
-    const defs = def.ChildrenNames.map(defName => modulo.definitions[defName]);
-    def.initRenderObj = { elementClass: cls };
-    modulo.repeatProcessors(defs, 'Factory');
-    const initRenderObj = def.initRenderObj;
-    */
 
     cls.prototype.init = function init () {
         this.modulo = modulo;
@@ -1310,9 +1296,9 @@ modulo.register('cpart', class Script {
         const isDirRegEx = /(Unmount|Mount)$/;
         def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
         const { ChildrenNames } = modulo.definitions[def.Parent] || { };
-        const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
-        sibNames.push('component', 'element', 'cparts'); // Add in extras
-        const varNames = sibNames.filter(name => value.includes(name));
+        const sibs = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
+        sibs.push('component', 'element', 'cparts'); // Add in extras
+        const varNames = sibs.filter(name => value.includes(name)); // Used only
         // Build def.Code to wrap the user-provided code and export local vars
         def.Code = `var script = { exports: {} }; `;
         def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
@@ -1320,7 +1306,7 @@ modulo.register('cpart', class Script {
         for (const s of getAutoExportNames(value)) {
             def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
         }
-        def.Code += `setLocalVariables: function(o) {`
+        def.Code += `setLocalVariables: function (o) {`
         def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
         def.Code += `}, exports: script.exports }\n`
     }
