@@ -309,7 +309,7 @@ modulo.register('core', class DOMLoader {
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
-    def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
+    def.Source = (new window.URL(value, getParentDefPath(modulo, def))).href;
     modulo.fetchQueue.fetch(def.Source).then(text => {
         def.Content = (text || '') + (def.Content || '');
     });

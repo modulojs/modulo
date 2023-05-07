@@ -2,7 +2,7 @@
     These tests are useful as unit tests testing the AssetManager core class
     and "build" command
 -->
-<Component name="AssetManager"><TestSuite>
+<Component name="AssetManager"><TestSuite solo>
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -298,11 +298,14 @@ window.moduloBuild.nameToHash = {
 
     <script name="commands.build produces files with expected names and sizes">
         const files = window._buildCommandAndRun(false, null);
-        const expectedFns = JSON.stringify([
+        let expectedFns = JSON.stringify([
             'modulo-build-xxxxxxxx.css',
             'modulo-build-xxxxxxxx.js',
             'index.html',
         ]);
+        if (window.location.pathname.includes('virtualdom_test_2.html')) {
+            expectedFns = expectedFns.replace('index.html', 'virtualdom_test_2.html');
+        }
         const actualFns = JSON.stringify(files.map(({ filename }) => filename));
         const [ cssSize, jsSize, htmlSize ] = files.map(({ text }) => (text || '').trim().length).concat([-1, -1, -1]); // have -1 as placeholder
         assert: expectedFns === actualFns && jsSize > 2500 && cssSize === 0 && htmlSize > 500
