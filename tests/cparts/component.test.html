@@ -16,12 +16,7 @@
             <script name="Ensure component exists and innerHTML starts as null">
                 const { innerHTML } = component
                 component.innerHTML = '<div id="test"><p>Abc</p></div>'
-                // Note: Need to change this if we ever change lc methods
-                if (element.lifecycle) {
-                    element.lifecycle([ 'render', 'reconcile', 'update' ])
-                } else {
-                    element.cparts.component.lifecycle([ 'render', 'reconcile', 'update' ])
-                }
+                element.cparts.component._lifecycle([ 'render', 'reconcile', 'update' ])
                 assert: innerHTML === null
             </script>
 

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<script src="/js/Modulo.js"></script>
+<script src="/demos/mdu/cparts/TestSuite.js"></script>
+<script src="/demos/mdu/utils/vwindow2.js"></script>
+
+<script>
+
+    const vw = new modulo.registry.engines.VirtualWindow(modulo);
+    vw.navigate('http://localhost:3334/demos/wip/min_start_1.html').then(() => {
+        console.log(vw.window.document.innerHTML);
+        /*
+        console.log(vw.window.modulo);
+        setTimeout(() => {
+            console.log(vw.window.modulo);
+            console.log(vw.window.document.innerHTML);
+        }, 1000);
+        */
+    });
+
+</script>

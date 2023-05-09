@@ -2,7 +2,7 @@
     These tests are useful as unit tests testing the AssetManager core class
     and "build" command
 -->
-<Component name="AssetManager"><TestSuite>
+<Component name="BuildCommandAndAssetManager"><TestSuite >
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -98,7 +98,7 @@ window.moduloBuild.nameToHash = {
     <script name="assets.buildJavaScript exists">
         const originalRegistry = modulo.registry;
         const originalConfig = modulo.config;
-        const { deepClone, cloneStub } = modulo.registry.utils;
+        const { deepClone } = modulo.registry.utils;
 
         function _prepIsolatedModulo(callback = null) {
             // Now, let's make a fresh modulo, and see if we can "load" the
@@ -144,9 +144,9 @@ window.moduloBuild.nameToHash = {
             mod2._customElements = customElements;
             if (callback) {
                 callback(mod2, fakeWindow);
-                if (fakeWindow.moduloBuild) {
-                    mod2.start(fakeWindow.moduloBuild);
-                }
+                /*if (fakeWindow.moduloBuild) {
+                    //mod2.start(fakeWindow.moduloBuild);
+                }*/
             }
             return mod2;
         }
@@ -298,11 +298,14 @@ window.moduloBuild.nameToHash = {
 
     <script name="commands.build produces files with expected names and sizes">
         const files = window._buildCommandAndRun(false, null);
-        const expectedFns = JSON.stringify([
+        let expectedFns = JSON.stringify([
             'modulo-build-xxxxxxxx.css',
             'modulo-build-xxxxxxxx.js',
             'index.html',
         ]);
+        if (window.location.pathname.includes('virtualdom_test_2.html')) {
+            expectedFns = expectedFns.replace('index.html', 'virtualdom_test_2.html');
+        }
         const actualFns = JSON.stringify(files.map(({ filename }) => filename));
         const [ cssSize, jsSize, htmlSize ] = files.map(({ text }) => (text || '').trim().length).concat([-1, -1, -1]); // have -1 as placeholder
         assert: expectedFns === actualFns && jsSize > 2500 && cssSize === 0 && htmlSize > 500

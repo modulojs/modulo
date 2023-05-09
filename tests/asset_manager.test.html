@@ -2,7 +2,7 @@
     These tests are useful as unit tests testing the AssetManager core class
     and "build" command
 -->
-<Component name="AssetManager"><TestSuite solo>
+<Component name="BuildCommandAndAssetManager"><TestSuite >
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -98,7 +98,7 @@ window.moduloBuild.nameToHash = {
     <script name="assets.buildJavaScript exists">
         const originalRegistry = modulo.registry;
         const originalConfig = modulo.config;
-        const { deepClone, cloneStub } = modulo.registry.utils;
+        const { deepClone } = modulo.registry.utils;
 
         function _prepIsolatedModulo(callback = null) {
             // Now, let's make a fresh modulo, and see if we can "load" the
@@ -144,9 +144,9 @@ window.moduloBuild.nameToHash = {
             mod2._customElements = customElements;
             if (callback) {
                 callback(mod2, fakeWindow);
-                if (fakeWindow.moduloBuild) {
-                    mod2.start(fakeWindow.moduloBuild);
-                }
+                /*if (fakeWindow.moduloBuild) {
+                    //mod2.start(fakeWindow.moduloBuild);
+                }*/
             }
             return mod2;
         }

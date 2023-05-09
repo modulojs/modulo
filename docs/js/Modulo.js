@@ -309,7 +309,7 @@ modulo.register('core', class DOMLoader {
 
 modulo.register('processor', function src (modulo, def, value) {
     const { getParentDefPath } = modulo.registry.utils;
-    def.Source = (new URL(value, getParentDefPath(modulo, def))).href;
+    def.Source = (new window.URL(value, getParentDefPath(modulo, def))).href;
     modulo.fetchQueue.fetch(def.Source).then(text => {
         def.Content = (text || '') + (def.Content || '');
     });
@@ -363,20 +363,6 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
             initRenderObj[cpartDef.RenderObj || cpartDef.Name] = result;
         }
     }
-
-    /*
-    // TODO INP: Refactor away factoryCallback, or turn into processor
-    modulo.register('processor', function renderObj (modulo, def, value) {
-        const parentDef = modulo.definitions[def.Parent];
-        const isLower = key => key[0].toLowerCase() === key[0];
-        const data = modulo.registry.utils.keyFilter(def, isLower);
-        parendDef.initRenderObj[value || def.Name] = data;
-    });
-    const defs = def.ChildrenNames.map(defName => modulo.definitions[defName]);
-    def.initRenderObj = { elementClass: cls };
-    modulo.repeatProcessors(defs, 'Factory');
-    const initRenderObj = def.initRenderObj;
-    */
 
     cls.prototype.init = function init () {
         this.modulo = modulo;
@@ -1310,9 +1296,9 @@ modulo.register('cpart', class Script {
         const isDirRegEx = /(Unmount|Mount)$/;
         def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
         const { ChildrenNames } = modulo.definitions[def.Parent] || { };
-        const sibNames = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
-        sibNames.push('component', 'element', 'cparts'); // Add in extras
-        const varNames = sibNames.filter(name => value.includes(name));
+        const sibs = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
+        sibs.push('component', 'element', 'cparts'); // Add in extras
+        const varNames = sibs.filter(name => value.includes(name)); // Used only
         // Build def.Code to wrap the user-provided code and export local vars
         def.Code = `var script = { exports: {} }; `;
         def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
@@ -1320,7 +1306,7 @@ modulo.register('cpart', class Script {
         for (const s of getAutoExportNames(value)) {
             def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
         }
-        def.Code += `setLocalVariables: function(o) {`
+        def.Code += `setLocalVariables: function (o) {`
         def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
         def.Code += `}, exports: script.exports }\n`
     }
