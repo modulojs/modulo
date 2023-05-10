@@ -3,6 +3,13 @@ if (!modulo.registry.vwindow) {
 }
 
 modulo.registry.utils.parse = function parse(parentElem, text) {
+    modulo.assert(parentElem !== undefined || text !== undefined, 'Must specify text to parse');
+    if (text === undefined) { // Specify "null" to create a new document with a detached x tag
+        text = parentElem;
+        const vw = new modulo.registry.engines.VirtualWindow(modulo);
+        parentElem = vw.document.createElement('x'); // Create a detached 'x' tag
+    }
+
     /*
       Simple recursive descent parser for HTML
     */
@@ -20,7 +27,7 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
     };
     // If there's leading text, create a TextNode with that as content
     const pushText = (_textContent, opts) =>
-            topOfStack.childNodes.push(new modulo.registry.vwindow.HTMLElement({
+            topOfStack.append(new modulo.registry.vwindow.HTMLElement({
                 nodeType: 3,
                 _textContent,
                 ...opts,
@@ -28,7 +35,7 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
 
     const { ownerDocument } = parentElem;
     let elemClassesUC = {};
-    if (ownerDocument.moduloVirtualWindow.customElements) {
+    if (ownerDocument && ownerDocument.moduloVirtualWindow.customElements) {
         elemClassesUC = ownerDocument.moduloVirtualWindow.customElements.elemClassesUC;
     }
 
@@ -119,6 +126,7 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
             throw new Error('Over 9999 parsing steps');
         }
     }
+    return parentElem;
 }
 
 modulo.registry.vwindow.Element = class Element {
@@ -168,6 +176,9 @@ modulo.registry.vwindow.Event = class Event {
 
 
 
+/* Synchronous Promise variant */
+modulo.registry.vwindow.Promise = class PausablePromise {
+}
 
 modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.vwindow.Element {
     constructor(opts) {
@@ -304,6 +315,10 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
         return this.childNodes.length > 0 ? this.childNodes[0] : null;
     }
 
+    get firstElementChild() {
+        return this.children.length > 0 ? this.children[0] : null;
+    }
+
     get nextSibling() {
         if (!this.parentNode || (this._parentIndex + 1) >= this.parentNode.childNodes.length) {
             return null;
@@ -367,7 +382,7 @@ modulo.registry.vwindow.HTMLElement = class HTMLElement extends modulo.registry.
 
     _fetch(url, callback) {
         const vw = this.ownerDocument.moduloVirtualWindow;
-        vw.window.fetch(url)
+        vw.fetch(url)
             .then(response => response.text())
             .then(callback);
             /*
@@ -683,13 +698,73 @@ modulo.register('engine', class VirtualWindow {
         Object.assign(this, win); // Expose some window properties at top as well
         this.window = Object.assign({}, vwindow, win); // Add in all vdom classes
         this.window.exec = this.exec.bind(this);
-        //this.window.fetch = window.fetch.bind(window);
         this.window.fetch = this.fetch.bind(this);
+        this.isVirtualFileSystem = false;
         this.cachedForBlocking = {};
+
+        // If the "virtual-file-system" configuration option is set, we can mount virtual files
+        // TODO: Speed up idea: Have the entire source directory get read into
+        // memory and mounted on this (even binaries, if specified!), then when
+        // doing SSG just work on the memory copy, for lighting fast
+        // prebuilding!
+        // Eventually, when binary operation become more normal (e.g.
+        // <ImageCanvas> type elements), then have VirtualWindow be capable of
+        // running those remotely via a RPC bridge, or existing HTTP API or
+        // equivalent (e.g.  an express server that sits around with a
+        // Pupeteer). Or standard ipc stuff?
+        if (this.modulo.config.virtualwindow.virtualFileSystem) {
+            this.setVFS(this.modulo.config.virtualwindow.virtualFileSystem);
+        }
     }
 
     fetch(...args) {
-        return window.fetch(...args);
+        // The single "fetch" choke point, used by both VirtualWindow and by it's children
+        if (this.isVirtualFileSystem) {
+            return this.fetchVFS(...args);
+        } else {
+            return window.fetch(...args);
+        }
+    }
+    fetchVFS(...args) {
+        class Response {
+            constructor(url, text) {
+                this._url = url;
+                this._textBody = text;
+            }
+            json() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        resolve(JSON.parse(this._textBody));
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            }
+            text() {
+                return new Promise((resolve, reject) => {
+                    resolve(this._textBody);
+                });
+            }
+        }
+        return new Promise((resolve, reject) => {
+            const request = {};
+            const response = {};
+            let url = args[0] || '';
+            if (url.toLowerCase().startsWith('file://')) {
+                // Local file protocol, good!
+                url = url.substr(7);
+            }
+            if (url.toLowerCase().startsWith('http://')) {
+                // Local file protocol, good!
+                url = url.substr(7);
+            }
+
+            if (!(url in this.cachedForBlocking)) {
+                reject(new Error(`V404| Virtual FileSystem entry for ${ url } not found`));
+            } else {
+                resolve(new Response(url, this.cachedForBlocking[url]));
+            }
+        });
     }
 
     makeCustomElements() {
@@ -743,7 +818,7 @@ modulo.register('engine', class VirtualWindow {
                 return url;
             }
         }, new this.window.URL(url));
-        return window.fetch(url)
+        return this.fetch(url)
             .then(response => response.text())
             .then(this.execHTML.bind(this))
     }
@@ -752,6 +827,11 @@ modulo.register('engine', class VirtualWindow {
         //const code = `${ text }\n\n return ${ exportCode };`;
         const func = new Function('window', 'document', 'HTMLElement', code);
         return func(this.window, this.document, this.HTMLElement);
+    }
+
+    setVFS(sources) {
+        this.isVirtualFileSystem = true;
+        Object.assign(this.cachedForBlocking, sources);
     }
 
     execHTML(pageContent) {
@@ -770,7 +850,7 @@ modulo.register('engine', class VirtualWindow {
         const sources = /<SCRIPT[^>]*\sSRC\s*=\s*["']([^"']+)["']/gi;
         const promises = [];
         for (const match of pageContent.matchAll(sources)) {
-            promises.push(window.fetch(match[1])
+            promises.push(this.fetch(match[1])
                 .then(response => response.text())
                 .then(text => {
                    data[match[1]] = text;

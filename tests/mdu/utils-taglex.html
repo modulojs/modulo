@@ -6,13 +6,14 @@
 
 <test name="RuleSet tests">
     <script name="TagLex classes are loaded and available">
-        const { taglex } = Modulo.utils;
+        const { taglex } = modulo.registry;
         const { EventEmitter, Lexer, StackParser, TagParser, RuleSet, TagRuleSet } = (taglex || {});
         assert: EventEmitter && Lexer && StackParser && TagParser && RuleSet && TagRuleSet
     </script>
 
     <script name="Can correctly lex text into tokens">
-        const { taglex, NodeUnitHelper } = Modulo.utils;
+        const { taglex } = modulo.registry;
+        const { NodeUnitHelper } = modulo.registry.utils;
         const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
         var ruleset = new taglex.RuleSet();
@@ -192,7 +193,8 @@
     </script>
 
   <script name="Test RuleSet with overlapping tokens">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet();
@@ -243,7 +245,8 @@
 
 
   <script name="test_lexer_stack_pass ">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet();
@@ -276,7 +279,8 @@
   </script>
 
   <script name="test_lexer_empty_match">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet();
@@ -347,7 +351,8 @@
 
 
   <script name="test_lexer_ignore_case">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet({ignore_case: true});
@@ -385,7 +390,8 @@
 
 
   <script name="test_lexer_regexp">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet({
@@ -426,7 +432,8 @@
 
 
   <script name="test_lexer_collapse">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var ruleset = new taglex.RuleSet();
@@ -525,7 +532,8 @@
 
 
   <script name="test_tag_parser_basic">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var result, parser, text, contents, node_contents;
@@ -637,7 +645,8 @@
 
 
   <script name="test_tag_parser_root_ignore_text">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var result, parser, text, contents, node_contents;
@@ -687,7 +696,8 @@
 
 
   <script name="test_tag_parser_event_buffering">
-      const { taglex, NodeUnitHelper } = Modulo.utils;
+      const { taglex } = modulo.registry;
+      const { NodeUnitHelper } = modulo.registry.utils;
       const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
       var result, parser, text, contents, node_contents, bufferer;
@@ -738,7 +748,8 @@
 
 
   <script name="test_complex_lexing_example">
-    const { taglex, NodeUnitHelper } = Modulo.utils;
+    const { taglex } = modulo.registry;
+    const { NodeUnitHelper } = modulo.registry.utils;
     const test = new NodeUnitHelper(); // Implements subset of nodeunit
 
     /*
@@ -787,7 +798,8 @@
   </script>
 
   <script name="test_complex_markdown_example">
-    const { taglex, NodeUnitHelper } = Modulo.utils;
+    const { taglex } = modulo.registry;
+    const { NodeUnitHelper } = modulo.registry.utils;
     const test = new NodeUnitHelper(); // Implements subset of nodeunit
     const out = [];
 

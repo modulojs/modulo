@@ -1,15 +1,15 @@
-if (!Modulo.utils.taglex) {
+if (!modulo.registry.taglex) {
     const ROOT = 'tag_root';
     const TEXT_NODE  = 1;
     const TAG_NODE   = 2;
     const POP        = 1;
     const DOUBLE_POP = 2;
     const NOOP       = 3;
-    Modulo.utils.taglex = { ROOT, TEXT_NODE, TAG_NODE, POP, DOUBLE_POP, NOOP };
+    modulo.registry.taglex = { ROOT, TEXT_NODE, TAG_NODE, POP, DOUBLE_POP, NOOP };
 }
 
 // Very simple internal EventEmitter implementation, subclassed below
-Modulo.utils.taglex.EventEmitter = class EventEmitter {
+modulo.registry.taglex.EventEmitter = class EventEmitter {
     constructor() {
         this._callbacks = {};
     }
@@ -27,11 +27,11 @@ Modulo.utils.taglex.EventEmitter = class EventEmitter {
 }
 
 
-Modulo.utils.escapeForRegExp = function escapeForRegExp (str) {
+modulo.registry.utils.escapeForRegExp = function escapeForRegExp (str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 };
 
-Modulo.utils.taglex.Lexer = class Lexer extends Modulo.utils.taglex.EventEmitter {
+modulo.registry.taglex.Lexer = class Lexer extends modulo.registry.taglex.EventEmitter {
     constructor(ruleset, default_state, on_func) {
         super();
         this.ruleset = ruleset;
@@ -65,7 +65,7 @@ Modulo.utils.taglex.Lexer = class Lexer extends Modulo.utils.taglex.EventEmitter
     }
 
     _emit_and_token(next_state, initial_text, normalized, token) {
-        const { TEXT_NODE, TAG_NODE, NOOP } = Modulo.utils.taglex;
+        const { TEXT_NODE, TAG_NODE, NOOP } = modulo.registry.taglex;
 
         // Check state for error conditions
         if (next_state === null) {
@@ -89,7 +89,7 @@ Modulo.utils.taglex.Lexer = class Lexer extends Modulo.utils.taglex.EventEmitter
     }
 
     _process(text, state) {
-        const { TEXT_NODE } = Modulo.utils.taglex;
+        const { TEXT_NODE } = modulo.registry.taglex;
 
         // Process 1 text node, or 1 text node and 1 tag node
         let regexps = this.ruleset.regexps;
@@ -141,7 +141,7 @@ Modulo.utils.taglex.Lexer = class Lexer extends Modulo.utils.taglex.EventEmitter
     }
 }
 
-Modulo.utils.taglex.StackParser = class StackParser extends Modulo.utils.taglex.Lexer {
+modulo.registry.taglex.StackParser = class StackParser extends modulo.registry.taglex.Lexer {
     constructor(ruleset, default_state, on_func) {
         super(ruleset, default_state, on_func);
         this.reset();
@@ -172,7 +172,7 @@ Modulo.utils.taglex.StackParser = class StackParser extends Modulo.utils.taglex.
     }
 
     _transition_state_stack(state, next_state, initial_text, normalized, token) {
-        const { TEXT_NODE, TAG_NODE, POP, DOUBLE_POP, NOOP } = Modulo.utils.taglex;
+        const { TEXT_NODE, TAG_NODE, POP, DOUBLE_POP, NOOP } = modulo.registry.taglex;
         /////////////////////////////////
         // Collapse feature logic
         // A collapse action pops all the way up to target
@@ -267,7 +267,7 @@ Modulo.utils.taglex.StackParser = class StackParser extends Modulo.utils.taglex.
     }
 }
 
-Modulo.utils.taglex.TagParser = class TagParser extends Modulo.utils.taglex.StackParser {
+modulo.registry.taglex.TagParser = class TagParser extends modulo.registry.taglex.StackParser {
     // Improved version of StackParser that emits more info based on TagRuleSet
     constructor(ruleset, default_state, on_func) {
         super(ruleset, default_state, on_func);
@@ -275,7 +275,7 @@ Modulo.utils.taglex.TagParser = class TagParser extends Modulo.utils.taglex.Stac
     }
 
     _prep_events() {
-        const { TEXT_NODE } = Modulo.utils.taglex;
+        const { TEXT_NODE } = modulo.registry.taglex;
 
         let ruleset = this.ruleset;
         let me = this;
@@ -453,7 +453,7 @@ Modulo.utils.taglex.TagParser = class TagParser extends Modulo.utils.taglex.Stac
         };
 
         this.regexps = {};
-        const { escapeForRegExp } = Modulo.utils;
+        const { escapeForRegExp } = modulo.registry.utils;
         for (let state_name in this._states) {
             let patterns = [];
             for (const token_name of this._states[state_name]) {
@@ -830,7 +830,7 @@ Modulo.utils.taglex.TagParser = class TagParser extends Modulo.utils.taglex.Stac
     exports.RuleSet = RuleSet;
     exports.TagRuleSet = TagRuleSet;
     exports.SourceBufferer = SourceBufferer;
-})(Modulo.utils.taglex);
+})(modulo.registry.taglex);
 
 /*
     ////////////////////////////////////// XXX DEAD CODE

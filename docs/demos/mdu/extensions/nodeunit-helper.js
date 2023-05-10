@@ -1,6 +1,6 @@
 /*
-  Likely to be removed: A helper class that implements an old nodeunit
-  interface to make porting unit tests slightly easier.
+  Likely to be removed: A helper class that implements a function in
+  node unit to make porting unit tests slightly easier.
 */
 Modulo.utils.NodeUnitHelper = class NodeUnitHelper {
     constructor() {

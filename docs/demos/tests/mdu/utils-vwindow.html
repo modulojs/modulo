@@ -1,0 +1,151 @@
+<Component name="VWindowTests"><TestSuite>
+
+<test name="VirtualWindow functional tests">
+    <script name="VirtualWindow class exists">
+        const { VirtualWindow } = modulo.registry.engines;
+        assert: VirtualWindow
+    </script>
+
+    <script name="execHTML method works with inline scripts">
+        const { VirtualWindow } = modulo.registry.engines;
+        modulo.config.virtualwindow.virtualFileSystem = {};
+        const vw = new VirtualWindow(modulo);
+        vw.execHTML(`<!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>
+                    <div>
+                        <strong>Hello world!</strong>
+                    </div>
+                    <` + `script>window.embedRunCount = (window.embedRunCount || 0) + 1;</` + `script>
+                </body>
+            </html>
+        `);
+        console.log(vw.window);
+        assert: vw.window.embedRunCount === 1
+    </script>
+
+    <script name="execHTML method works remote (VFS) scripts">
+        const { VirtualWindow } = modulo.registry.engines;
+        modulo.config.virtualwindow.virtualFileSystem = {
+            '/js/Modulo.js': 'window.scriptRunCount = (window.scriptRunCount || 0) + 1;',
+        };
+        const vw = new VirtualWindow(modulo);
+        vw.execHTML(`<!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>
+                    <div>
+                        <strong>Hello world!</strong>
+                    </div>
+                    <` + `script src="/js/Modulo.js"></` + `script>
+                </body>
+            </html>
+        `).then(() => { console.log('too late?')}); // No-op, since sync
+        console.log('this is vw.window', vw.window, vw.window.scriptRunCount);
+        assert: vw.window.scriptRunCount === 1
+    </script>
+
+    <script name="execHTML method works with inline and remote (VFS) scripts">
+        const { VirtualWindow } = modulo.registry.engines;
+        modulo.config.virtualwindow.virtualFileSystem = {
+            '/js/Modulo.js': 'window.scriptRunCount = (window.scriptRunCount || 0) + 1;',
+        };
+        const vw = new VirtualWindow(modulo);
+        vw.execHTML(`<!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>
+                    <div>
+                        <strong>Hello world!</strong>
+                    </div>
+                    <` + `script src="/js/Modulo.js"></` + `script>
+                    <` + `script>window.embedRunCount = (window.embedRunCount || 0) + 1;</` + `script>
+                </body>
+            </html>
+        `);
+        assert: vw.window.embedRunCount === 1 && vw.window.scriptRunCount === 1
+    </script>
+
+</test>
+
+
+<test name="parse functional testing">
+    <script name="parse function exists">
+        const { parse } = modulo.registry.utils;
+        assert: parse
+    </script>
+
+    <script name="parse handles empty string">
+        const { parse } = modulo.registry.utils;
+        const el = parse('');
+        const childNodesStrings = JSON.stringify(el.childNodes.map(c => c.textContent));
+        const childrenStrings = JSON.stringify(el.children.map(c => c.textContent));
+        assert: el.innerHTML === '' && el.textContent === '' && (childNodesStrings === '[]') && (childrenStrings === '[]')
+    </script>
+
+    <script name="parse handles text string">
+        const { parse } = modulo.registry.utils;
+        const el = parse('Hello world!');
+        const childNodesStrings = JSON.stringify(el.childNodes.map(c => c.textContent));
+        const childrenStrings = JSON.stringify(el.children.map(c => c.textContent));
+        assert: el.innerHTML === 'Hello world!' && el.textContent === 'Hello world!' && (childNodesStrings === '["Hello world!"]') && (childrenStrings === '[]')
+    </script>
+
+    <script name="parse handles text string and creates proper text node">
+        const { parse } = modulo.registry.utils;
+        const el = parse('Hello world!');
+        const tn = el.firstChild;
+        assert: tn.textContent === 'Hello world!' && tn.nodeType === 3
+    </script>
+
+    <script name="parse creates leading text node before elements">
+        const { parse } = modulo.registry.utils;
+        const el = parse('Hello <strong>HTML</strong> world!');
+        const tn = el.firstChild;
+        assert: tn.textContent === 'Hello ' && tn.nodeType === 3
+    </script>
+
+    <script name="parse creates text nodes throughout elements">
+        const { parse } = modulo.registry.utils;
+        const el = parse('Hello <strong>HTML</strong> world!');
+        const childNodesStrings = JSON.stringify(el.childNodes.map(c => c.textContent));
+        const childrenStrings = JSON.stringify(el.children.map(c => c.textContent));
+        const htmlExpected = 'Hello <strong>HTML</strong> world!';
+        const textExpected = 'Hello HTML world!';
+        const childNodesExpected = '["Hello ","HTML"," world!"]';
+        const childrenExpected = '["HTML"]';
+        assert: el.innerHTML ===  htmlExpected && el.textContent === textExpected && (childNodesStrings === childNodesExpected) && (childrenStrings === childrenExpected)
+    </script>
+
+    <script name="parse creates normal element node with firstChild and nextSibling">
+        const { parse } = modulo.registry.utils;
+        const el = parse('Hello <strong>HTML</strong> world!');
+        const { firstChild } = el;
+        const { nextSibling } = firstChild || {};
+        const { textContent, innerHTML, outerHTML } = nextSibling || {};
+        assert: firstChild.textContent === 'Hello ' && textContent === 'HTML' && innerHTML === 'HTML' && outerHTML === '<strong>HTML</strong>'
+    </script>
+
+    <script name="parse creates normal element node with complicated structure and expected text content">
+        const { parse } = modulo.registry.utils;
+        const el = parse('<a>111 1 111</a><b>222 2 222</b><c>333 <d>444 </d>555 <e>666</e> 777</c>')
+        const a = el.children[0];
+        const b = el.children[1];
+        const c = el.children[2];
+        const d = c.children[0];
+        const e = c.children[1];
+        const aTC = a && a.textContent;
+        const bTC = b && b.textContent;
+        const cTC = c && c.textContent;
+        const dTC = d && d.textContent;
+        const eTC = e && e.textContent;
+        assert: aTC === '111 1 111' && bTC === '222 2 222' && cTC === '333 444 555 666 777' && dTC === '444 ' && eTC === '666';
+    </script>
+
+</test>
+
+
+
+
+</TestSuite></Component>

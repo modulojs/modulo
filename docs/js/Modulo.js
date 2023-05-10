@@ -12,11 +12,6 @@ window.Modulo = class Modulo {
         this.stores = {}; // Global data store (by default, only used by State)
     }
 
-    start(elem, callback = null) { // XXX DEAD CODE
-        this.loadFromDOM(elem, null, true);
-        this.preprocessAndDefine(callback);
-    }
-
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // pluralize
         if (type in this.registry.registryCallbacks) {
@@ -43,6 +38,30 @@ window.Modulo = class Modulo {
             inst.constructedCallback();
         }
         return inst;
+    }
+
+    instanceParts(def, extra, parts = {}) {
+        // Loop through all children, instancing each class with configuration
+        const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
+        for (const def of allNames.map(name => this.definitions[name])) {
+            parts[def.RenderObj || def.Name] = this.instance(def, extra);
+        }
+        return parts;
+    }
+
+    lifecycle(parts, renderObj, lifecycleNames) {
+        for (const lifecycleName of lifecycleNames) {
+            const methodName = lifecycleName + 'Callback';
+            for (const [ name, obj ] of Object.entries(parts)) {
+                if (!(methodName in obj)) {
+                    continue; // Skip if obj has not registered callback
+                }
+                const result = obj[methodName].call(obj, renderObj);
+                if (result) {
+                    renderObj[obj.conf.RenderObj || obj.conf.Name] = result;
+                }
+            }
+        }
     }
 
     preprocessAndDefine(cb) {
@@ -370,12 +389,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         this.isModulo = true;
         this.originalHTML = null;
         this.originalChildren = [];
-        this.cparts = {};
-        // Loop through all children, instancing each class with configuration
-        const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
-        for (const def of allNames.map(name => modulo.definitions[name])) {
-            this.cparts[def.RenderObj || def.Name] = modulo.instance(def, { element: this });
-        }
+        this.cparts = modulo.instanceParts(def, { element: this });
     };
 
     // Mount the element, optionally "merging" in the modulo-original-html attr
@@ -383,7 +397,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         const htmlOriginal = this.getAttribute('modulo-original-html');
         const original = ((!htmlOriginal || htmlOriginal === '') ? this :
                           modulo.registry.utils.makeDiv(htmlOriginal));
-        this.cparts.component.lifecycle([ 'initialized' ]);
+        this.cparts.component._lifecycle([ 'initialized' ]);
         this.rerender(original); // render and re-mount it's own childNodes
         if (this.hasAttribute('modulo-original-html')) {
             const { reconciler } = this.cparts.component;
@@ -419,10 +433,7 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
 });
 
 modulo.register('cpart', class Artifact {
-    // TODO: Refactor Component logic to be shared with Artifact (maybe using
-    // preprocessors?). Refactor this to use something more generalized for
-    // children, so it shares code flow with component. Generally, this is a mess!
-    static build(modulo, def) {
+    buildCommandCallback({ modulo, def }) {
         const finish = () => {
             const { saveFileAs, hash } = modulo.registry.utils;
             const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
@@ -491,6 +502,7 @@ modulo.register('cpart', class Artifact {
 }, {
     Contains: 'cparts',
     DefinedAs: 'name',
+    RenderObj: 'artifact',
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
@@ -541,6 +553,7 @@ modulo.register('coreDef', class Component {
             return ${ className };
         `;
     }
+
     rerender(original = null) {
         if (original) {
             if (this.element.originalHTML === null) {
@@ -549,28 +562,17 @@ modulo.register('coreDef', class Component {
             this.element.originalChildren = Array.from(
                 original.hasChildNodes() ? original.childNodes : []);
         }
-        this.lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
+        this._lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
     }
 
     getCurrentRenderObj() {
         return (this.element.eventRenderObj || this.element.renderObj || this.element.initRenderObj);
     }
 
-    lifecycle(lifecycleNames, rObj={}) {
+    _lifecycle(lifecycleNames, rObj={}) {
         const renderObj = Object.assign({}, rObj, this.getCurrentRenderObj());
         this.element.renderObj = renderObj;
-        for (const lifecycleName of lifecycleNames) {
-            const methodName = lifecycleName + 'Callback';
-            for (const [ name, obj ] of Object.entries(this.element.cparts)) {
-                if (!(methodName in obj)) {
-                    continue; // Skip if obj has not registered callback
-                }
-                const result = obj[methodName].call(obj, renderObj);
-                if (result) {
-                    renderObj[obj.conf.RenderObj || obj.conf.Name] = result;
-                }
-            }
-        }
+        this.modulo.lifecycle(this.element.cparts, renderObj, lifecycleNames);
         //this.element.renderObj = null; // ?rendering is over, set to null
     }
 
@@ -645,10 +647,10 @@ modulo.register('coreDef', class Component {
     }
 
     handleEvent(func, payload, ev) {
-        this.lifecycle([ 'event' ]);
+        this._lifecycle([ 'event' ]);
         const { value } = (ev.target || {}); // Get value if is <INPUT>, etc
         func.call(null, payload === undefined ? value : payload, ev);
-        this.lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
+        this._lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
         if (this.attrs.rerender !== 'manual') {
             this.element.rerender(); // always rerender after events
         }
@@ -1736,16 +1738,12 @@ modulo.register('engine', class Reconciler {
     }
 
     applyPatch(node, method, arg, arg2) { // take that, rule of 3!
-        //if (!node || !node[method]) { console.error('NO NODE:', node, method, arg, arg2) } // XXX
         if (method === 'node-value') {
             node.nodeValue = arg;
         } else if (method === 'insertBefore') {
             node.insertBefore(arg, arg2); // Needs 2 arguments
-        } else if (method === 'attr-append') { // Append string to existing
-            node.setAttribute(arg, (node.getAttribute(arg) || '') + arg2); // TODO: DEAD CODE
         } else if (method.startsWith('directive-')) {
-            // TODO: Possibly, remove 'directive-' prefix, unnecessary
-            method = method.substr('directive-'.length);
+            method = method.substr('directive-'.length); // TODO: RM prefix (or generalizze)
             node[method].call(node, arg); // invoke directive method
         } else {
             node[method].call(node, arg); // invoke method
@@ -1858,9 +1856,22 @@ modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     modulo.config.IS_BUILD = true;
     opts.callback = opts.callback || (() => {});
+    /*
+    // TODO: Use this to refactor modulo-original-html into Component class
+    for (const elem of document.querySelectorAll('*')) {
+        // Escape hatch for CParts / Scripts to hook in on a per-component basis
+        if (elem.isModulo && elem.cparts && elem.cparts.component) {
+            elem.cparts.component._lifecycle([ 'prepareBuild', 'build' ]);
+        }
+    }
+    */
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
-        modulo.registry.cparts.Artifact.build(modulo, artifacts.shift());
+        const artifact = artifacts.shift();
+        const artifactParts = modulo.instanceParts(artifact, {});
+        const buildObj = { modulo, def: artifact };
+        modulo.lifecycle(artifactParts, buildObj, [ 'buildCommand' ]);
+        //modulo.repeatProcessors(artifacts, 'ArtifactBuilders');
         modulo.fetchQueue.enqueueAll(artifacts.length > 0 ? buildNext : opts.callback);
     };
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');

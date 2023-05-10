@@ -1,50 +1,67 @@
+<!DOCTYPE html>
+<template Modulo>
+    <Library -src="/demos/tests/mdu/utils-vwindow.html"></Library>
+    <Library -src="/demos/tests/mdu/utils-taglex.html"></Library>
+</template>
+
 <script src="/js/Modulo.js"></script>
 <script src="/demos/mdu/cparts/TestSuite.js"></script>
 <script src="/demos/mdu/utils/taglex.js"></script>
-<script src="/demos/mdu/extensions/virtualdom.js"></script>
-<script src="/demos/mdu/extensions/nodeunit-helper.js"></script>
+<script src="/demos/mdu/utils/vwindow2.js"></script>
+<script>
 
-<template modulo-embed>
-    <!-- Load tests for MDU -->
-    <Library src="/demos/tests/mdu/utils-taglex.html"></Library>
+/*
+  Likely to be removed: A helper class that implements a function in
+  node unit to make porting unit tests slightly easier.
+*/
+modulo.registry.utils.NodeUnitHelper = class NodeUnitHelper {
+    constructor() {
+        this.failures = [];
+        this.failed = false;
+    }
 
-    <Component name="TestReporter">
-        <Template>
-            {% if state.success != null %}
-                {% if state.success %}
-                    <h1 style="background: seagreen">OK (MDU)</h1>
-                {% else %}
-                    <h1 style="background: red">FAILURE (MDU)</h1>
-                {% endif %}
-            {% else %}
-                <button @click:=script.doTests>Run MDU tests</button>
-            {% endif %}
-            <p><em>Tip: Use the Developer Console to see the output.</em></p>
-        </Template>
-        <State
-            success:=null
-        ></State>
-        <Script>
-            function doTests() {
-                if (state.success === null) { // prevent double runs
-                    state.success = Modulo.cmd.test();
-                }
+    _deepEqual(left, right) {
+        if (left === right) { // Same reference
+            return true;
+        }
+
+        if (!left || !right || left !== Object(left) || right !== Object(right)) {
+            return left === right; // Falsy values and other primitives
+        }
+
+        if (Object.keys(left).length !== Object.keys(right).length) {
+            return false;
+        }
+
+        for (const key in left) { // Recurse into each property
+            if (!(key in right) || !this._deepEqual(left[key], right[key])) {
+                return false;
             }
+        }
+        return true;
+    }
 
-            const getParams = String(window.location.search || '').substr(1);
-            function initializedCallback() {
-                if (getParams.includes('run=y')) {
-                    doTests();
-                }
+    deepEqual(left, right, message = null) {
+        if (message === null) {
+            if (!this._inequalCount) {
+                this._inequalCount = 1; // first
+            } else {
+                this._inequalCount++;
             }
-        </Script>
-    </Component>
+            message = 'deepEqual#' + this._inequalCount;
+        }
+        const result = this._deepEqual(left, right);
+        if (!result) {
+            this.failures.push(message);
+            this.failed = JSON.stringify(this.failures);
+        }
+    }
 
+    done() {
+        // presently just a no-op
+    }
+}
 
-</template>
-
-<script> Modulo.defineAll() </script>
-
-<x-TestReporter></x-TestReporter>
+</script>
 
 
