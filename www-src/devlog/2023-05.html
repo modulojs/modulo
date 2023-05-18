@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
+
+<mws-Page
+    pagetitle="Internal overhaul: Stable builds, processors, & more"
+    navbar="about">
+
+<mws-DevLogNav fn="2023-05"></mws-DevLogNav>
+
+
+<p>The main focus of Modulo Alpha development at this point is overhauling the
+API to make custom component parts. This is because the current internal API
+had inconsistencies and limitations, and it was clearly the absolute central
+way to extend the framework, and thus very important to get correct before
+beta. I'm happy to say that the bulk of the internal and CPart API is stable,
+and the remaining bugs only involve documenting, a few new features and tweaks,
+and fixing any straggling nested errors.</p>
+
+<p>A quick overview of the new API features:</p>
+
+<ol>
+    <li><strong>register() API</strong>, which is a "plug-in" system, an easy
+    way to attach (or override) classes and functions to the Modulo
+    object</li>
+    <li><strong>Definitions API</strong>, which is a complete rewrite of the
+    internal loading API to be more transparent and data-oriented for
+    debugging, while producing better builds</li>
+    <li><strong>Config API</strong>, which is a powerful configuration system
+    for both application configuration and 3rd party module configuration.</li>
+    <li><strong>Processor API</strong> which allows for static functions to
+    iterate on definitions, either private to definition classes (as static
+    methods), or as public, re-usable mixins (which is how <code>-src=</code>
+    is implemented)</li>
+</ol>
+
+<p>Part of the reason I had to rewrite it this way was to support adding the
+following features:</p>
+<ol>
+    <li><strong>Stable builds</strong> with fully bundled self-contained JS,
+    CSS, and HTML (from the browser or CLI)</li>
+    <li><strong>CPart feature improvements</strong>, including State allowing
+    for Stores (globally connected data)</li>
+</ol>
+
+</mws-Page>

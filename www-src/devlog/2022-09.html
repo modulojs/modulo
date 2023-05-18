@@ -68,7 +68,7 @@ examples.</p>
     <h4>Bad</h4>
 
     <p>Alpha may mean "things kinda work", but it also means "things kinda don't
-    work". Here are known bugs &amp; API changes as of <del>September 2022</del> March 2023: :</p>
+    work". Here are known bugs &amp; API changes as of <del>September 2022</del> <del>March 2023</del> May 2023:</p>
 
     <ul>
         <li><em>Unknown Bugs</em> - While developing the websites using Modulo,
@@ -79,9 +79,10 @@ examples.</p>
 
         <li><em>Nested components that use slots</em> -
         <a href="https://github.com/modulojs/modulo/issues/6">#6</a>
-        There are some bugs and unexpected behavior around nested components
-        and dataProps referencing the context of parent components in "slotted"
-        DOM elements.</li>
+        There are some bugs and unexpected behavior around nested components,
+        nested components getting rendered to the wrong spot during rerendering
+        after a build, and dataProps referencing the context of parent
+        components in "slotted" DOM elements.</li>
 
         <li><em>Undocumented CPart API</em> -
         <a href="https://github.com/modulojs/modulo/issues/3">#3</a>
@@ -100,7 +101,7 @@ examples.</p>
         eventual goal is full customization of these as well, so that you can
         incorporate image-packing or transformations during the build-step, for
         example, or a more clever DOM resolver that better guesses element
-        changes. The Templater has an example in the Experiments page.</li>
+        changes.</li>
 
         <li><em>Undocumented CLI</em> -
         <a href="https://github.com/modulojs/modulo/issues/4">#4</a>
@@ -122,22 +123,23 @@ examples.</p>
         unpredictable and inconsistent.  The same boilerplate sometimes
         generates different hashes.</del></li>
 
-        <li><em>Poorly documented Library, namespace, and loading logic</em> -
+        <li><del><em>Poorly documented Library, namespace, and loading logic</em> -
         <a href="https://github.com/modulojs/modulo/issues/8">#8</a>
         The <code>&lt;Library&gt;</code> CPart tag is intended to make it easier
         to keep your library files encapsulated and redistributable. Currently,
         the behavior is non-ideal and will likely be changed, especially around
         distinguishing "configuration" from "definition", "namespace" from the
         unique "definition names" that CParts get, and so on. The documentation
-        will need updates on this as well.</li>
+        will need updates on this as well.</del></li>
 
-        <li><em>Undocumented and config logic and changing API</em> -
+        <li><del><em>Undocumented config logic and changing
+        API</em> -
         <a href="https://github.com/modulojs/modulo/issues/9">#9</a>
         Much like Library and loading, Modulo has an undocumented configuration
         system, intended to be leveraged both internally and by CPart
         developers for a consistent way to configure third party middleware as
         it gets integrated (similar to Django's "settings.py"). The API for
-        this is likely to change, and thus is mostly undocumented.</li>
+        this is likely to change, and thus is mostly undocumented.</del></li>
 
         <li><em>Poor code quality</em> -
         <a href="https://github.com/modulojs/modulo/issues/10">#10</a>
