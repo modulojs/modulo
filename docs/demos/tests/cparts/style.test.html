@@ -1,0 +1,124 @@
+
+<!-- Functional testing for Style c part -->
+<Component name="StyleCPart_TesterA">
+    <Template>
+      <a>abc</a><b>def</b>
+    </Template>
+    <Style>
+      /* comments are ignored */
+      a { color: red; }
+      b { color: blue; }
+    </Style>
+</Component>
+
+
+<Component name="StyleCPart_TesterB">
+    <Template>
+      <del>hij</del><div>klm</div>
+    </Template>
+    <Style isolate-class="t123-isolate-me">
+      del { color: purple; }
+      div { color: yellow; }
+    </Style>
+</Component>
+
+
+<Component name="StyleCPart_TesterC">
+    <Style prefix="t456-prefix-me">
+      span { color: orange; }
+      spin { color: green; }
+      t456-prefix-me spin { color: red; }
+      :host { color: blue; }
+      :host.withExtraStuff[type=checkbox] { color: orangered; }
+      :root { --color: blue; }
+    </Style>
+</Component>
+
+
+<Component name="StyleCPart_TestFunctional">
+    <Template>
+        {% if state.testRegular %}
+            <x-StyleCPart_TesterA></x-StyleCPart_TesterA>
+        {% elif state.testIsolate %}
+            <x-StyleCPart_TesterB></x-StyleCPart_TesterB>
+        {% elif state.testPrefix %}
+            <x-StyleCPart_TesterC></x-StyleCPart_TesterC>
+        {% endif %}
+    </Template>
+
+    <State
+        test-regular:=false
+        test-isolate:=false
+        test-prefix:=false
+    ></State>
+
+
+    <TestSuite>
+        <Test name="Testing mounting regular correct">
+
+            <state test-regular:=true test-isolate:=false test-prefix:=false></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TesterA><a>abc</a><b>def</b></x-StyleCPart_TesterA>
+            </template>
+
+            <script name="ensure CSS asset gets registered with tag ancestor based isolation">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[1] || '').trim();
+                const expected = 'x-StyleCPart_TesterA a { color: red; }\n'+
+                                  'x-StyleCPart_TesterA b { color: blue; }';
+                assert: actual === expected
+            </script>
+
+
+            <state test-regular:=false test-isolate:=true></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TesterB>
+                    <del class="t123-isolate-me">hij</del>
+                    <div class="t123-isolate-me">klm</div>
+                </x-StyleCPart_TesterB>
+            </template>
+
+            <script name="ensure CSS asset gets registered with CSS-class based isolation">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[2] || '').trim();
+                const expected = '.t123-isolate-me:is(del) { color: purple; }\n'+
+                                  '.t123-isolate-me:is(div) { color: yellow; }';
+                assert: actual === expected
+            </script>
+
+
+            <state test-prefix:=true test-regular:=false test-isolate:=false></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TesterC></x-StyleCPart_TesterC>
+            </template>
+
+            <script name="ensure CSS asset gets registered with prefix-class based isolation">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[3] || '').trim();
+                const expected =
+                    't456-prefix-me span { color: orange; }\n' +
+                    't456-prefix-me spin { color: green; }\n' +
+                    't456-prefix-me spin { color: red; }\n' +
+                    't456-prefix-me { color: blue; }\n' +
+                    't456-prefix-me.withExtraStuff[type=checkbox] { color: orangered; }\n' +
+                    't456-prefix-me { --color: blue; }';
+                assert: actual === expected
+            </script>
+
+            <!--
+            <script name="ensure CSS asset gets registered">
+                const def = modulo.definitions.library16_StyleCPart_TesterB_style;
+                const value = `
+                    del { color: purple; }
+                    div { color: yellow; }
+                `;
+                modulo.registry.cparts.Style.PrefixCSS(modulo, def, value);
+                console.log(JSON.stringify(def));
+                console.log(modulo.assets.cssAssetsArray)
+                assert: true
+            </script>
+            -->
+        </Test>
+    </TestSuite>
+</Component>
+
