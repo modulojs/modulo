@@ -562,7 +562,7 @@ modulo.register('coreDef', class Component {
             this.element.originalChildren = Array.from(
                 original.hasChildNodes() ? original.childNodes : []);
         }
-        this._lifecycle([ 'prepare', 'render', 'reconcile', 'update' ]);
+        this._lifecycle([ 'prepare', 'render', 'dom', 'reconcile', 'update' ]);
     }
 
     getCurrentRenderObj() {
@@ -612,11 +612,19 @@ modulo.register('coreDef', class Component {
 
     prepareCallback() {
         const { originalHTML } = this.element;
-        return { originalHTML, innerHTML: null, patches: null, id: this.id };
+        return { originalHTML, innerDOM: null, innerHTML: null, patches: null, id: this.id };
+    }
+
+    domCallback(renderObj) {
+        let { root, innerHTML, innerDOM } = renderObj.component;
+        if (innerHTML && !innerDOM) {
+            innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
+        }
+        return { root, innerHTML, innerDOM };
     }
 
     reconcileCallback(renderObj) {
-        let { innerHTML, patches, root } = renderObj.component;
+        let { innerHTML, innerDOM, patches, root } = renderObj.component;
         this.mode = this.attrs.mode || 'regular';
         if (innerHTML !== null) {
             if (this.mode === 'regular' || this.mode === 'vanish') {
@@ -628,7 +636,8 @@ modulo.register('coreDef', class Component {
             } else {
                 this.modulo.assert(this.mode === 'custom-root', 'Invalid mode');
             }
-            patches = this.reconciler.reconcile(root, innerHTML || '', this.localNameMap);// rm last arg
+            const rival = innerDOM || innerHTML || '';
+            patches = this.reconciler.reconcile(root, rival, this.localNameMap);
         }
         return { patches, innerHTML }; // TODO remove innerHTML from here
     }
@@ -797,42 +806,21 @@ modulo.register('util', function getParentDefPath(modulo, def) {
     return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
 });
 
+
+modulo.register('util', function parseSelectors(text='') { // TODO hacky function
+    let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
+    const selectors = [];
+    content.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi,
+        selector => selectors.push(selector.replace(/[\s\{]/g, '')));
+    return selectors;
+});
+
 modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
     // TODO: Redo prefixAllSelectors to instead behave more like DataType,
     // basically using "?" auto determines based on Component mode + TagName,
     // allowing users to override if they want to intentionally silo their CSS
     // some other way
     // NOTE - has old tests that can be resurrected
-    const fullName = `${namespace}-${name}`;
-    let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
-
-    // To prefix the selectors, we loop through them, with this RegExp that
-    // looks for { chars
-    content = content.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi, selector => {
-        selector = selector.trim();
-        if (selector.startsWith('@') || selector.startsWith(fullName)
-              || selector.startsWith('from') || selector.startsWith('to')) {
-            // TODO: Make a regexp to check if matches other keyframe
-            // stuff, 90% etc
-            // Skip, is @media or @keyframes, or already prefixed
-            return selector;
-        }
-
-        // Upgrade the ":host" pseudo-element to be the full name (since
-        // this is not a Shadow DOM style-sheet)
-        selector = selector.replace(new RegExp(/:host(\([^)]*\))?/, 'g'), hostClause => {
-            // TODO: this needs more thorough testing
-            const notBare = (hostClause && hostClause !== ':host');
-            return fullName + (notBare ? `:is(${hostClause})` : '');
-        });
-
-        // If it is not prefixed at this point, then be sure to prefix
-        if (!selector.startsWith(fullName)) {
-            selector = `${fullName} ${selector}`;
-        }
-        return selector;
-    });
-    return content;
 });
 
 modulo.register('core', class AssetManager {
@@ -993,15 +981,88 @@ modulo.register('cpart', class Props {
 });
 
 modulo.register('cpart', class Style {
+    static IsolateClass (modulo, def, value) {
+        const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
+        /*else if (value === null && mode && mode.startsWith('vanish')) {
+            def.isolateClass = def.Parent; } else */
+        if (value === null) { // Autodetect
+            if (mode && namespace && Name && mode === 'regular') {
+                def.prefix = def.prefix || `${ namespace }-${ Name }`;
+            } else if (mode.startsWith('vanish')) {
+                // TODO: vanish starts with no prefix
+                //def.isolateClass = def.Parent;
+            }
+        } else {
+            def.isolateClass = value; // (copy to lowercase, so not "-prefixed")
+        }
+    }
+
+    /*
+    static selectorCallback (modulo, def, selector) {
+        if (def.isolateClass) {
+            const selectorOnly = selector.replace(/\s*\{\s*$/, '').trim();
+            def.isolateSelector.push(selectorOnly);
+            return `.${ def.isolateClass }:is(${ selectorOnly }) {`;
+        }
+        if (def.prefix) {
+            def.selectorCallback = def.selectorCallback || ((selector) => {
+                // Upgrade the ":host" pseudo-element to be the full name
+                const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
+                selector = selector.replace(hostRegExp, hostClause => {
+                    hostClause = hostClause.replace(/:(host|root)/gi, '');
+                    return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
+                });
+                // If it is not prefixed at this point, then be sure to prefix
+                const prefixed = `${def.prefix} ${selector}`;
+                return selector.startsWith(def.prefix) ? selector : prefixed;
+            });
+        }
+    }
+    */
+
     static PrefixCSS (modulo, def, value) {
         const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
-        if (mode === 'regular') {
-            value = modulo.registry.utils.prefixAllSelectors(namespace, Name, value);
+        if (!def.keepComments && (def.isolateClass || def.prefix)) {
+            value = value.replace(/\/\*.+?\*\//g, ''); // strip comments
+        }
+        if (def.isolateClass) {
+            //modulo.assert(!def.prefix, 'Do not specify both class and prefix')
+            delete def.prefix; // TODO: Should never be both!
+            def.isolateSelector = def.isolateSelector || [];
+            def.selectorCallback = def.selectorCallback || ((selector) => {
+                const selectorOnly = selector.replace(/\s*\{\s*$/, '').trim();
+                def.isolateSelector.push(selectorOnly);
+                return `.${ def.isolateClass }:is(${ selectorOnly }) {`;
+            });
+        } else if (def.prefix) {
+            def.selectorCallback = def.selectorCallback || ((selector) => {
+                // Upgrade the ":host" pseudo-element to be the full name
+                const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
+                selector = selector.replace(hostRegExp, hostClause => {
+                    hostClause = hostClause.replace(/:(host|root)/gi, '');
+                    return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
+                });
+                // If it is not prefixed at this point, then be sure to prefix
+                const prefixed = `${def.prefix} ${selector}`;
+                return selector.startsWith(def.prefix) ? selector : prefixed;
+            });
+        }
+        if (def.prefix || def.isolateClass) {
+            value = value.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi, selector => {
+                selector = selector.trim();
+                if (selector.startsWith('@') || selector.startsWith('from')
+                                              || selector.startsWith('to')) {
+                    // Skip, is @media or @keyframes, or already prefixed
+                    return selector;
+                }
+                return def.selectorCallback(selector);
+            });
         }
         if (mode !== 'shadow') {
             modulo.assets.registerStylesheet(value);
         }
     }
+
     initializedCallback(renderObj) {
         const { component, style } = renderObj;
         if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
@@ -1011,8 +1072,21 @@ modulo.register('cpart', class Style {
             this.element.shadowRoot.append(style);
         }
     }
+
+    domCallback(renderObj) {
+        const { innerDOM } = renderObj.component;
+        let { isolateClass, isolateSelector } = this.conf;
+        if (isolateClass && isolateSelector) { // Attach "silo'ed" class to elem
+            for (const elem of innerDOM.querySelectorAll(isolateSelector)){
+                elem.classList.add(isolateClass);
+            }
+        }
+    }
 }, {
-    DefFinalizers: [ 'Content|PrefixCSS' ]
+    IsolateClass: null, // null is "default behavior" (autodetect)
+    isolateSelector: null, // No selector-based isolate
+    prefix: null, // "?" is "default behavior" (autodetect")
+    DefFinalizers: [ 'IsolateClass', 'Content|PrefixCSS' ]
 });
 
 modulo.register('cpart', class Template {
