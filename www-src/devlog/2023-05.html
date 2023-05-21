@@ -10,16 +10,20 @@
 
 <mws-DevLogNav fn="2023-05"></mws-DevLogNav>
 
+<h2>The 0.0.50 release</h2>
 
-<p>The main focus of Modulo Alpha development at this point is overhauling the
-API to make custom component parts. This is because the current internal API
-had inconsistencies and limitations, and it was clearly the absolute central
-way to extend the framework, and thus very important to get correct before
-beta. I'm happy to say that the bulk of the internal and CPart API is stable,
-and the remaining bugs only involve documenting, a few new features and tweaks,
-and fixing any straggling nested errors.</p>
+<p>The main focus of Modulo alpha development has been rewriting the internal
+API used to make custom component parts. This is because the previous internal
+API (from before 0.0.30 or so) had inconsistencies and limitations, and it was
+clearly the absolute central way to extend the framework, and thus very
+important to get correct early on. I'm happy to say that the bulk of the
+internal and CPart API is stable, and the remaining tasks for Modulo alpha
+largely involve documenting, fixing various errors, and likely very few
+remaining actual new features or capabilities.</p>
 
-<p>A quick overview of the new API features:</p>
+<h3>New API features</h3>
+
+<p>A quick overview of the new API features</p>
 
 <ol>
     <li><strong>register() API</strong>, which is a "plug-in" system, an easy
@@ -27,22 +31,34 @@ and fixing any straggling nested errors.</p>
     object</li>
     <li><strong>Definitions API</strong>, which is a complete rewrite of the
     internal loading API to be more transparent and data-oriented for
-    debugging, while producing better builds</li>
+    debugging, while producing slimmer and more consistent builds</li>
     <li><strong>Config API</strong>, which is a powerful configuration system
-    for both application configuration and 3rd party module configuration.</li>
+    for both application configuration and 3rd party module configuration</li>
     <li><strong>Processor API</strong> which allows for static functions to
     iterate on definitions, either private to definition classes (as static
     methods), or as public, re-usable mixins (which is how <code>-src=</code>
-    is implemented)</li>
+    is implemented, and how new data types can be implemented for the
+    StaticData system)</li>
+    <li><strong>DOM render phase</strong> which replaces "tag load directives"
+    as the way to modify DOM before the reconciliation process begins.</li>
 </ol>
 
-<p>Part of the reason I had to rewrite it this way was to support adding the
-following features:</p>
+<h3>New user features</h3>
+
+<p>All this effort was necessary to implement the following features:</p>
 <ol>
     <li><strong>Stable builds</strong> with fully bundled self-contained JS,
     CSS, and HTML (from the browser or CLI)</li>
     <li><strong>CPart feature improvements</strong>, including State allowing
-    for Stores (globally connected data)</li>
+    for stores (globally connected data with global refresh), Style supporting
+    class-based isolation, StaticData's pluggable datatype system</li>
+    <li><strong>Configuration definition</strong> - A new type of definition
+    tag that lets you add static configuration scripts, for things like
+    one-time set-ups that get run on every page load, or loading and exposing
+    third-party libraries. It also allows via attribute setting to configure
+    Modulo itself, first party libraries, or third party libraries.</li>
+    <li><strong>Code quality</strong> - Modulo's codebase structure is getting
+    simpler and shorter with these releases, as concepts are reduced into one</li>
 </ol>
 
 </mws-Page>

@@ -806,23 +806,6 @@ modulo.register('util', function getParentDefPath(modulo, def) {
     return pDef ? pDef.Source || getParentDefPath(modulo, pDef) : url;
 });
 
-
-modulo.register('util', function parseSelectors(text='') { // TODO hacky function
-    let content = text.replace(/\*\/.*?\*\//ig, ''); // strip comments
-    const selectors = [];
-    content.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi,
-        selector => selectors.push(selector.replace(/[\s\{]/g, '')));
-    return selectors;
-});
-
-modulo.register('util', function prefixAllSelectors(namespace, name, text='') {
-    // TODO: Redo prefixAllSelectors to instead behave more like DataType,
-    // basically using "?" auto determines based on Component mode + TagName,
-    // allowing users to override if they want to intentionally silo their CSS
-    // some other way
-    // NOTE - has old tests that can be resurrected
-});
-
 modulo.register('core', class AssetManager {
     constructor (modulo) {
         this.modulo = modulo;
@@ -983,8 +966,6 @@ modulo.register('cpart', class Props {
 modulo.register('cpart', class Style {
     static IsolateClass (modulo, def, value) {
         const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
-        /*else if (value === null && mode && mode.startsWith('vanish')) {
-            def.isolateClass = def.Parent; } else */
         if (value === null) { // Autodetect
             if (mode && namespace && Name && mode === 'regular') {
                 def.prefix = def.prefix || `${ namespace }-${ Name }`;
@@ -997,96 +978,73 @@ modulo.register('cpart', class Style {
         }
     }
 
-    /*
-    static selectorCallback (modulo, def, selector) {
+    static processSelector (modulo, def, selector) {
         if (def.isolateClass) {
             const selectorOnly = selector.replace(/\s*\{\s*$/, '').trim();
             def.isolateSelector.push(selectorOnly);
-            return `.${ def.isolateClass }:is(${ selectorOnly }) {`;
+            selector = `.${ def.isolateClass }:is(${ selectorOnly }) {`;
         }
         if (def.prefix) {
-            def.selectorCallback = def.selectorCallback || ((selector) => {
-                // Upgrade the ":host" pseudo-element to be the full name
-                const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
-                selector = selector.replace(hostRegExp, hostClause => {
-                    hostClause = hostClause.replace(/:(host|root)/gi, '');
-                    return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
-                });
-                // If it is not prefixed at this point, then be sure to prefix
-                const prefixed = `${def.prefix} ${selector}`;
-                return selector.startsWith(def.prefix) ? selector : prefixed;
+            // Upgrade the ":host" or :root pseudo-elements to be the full name
+            const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
+            selector = selector.replace(hostRegExp, hostClause => {
+                hostClause = hostClause.replace(/:(host|root)/gi, '');
+                return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
             });
+            // If it is not prefixed at this point, then be sure to prefix
+            const prefixed = `${def.prefix} ${selector}`;
+            selector = selector.startsWith(def.prefix) ? selector : prefixed;
         }
+        return selector;
     }
-    */
 
-    static PrefixCSS (modulo, def, value) {
-        const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
-        if (!def.keepComments && (def.isolateClass || def.prefix)) {
-            value = value.replace(/\/\*.+?\*\//g, ''); // strip comments
-        }
-        if (def.isolateClass) {
-            //modulo.assert(!def.prefix, 'Do not specify both class and prefix')
-            delete def.prefix; // TODO: Should never be both!
-            def.isolateSelector = def.isolateSelector || [];
-            def.selectorCallback = def.selectorCallback || ((selector) => {
-                const selectorOnly = selector.replace(/\s*\{\s*$/, '').trim();
-                def.isolateSelector.push(selectorOnly);
-                return `.${ def.isolateClass }:is(${ selectorOnly }) {`;
-            });
-        } else if (def.prefix) {
-            def.selectorCallback = def.selectorCallback || ((selector) => {
-                // Upgrade the ":host" pseudo-element to be the full name
-                const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
-                selector = selector.replace(hostRegExp, hostClause => {
-                    hostClause = hostClause.replace(/:(host|root)/gi, '');
-                    return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
-                });
-                // If it is not prefixed at this point, then be sure to prefix
-                const prefixed = `${def.prefix} ${selector}`;
-                return selector.startsWith(def.prefix) ? selector : prefixed;
-            });
-        }
-        if (def.prefix || def.isolateClass) {
+    static ProcessCSS (modulo, def, value) {
+        if (def.isolateClass || def.prefix) {
+            if (!def.keepComments) {
+                value = value.replace(/\/\*.+?\*\//g, ''); // strip comments
+            }
+            if (def.isolateClass) {
+                //modulo.assert(!def.prefix, 'Do not specify both class and prefix')
+                delete def.prefix; // TODO: Should never be both!
+                def.isolateSelector = def.isolateSelector || [];
+            }
             value = value.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi, selector => {
                 selector = selector.trim();
                 if (selector.startsWith('@') || selector.startsWith('from')
                                               || selector.startsWith('to')) {
-                    // Skip, is @media or @keyframes, or already prefixed
-                    return selector;
+                    return selector; // Skip (e.g. is @media or @keyframes)
                 }
-                return def.selectorCallback(selector);
+                return this.processSelector(modulo, def, selector);
             });
         }
-        if (mode !== 'shadow') {
+        const { mode } = modulo.definitions[def.Parent] || {};
+        if (mode === 'shadow') { // Stash in the definition configuration
+            def.shadowContent = (def.shadowContent || '') + value;
+        } else { // Otherwise, just "register" as a modulo asset
             modulo.assets.registerStylesheet(value);
         }
     }
 
-    initializedCallback(renderObj) {
-        const { component, style } = renderObj;
-        if (component && component.attrs && component.attrs.mode === 'shadow') { // TODO Finish
-            const style = window.document.createElement('style');
-            style.setAttribute('modulo-ignore', 'true');
-            style.textContent = style.content;
-            this.element.shadowRoot.append(style);
-        }
-    }
-
     domCallback(renderObj) {
-        const { innerDOM } = renderObj.component;
-        let { isolateClass, isolateSelector } = this.conf;
+        const { mode } = modulo.definitions[this.conf.Parent] || {};
+        const { innerDOM, Parent } = renderObj.component;
+        let { isolateClass, isolateSelector, shadowContent } = this.conf;
         if (isolateClass && isolateSelector) { // Attach "silo'ed" class to elem
             for (const elem of innerDOM.querySelectorAll(isolateSelector)){
                 elem.classList.add(isolateClass);
             }
+        }
+        if (shadowContent) { // TODO Test this
+            const style = window.document.createElement('style');
+            style.textContent = shadowContent;
+            innerDOM.append(style);
         }
     }
 }, {
     IsolateClass: null, // null is "default behavior" (autodetect)
     isolateSelector: null, // No selector-based isolate
     prefix: null, // "?" is "default behavior" (autodetect")
-    DefFinalizers: [ 'IsolateClass', 'Content|PrefixCSS' ]
+    DefFinalizers: [ 'IsolateClass', 'Content|ProcessCSS' ]
 });
 
 modulo.register('cpart', class Template {
