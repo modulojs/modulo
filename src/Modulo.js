@@ -38,7 +38,6 @@ window.Modulo = class Modulo {
         if (inst.constructedCallback) {
             inst.constructedCallback();
         }
-        //console.log('this is inst', inst);
         return inst;
     }
 
@@ -1025,7 +1024,8 @@ modulo.register('cpart', class Style {
         if (mode === 'shadow') { // Stash in the definition configuration
             def.shadowContent = (def.shadowContent || '') + value;
         } else { // Otherwise, just "register" as a modulo asset
-            // TODO: Refactor this inline, change modulo.assets into plain object
+            // TODO: Refactor this inline, change modulo.assets into plain
+            // object, and move the dom to "windowMount" or "factory" etc
             modulo.assets.registerStylesheet(value);
         }
     }
@@ -1049,7 +1049,7 @@ modulo.register('cpart', class Style {
     IsolateClass: null, // null is "default behavior" (autodetect)
     isolateSelector: null, // No selector-based isolate
     prefix: null, // "?" is "default behavior" (autodetect")
-    DefFinalizers: [ 'IsolateClass', 'Content|ProcessCSS' ]
+    DefBuilders: [ 'IsolateClass', 'Content|ProcessCSS' ]
 });
 
 modulo.register('cpart', class Template {

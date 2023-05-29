@@ -1,9 +1,9 @@
 <template Modulo>
-    <Component name="Testy" mode="vanish">
+    <Component name="Testy">
         <Template>
             <div class="tcls">Hello world!</div>
         </Template>
-        <Style isolate-class="t123-isolate-me">
+        <Style>
             div {
                 color: blue;
             }
@@ -12,9 +12,14 @@
 </template>
 <script src="/js/Modulo.js"></script>
 
+<style>
+    div{ background: orange }
+</style>
+
 <p>Example:</p>
 <hr />
 <x-Testy></x-Testy>
 
+<div>not blue</div>
 
 
