@@ -112,7 +112,7 @@
                     del { color: purple; }
                     div { color: yellow; }
                 `;
-                modulo.registry.cparts.Style.PrefixCSS(modulo, def, value);
+                modulo.registry.cparts.Style.ProcessCSS(modulo, def, value);
                 console.log(JSON.stringify(def));
                 console.log(modulo.assets.cssAssetsArray)
                 assert: true

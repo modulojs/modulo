@@ -1,13 +1,20 @@
-<!--
-    In order to reuse components betweenIt's best to keep your components defined in a separate file. Otherwise,
-    you won't be able to use <Script> CParts along with other
-    In order to use reuse components between pages <Script> CParts and other more advanced features, and 
-    so that component definition to a separate file, such as one called ".
-    loaded as such:
--->
+<template Modulo>
+    <Component name="Testy" mode="vanish">
+        <Template>
+            <div class="tcls">Hello world!</div>
+        </Template>
+        <Style isolate-class="t123-isolate-me">
+            div {
+                color: blue;
+            }
+        </Style>
+    </Component>
+</template>
+<script src="/js/Modulo.js"></script>
 
-<script Modulo
-    src="/js/Modulo.js"
-    -src="./libraries/my_components.html"
-></script>
+<p>Example:</p>
+<hr />
+<x-Testy></x-Testy>
+
+
 

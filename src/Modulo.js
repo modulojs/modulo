@@ -31,12 +31,14 @@ window.Modulo = class Modulo {
         const registry = def.Type === 'Component' ? 'coreDefs' : 'cparts'; // TODO: make compatible with any registration type
         const inst = new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
-        const conf = Object.assign({}, this.config[name.toLowerCase()], def);
+        //const conf = Object.assign({}, this.config[name.toLowerCase()], def);
+        const conf = Object.assign({}, def); // Just shallow copy "def"
         const attrs = this.registry.utils.keyFilter(conf, isLower);
         Object.assign(inst, { id, attrs, conf }, extra, { modulo: this });
         if (inst.constructedCallback) {
             inst.constructedCallback();
         }
+        //console.log('this is inst', inst);
         return inst;
     }
 
@@ -823,6 +825,8 @@ modulo.register('core', class AssetManager {
     }
 
     require(moduleName) {
+        // TODO: Don't use nameToHash for simpler look-up, but include
+        // "hashToName" for deduping during add (just create extra refs)
         this.modulo.assert(moduleName in this.nameToHash,
             `${ moduleName } not in ${ Object.keys(this.nameToHash).join(', ') }`);
         const hash = this.nameToHash[moduleName];
@@ -1021,6 +1025,7 @@ modulo.register('cpart', class Style {
         if (mode === 'shadow') { // Stash in the definition configuration
             def.shadowContent = (def.shadowContent || '') + value;
         } else { // Otherwise, just "register" as a modulo asset
+            // TODO: Refactor this inline, change modulo.assets into plain object
             modulo.assets.registerStylesheet(value);
         }
     }
@@ -1053,6 +1058,7 @@ modulo.register('cpart', class Template {
         const template = modulo.instance(def, { });
         const compiledCode = template.compileFunc(def.Content);
         const code = `return function (CTX, G) { ${ compiledCode } };`;
+        // TODO: Refactor this to use define processor?
         modulo.assets.define(def.DefinitionName, code);
         delete def.Content;
     }
@@ -1299,6 +1305,7 @@ modulo.register('processor', function code (modulo, def, value) {
         console.error("ERROR: Duped def:", def.DefinitionName);
         return;
     }
+    // TODO: Refactor this inline, change modulo.assets into plain object
     modulo.assets.define(def.DefinitionName, value);
 });
 
