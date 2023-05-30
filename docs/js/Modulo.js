@@ -974,20 +974,16 @@ modulo.register('cpart', class Style {
         const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
         if (value === true) { // Auto-detect based on parent's mode
             AutoIsolate(modulo, def, mode); // Check "mode" instead (1x recurse)
-        } else if (value === 'regular') {
+        } else if (value === 'regular' && !def.isolateClass) { // Use prefix
             def.prefix = def.prefix || `${ namespace }-${ Name }`;
-        } else if (value === 'vanish') {
+        } else if (value === 'vanish') { // Vanish-based, specify "isolateClass"
             def.isolateClass = def.isolateClass || def.Parent;
-        } else if (value === 'vanish-into-document') {
-            def.prefix = def.prefix || `#${ def.Parent }`;
         }
     }
 
     static processSelector (modulo, def, selector) {
         const hostPrefix = def.prefix || ('.' + def.isolateClass);
         if (def.isolateClass || def.prefix) {
-            // Upgrade the "HTML" or "BODY" elements to be ":host"
-            selector = selector.replace(/(body|html)\s*([\{,])/gi, ':host $2');
             // Upgrade the ":host" or :root pseudo-elements to be the full name
             const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
             selector = selector.replace(hostRegExp, hostClause => {
@@ -1002,10 +998,9 @@ modulo.register('cpart', class Style {
             def.isolateSelector.push(selectorOnly);
             selector = `.${ def.isolateClass }:is(${ selectorOnly })` + suffix;
         }
-        if (def.prefix) {
+        if (def.prefix && !selector.startsWith(def.prefix)) {
             // If it is not prefixed at this point, then be sure to prefix
-            const prefixed = `${def.prefix} ${selector}`;
-            selector = selector.startsWith(def.prefix) ? selector : prefixed;
+            selector = `${def.prefix} ${selector}`;
         }
         return selector;
     }
@@ -1015,11 +1010,7 @@ modulo.register('cpart', class Style {
             if (!def.keepComments) {
                 value = value.replace(/\/\*.+?\*\//g, ''); // strip comments
             }
-            if (def.isolateClass) {
-                //modulo.assert(!def.prefix, 'Do not specify both class and prefix')
-                delete def.prefix; // TODO: Should never be both!
-                def.isolateSelector = def.isolateSelector || [];
-            }
+            def.isolateSelector = []; // Used to accumulate elements to select
             value = value.replace(/([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/gi, selector => {
                 selector = selector.trim();
                 if (selector.startsWith('@') || selector.startsWith('from')
@@ -1042,16 +1033,16 @@ modulo.register('cpart', class Style {
     static factoryCallback(renderObj, def, modulo) {
         // TODO: "windowReadyCallback" - Refactor this to put stylesheet in head
         // If prefix is an ID, set on body (e.g. for vanish-into-document)
-        const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
+        /*const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
         if (id && window.document && window.document.body) {
             window.document.body.setAttribute('id', id);
-        }
+        }*/
     }
 
     domCallback(renderObj) {
         const { mode } = modulo.definitions[this.conf.Parent] || {};
         const { innerDOM, Parent } = renderObj.component;
-        let { isolateClass, isolateSelector, shadowContent } = this.conf;
+        const { isolateClass, isolateSelector, shadowContent } = this.conf;
         if (isolateClass && isolateSelector) { // Attach "silo'ed" class to elem
             const selector = isolateSelector.filter(s => s).join(',\n');
             for (const elem of innerDOM.querySelectorAll(selector)){
@@ -1061,14 +1052,14 @@ modulo.register('cpart', class Style {
         if (shadowContent) {
             const style = window.document.createElement('style');
             style.textContent = shadowContent;
-            innerDOM.append(style);
+            innerDOM.append(style); // Append to element to reconcile
         }
     }
 }, {
     AutoIsolate: true, // null is "default behavior" (autodetect)
-    isolateSelector: null, // No selector-based isolate
+    isolateSelector: null, // Later has list of selectors
     isolateClass: null, // No class-based isolate
-    prefix: null, // "?" is "default behavior" (autodetect")
+    prefix: null, // No prefix-based isolation
     DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ]
 });
 
