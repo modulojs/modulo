@@ -1,4 +1,5 @@
 <template Modulo>
+    <Library namespace="x" -src="/libraries/globalExamples.html"></Library>
     <Component name="Testy">
         <Template>
             <div class="tcls">Hello world!</div>
@@ -12,14 +13,18 @@
 </template>
 <script src="/js/Modulo.js"></script>
 
-<style>
-    div{ background: orange }
-</style>
-
 <p>Example:</p>
 <hr />
-<x-Testy></x-Testy>
 
+
+<x-DemoModal button="Bio: Nicholas Cage" title="Biography">
+    <p>Prolific and varied Hollywood actor</p>
+    <img src="//i.imgur.com/hJwIMx7.png" style="width: 200px">
+</x-DemoModal>
+
+<!--
+<x-Testy></x-Testy>
 <div>not blue</div>
+-->
 
 
