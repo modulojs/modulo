@@ -214,8 +214,10 @@ window.modulo.DEVLIB_SOURCE = (`
                 elem.setAttribute('modulo-original-html', elem.originalHTML);
             }
         }
-        script.exports.prefix = '<!DOCTYPE html><html><head>' + (window.document.head ? window.document.head.innerHTML : '');
-        script.exports.interfix = '</head><body>' + (window.document.body ? window.document.body.innerHTML : '');
+        const head = window.document.head || { innerHTML: '' };
+        const body = window.document.body || { innerHTML: '', id: '' };
+        script.exports.prefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
+        script.exports.interfix = '</head><body id="' + body.id + '">' + body.innerHTML;
         script.exports.suffix = '</body></html>';
     </S` + `cript>
     <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
@@ -967,33 +969,40 @@ modulo.register('cpart', class Props {
 });
 
 modulo.register('cpart', class Style {
-    static IsolateClass (modulo, def, value) {
+    static AutoIsolate(modulo, def, value) {
+        const { AutoIsolate } = modulo.registry.cparts.Style;
         const { namespace, mode, Name } = modulo.definitions[def.Parent] || {};
-        if (value === null) { // Autodetect
-            if (mode && namespace && Name && mode === 'regular') {
-                def.prefix = def.prefix || `${ namespace }-${ Name }`;
-            } else if (mode.startsWith('vanish')) {
-                // TODO: vanish starts with no prefix
-                //def.isolateClass = def.Parent;
-            }
-        } else {
-            def.isolateClass = value; // (copy to lowercase, so not "-prefixed")
+        if (value === true) { // Auto-detect based on parent's mode
+            AutoIsolate(modulo, def, mode); // Check "mode" instead (1x recurse)
+        } else if (value === 'regular') {
+            def.prefix = def.prefix || `${ namespace }-${ Name }`;
+        } else if (value === 'vanish') {
+            def.isolateClass = def.isolateClass || def.Parent;
+        } else if (value === 'vanish-into-document') {
+            def.prefix = def.prefix || `#${ def.Parent }`;
         }
     }
 
     static processSelector (modulo, def, selector) {
-        if (def.isolateClass) {
-            const selectorOnly = selector.replace(/\s*\{\s*$/, '').trim();
-            def.isolateSelector.push(selectorOnly);
-            selector = `.${ def.isolateClass }:is(${ selectorOnly }) {`;
-        }
-        if (def.prefix) {
+        const hostPrefix = def.prefix || ('.' + def.isolateClass);
+        if (def.isolateClass || def.prefix) {
+            // Upgrade the "HTML" or "BODY" elements to be ":host"
+            selector = selector.replace(/(body|html)\s*([\{,])/gi, ':host $2');
             // Upgrade the ":host" or :root pseudo-elements to be the full name
             const hostRegExp = new RegExp(/:(host|root)(\([^)]*\))?/, 'g');
             selector = selector.replace(hostRegExp, hostClause => {
                 hostClause = hostClause.replace(/:(host|root)/gi, '');
-                return def.prefix + (hostClause ? `:is(${ hostClause })` : '');
+                return hostPrefix + (hostClause ? `:is(${ hostClause })` : '');
             });
+        }
+        const selectorOnly = selector.replace(/\s*[\{,]\s*,?$/, '').trim();
+        if (def.isolateClass && selectorOnly !== hostPrefix) {
+            // Remove extraneous characters (and strip ',' for isolateSelector)
+            const suffix = /{\s*$/.test(selector) ? ' {' : ', ';
+            def.isolateSelector.push(selectorOnly);
+            selector = `.${ def.isolateClass }:is(${ selectorOnly })` + suffix;
+        }
+        if (def.prefix) {
             // If it is not prefixed at this point, then be sure to prefix
             const prefixed = `${def.prefix} ${selector}`;
             selector = selector.startsWith(def.prefix) ? selector : prefixed;
@@ -1030,26 +1039,37 @@ modulo.register('cpart', class Style {
         }
     }
 
+    static factoryCallback(renderObj, def, modulo) {
+        // TODO: "windowReadyCallback" - Refactor this to put stylesheet in head
+        // If prefix is an ID, set on body (e.g. for vanish-into-document)
+        const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
+        if (id && window.document && window.document.body) {
+            window.document.body.setAttribute('id', id);
+        }
+    }
+
     domCallback(renderObj) {
         const { mode } = modulo.definitions[this.conf.Parent] || {};
         const { innerDOM, Parent } = renderObj.component;
         let { isolateClass, isolateSelector, shadowContent } = this.conf;
         if (isolateClass && isolateSelector) { // Attach "silo'ed" class to elem
-            for (const elem of innerDOM.querySelectorAll(isolateSelector)){
+            const selector = isolateSelector.filter(s => s).join(',\n');
+            for (const elem of innerDOM.querySelectorAll(selector)){
                 elem.classList.add(isolateClass);
             }
         }
-        if (shadowContent) { // TODO Test this
+        if (shadowContent) {
             const style = window.document.createElement('style');
             style.textContent = shadowContent;
             innerDOM.append(style);
         }
     }
 }, {
-    IsolateClass: null, // null is "default behavior" (autodetect)
+    AutoIsolate: true, // null is "default behavior" (autodetect)
     isolateSelector: null, // No selector-based isolate
+    isolateClass: null, // No class-based isolate
     prefix: null, // "?" is "default behavior" (autodetect")
-    DefBuilders: [ 'IsolateClass', 'Content|ProcessCSS' ]
+    DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ]
 });
 
 modulo.register('cpart', class Template {

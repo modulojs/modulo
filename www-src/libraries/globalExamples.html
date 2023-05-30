@@ -6,7 +6,7 @@
     ></Props>
 
     <Template>
-        <button @click:=script.show>{{ props.button }} ⬇☐&nbsp;</button>
+        <button @click:=script.show>{{ props.button }}</button>
         <div class="modal-backdrop"
             @click:=script.hide
             style="display: {% if state.visible %}block{% else %}none{% endif %}">
@@ -33,6 +33,10 @@
     </Script>
 
     <Style>
+        :host {
+            position: relative;
+            display: hidden;
+        }
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -159,9 +163,9 @@
             background-color: white;
             border: 1px solid grey;
             width: 30px;
-            border-radius: 1px 5px 1px 5px;
-            box-shadow: inset -5px -5px 1px 1px hsla(0,0%,39.2%,.3);
-            margin-top: -5px;
+            border-radius: 1px 3px 1px 3px;
+            box-shadow: inset -3px -3px 1px 1px hsla(0,0%,39.2%,.3);
+            margin-top: -3px;
         }
 
         .chart-container.animated > div {
