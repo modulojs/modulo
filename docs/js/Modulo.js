@@ -4,6 +4,9 @@
 // licensed code built with the Modulo framework bundled in the same file for
 // efficiency instead of "linking", as long as this notice and license remains
 // intact with the Modulo.js source code itself and any direct modifications.
+if (typeof window === "undefined") { // Node.js environment
+    var window = {};
+}
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -46,6 +49,8 @@ window.Modulo = class Modulo {
         return inst;
     }
 
+    /*
+    // TODO: Dead code, finish / delete
     getInjections() {
         return {
             modulo: this,
@@ -57,7 +62,7 @@ window.Modulo = class Modulo {
         const results = [];
         const injections = Object.assign({}, this.getInjections(), extra);
         for (const path of paths) {
-            const reg = path.includes('.') ? this.registry : this.modules, path;
+            const reg = path.includes('.') ? this.registry : this.modules[path];
             const cls = this.registry.utils.get(reg);
             const defaults = this.config[cls.name] || { dependencies: [] };
             results.push(this._inject(cls, dependencies, injections));
@@ -78,6 +83,7 @@ window.Modulo = class Modulo {
             constructedCallback() {}
         };
     }
+    */
 
     instanceParts(def, extra, parts = {}) {
         // Loop through all children, instancing each class with configuration
@@ -173,7 +179,7 @@ window.Modulo = class Modulo {
 }
 
 // TODO: Move to conf
-Modulo.INVALID_WORDS = new Set((`
+window.Modulo.INVALID_WORDS = new Set((`
     break case catch class const continue debugger default delete do else enum
     export extends finally for if implements import in instanceof interface new
     null package private protected public return static super switch throw try
@@ -183,7 +189,7 @@ Modulo.INVALID_WORDS = new Set((`
 // TODO: Condense window.moduloBuild into window.modulo as well, gets "hydrated"
 //window.modulo = Object.assign(new Modulo(), window.modulo || {});
 // Create a new modulo instance to be the global default instance
-window.modulo = new Modulo();
+window.modulo = new window.Modulo();
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
     var modulo = window.modulo; // TODO: RM when global modulo is cleaned up
 }
@@ -1974,6 +1980,6 @@ if (typeof window.document !== 'undefined') {
         modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
     });
 } else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    exports = { Modulo, modulo };
+    Object.assign(exports, window);
 }
 /*-{-% endif %-}-*/
