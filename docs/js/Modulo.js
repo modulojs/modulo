@@ -1,4 +1,9 @@
-/* Copyright 2023 modulojs.org michaelb | Use in compliance with LGPL 2.1 */
+// Copyright 2023 MichaelB | https://modulojs.org | LGPLv3
+// Modulo LGPLv3 NOTICE: Any direct modifications to the Modulo.js source code
+// must be LGPL or compatible. It is acceptable to distribute dissimilarly
+// licensed code built with the Modulo framework bundled in the same file for
+// efficiency instead of "linking", as long as this notice and license remains
+// intact with the Modulo.js source code itself and any direct modifications.
 window.ModuloPrevious = window.Modulo;
 window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
@@ -39,6 +44,39 @@ window.Modulo = class Modulo {
             inst.constructedCallback();
         }
         return inst;
+    }
+
+    getInjections() {
+        return {
+            modulo: this,
+        };
+    }
+
+    use(pathOrPaths, extra) {
+        const paths = Array.isArray(pathOrPaths) ? pathOrPaths : [ pathOrPaths ];
+        const results = [];
+        const injections = Object.assign({}, this.getInjections(), extra);
+        for (const path of paths) {
+            const reg = path.includes('.') ? this.registry : this.modules, path;
+            const cls = this.registry.utils.get(reg);
+            const defaults = this.config[cls.name] || { dependencies: [] };
+            results.push(this._inject(cls, dependencies, injections));
+        }
+        return results;
+    }
+
+    _inject(cls, dependencies, injections) {
+        return (...args) => cls(...dependencies.map(s => injections[s]), ...args);
+        if (cls.name[0].toLowerCase() === cls.name[0]) { // e.g. function foobar
+        } // Starts with a capital letter, lets extend -- e.g. class FooBar
+        return class extends cls {
+            constructor(...args) {
+                super(...dependencies.map(s => injections[s]), ...args);
+                Object.apply(this, obj || injections);
+                this.constructedCallback();
+            }
+            constructedCallback() {}
+        };
     }
 
     instanceParts(def, extra, parts = {}) {
