@@ -1,7 +1,7 @@
 {
   "name": "mdu.js",
   "author": "michaelb",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
   "homepage": "https://modulojs.org/",
   "main": "./src/Modulo.js",
@@ -31,6 +31,8 @@
     "require": "./src/Modulo.js"
   },
   "keywords": [
+    "web-components",
+    "jamstack",
     "UI",
     "templates",
     "templating",
@@ -44,7 +46,7 @@
     "mdu/*",
     "mdu/**/*"
   ],
-  "license": "LGPL-2.1",
+  "license": "LGPL-3.0",
   "bugs": {
     "url": "https://github.com/modulojs/modulo/issues"
   }

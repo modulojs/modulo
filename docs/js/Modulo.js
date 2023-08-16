@@ -205,12 +205,12 @@ window.modulo.registry.registryCallbacks = {
         window.m[cls.name] = () => cls(modulo); // Attach shortcut to global "m"
     },
     processors(modulo, cls) {
-        modulo.registry.processors[cls.name.toLowerCase()] = cls;
+        modulo.registry.processors[cls.name.toLowerCase()] = cls; // Alias lower
     },
     core(modulo, cls) { // Global / core class getting registered
         const lowerName = cls.name[0].toLowerCase() + cls.name.slice(1);
         modulo[lowerName] = new cls(modulo);
-        modulo.assets = modulo.assetManager;
+        modulo.assets = modulo.assetManager; // TODO Rm
     },
 };
 
@@ -757,7 +757,7 @@ modulo.register('coreDef', class Component {
             el.dataProps = {};
             el.dataPropsAttributeNames = {};
         }
-        const resolver = new modulo.registry.core.ValueResolver(// TODO: Global modulo
+        const resolver = new this.modulo.registry.core.ValueResolver(// OLD TODO: Global modulo
                       this.element && this.element.getCurrentRenderObj());
         resolver.set(el.dataProps, attrName + ':', value);
         el.dataPropsAttributeNames[rawName] = attrName;
@@ -843,7 +843,7 @@ modulo.register('util', function get(obj, key) {
 });
 
 modulo.register('util', function set(obj, keyPath, val) {
-    return new modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // TODO: Global modulo
+    return new window.modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // OLD TODO: Global modulo
 });
 
 modulo.register('util', function getParentDefPath(modulo, def) {
@@ -1675,7 +1675,7 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts; // TODO global modulo
+            this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts; // OLD TODO global modulo
         }
         this.patch = this.pushPatch;
         this.patches = [];
@@ -1699,7 +1699,7 @@ modulo.register('engine', class Reconciler {
         }
 
         // There are directives... time to resolve them
-        const { cleanWord, stripWord } = modulo.registry.utils; // TODO global modulo
+        const { cleanWord, stripWord } = this.modulo.registry.utils; // old TODO global modulo
         const arr = [];
         const attrName = stripWord((name.match(/\][^\]]+$/) || [ '' ])[0]);
         for (const directiveName of name.split(']').map(cleanWord)) {
@@ -1979,7 +1979,7 @@ if (typeof window.document !== 'undefined') {
         modulo.loadFromDOM(window.document.body, null, true); // Load new tags
         modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
     });
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    Object.assign(exports, window);
+} else if (typeof module !== 'undefined') { // Node.js
+    module.exports = { Modulo, modulo, window };
 }
 /*-{-% endif %-}-*/

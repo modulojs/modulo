@@ -205,12 +205,12 @@ window.modulo.registry.registryCallbacks = {
         window.m[cls.name] = () => cls(modulo); // Attach shortcut to global "m"
     },
     processors(modulo, cls) {
-        modulo.registry.processors[cls.name.toLowerCase()] = cls;
+        modulo.registry.processors[cls.name.toLowerCase()] = cls; // Alias lower
     },
     core(modulo, cls) { // Global / core class getting registered
         const lowerName = cls.name[0].toLowerCase() + cls.name.slice(1);
         modulo[lowerName] = new cls(modulo);
-        modulo.assets = modulo.assetManager;
+        modulo.assets = modulo.assetManager; // TODO Rm
     },
 };
 
@@ -281,7 +281,7 @@ modulo.register('core', class ValueResolver {
         if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
             return JSON.parse(key); // Not a valid identifier, try JSON
         }
-        return modulo.registry.utils.get(ctxObj, key); // Drill down to value
+        return modulo.registry.utils.get(ctxObj, key); // Drill down to value // XXX global modulo
     }
 
     set(obj, keyPath, val) {
@@ -442,8 +442,9 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Mount the element, optionally "merging" in the modulo-original-html attr
     cls.prototype.parsedCallback = function parsedCallback() {
         const htmlOriginal = this.getAttribute('modulo-original-html');
+        // TODO: Shouldn't this logic be hasAttribute? (to match logic below)
         const original = ((!htmlOriginal || htmlOriginal === '') ? this :
-                          modulo.registry.utils.makeDiv(htmlOriginal));
+                          this.modulo.registry.utils.makeDiv(htmlOriginal));
         this.cparts.component._lifecycle([ 'initialized' ]);
         this.rerender(original); // render and re-mount it's own childNodes
         if (this.hasAttribute('modulo-original-html')) {
@@ -454,6 +455,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         }
         this.isMounted = true;
     };
+
     cls.prototype.initRenderObj = initRenderObj;
     // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
@@ -653,7 +655,7 @@ modulo.register('coreDef', class Component {
                 }
             }
         }
-        this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
+        this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
     }
 
@@ -757,7 +759,7 @@ modulo.register('coreDef', class Component {
             el.dataProps = {};
             el.dataPropsAttributeNames = {};
         }
-        const resolver = new modulo.registry.core.ValueResolver(// TODO: Global modulo
+        const resolver = new this.modulo.registry.core.ValueResolver(// OLD TODO: Global modulo
                       this.element && this.element.getCurrentRenderObj());
         resolver.set(el.dataProps, attrName + ':', value);
         el.dataPropsAttributeNames[rawName] = attrName;
@@ -843,7 +845,7 @@ modulo.register('util', function get(obj, key) {
 });
 
 modulo.register('util', function set(obj, keyPath, val) {
-    return new modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // TODO: Global modulo
+    return new window.modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // OLD TODO: Global modulo
 });
 
 modulo.register('util', function getParentDefPath(modulo, def) {
@@ -1675,7 +1677,7 @@ modulo.register('engine', class Reconciler {
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // XXX horrible HACK
-            this.directiveShortcuts = modulo.config.reconciler.directiveShortcuts; // TODO global modulo
+            this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts; // OLD TODO global modulo
         }
         this.patch = this.pushPatch;
         this.patches = [];
@@ -1699,7 +1701,7 @@ modulo.register('engine', class Reconciler {
         }
 
         // There are directives... time to resolve them
-        const { cleanWord, stripWord } = modulo.registry.utils; // TODO global modulo
+        const { cleanWord, stripWord } = this.modulo.registry.utils; // old TODO global modulo
         const arr = [];
         const attrName = stripWord((name.match(/\][^\]]+$/) || [ '' ])[0]);
         for (const directiveName of name.split(']').map(cleanWord)) {
@@ -1713,7 +1715,7 @@ modulo.register('engine', class Reconciler {
 
     loadString(rivalHTML, tagTransforms) {
         this.patches = [];
-        const rival = modulo.registry.utils.makeDiv(rivalHTML);
+        const rival = this.modulo.registry.utils.makeDiv(rivalHTML);
         const transforms = Object.assign({}, this.tagTransforms, tagTransforms);
         this.applyLoadDirectives(rival, transforms);
         return rival;
@@ -1735,7 +1737,7 @@ modulo.register('engine', class Reconciler {
             const newTag = tagTransforms[node.tagName.toLowerCase()];
             //console.log('this is tagTransforms', tagTransforms);
             if (newTag) {
-                modulo.registry.utils.transformTag(node, newTag);
+                this.modulo.registry.utils.transformTag(node, newTag);
             }
             ///////
 
@@ -1781,7 +1783,7 @@ modulo.register('engine', class Reconciler {
 
     reconcileChildren(childParent, rivalParent) {
         // Nonstandard nomenclature: "The rival" is the node we wish to match
-        const cursor = new modulo.registry.engines.DOMCursor(childParent, rivalParent);
+        const cursor = new this.modulo.registry.engines.DOMCursor(childParent, rivalParent);
         while (cursor.hasNext()) {
             const [ child, rival ] = cursor.next();
             const needReplace = child && rival && (
@@ -1979,7 +1981,7 @@ if (typeof window.document !== 'undefined') {
         modulo.loadFromDOM(window.document.body, null, true); // Load new tags
         modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
     });
-} else if (typeof exports !== 'undefined') { // Node.js / silo'ed script
-    Object.assign(exports, window);
+} else if (typeof module !== 'undefined') { // Node.js
+    module.exports = { Modulo, modulo, window };
 }
 /*-{-% endif %-}-*/
