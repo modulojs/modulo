@@ -66,7 +66,7 @@ window.Modulo = class Modulo {
                     continue; // Skip if obj has not registered callback
                 }
                 const result = obj[methodName].call(obj, renderObj);
-                if (result) {
+                if (result) { // TODO: Change to (result !== undefined) and test
                     renderObj[obj.conf.RenderObj || obj.conf.Name] = result;
                 }
             }
@@ -343,6 +343,11 @@ modulo.register('processor', function src (modulo, def, value) {
     modulo.fetchQueue.fetch(def.Source).then(text => {
         def.Content = (text || '') + (def.Content || '');
     });
+});
+
+modulo.register('processor', function srcSync (modulo, def, value) {
+    modulo.registry.processors.src(modulo, def, value);
+    return true; // Only difference is return "true" for "wait"
 });
 
 modulo.register('processor', function defTarget (modulo, def, value) {
@@ -1346,7 +1351,7 @@ modulo.register('cpart', class StaticData {
 
 modulo.register('coreDef', class Configuration { }, {
     DefTarget: 'config',
-    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content|Code', 'DefinitionName|MainRequire' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src|SrcSync', 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
 modulo.register('cpart', class Script {

@@ -49,42 +49,6 @@ window.Modulo = class Modulo {
         return inst;
     }
 
-    /*
-    // TODO: Dead code, finish / delete
-    getInjections() {
-        return {
-            modulo: this,
-        };
-    }
-
-    use(pathOrPaths, extra) {
-        const paths = Array.isArray(pathOrPaths) ? pathOrPaths : [ pathOrPaths ];
-        const results = [];
-        const injections = Object.assign({}, this.getInjections(), extra);
-        for (const path of paths) {
-            const reg = path.includes('.') ? this.registry : this.modules[path];
-            const cls = this.registry.utils.get(reg);
-            const defaults = this.config[cls.name] || { dependencies: [] };
-            results.push(this._inject(cls, dependencies, injections));
-        }
-        return results;
-    }
-
-    _inject(cls, dependencies, injections) {
-        return (...args) => cls(...dependencies.map(s => injections[s]), ...args);
-        if (cls.name[0].toLowerCase() === cls.name[0]) { // e.g. function foobar
-        } // Starts with a capital letter, lets extend -- e.g. class FooBar
-        return class extends cls {
-            constructor(...args) {
-                super(...dependencies.map(s => injections[s]), ...args);
-                Object.apply(this, obj || injections);
-                this.constructedCallback();
-            }
-            constructedCallback() {}
-        };
-    }
-    */
-
     instanceParts(def, extra, parts = {}) {
         // Loop through all children, instancing each class with configuration
         const allNames = [ def.DefinitionName ].concat(def.ChildrenNames);
@@ -102,7 +66,7 @@ window.Modulo = class Modulo {
                     continue; // Skip if obj has not registered callback
                 }
                 const result = obj[methodName].call(obj, renderObj);
-                if (result) {
+                if (result) { // TODO: Change to (result !== undefined) and test
                     renderObj[obj.conf.RenderObj || obj.conf.Name] = result;
                 }
             }
@@ -281,7 +245,7 @@ modulo.register('core', class ValueResolver {
         if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
             return JSON.parse(key); // Not a valid identifier, try JSON
         }
-        return modulo.registry.utils.get(ctxObj, key); // Drill down to value
+        return modulo.registry.utils.get(ctxObj, key); // Drill down to value // XXX global modulo
     }
 
     set(obj, keyPath, val) {
@@ -381,6 +345,11 @@ modulo.register('processor', function src (modulo, def, value) {
     });
 });
 
+modulo.register('processor', function srcSync (modulo, def, value) {
+    modulo.registry.processors.src(modulo, def, value);
+    return true; // Only difference is return "true" for "wait"
+});
+
 modulo.register('processor', function defTarget (modulo, def, value) {
     const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document, make it switch to Template Resolver if there is {% or {{
     const resolver = new modulo.registry.core[resolverName](modulo);
@@ -442,8 +411,9 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
     // Mount the element, optionally "merging" in the modulo-original-html attr
     cls.prototype.parsedCallback = function parsedCallback() {
         const htmlOriginal = this.getAttribute('modulo-original-html');
+        // TODO: Shouldn't this logic be hasAttribute? (to match logic below)
         const original = ((!htmlOriginal || htmlOriginal === '') ? this :
-                          modulo.registry.utils.makeDiv(htmlOriginal));
+                          this.modulo.registry.utils.makeDiv(htmlOriginal));
         this.cparts.component._lifecycle([ 'initialized' ]);
         this.rerender(original); // render and re-mount it's own childNodes
         if (this.hasAttribute('modulo-original-html')) {
@@ -454,6 +424,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         }
         this.isMounted = true;
     };
+
     cls.prototype.initRenderObj = initRenderObj;
     // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
@@ -653,7 +624,7 @@ modulo.register('coreDef', class Component {
                 }
             }
         }
-        this.reconciler = new this.modulo.registry.engines.Reconciler(this, opts);
+        this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
     }
 
@@ -1380,7 +1351,7 @@ modulo.register('cpart', class StaticData {
 
 modulo.register('coreDef', class Configuration { }, {
     DefTarget: 'config',
-    DefBuilders: [ 'Content|Code', 'DefinitionName|MainRequire' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src|SrcSync', 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
 modulo.register('cpart', class Script {
@@ -1713,7 +1684,7 @@ modulo.register('engine', class Reconciler {
 
     loadString(rivalHTML, tagTransforms) {
         this.patches = [];
-        const rival = modulo.registry.utils.makeDiv(rivalHTML);
+        const rival = this.modulo.registry.utils.makeDiv(rivalHTML);
         const transforms = Object.assign({}, this.tagTransforms, tagTransforms);
         this.applyLoadDirectives(rival, transforms);
         return rival;
@@ -1735,7 +1706,7 @@ modulo.register('engine', class Reconciler {
             const newTag = tagTransforms[node.tagName.toLowerCase()];
             //console.log('this is tagTransforms', tagTransforms);
             if (newTag) {
-                modulo.registry.utils.transformTag(node, newTag);
+                this.modulo.registry.utils.transformTag(node, newTag);
             }
             ///////
 
@@ -1781,7 +1752,7 @@ modulo.register('engine', class Reconciler {
 
     reconcileChildren(childParent, rivalParent) {
         // Nonstandard nomenclature: "The rival" is the node we wish to match
-        const cursor = new modulo.registry.engines.DOMCursor(childParent, rivalParent);
+        const cursor = new this.modulo.registry.engines.DOMCursor(childParent, rivalParent);
         while (cursor.hasNext()) {
             const [ child, rival ] = cursor.next();
             const needReplace = child && rival && (
