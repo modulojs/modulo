@@ -425,20 +425,19 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         }, 0);
     };
 
-    // Mount the element, optionally "merging" in the modulo-original-html attr
+    // Mount the element, optionally "merging" in the modulo-mount-html attr
     cls.prototype.parsedCallback = function parsedCallback() {
         if (this.isMounted || this.isBeingMounted) {
             return; // Already mounted, skip since it probably just got moved
         }
         this.isBeingMounted = true;
         let original = this;
-        if (this.hasAttribute('modulo-original-html')) {
-            this.originalHTML = this.getAttribute('modulo-original-html');
+        if (this.hasAttribute('modulo-mount-html')) {
+            this.originalHTML = this.getAttribute('modulo-mount-html');
             original = this.modulo.registry.utils.makeDiv(this.originalHTML);
         } else {
             this.originalHTML = this.innerHTML;
         }
-        // Trigger initialized lifecycle
         this.cparts.component._lifecycle([ 'initialized', 'firstRender' ]);
         this.cparts.component.rerender(original); // render + mount childNodes
         this.isMounted = true;
@@ -608,30 +607,20 @@ modulo.register('coreDef', class Component {
     }
 
     buildCallback() {
-        const elem = this.element;
-        if (elem.originalHTML !== elem.innerHTML) {
-            elem.setAttribute('modulo-original-html', elem.originalHTML);
+        const PRE = 'modulo-mount-'; // Prefix used for attributes
+        if (this.element.originalHTML !== this.element.innerHTML) {
+            this.element.setAttribute(PRE + 'html', this.element.originalHTML);
         }
-        for (const patch of this._mountPatchset || []) {
-            if (!patch[1].startsWith('directive-')) {
-                continue; // not a directive, ignore
-            }
-            let parentCount = 0;
-            const { rawName, el } = patch[2]; // Get directive raw info
-            let parentEl = el;
-            while (parentEl && parentEl !== this.element) {
-                parentCount++;
-                parentEl = parentEl.parentNode;
-            }
-            if (!parentEl) {
-                console.log('WARNING: no parentEl!');
-                continue;
-            }
-            const serialPatch = parentCount + ',' + rawName;
-            const existing = el.getAttribute('modulo-mount-patches') || '';
-            if (!existing.includes(serialPatch)) {
-                const attrValue = `${ existing }\n${ serialPatch }`.trim();
-                el.setAttribute('modulo-mount-patches', attrValue);
+        const nodes = Array.from(this.element.querySelectorAll('*'));
+        for (const [ node, method, arg ] of this._mountPatchset || []) {
+            const { rawName, el } = arg || {}; // Extract needed directive info
+            const count = el ? nodes.filter(e => e.contains(el)).length : 0;
+            if (count) { // The element exists, and is contained by 1 or more
+                const existing = el.getAttribute(PRE + 'patches') || '';
+                if (!existing.includes(count + ',' + rawName)) { // Not a dupe
+                    const value = existing + '\n' + count + ',' + rawName;
+                    el.setAttribute(PRE + 'patches', value.trim());
+                }
             }
         }
     }
@@ -683,9 +672,8 @@ modulo.register('coreDef', class Component {
 
     firstRenderCallback(renderObj) {
         const { get } = this.modulo.registry.utils;
-        // Now, try hydrating with any modulo-mount-patches
         const elems = this.element.querySelectorAll('[modulo-mount-patches]');
-        for (const elem of elems) {
+        for (const elem of elems) { // Hydrate all modulo-mount-patches
             // TODO: Refactor to compute the correct number first, then filter
             const patches = elem.getAttribute('modulo-mount-patches');
             elem.removeAttribute('modulo-mount-patches'); // Consume attribute
@@ -697,6 +685,8 @@ modulo.register('coreDef', class Component {
                     this.reconciler.patch = this.reconciler.applyPatch;
                     this.reconciler.patchDirectives(elem, rawName, 'Mount');
                     this.reconciler.patch = this.reconciler.pushPatch;
+                } else {
+                    console.log('invalid, its a not me!')
                 }
             }
         }
@@ -708,15 +698,12 @@ modulo.register('coreDef', class Component {
     }
 
     domCallback(renderObj) {
-        let { root, innerHTML, innerDOM, domPatches } = renderObj.component;
+        let { root, innerHTML, innerDOM } = renderObj.component;
         if (innerHTML && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
-            //this.modulo._activeReconciler = this.reconciler;
             innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
-            //domPatches = this.reconciler.patches;
             this.reconciler.patches = []; // clear
-            //this.modulo._activeReconciler = null;
         }
-        return { root, innerHTML, innerDOM, domPatches };
+        return { root, innerHTML, innerDOM };
     }
 
     reconcileCallback(renderObj) {
@@ -739,14 +726,11 @@ modulo.register('coreDef', class Component {
     }
 
     updateCallback(renderObj) {
-        const { patches, domPatches, innerHTML } = renderObj.component;
+        const { patches, innerHTML } = renderObj.component;
         if (patches) {
             this._mountPatchset = this._mountPatchset || patches; // store first
             this.reconciler.applyPatches(patches);
         }
-        /*if (domPatches) {
-            this.reconciler.applyPatches(domPatches);
-        }*/
 
         if (!this.element.isMounted && (this.mode === 'vanish' ||
                                         this.mode === 'vanish-into-document')) {
