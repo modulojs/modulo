@@ -217,14 +217,6 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        for (const elem of window.document.querySelectorAll('*')) {
-            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-                elem.setAttribute('modulo-original-html', elem.originalHTML);
-            }
-            if (elem.moduloBuildCallback) {
-                elem.moduloBuildCallback();
-            }
-        }
         const head = window.document.head || { innerHTML: '' };
         const body = window.document.body || { innerHTML: '', id: '' };
         script.exports.prefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
@@ -415,10 +407,6 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         modulo._parentComponent = null;
     };
 
-    cls.prototype.moduloBuildCallback = function moduloBuildCallback () {
-        return this.cparts.component.moduloBuildCallback();
-    };
-
     cls.prototype.connectedCallback = function connectedCallback () {
         if (modulo._parentComponent && modulo._parentComponent.contains(this)) {
             return; // Already will be handled by a parent component
@@ -453,7 +441,9 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         } else {
             this.originalHTML = this.innerHTML;
         }
-        this.cparts.component._lifecycle([ 'initialized' ]);
+
+        // Trigger initialized lifecycle
+        this.cparts.component._lifecycle([ 'initialized', 'firstRender' ]);
         this.cparts.component.rerender(original); // render + mount childNodes
         /*
         if (this.hasAttribute('modulo-original-html')) { // Trigger first Mounts
@@ -465,22 +455,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         */
 
         // Ensure any serialized "modulo-mount-patches" get applied
-        const mountElems = this.querySelectorAll('[modulo-mount-patches]');
-        for (const elem of mountElems) {
-            const patchesStrings = elem.getAttribute('modulo-mount-patches').split('\n');
-            elem.removeAttribute('modulo-mount-patches');
-            for (const patchString of patchesString) {
-                if (patchString) {
-                    const [ parentCount, rawName ] = JSON.load(patchString);
-                    const node = get(elem, '.parentNode'.repeat(parentCount).substr(1));
-                    console.log('HYDRATING NODE:', node);
-                    const { reconciler } = node.cparts.component;
-                    reconciler.patch = reconciler.applyPatch; // Apply immediately
-                    reconciler.patchDirectives(node, rawName, 'Mount');
-                    reconciler.patch = reconciler.pushPatch; // (undo apply)
-                }
-            }
-        }
+
         this.isMounted = true;
         this.isBeingMounted = false;
     };
@@ -648,12 +623,12 @@ modulo.register('coreDef', class Component {
         this._lifecycle([ 'prepare', 'render', 'dom', 'reconcile', 'update' ]);
     }
 
-    moduloBuildCallback() {
-        // this._lifecycle([ 'build' ]); // TODO: Document
-        if (!this._mountPatchset) {
-            return;
+    buildCallback() {
+        const elem = this.element;
+        if (elem.originalHTML !== elem.innerHTML) {
+            elem.setAttribute('modulo-original-html', elem.originalHTML);
         }
-        for (const patch of this._mountPatchset) {
+        for (const patch of this._mountPatchset || []) {
             if (!patch[1].startsWith('directive-')) {
                 continue; // not a directive, ignore
             }
@@ -668,10 +643,12 @@ modulo.register('coreDef', class Component {
                 console.log('WARNING: no parentEl!');
                 continue;
             }
-            const serialPatch = [ parentCount, rawName ];
-            let patchesString = el.getAttribute('modulo-mount-patches') || '';
-            patchesString += "\n" + JSON.stringify(serialPatch);
-            el.setAttribute('modulo-mount-patches', patchesString);
+            const serialPatch = parentCount + ',' + rawName;
+            const existing = el.getAttribute('modulo-mount-patches') || '';
+            if (!existing.includes(serialPatch)) {
+                const attrValue = `${ existing }\n${ serialPatch }`.trim();
+                el.setAttribute('modulo-mount-patches', attrValue);
+            }
         }
     }
 
@@ -718,6 +695,27 @@ modulo.register('coreDef', class Component {
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
+    }
+
+    firstRenderCallback(renderObj) {
+        const { get } = this.modulo.registry.utils;
+        // Now, try hydrating with any modulo-mount-patches
+        const elems = this.element.querySelectorAll('[modulo-mount-patches]');
+        for (const elem of elems) {
+            // TODO: Refactor to compute the correct number first, then filter
+            const patches = elem.getAttribute('modulo-mount-patches');
+            elem.removeAttribute('modulo-mount-patches'); // Consume attribute
+            for (const patchString of patches.split('\n')) { // Loop each lines
+                const [ count, rawName ] = patchString.split(','); // Comma sep
+                const path = '.parentNode'.repeat(Number(count)).substr(1);
+                const node = get(elem, path);
+                if (node === this.element) { // It's me!
+                    this.reconciler.patch = this.reconciler.applyPatch;
+                    this.reconciler.patchDirectives(elem, rawName, 'Mount');
+                    this.reconciler.patch = this.reconciler.pushPatch;
+                }
+            }
+        }
     }
 
     prepareCallback() {
@@ -1545,7 +1543,7 @@ modulo.register('cpart', class State {
 
     bindMount({ el, attrName, value }) {
         const name = attrName || el.getAttribute('name');
-        const val = modulo.registry.utils.get(this.data, name);
+        const val = this.modulo.registry.utils.get(this.data, name);
         this.modulo.assert(val !== undefined, `state.bind "${name}" undefined`);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
@@ -2034,15 +2032,11 @@ modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     modulo.config.IS_BUILD = true;
     opts.callback = opts.callback || (() => {});
-    /*
-    // TODO: Use this to refactor modulo-original-html into Component class
     for (const elem of document.querySelectorAll('*')) {
-        // Escape hatch for CParts / Scripts to hook in on a per-component basis
-        if (elem.isModulo && elem.cparts && elem.cparts.component) {
-            elem.cparts.component._lifecycle([ 'prepareBuild', 'build' ]);
+        if (elem.cparts && elem.cparts.component) {
+            elem.cparts.component._lifecycle([ 'build' ]); // "buildCallback"
         }
     }
-    */
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
         const artifact = artifacts.shift();

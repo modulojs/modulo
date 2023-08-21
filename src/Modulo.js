@@ -217,14 +217,6 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        for (const elem of window.document.querySelectorAll('*')) {
-            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-                elem.setAttribute('modulo-original-html', elem.originalHTML);
-            }
-            if (elem.moduloBuildCallback) {
-                elem.moduloBuildCallback();
-            }
-        }
         const head = window.document.head || { innerHTML: '' };
         const body = window.document.body || { innerHTML: '', id: '' };
         script.exports.prefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
@@ -415,10 +407,6 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         modulo._parentComponent = null;
     };
 
-    cls.prototype.moduloBuildCallback = function moduloBuildCallback () {
-        return this.cparts.component.moduloBuildCallback();
-    };
-
     cls.prototype.connectedCallback = function connectedCallback () {
         if (modulo._parentComponent && modulo._parentComponent.contains(this)) {
             return; // Already will be handled by a parent component
@@ -429,9 +417,6 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
             while (modulo._componentConnectionQueue.length > 0) {
                 const element = modulo._componentConnectionQueue.shift();
                 modulo._parentComponent = element;
-                /*const allowFragMount = (element.cparts && element.cparts.component &&
-                      element.cparts.component.allowFragmentMount); // TODO Document or RM*/
-                //if (allowFragMount || window.document.contains(element)) {
                 if (window.document.contains(element)) {
                     element.parsedCallback();
                 }
@@ -453,25 +438,12 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         } else {
             this.originalHTML = this.innerHTML;
         }
-
         // Trigger initialized lifecycle
         this.cparts.component._lifecycle([ 'initialized', 'firstRender' ]);
         this.cparts.component.rerender(original); // render + mount childNodes
-        /*
-        if (this.hasAttribute('modulo-original-html')) { // Trigger first Mounts
-            const { reconciler } = this.cparts.component;
-            reconciler.patch = reconciler.applyPatch; // Apply immediately
-            reconciler.patchAndDescendants(this, 'Mount'); // Trigger "Mount"
-            reconciler.patch = reconciler.pushPatch; // (undo apply)
-        }
-        */
-
-        // Ensure any serialized "modulo-mount-patches" get applied
-
         this.isMounted = true;
         this.isBeingMounted = false;
     };
-
 
     cls.prototype.initRenderObj = initRenderObj;
     // TODO: Possibly remove the following aliases (for fewer code paths):
@@ -635,12 +607,12 @@ modulo.register('coreDef', class Component {
         this._lifecycle([ 'prepare', 'render', 'dom', 'reconcile', 'update' ]);
     }
 
-    moduloBuildCallback() {
-        // this._lifecycle([ 'build' ]); // TODO: Document
-        if (!this._mountPatchset) {
-            return;
+    buildCallback() {
+        const elem = this.element;
+        if (elem.originalHTML !== elem.innerHTML) {
+            elem.setAttribute('modulo-original-html', elem.originalHTML);
         }
-        for (const patch of this._mountPatchset) {
+        for (const patch of this._mountPatchset || []) {
             if (!patch[1].startsWith('directive-')) {
                 continue; // not a directive, ignore
             }
@@ -2029,7 +2001,8 @@ modulo.register('util', function showDevMenu() {
     const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
-        return modulo.registry.commands[cmd](modulo, { callback });
+        const func = () => modulo.registry.commands[cmd](modulo, { callback });
+        return window.setTimeout(func, 0);
     } // Else: Display "COMMANDS:" menu in console
     const commandNames = Object.keys(modulo.registry.commands);
     const href = 'window.location.href += ';
@@ -2044,15 +2017,11 @@ modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     modulo.config.IS_BUILD = true;
     opts.callback = opts.callback || (() => {});
-    /*
-    // TODO: Use this to refactor modulo-original-html into Component class
     for (const elem of document.querySelectorAll('*')) {
-        // Escape hatch for CParts / Scripts to hook in on a per-component basis
-        if (elem.isModulo && elem.cparts && elem.cparts.component) {
-            elem.cparts.component._lifecycle([ 'prepareBuild', 'build' ]);
+        if (elem.cparts && elem.cparts.component) {
+            elem.cparts.component._lifecycle([ 'build' ]); // "buildCallback"
         }
     }
-    */
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
         const artifact = artifacts.shift();
