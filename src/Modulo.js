@@ -403,24 +403,14 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         this.originalHTML = null;
         this.originalChildren = [];
         this.cparts = modulo.instanceParts(def, { element: this });
-        modulo._componentConnectionQueue = modulo._componentConnectionQueue || [];
-        modulo._parentComponent = null;
     };
 
     cls.prototype.connectedCallback = function connectedCallback () {
-        if (modulo._parentComponent && modulo._parentComponent.contains(this)) {
-            return; // Already will be handled by a parent component
-        }
-        modulo._parentComponent = this;
-        modulo._componentConnectionQueue.push(this);
-        setTimeout(() => {
-            while (modulo._componentConnectionQueue.length > 0) {
-                const element = modulo._componentConnectionQueue.shift();
-                modulo._parentComponent = element;
-                if (window.document.contains(element)) {
-                    element.parsedCallback();
-                }
-                modulo._parentComponent = null;
+        modulo._connectedQueue = modulo._connectedQueue || [];
+        modulo._connectedQueue.push(this);
+        window.setTimeout(() => {
+            while (modulo._connectedQueue.length > 0) { // Drain queue
+                modulo._connectedQueue.shift().parsedCallback();
             }
         }, 0);
     };
@@ -449,7 +439,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
     cls.prototype.rerender = function (original = null) {
         if (this.isMounted) {
             this.cparts.component.rerender(original);
-        } else if (!this.isBeingMounted) {
+        } else {
             this.parsedCallback();
         }
     };
@@ -670,26 +660,23 @@ modulo.register('coreDef', class Component {
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
     }
 
-    firstRenderCallback(renderObj) {
+    firstRenderCallback() {
+        const ATTR = 'modulo-mount-patches'; // Attribute used
         const { get } = this.modulo.registry.utils;
-        const elems = this.element.querySelectorAll('[modulo-mount-patches]');
-        for (const elem of elems) { // Hydrate all modulo-mount-patches
-            // TODO: Refactor to compute the correct number first, then filter
-            const patches = elem.getAttribute('modulo-mount-patches');
-            elem.removeAttribute('modulo-mount-patches'); // Consume attribute
-            for (const patchString of patches.split('\n')) { // Loop each lines
-                const [ count, rawName ] = patchString.split(','); // Comma sep
-                const path = '.parentNode'.repeat(Number(count)).substr(1);
-                const node = get(elem, path);
-                if (node === this.element) { // It's me!
-                    this.reconciler.patch = this.reconciler.applyPatch;
+        for (const elem of this.element.querySelectorAll(`[${ ATTR }]`)) {
+            for (const line of elem.getAttribute(ATTR).split('\n')) {
+                const [ count, rawName ] = line.split(','); // Comma seperated
+                const nodePath = '.parentNode'.repeat(count).substr(1);
+                if (this.element === get(elem, nodePath)) { // It's me!
                     this.reconciler.patchDirectives(elem, rawName, 'Mount');
-                    this.reconciler.patch = this.reconciler.pushPatch;
+                    const newVal = elem.getAttribute(ATTR).replace(line, '');
+                    elem.setAttribute(ATTR, newVal); // "Consume" line from attr
                 } else {
-                    console.log('invalid, its a not me!')
+                    console.log('invalid, its a not me!');
                 }
             }
         }
+        this.reconciler.applyPatches(this.reconciler.patches); // Apply Mounts 
     }
 
     prepareCallback() {
@@ -699,7 +686,8 @@ modulo.register('coreDef', class Component {
 
     domCallback(renderObj) {
         let { root, innerHTML, innerDOM } = renderObj.component;
-        if (innerHTML && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
+        //if (innerHTML && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
+        if (innerHTML !== null && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
             innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
             this.reconciler.patches = []; // clear
         }
@@ -1858,10 +1846,6 @@ modulo.register('engine', class Reconciler {
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
                         // TODO: Possibly add directive resolution context to rival / child.originalChildren?
-                        /*if (child.isMounted) { // Trigger re-render if mounted
-                            this.patch(child, 'rerender', rival);
-                        } else { // Otherwise, trigger "parsedCallback"
-                        }*/
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();

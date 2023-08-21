@@ -1,28 +1,48 @@
 <template Modulo>
     <Component name="Testy">
-    <Template>
-<ol>
-    {% for item in state.list %}
-        <li>{{ item }}</li>
-    {% endfor %}
-    <li>
-        <input [state.bind] name="text" />
-        <button @click:=script.addItem>Add</button>
-    </li>
-</ol>
-</Template>
+        <Template>
+            <ol>
+                {% for item in state.list %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            <div style="background: lightblue; padding: 5px">
+                <x-SubComponent></x-SubComponent>
+            </div>
+                <li>
+                    <input [state.bind] name="text" />
+                    <button @click:=script.addItem>Add</button>
+                </li>
+            </ol>
+            <div style="background: lightblue; padding: 5px">
+                <x-SubComponent></x-SubComponent>
+            </div>
+        </Template>
 
-<State
-    list:='["Milk", "Bread", "Candy"]'
-    text="Coffee"
-></State>
+        <State
+            list:='["Milk", "Bread", "Candy"]'
+            text="Coffee"
+        ></State>
 
-<Script>
-    function addItem() {
-        state.list.push(state.text); // add to list
-        state.text = ""; // clear input
-    }
-</Script>
+        <Script>
+            function addItem() {
+                state.list.push(state.text); // add to list
+                state.text = ""; // clear input
+            }
+        </Script>
+    </Component>
+
+    <Component name="SubComponent">
+        <Template>
+            <button @click:=script.doSub>Sub: [{{ state.msg }}]</button>
+        </Template>
+        <State
+            msg="--------"
+        ></State>
+        <Script>
+            function doSub() {
+                state.msg = "CLICKED!"; // clear input
+            }
+        </Script>
     </Component>
 </template>
 <script src="/js/Modulo.js"></script>
