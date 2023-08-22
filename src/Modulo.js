@@ -383,7 +383,6 @@ modulo.register('processor', function definedAs (modulo, def, value) {
 });
 
 modulo.register('util', function initComponentClass (modulo, def, cls) {
-    const { get } = modulo.registry.utils;
     // Run factoryCallback static lifecycle method to create initRenderObj
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
@@ -398,50 +397,32 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
     cls.prototype.init = function init () {
         this.modulo = modulo;
         this.isMounted = false;
-        this.isBeingMounted = false;
         this.isModulo = true;
         this.originalHTML = null;
         this.originalChildren = [];
         this.cparts = modulo.instanceParts(def, { element: this });
     };
-
+    modulo._connectedQueue = modulo._connectedQueue || []; // Ensure array
+    const _drainQueue = () => { // "Clusters" all moduloMount calls into one
+        while (modulo._connectedQueue.length > 0) { // Drains + invokes
+            modulo._connectedQueue.shift().moduloMount();
+        }
+    };
     cls.prototype.connectedCallback = function connectedCallback () {
-        modulo._connectedQueue = modulo._connectedQueue || [];
         modulo._connectedQueue.push(this);
-        window.setTimeout(() => {
-            while (modulo._connectedQueue.length > 0) { // Drain queue
-                modulo._connectedQueue.shift().parsedCallback();
-            }
-        }, 0);
+        window.setTimeout(_drainQueue, 0);
     };
-
-    // Mount the element, optionally "merging" in the modulo-mount-html attr
-    cls.prototype.parsedCallback = function parsedCallback() {
-        if (this.isMounted || this.isBeingMounted) {
-            return; // Already mounted, skip since it probably just got moved
+    cls.prototype.moduloMount = function moduloMount() {
+        if (!this.isMounted && window.document.contains(this)) { // Prevent dupe
+            this.cparts.component._lifecycle([ 'initialized', 'mount', 'mountRender' ]);
         }
-        this.isBeingMounted = true;
-        let original = this;
-        if (this.hasAttribute('modulo-mount-html')) {
-            this.originalHTML = this.getAttribute('modulo-mount-html');
-            original = this.modulo.registry.utils.makeDiv(this.originalHTML);
-        } else {
-            this.originalHTML = this.innerHTML;
-        }
-        this.cparts.component._lifecycle([ 'initialized', 'firstRender' ]);
-        this.cparts.component.rerender(original); // render + mount childNodes
-        this.isMounted = true;
-        this.isBeingMounted = false;
     };
-
     cls.prototype.initRenderObj = initRenderObj;
-    // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
-        if (this.isMounted) {
-            this.cparts.component.rerender(original);
-        } else {
-            this.parsedCallback();
+        if (!this.isMounted) { // Not mounted, do Mount which will also rerender
+            return this.moduloMount();
         }
+        this.cparts.component.rerender(original);
     };
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
@@ -577,7 +558,6 @@ modulo.register('coreDef', class Component {
             const def = modulo.definitions['${ def.DefinitionName }'];
             class ${ className } extends ${ value } {
                 constructor() { super(); this.init(); }
-                /*connectedCallback() { window.setTimeout(() => this.parsedCallback(), 0); }*/
             }
             modulo.registry.utils.initComponentClass(modulo, def, ${ className });
             window.customElements.define(def.TagName, ${ className });
@@ -660,7 +640,7 @@ modulo.register('coreDef', class Component {
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
     }
 
-    firstRenderCallback() {
+    mountCallback() { // Prepare the element, "hydrating" the "mount-patches"
         const ATTR = 'modulo-mount-patches'; // Attribute used
         const { get } = this.modulo.registry.utils;
         for (const elem of this.element.querySelectorAll(`[${ ATTR }]`)) {
@@ -671,12 +651,19 @@ modulo.register('coreDef', class Component {
                     this.reconciler.patchDirectives(elem, rawName, 'Mount');
                     const newVal = elem.getAttribute(ATTR).replace(line, '');
                     elem.setAttribute(ATTR, newVal); // "Consume" line from attr
-                } else {
-                    console.log('invalid, its a not me!');
                 }
             }
         }
-        this.reconciler.applyPatches(this.reconciler.patches); // Apply Mounts 
+    }
+
+    mountRenderCallback() { // First "mount", trigger render & hydration
+        const { makeDiv } = this.modulo.registry.utils;
+        this.reconciler.applyPatches(this.reconciler.patches); // From "mount"
+        const html = this.element.getAttribute('modulo-mount-html');
+        const rival = (html !== null) ? makeDiv(html) : this.element;
+        this.element.originalHTML = html ? html : rival.innerHTML;
+        this.rerender(rival); // render + mount childNodes
+        this.element.isMounted = true; // Mark as mounted
     }
 
     prepareCallback() {
@@ -686,8 +673,7 @@ modulo.register('coreDef', class Component {
 
     domCallback(renderObj) {
         let { root, innerHTML, innerDOM } = renderObj.component;
-        //if (innerHTML && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
-        if (innerHTML !== null && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
+        if (innerHTML !== null && !innerDOM) {
             innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
             this.reconciler.patches = []; // clear
         }
@@ -716,10 +702,9 @@ modulo.register('coreDef', class Component {
     updateCallback(renderObj) {
         const { patches, innerHTML } = renderObj.component;
         if (patches) {
-            this._mountPatchset = this._mountPatchset || patches; // store first
+            this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches);
         }
-
         if (!this.element.isMounted && (this.mode === 'vanish' ||
                                         this.mode === 'vanish-into-document')) {
             // First time initialized, and is one of the vanish modes
@@ -772,7 +757,6 @@ modulo.register('coreDef', class Component {
 
     eventUnmount({ el, attrName }) {
         if (el.moduloEvents) { // TODO: Remove this check
-            // Modulo.assert(el.moduloEvents[attrName], 'Invalid unmount');
             el.removeEventListener(attrName, el.moduloEvents[attrName]);
             delete el.moduloEvents[attrName];
         }
