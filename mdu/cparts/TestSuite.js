@@ -97,11 +97,14 @@ modulo.register('cpart', class TestSuite {
         const isLower = key => key[0].toLowerCase() === key[0];
         const attrs = modulo.registry.utils.keyFilter(conf, isLower);
         element.initRenderObj.props = attrs;
-        element.renderObj.props = attrs;
+        if (element.renderObj) {
+            element.renderObj.props = attrs;
+        }
         if (element.eventRenderObj) {
             element.eventRenderObj.props = attrs;
         }
-        element.cparts.props.prepareCallback = () => {}; // Turn prepare into a dummy, to avoid overriding above
+        // Turn prepare into a dummy, to avoid overriding above
+        element.cparts.props.prepareCallback = () => {};
     }
 
     static templateAssertion(modulo, element, stepConf) {
@@ -706,7 +709,7 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloMockDocument = element.mockDocument = doc;
 
     doc.body.appendChild(element);
-    element.moduloMount(); // Ensure moduloMount called synchronously
+    element.moduloMount(true); // Ensure moduloMount called synchronously
     //element.moduloMount = () => {}; // Prevent double calling
     return element;
 });

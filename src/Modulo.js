@@ -403,17 +403,17 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         this.cparts = modulo.instanceParts(def, { element: this });
     };
     modulo._connectedQueue = modulo._connectedQueue || []; // Ensure array
-    const _drainQueue = () => { // "Clusters" all moduloMount calls into one
+    modulo._drainQueue = () => { // "Clusters" all moduloMount calls
         while (modulo._connectedQueue.length > 0) { // Drains + invokes
             modulo._connectedQueue.shift().moduloMount();
         }
     };
     cls.prototype.connectedCallback = function connectedCallback () {
         modulo._connectedQueue.push(this);
-        window.setTimeout(_drainQueue, 0);
+        window.setTimeout(modulo._drainQueue, 0);
     };
-    cls.prototype.moduloMount = function moduloMount() {
-        if (!this.isMounted && window.document.contains(this)) { // Prevent dupe
+    cls.prototype.moduloMount = function moduloMount(force = false) {
+        if ((!this.isMounted && window.document.contains(this)) || force) {
             this.cparts.component._lifecycle([ 'initialized', 'mount', 'mountRender' ]);
         }
     };
@@ -422,7 +422,7 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         if (!this.isMounted) { // Not mounted, do Mount which will also rerender
             return this.moduloMount();
         }
-        this.cparts.component.rerender(original);
+        this.cparts.component.rerender(original); // Otherwise, normal rerender
     };
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
