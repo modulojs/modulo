@@ -1,7 +1,35 @@
 # Contributing
 
-The best way to contribute is by trying it out: Building something with it, and
-then give feedback.
+
+## How do I help?
+
+Curious about how you can contribute to this exciting new free / libre open
+source software project? Given it's dense style and ambitious aims, there'll
+probably be less opportunity to contribute directly to the Modulo.js file
+itself. However, [the "code to docs" ratio that the Modulo project aims to
+achieve](https://modulojs.org/devlog/2021-09.html) means there's an even
+greater need for help everywhere else!
+
+Best ways to contribute:
+1. Build a website with it
+2. Writing a component library based on it
+3. Writing a blog post about using it
+4. Create a Component Part for it
+5. Write middleware to integrate it with other frameworks or build systems
+
+If you do any of these, please reach out and we can possibly list it in the
+Examples page, along with other "sightings" of Modulo "in the wild"!
+
+If you are curious about working on the Modulo source code itself, read on.
+
+## Dev Environment
+
+- Run local dev env:
+    - npm run start
+- Run unit tests locally in the browser:
+    - <http://localhost:3334/demos/tests/?mod-cmd=test>
+- In the terminal (uses puppeteer):
+    - `npm run test`
 
 ## Formatting
 

@@ -706,8 +706,8 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloMockDocument = element.mockDocument = doc;
 
     doc.body.appendChild(element);
-    element.parsedCallback(); // Ensure parsedCallback called synchronously
-    //element.parsedCallback = () => {}; // Prevent double calling
+    element.moduloMount(); // Ensure moduloMount called synchronously
+    //element.moduloMount = () => {}; // Prevent double calling
     return element;
 });
 
@@ -719,13 +719,13 @@ modulo.register('util', function doTestRerender (elem, testInfo) {
         return String(e);
     }
 
-    // Trigger all children's parsedCallbacks
+    // Trigger all children's moduloMount
     const descendants = Array.from(elem.querySelectorAll('*'));
     const isWebComponent = ({ tagName }) => tagName.includes('-');
     for (const webComponent of descendants.filter(isWebComponent)) {
-        if (webComponent.parsedCallback) {
-            webComponent.parsedCallback(); // ensure gets immediately invoked
-            webComponent.parsedCallback = () => {}; // Prevent double calling
+        if (webComponent.moduloMount) {
+            webComponent.moduloMount(); // ensure gets immediately invoked
+            webComponent.moduloMount = () => {}; // Prevent double calling
         }
     }
 });

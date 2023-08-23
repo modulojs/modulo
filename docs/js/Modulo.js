@@ -383,7 +383,6 @@ modulo.register('processor', function definedAs (modulo, def, value) {
 });
 
 modulo.register('util', function initComponentClass (modulo, def, cls) {
-    const { get } = modulo.registry.utils;
     // Run factoryCallback static lifecycle method to create initRenderObj
     const initRenderObj = { elementClass: cls };
     for (const defName of def.ChildrenNames) {
@@ -398,77 +397,32 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
     cls.prototype.init = function init () {
         this.modulo = modulo;
         this.isMounted = false;
-        this.isBeingMounted = false;
         this.isModulo = true;
         this.originalHTML = null;
         this.originalChildren = [];
         this.cparts = modulo.instanceParts(def, { element: this });
-        modulo._componentConnectionQueue = modulo._componentConnectionQueue || [];
-        modulo._parentComponent = null;
     };
-
+    modulo._connectedQueue = modulo._connectedQueue || []; // Ensure array
+    const _drainQueue = () => { // "Clusters" all moduloMount calls into one
+        while (modulo._connectedQueue.length > 0) { // Drains + invokes
+            modulo._connectedQueue.shift().moduloMount();
+        }
+    };
     cls.prototype.connectedCallback = function connectedCallback () {
-        if (modulo._parentComponent && modulo._parentComponent.contains(this)) {
-            return; // Already will be handled by a parent component
-        }
-        modulo._parentComponent = this;
-        modulo._componentConnectionQueue.push(this);
-        setTimeout(() => {
-            while (modulo._componentConnectionQueue.length > 0) {
-                const element = modulo._componentConnectionQueue.shift();
-                modulo._parentComponent = element;
-                /*const allowFragMount = (element.cparts && element.cparts.component &&
-                      element.cparts.component.allowFragmentMount); // TODO Document or RM*/
-                //if (allowFragMount || window.document.contains(element)) {
-                if (window.document.contains(element)) {
-                    element.parsedCallback();
-                }
-                modulo._parentComponent = null;
-            }
-        }, 0);
+        modulo._connectedQueue.push(this);
+        window.setTimeout(_drainQueue, 0);
     };
-
-    // Mount the element, optionally "merging" in the modulo-original-html attr
-    cls.prototype.parsedCallback = function parsedCallback() {
-        if (this.isMounted || this.isBeingMounted) {
-            return; // Already mounted, skip since it probably just got moved
+    cls.prototype.moduloMount = function moduloMount() {
+        if (!this.isMounted && window.document.contains(this)) { // Prevent dupe
+            this.cparts.component._lifecycle([ 'initialized', 'mount', 'mountRender' ]);
         }
-        this.isBeingMounted = true;
-        let original = this;
-        if (this.hasAttribute('modulo-original-html')) {
-            this.originalHTML = this.getAttribute('modulo-original-html');
-            original = this.modulo.registry.utils.makeDiv(this.originalHTML);
-        } else {
-            this.originalHTML = this.innerHTML;
-        }
-
-        // Trigger initialized lifecycle
-        this.cparts.component._lifecycle([ 'initialized', 'firstRender' ]);
-        this.cparts.component.rerender(original); // render + mount childNodes
-        /*
-        if (this.hasAttribute('modulo-original-html')) { // Trigger first Mounts
-            const { reconciler } = this.cparts.component;
-            reconciler.patch = reconciler.applyPatch; // Apply immediately
-            reconciler.patchAndDescendants(this, 'Mount'); // Trigger "Mount"
-            reconciler.patch = reconciler.pushPatch; // (undo apply)
-        }
-        */
-
-        // Ensure any serialized "modulo-mount-patches" get applied
-
-        this.isMounted = true;
-        this.isBeingMounted = false;
     };
-
-
     cls.prototype.initRenderObj = initRenderObj;
-    // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
-        if (this.isMounted) {
-            this.cparts.component.rerender(original);
-        } else if (!this.isBeingMounted) {
-            this.parsedCallback();
+        if (!this.isMounted) { // Not mounted, do Mount which will also rerender
+            return this.moduloMount();
         }
+        this.cparts.component.rerender(original);
     };
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
@@ -543,9 +497,10 @@ modulo.register('cpart', class Artifact {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                if (elem.src || elem.href) {
-                    modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
-                        delete modulo.fetchQueue.data[elem.src || elem.href];
+                const url = elem.getAttribute('src') || elem.getAttribute('href');
+                if (url) { // Needed, since otherwise it chokes on blank src
+                    modulo.fetchQueue.fetch(url).then(text => {
+                        delete modulo.fetchQueue.data[url];
                         elem.bundledContent = text;
                     });
                 }
@@ -604,7 +559,6 @@ modulo.register('coreDef', class Component {
             const def = modulo.definitions['${ def.DefinitionName }'];
             class ${ className } extends ${ value } {
                 constructor() { super(); this.init(); }
-                /*connectedCallback() { window.setTimeout(() => this.parsedCallback(), 0); }*/
             }
             modulo.registry.utils.initComponentClass(modulo, def, ${ className });
             window.customElements.define(def.TagName, ${ className });
@@ -624,30 +578,20 @@ modulo.register('coreDef', class Component {
     }
 
     buildCallback() {
-        const elem = this.element;
-        if (elem.originalHTML !== elem.innerHTML) {
-            elem.setAttribute('modulo-original-html', elem.originalHTML);
+        const PRE = 'modulo-mount-'; // Prefix used for attributes
+        if (this.element.originalHTML !== this.element.innerHTML) {
+            this.element.setAttribute(PRE + 'html', this.element.originalHTML);
         }
-        for (const patch of this._mountPatchset || []) {
-            if (!patch[1].startsWith('directive-')) {
-                continue; // not a directive, ignore
-            }
-            let parentCount = 0;
-            const { rawName, el } = patch[2]; // Get directive raw info
-            let parentEl = el;
-            while (parentEl && parentEl !== this.element) {
-                parentCount++;
-                parentEl = parentEl.parentNode;
-            }
-            if (!parentEl) {
-                console.log('WARNING: no parentEl!');
-                continue;
-            }
-            const serialPatch = parentCount + ',' + rawName;
-            const existing = el.getAttribute('modulo-mount-patches') || '';
-            if (!existing.includes(serialPatch)) {
-                const attrValue = `${ existing }\n${ serialPatch }`.trim();
-                el.setAttribute('modulo-mount-patches', attrValue);
+        const nodes = Array.from(this.element.querySelectorAll('*'));
+        for (const [ node, method, arg ] of this._mountPatchset || []) {
+            const { rawName, el } = arg || {}; // Extract needed directive info
+            const count = el ? nodes.filter(e => e.contains(el)).length : 0;
+            if (count) { // The element exists, and is contained by 1 or more
+                const existing = el.getAttribute(PRE + 'patches') || '';
+                if (!existing.includes(count + ',' + rawName)) { // Not a dupe
+                    const value = existing + '\n' + count + ',' + rawName;
+                    el.setAttribute(PRE + 'patches', value.trim());
+                }
             }
         }
     }
@@ -671,6 +615,7 @@ modulo.register('coreDef', class Component {
     }
 
     initializedCallback(renderObj) {
+        const { makeDiv } = this.modulo.registry.utils;
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
@@ -695,27 +640,31 @@ modulo.register('coreDef', class Component {
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
+        const html = this.element.getAttribute('modulo-mount-html');
+        this._rival = (html !== null) ? makeDiv(html) : this.element;
+        this.element.originalHTML = html || this._rival.innerHTML;
     }
 
-    firstRenderCallback(renderObj) {
+    mountCallback() { // Prepare the element, "hydrating" the "mount-patches"
+        const ATTR = 'modulo-mount-patches'; // Attribute used
         const { get } = this.modulo.registry.utils;
-        // Now, try hydrating with any modulo-mount-patches
-        const elems = this.element.querySelectorAll('[modulo-mount-patches]');
-        for (const elem of elems) {
-            // TODO: Refactor to compute the correct number first, then filter
-            const patches = elem.getAttribute('modulo-mount-patches');
-            elem.removeAttribute('modulo-mount-patches'); // Consume attribute
-            for (const patchString of patches.split('\n')) { // Loop each lines
-                const [ count, rawName ] = patchString.split(','); // Comma sep
-                const path = '.parentNode'.repeat(Number(count)).substr(1);
-                const node = get(elem, path);
-                if (node === this.element) { // It's me!
-                    this.reconciler.patch = this.reconciler.applyPatch;
+        for (const elem of this.element.querySelectorAll(`[${ ATTR }]`)) {
+            for (const line of elem.getAttribute(ATTR).split('\n')) {
+                const [ count, rawName ] = line.split(','); // Comma seperated
+                const nodePath = '.parentNode'.repeat(count).substr(1);
+                if (this.element === get(elem, nodePath)) { // It's me!
                     this.reconciler.patchDirectives(elem, rawName, 'Mount');
-                    this.reconciler.patch = this.reconciler.pushPatch;
+                    const newVal = elem.getAttribute(ATTR).replace(line, '');
+                    elem.setAttribute(ATTR, newVal); // "Consume" line from attr
                 }
             }
         }
+    }
+
+    mountRenderCallback() { // First "mount", trigger render & hydration
+        this.reconciler.applyPatches(this.reconciler.patches); // From "mount"
+        this.rerender(this._rival); // render + mount childNodes
+        this.element.isMounted = true; // Mark as mounted
     }
 
     prepareCallback() {
@@ -724,15 +673,12 @@ modulo.register('coreDef', class Component {
     }
 
     domCallback(renderObj) {
-        let { root, innerHTML, innerDOM, domPatches } = renderObj.component;
-        if (innerHTML && !innerDOM) { // TODO: change to innerHTML !== null && !innerDOM
-            //this.modulo._activeReconciler = this.reconciler;
+        let { root, innerHTML, innerDOM } = renderObj.component;
+        if (innerHTML !== null && !innerDOM) {
             innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
-            //domPatches = this.reconciler.patches;
             this.reconciler.patches = []; // clear
-            //this.modulo._activeReconciler = null;
         }
-        return { root, innerHTML, innerDOM, domPatches };
+        return { root, innerHTML, innerDOM };
     }
 
     reconcileCallback(renderObj) {
@@ -755,15 +701,11 @@ modulo.register('coreDef', class Component {
     }
 
     updateCallback(renderObj) {
-        const { patches, domPatches, innerHTML } = renderObj.component;
+        const { patches, innerHTML } = renderObj.component;
         if (patches) {
-            this._mountPatchset = this._mountPatchset || patches; // store first
+            this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches);
         }
-        /*if (domPatches) {
-            this.reconciler.applyPatches(domPatches);
-        }*/
-
         if (!this.element.isMounted && (this.mode === 'vanish' ||
                                         this.mode === 'vanish-into-document')) {
             // First time initialized, and is one of the vanish modes
@@ -816,7 +758,6 @@ modulo.register('coreDef', class Component {
 
     eventUnmount({ el, attrName }) {
         if (el.moduloEvents) { // TODO: Remove this check
-            // Modulo.assert(el.moduloEvents[attrName], 'Invalid unmount');
             el.removeEventListener(attrName, el.moduloEvents[attrName]);
             delete el.moduloEvents[attrName];
         }
@@ -1146,12 +1087,7 @@ modulo.register('cpart', class Style {
     }
 
     static factoryCallback(renderObj, def, modulo) {
-        // TODO: "windowReadyCallback" - Refactor this to put stylesheet in head
-        // If prefix is an ID, set on body (e.g. for vanish-into-document)
-        /*const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
-        if (id && window.document && window.document.body) {
-            window.document.body.setAttribute('id', id);
-        }*/
+        // OLD TODO: "windowReadyCallback" - Refactor to put stylesheet in head?
     }
 
     domCallback(renderObj) {
@@ -1890,10 +1826,6 @@ modulo.register('engine', class Reconciler {
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
                         // TODO: Possibly add directive resolution context to rival / child.originalChildren?
-                        /*if (child.isMounted) { // Trigger re-render if mounted
-                            this.patch(child, 'rerender', rival);
-                        } else { // Otherwise, trigger "parsedCallback"
-                        }*/
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
@@ -1972,9 +1904,9 @@ modulo.register('engine', class Reconciler {
             this.patchDirectives(node, rawName, 'Mount', rival);
         }
 
-        // Check for old attributes that were removed
+        // Check for old attributes that were removed (ignoring modulo- prefixed ones)
         for (const rawName of myAttrs) {
-            if (!rivalAttributes.has(rawName)) {
+            if (!rivalAttributes.has(rawName) && !rawName.startsWith('modulo-')) {
                 this.patchDirectives(node, rawName, 'Unmount');
                 this.patch(node, 'removeAttribute', rawName);
             }
@@ -2017,7 +1949,8 @@ modulo.register('util', function showDevMenu() {
     const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
-        return modulo.registry.commands[cmd](modulo, { callback });
+        const func = () => modulo.registry.commands[cmd](modulo, { callback });
+        return window.setTimeout(func, 1000); // TODO: Remove this delay
     } // Else: Display "COMMANDS:" menu in console
     const commandNames = Object.keys(modulo.registry.commands);
     const href = 'window.location.href += ';

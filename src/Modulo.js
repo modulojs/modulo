@@ -497,9 +497,10 @@ modulo.register('cpart', class Artifact {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                if (elem.src || elem.href) {
-                    modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
-                        delete modulo.fetchQueue.data[elem.src || elem.href];
+                const url = elem.getAttribute('src') || elem.getAttribute('href');
+                if (url) { // Needed, since otherwise it chokes on blank src
+                    modulo.fetchQueue.fetch(url).then(text => {
+                        delete modulo.fetchQueue.data[url];
                         elem.bundledContent = text;
                     });
                 }
@@ -614,6 +615,7 @@ modulo.register('coreDef', class Component {
     }
 
     initializedCallback(renderObj) {
+        const { makeDiv } = this.modulo.registry.utils;
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
@@ -638,6 +640,9 @@ modulo.register('coreDef', class Component {
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
+        const html = this.element.getAttribute('modulo-mount-html');
+        this._rival = (html !== null) ? makeDiv(html) : this.element;
+        this.element.originalHTML = html || this._rival.innerHTML;
     }
 
     mountCallback() { // Prepare the element, "hydrating" the "mount-patches"
@@ -657,12 +662,8 @@ modulo.register('coreDef', class Component {
     }
 
     mountRenderCallback() { // First "mount", trigger render & hydration
-        const { makeDiv } = this.modulo.registry.utils;
         this.reconciler.applyPatches(this.reconciler.patches); // From "mount"
-        const html = this.element.getAttribute('modulo-mount-html');
-        const rival = (html !== null) ? makeDiv(html) : this.element;
-        this.element.originalHTML = html ? html : rival.innerHTML;
-        this.rerender(rival); // render + mount childNodes
+        this.rerender(this._rival); // render + mount childNodes
         this.element.isMounted = true; // Mark as mounted
     }
 
@@ -1086,12 +1087,7 @@ modulo.register('cpart', class Style {
     }
 
     static factoryCallback(renderObj, def, modulo) {
-        // TODO: "windowReadyCallback" - Refactor this to put stylesheet in head
-        // If prefix is an ID, set on body (e.g. for vanish-into-document)
-        /*const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
-        if (id && window.document && window.document.body) {
-            window.document.body.setAttribute('id', id);
-        }*/
+        // OLD TODO: "windowReadyCallback" - Refactor to put stylesheet in head?
     }
 
     domCallback(renderObj) {
@@ -1908,9 +1904,9 @@ modulo.register('engine', class Reconciler {
             this.patchDirectives(node, rawName, 'Mount', rival);
         }
 
-        // Check for old attributes that were removed
+        // Check for old attributes that were removed (ignoring modulo- prefixed ones)
         for (const rawName of myAttrs) {
-            if (!rivalAttributes.has(rawName)) {
+            if (!rivalAttributes.has(rawName) && !rawName.startsWith('modulo-')) {
                 this.patchDirectives(node, rawName, 'Unmount');
                 this.patch(node, 'removeAttribute', rawName);
             }
@@ -1954,7 +1950,7 @@ modulo.register('util', function showDevMenu() {
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
         const func = () => modulo.registry.commands[cmd](modulo, { callback });
-        return window.setTimeout(func, 0);
+        return window.setTimeout(func, 1000); // TODO: Remove this delay
     } // Else: Display "COMMANDS:" menu in console
     const commandNames = Object.keys(modulo.registry.commands);
     const href = 'window.location.href += ';
