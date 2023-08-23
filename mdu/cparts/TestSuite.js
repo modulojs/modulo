@@ -727,7 +727,7 @@ modulo.register('util', function doTestRerender (elem, testInfo) {
     const isWebComponent = ({ tagName }) => tagName.includes('-');
     for (const webComponent of descendants.filter(isWebComponent)) {
         if (webComponent.moduloMount) {
-            webComponent.moduloMount(); // ensure gets immediately invoked
+            webComponent.moduloMount(true); // ensure gets immediately invoked
             webComponent.moduloMount = () => {}; // Prevent double calling
         }
     }
