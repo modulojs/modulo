@@ -97,14 +97,11 @@ modulo.register('cpart', class TestSuite {
         const isLower = key => key[0].toLowerCase() === key[0];
         const attrs = modulo.registry.utils.keyFilter(conf, isLower);
         element.initRenderObj.props = attrs;
-        if (element.renderObj) {
-            element.renderObj.props = attrs;
-        }
+        element.renderObj.props = attrs;
         if (element.eventRenderObj) {
             element.eventRenderObj.props = attrs;
         }
-        // Turn prepare into a dummy, to avoid overriding above
-        element.cparts.props.prepareCallback = () => {};
+        element.cparts.props.prepareCallback = () => {}; // Turn prepare into a dummy, to avoid overriding above
     }
 
     static templateAssertion(modulo, element, stepConf) {
@@ -709,8 +706,8 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloMockDocument = element.mockDocument = doc;
 
     doc.body.appendChild(element);
-    element.moduloMount(true); // Ensure moduloMount called synchronously
-    //element.moduloMount = () => {}; // Prevent double calling
+    element.parsedCallback(); // Ensure parsedCallback called synchronously
+    //element.parsedCallback = () => {}; // Prevent double calling
     return element;
 });
 
@@ -722,13 +719,13 @@ modulo.register('util', function doTestRerender (elem, testInfo) {
         return String(e);
     }
 
-    // Trigger all children's moduloMount
+    // Trigger all children's parsedCallbacks
     const descendants = Array.from(elem.querySelectorAll('*'));
     const isWebComponent = ({ tagName }) => tagName.includes('-');
     for (const webComponent of descendants.filter(isWebComponent)) {
-        if (webComponent.moduloMount) {
-            webComponent.moduloMount(true); // ensure gets immediately invoked
-            webComponent.moduloMount = () => {}; // Prevent double calling
+        if (webComponent.parsedCallback) {
+            webComponent.parsedCallback(); // ensure gets immediately invoked
+            webComponent.parsedCallback = () => {}; // Prevent double calling
         }
     }
 });

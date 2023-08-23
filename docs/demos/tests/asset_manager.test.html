@@ -332,10 +332,9 @@ window.moduloBuild.nameToHash = {
 
     <script name="commands.build produces JS file with expected content">
         const files = window._buildCommandAndRun(false, null);
+        //const [ js, css, html ] = files.map(({ text }) => text);
         const [ css, js, html ] = files.map(({ text }) => text);
-        //Shudl be below:
-        //const jsE1 = `js code for (${ window.location.protocol }//${ window.location.host }/foo/testing123.js)`;
-        const jsE1 = `js code for (/foo/testing123.js)`;
+        const jsE1 = `js code for (${ window.location.protocol }//${ window.location.host }/foo/testing123.js)`;
         const jsE2 = 'js code for (http://bar.com/testing456.js)';
         const jsE3 = 'OUT.push("aaa");'; // Ensure the template for TestA got compiled and included
         const jsE4 = 'OUT.push("bbb");'; // Ensure the template for TestB got compiled and included
@@ -398,10 +397,10 @@ window.moduloBuild.nameToHash = {
         const instB = new testB();
         doc.body.appendChild(instA);
         doc.body.appendChild(instB);
-        instA.moduloMount(true); // Ensure moduloMount called synchronously
-        instB.moduloMount(true); // Ensure moduloMount called synchronously
-        instA.moduloMount = () => {}; // Prevent double calling
-        instB.moduloMount = () => {}; // Prevent double calling
+        instA.parsedCallback(); // Ensure parsedCallback called synchronously
+        instB.parsedCallback(); // Ensure parsedCallback called synchronously
+        instA.parsedCallback = () => {}; // Prevent double calling
+        instB.parsedCallback = () => {}; // Prevent double calling
         assert: instA.isModulo && instB.isModulo && instA.innerHTML === 'aaa' && instB.innerHTML === 'bbb';
     </script>
 

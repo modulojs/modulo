@@ -70,10 +70,10 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
             }
             const elem = tagStack.pop();
             // Handle Web Components connectedCallback, and Modulo's
-            // non-standard, synchronous "moduloMount()"
-            if (elem.moduloMount && !elem._hasFiredConnected) {
+            // non-standard, synchronous "parsedCallback()"
+            if (elem.parsedCallback && !elem._hasFiredConnected) {
                 elem._hasFiredConnected = true;
-                elem.moduloMount();
+                elem.parsedCallback();
             } else if (elem.connectedCallback && !elem._hasFiredConnected) {
                 elem._hasFiredConnected = true;
                 elem.connectedCallback();
