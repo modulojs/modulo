@@ -855,7 +855,7 @@ modulo.register('util', function get(obj, key) {
 });
 
 modulo.register('util', function set(obj, keyPath, val) {
-    return new window.modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // OLD TODO: Global modulo
+    return new window.modulo.registry.core.ValueResolver(window.modulo).set(obj, keyPath, val);
 });
 
 modulo.register('util', function getParentDefPath(modulo, def) {
