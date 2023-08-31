@@ -115,7 +115,12 @@ modulo.register('cpart', class TestSuite {
 
         if ('testValues' in stepConf) {
             for (const input of element.querySelectorAll('input')) {
-                input.setAttribute('value', input.value);
+                if (input.type === 'checkbox') {
+                    const methodName = input.checked ? 'setAttribute' : 'removeAttribute';
+                    input[methodName]('checked', 'checked');
+                } else {
+                    input.setAttribute('value', input.value);
+                }
             }
         }
 

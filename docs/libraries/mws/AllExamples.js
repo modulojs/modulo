@@ -16,6 +16,5 @@ function initializedCallback() {
     for (const [ name, content ] of Object.entries(eg)) {
         state.examples.push({ name, content });
     }
-    element.rerender();
 }
 

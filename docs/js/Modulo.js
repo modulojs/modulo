@@ -217,11 +217,6 @@ window.modulo.DEVLIB_SOURCE = (`
 </Artifact>
 <Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
     <Script>
-        for (const elem of window.document.querySelectorAll('*')) {
-            if (elem.isModulo && elem.originalHTML !== elem.innerHTML) {
-                elem.setAttribute('modulo-original-html', elem.originalHTML);
-            }
-        }
         const head = window.document.head || { innerHTML: '' };
         const body = window.document.body || { innerHTML: '', id: '' };
         script.exports.prefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
@@ -245,7 +240,7 @@ modulo.register('core', class ValueResolver {
         if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
             return JSON.parse(key); // Not a valid identifier, try JSON
         }
-        return modulo.registry.utils.get(ctxObj, key); // Drill down to value // XXX global modulo
+        return window.modulo.registry.utils.get(ctxObj, key); // Drill down
     }
 
     set(obj, keyPath, val) {
@@ -407,28 +402,27 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
         this.originalChildren = [];
         this.cparts = modulo.instanceParts(def, { element: this });
     };
-
-    // Mount the element, optionally "merging" in the modulo-original-html attr
-    cls.prototype.parsedCallback = function parsedCallback() {
-        const htmlOriginal = this.getAttribute('modulo-original-html');
-        // TODO: Shouldn't this logic be hasAttribute? (to match logic below)
-        const original = ((!htmlOriginal || htmlOriginal === '') ? this :
-                          this.modulo.registry.utils.makeDiv(htmlOriginal));
-        this.cparts.component._lifecycle([ 'initialized' ]);
-        this.rerender(original); // render and re-mount it's own childNodes
-        if (this.hasAttribute('modulo-original-html')) {
-            const { reconciler } = this.cparts.component;
-            reconciler.patch = reconciler.applyPatch; // Apply immediately
-            reconciler.patchAndDescendants(this, 'Mount'); // Trigger "Mount"
-            reconciler.patch = reconciler.pushPatch; // (undo apply)
+    modulo._connectedQueue = modulo._connectedQueue || []; // Ensure array
+    modulo._drainQueue = () => { // "Clusters" all moduloMount calls
+        while (modulo._connectedQueue.length > 0) { // Drains + invokes
+            modulo._connectedQueue.shift().moduloMount();
         }
-        this.isMounted = true;
     };
-
+    cls.prototype.connectedCallback = function connectedCallback () {
+        modulo._connectedQueue.push(this);
+        window.setTimeout(modulo._drainQueue, 0);
+    };
+    cls.prototype.moduloMount = function moduloMount(force = false) {
+        if ((!this.isMounted && window.document.contains(this)) || force) {
+            this.cparts.component._lifecycle([ 'initialized', 'mount', 'mountRender' ]);
+        }
+    };
     cls.prototype.initRenderObj = initRenderObj;
-    // TODO: Possibly remove the following aliases (for fewer code paths):
     cls.prototype.rerender = function (original = null) {
-        this.cparts.component.rerender(original);
+        if (!this.isMounted) { // Not mounted, do Mount which will also rerender
+            return this.moduloMount();
+        }
+        this.cparts.component.rerender(original); // Otherwise, normal rerender
     };
     cls.prototype.getCurrentRenderObj = function () {
         return this.cparts.component.getCurrentRenderObj();
@@ -503,9 +497,10 @@ modulo.register('cpart', class Artifact {
                 if (def.exclude && elem.matches(def.exclude)) {
                     continue;
                 }
-                if (elem.src || elem.href) {
-                    modulo.fetchQueue.fetch(elem.src || elem.href).then(text => {
-                        delete modulo.fetchQueue.data[elem.src || elem.href];
+                const url = elem.getAttribute('src') || elem.getAttribute('href');
+                if (url) { // Needed, since otherwise it chokes on blank src
+                    modulo.fetchQueue.fetch(url).then(text => {
+                        delete modulo.fetchQueue.data[url];
                         elem.bundledContent = text;
                     });
                 }
@@ -564,7 +559,6 @@ modulo.register('coreDef', class Component {
             const def = modulo.definitions['${ def.DefinitionName }'];
             class ${ className } extends ${ value } {
                 constructor() { super(); this.init(); }
-                connectedCallback() { window.setTimeout(() => this.parsedCallback(), 0); }
             }
             modulo.registry.utils.initComponentClass(modulo, def, ${ className });
             window.customElements.define(def.TagName, ${ className });
@@ -581,6 +575,25 @@ modulo.register('coreDef', class Component {
                 original.hasChildNodes() ? original.childNodes : []);
         }
         this._lifecycle([ 'prepare', 'render', 'dom', 'reconcile', 'update' ]);
+    }
+
+    buildCallback() {
+        const PRE = 'modulo-mount-'; // Prefix used for attributes
+        if (this.element.originalHTML !== this.element.innerHTML) {
+            this.element.setAttribute(PRE + 'html', this.element.originalHTML);
+        }
+        const nodes = Array.from(this.element.querySelectorAll('*'));
+        for (const [ node, method, arg ] of this._mountPatchset || []) {
+            const { rawName, el } = arg || {}; // Extract needed directive info
+            const count = el ? nodes.filter(e => e.contains(el)).length : 0;
+            if (count) { // The element exists, and is contained by 1 or more
+                const existing = el.getAttribute(PRE + 'patches') || '';
+                if (!existing.includes(count + ',' + rawName)) { // Not a dupe
+                    const value = existing + '\n' + count + ',' + rawName;
+                    el.setAttribute(PRE + 'patches', value.trim());
+                }
+            }
+        }
     }
 
     getCurrentRenderObj() {
@@ -602,6 +615,7 @@ modulo.register('coreDef', class Component {
     }
 
     initializedCallback(renderObj) {
+        const { makeDiv } = this.modulo.registry.utils;
         const opts = { directiveShortcuts: [], directives: [] };
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
@@ -626,6 +640,31 @@ modulo.register('coreDef', class Component {
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
+        const html = this.element.getAttribute('modulo-mount-html');
+        this._rival = (html !== null) ? makeDiv(html) : this.element;
+        this.element.originalHTML = html || this._rival.innerHTML;
+    }
+
+    mountCallback() { // Prepare the element, "hydrating" the "mount-patches"
+        const ATTR = 'modulo-mount-patches'; // Attribute used
+        const { get } = this.modulo.registry.utils;
+        for (const elem of this.element.querySelectorAll(`[${ ATTR }]`)) {
+            for (const line of elem.getAttribute(ATTR).split('\n')) {
+                const [ count, rawName ] = line.split(','); // Comma seperated
+                const nodePath = '.parentNode'.repeat(count).substr(1);
+                if (this.element === get(elem, nodePath)) { // It's me!
+                    this.reconciler.patchDirectives(elem, rawName, 'Mount');
+                    const newVal = elem.getAttribute(ATTR).replace(line, '');
+                    elem.setAttribute(ATTR, newVal); // "Consume" line from attr
+                }
+            }
+        }
+    }
+
+    mountRenderCallback() { // First "mount", trigger render & hydration
+        this.reconciler.applyPatches(this.reconciler.patches); // From "mount"
+        this.rerender(this._rival); // render + mount childNodes
+        this.element.isMounted = true; // Mark as mounted
     }
 
     prepareCallback() {
@@ -635,8 +674,9 @@ modulo.register('coreDef', class Component {
 
     domCallback(renderObj) {
         let { root, innerHTML, innerDOM } = renderObj.component;
-        if (innerHTML && !innerDOM) {
+        if (innerHTML !== null && !innerDOM) {
             innerDOM = this.reconciler.loadString(innerHTML, this.localNameMap);
+            this.reconciler.patches = []; // clear
         }
         return { root, innerHTML, innerDOM };
     }
@@ -663,9 +703,9 @@ modulo.register('coreDef', class Component {
     updateCallback(renderObj) {
         const { patches, innerHTML } = renderObj.component;
         if (patches) {
+            this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches);
         }
-
         if (!this.element.isMounted && (this.mode === 'vanish' ||
                                         this.mode === 'vanish-into-document')) {
             // First time initialized, and is one of the vanish modes
@@ -717,9 +757,10 @@ modulo.register('coreDef', class Component {
     }
 
     eventUnmount({ el, attrName }) {
-        el.removeEventListener(attrName, el.moduloEvents[attrName]);
-        // Modulo.assert(el.moduloEvents[attrName], 'Invalid unmount');
-        delete el.moduloEvents[attrName];
+        if (el.moduloEvents) { // TODO: Remove this check
+            el.removeEventListener(attrName, el.moduloEvents[attrName]);
+            delete el.moduloEvents[attrName];
+        }
     }
 
     dataPropMount({ el, value, attrName, rawName }) { // element, 
@@ -814,7 +855,7 @@ modulo.register('util', function get(obj, key) {
 });
 
 modulo.register('util', function set(obj, keyPath, val) {
-    return new window.modulo.registry.core.ValueResolver(modulo).set(obj, keyPath, val); // OLD TODO: Global modulo
+    return new window.modulo.registry.core.ValueResolver(window.modulo).set(obj, keyPath, val);
 });
 
 modulo.register('util', function getParentDefPath(modulo, def) {
@@ -965,7 +1006,7 @@ modulo.register('core', class FetchQueue {
 modulo.register('cpart', class Props {
     initializedCallback(renderObj) {
         const props = {};
-        const { resolveDataProp } = modulo.registry.utils;
+        const { resolveDataProp } = this.modulo.registry.utils;
         for (const [ propName, def ] of Object.entries(this.attrs)) {
             props[propName] = resolveDataProp(propName, this.element, def);
             // TODO: Implement type-checked, and required
@@ -1046,12 +1087,7 @@ modulo.register('cpart', class Style {
     }
 
     static factoryCallback(renderObj, def, modulo) {
-        // TODO: "windowReadyCallback" - Refactor this to put stylesheet in head
-        // If prefix is an ID, set on body (e.g. for vanish-into-document)
-        /*const id = (def.prefix || '').startsWith('#') ? def.prefix.slice(1) : '';
-        if (id && window.document && window.document.body) {
-            window.document.body.setAttribute('id', id);
-        }*/
+        // OLD TODO: "windowReadyCallback" - Refactor to put stylesheet in head?
     }
 
     domCallback(renderObj) {
@@ -1443,7 +1479,7 @@ modulo.register('cpart', class State {
 
     bindMount({ el, attrName, value }) {
         const name = attrName || el.getAttribute('name');
-        const val = modulo.registry.utils.get(this.data, name);
+        const val = this.modulo.registry.utils.get(this.data, name);
         this.modulo.assert(val !== undefined, `state.bind "${name}" undefined`);
         const isText = el.tagName === 'TEXTAREA' || el.type === 'text';
         const evName = value ? value : (isText ? 'keyup' : 'change');
@@ -1486,15 +1522,17 @@ modulo.register('cpart', class State {
 
     propagate(name, val, originalEl = null) {
         const elems = (this.boundElements[name] || []).map(row => row[0]);
+        const typeConv = this.conf.types[ originalEl ? originalEl.type : null ];
+        val = typeConv ? typeConv(val, originalEl) : val; // Apply conversion
         for (const el of this.subscribers.concat(elems)) {
             if (originalEl && el === originalEl) {
-                continue; // don't propagate to self
+                continue; // don't propagate to originalEl (avoid infinite loop)
             }
-            if (el.stateChangedCallback) {
+            if (el.stateChangedCallback) { // A callback was found, use instead
                 el.stateChangedCallback(name, val, originalEl);
-            } else if (el.type === 'checkbox') {
-                el.checked = !!val; // ensure is bool
-            } else {
+            } else if (el.type === 'checkbox') { // Check input use ".checkbox"
+                el.checked = !!val;
+            } else { // Normal inputs use ".value"
                 el.value = val;
             }
         }
@@ -1502,7 +1540,8 @@ modulo.register('cpart', class State {
 
     eventCleanupCallback() {
         for (const name of Object.keys(this.data)) {
-            this.modulo.assert(name in this._oldData, `There is no "state.${name}"`);
+            this.modulo.assert(!this.conf.AllowNew && name in this._oldData,
+                `State variable "${ name }" is undeclared (no "-allow-new")`);
             if (this.data[name] !== this._oldData[name]) {
                 this.propagate(name, this.data[name], this);
             }
@@ -1512,6 +1551,7 @@ modulo.register('cpart', class State {
 }, {
     Directives: [ 'bindMount', 'bindUnmount' ],
     Store: null,
+    types: { range: Number, number: Number, checkbox: (val, el) => el.checked },
 });
 
 modulo.register('engine', class DOMCursor {
@@ -1747,7 +1787,9 @@ modulo.register('engine', class Reconciler {
     }
 
     applyPatches(patches) {
-        patches.forEach(patch => this.applyPatch.apply(this, patch));
+        for (const patch of patches) { // Simply loop through given iterable
+            this.applyPatch(patch[0], patch[1], patch[2], patch[3]);
+        }
     }
 
     reconcileChildren(childParent, rivalParent) {
@@ -1810,6 +1852,11 @@ modulo.register('engine', class Reconciler {
         } else if (method.startsWith('directive-')) {
             method = method.substr('directive-'.length); // TODO: RM prefix (or generalizze)
             node[method].call(node, arg); // invoke directive method
+        } else if (method.startsWith('weak-')) {
+            method = method.substr('weak-'.length);
+            if (document.body.contains(node)) {
+                node[method].call(node, arg);
+            }
         } else {
             node[method].call(node, arg); // invoke method
         }
@@ -1861,9 +1908,9 @@ modulo.register('engine', class Reconciler {
             this.patchDirectives(node, rawName, 'Mount', rival);
         }
 
-        // Check for old attributes that were removed
+        // Check for old attributes that were removed (ignoring modulo- prefixed ones)
         for (const rawName of myAttrs) {
-            if (!rivalAttributes.has(rawName)) {
+            if (!rivalAttributes.has(rawName) && !rawName.startsWith('modulo-')) {
                 this.patchDirectives(node, rawName, 'Unmount');
                 this.patch(node, 'removeAttribute', rawName);
             }
@@ -1906,7 +1953,8 @@ modulo.register('util', function showDevMenu() {
     const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
-        return modulo.registry.commands[cmd](modulo, { callback });
+        const func = () => modulo.registry.commands[cmd](modulo, { callback });
+        return window.setTimeout(func, 1000); // TODO: Remove this delay
     } // Else: Display "COMMANDS:" menu in console
     const commandNames = Object.keys(modulo.registry.commands);
     const href = 'window.location.href += ';
@@ -1921,15 +1969,11 @@ modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     modulo.config.IS_BUILD = true;
     opts.callback = opts.callback || (() => {});
-    /*
-    // TODO: Use this to refactor modulo-original-html into Component class
     for (const elem of document.querySelectorAll('*')) {
-        // Escape hatch for CParts / Scripts to hook in on a per-component basis
-        if (elem.isModulo && elem.cparts && elem.cparts.component) {
-            elem.cparts.component._lifecycle([ 'prepareBuild', 'build' ]);
+        if (elem.cparts && elem.cparts.component) {
+            elem.cparts.component._lifecycle([ 'build' ]); // "buildCallback"
         }
     }
-    */
     const artifacts = Object.values(modulo.definitions).filter(filter);
     const buildNext = () => {
         const artifact = artifacts.shift();

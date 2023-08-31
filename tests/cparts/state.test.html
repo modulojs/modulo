@@ -424,3 +424,131 @@
         </Test>
     </TestSuite>
 </Component>
+
+
+<Component name="StateCPart_TestTypes">
+    <Template>
+        {% if state.testnumber %}
+            <p>
+                <input [state.bind] name="anum" type="number" />
+                <input [state.bind] name="bnum" type="range" min="-100" max="100" step="0.1" />
+                Result: {{ state.anum|add:state.bnum }}
+            </p>
+        {% elif state.testbool %}
+            <aside>
+                <input [state.bind] name="abool" type="checkbox" />
+                {% if state.abool %}truthy{% endif %}
+                {% if not state.abool %}falsy{% endif %}
+            </aside>
+        {% endif %}
+    </Template>
+
+    <State
+        testnumber:=false
+        testbool:=false
+        anum:=10
+        bnum:=33
+        abool:=true
+    ></State>
+
+    <TestSuite>
+
+        <Test name="Testing Number types (number and range)">
+            <state
+                testnumber:=true
+            ></state>
+
+            <template name="Initial value worked" test-values>
+                <p>
+                    <input [state.bind] name="anum" type="number" value="10" />
+                    <input [state.bind] name="bnum" type="range"  value="33" min="-100" max="100" step="0.1" />
+                    Result: 43
+                </p>
+            </template>
+
+            <script name="Propagate method allows setting of other types from string">
+                element.cparts.state.propagate('anum', 50);
+                element.cparts.state.propagate('bnum', -29.5);
+                const { anum, bnum } = state;
+                assert: anum === 50 && bnum === -29.5
+            </script>
+
+            <template name="And reflected in DOM" test-values>
+                <p>
+                    <input [state.bind] name="anum" type="number" value="50" />
+                    <input [state.bind] name="bnum" type="range"  value="-29.5" min="-100" max="100" step="0.1" />
+                    Result: 20.5
+                </p>
+            </template>
+
+            <script name="Propagate method does conversion when triggered from DOM">
+                const inputANum = element.querySelector('[name=anum]');
+                const inputBNum = element.querySelector('[name=bnum]');
+                element.cparts.state.propagate('anum', "55", inputANum);
+                element.cparts.state.propagate('bnum', "-10.5", inputBNum);
+                const { anum, bnum } = state;
+                assert: anum === 55 && bnum === -10.5
+            </script>
+
+            <template name="And ensure conversion is in DOM, but old values are still present (no back prop)" test-values>
+                <p>
+                    <input [state.bind] name="anum" type="number" value="50" />
+                    <input [state.bind] name="bnum" type="range"  value="-29.5" min="-100" max="100" step="0.1" />
+                    Result: 44.5
+                </p>
+            </template>
+        </Test>
+
+
+        <Test name="Testing Boolean types (checkbox)">
+            <state
+                testbool:=true
+            ></state>
+
+            <template name="Initial value worked" test-values>
+                <aside>
+                    <input [state.bind] name="abool" type="checkbox" checked="checked" />
+                    truthy
+                </aside>
+            </template>
+
+            <script name="Propagate method allows setting of other types from string">
+                element.cparts.state.propagate('abool', false);
+                const { abool } = state;
+                assert: abool === false;
+            </script>
+
+            <template name="And checked reflected in dom" test-values>
+                <aside>
+                    <input [state.bind] name="abool" type="checkbox" />
+                    falsy
+                </aside>
+            </template>
+
+            <script name="Propagate method does bool conversion when triggered from DOM (1)">
+                const inputABool = element.querySelector('[name=abool]');
+                inputABool.checked = false;
+                element.cparts.state.propagate('abool', 'NotImportant', inputABool);
+                const { abool } = state;
+                assert: abool === false
+            </script>
+
+            <script name="Propagate method does bool conversion when triggered from DOM (2)">
+                const inputABool = element.querySelector('[name=abool]');
+                inputABool.checked = true;
+                element.cparts.state.propagate('abool', 'NotImportant', inputABool);
+                const { abool } = state;
+                assert: abool === true
+            </script>
+
+            <template name="And ensure bool conversion is in DOM" test-values>
+                <aside>
+                    <input [state.bind] name="abool" type="checkbox" checked="checked" />
+                    truthy
+                </aside>
+            </template>
+        </Test>
+
+    </TestSuite>
+</Component>
+

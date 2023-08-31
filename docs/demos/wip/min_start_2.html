@@ -1,14 +1,48 @@
 <template Modulo>
-    <Library namespace="x" -src="/libraries/globalExamples.html"></Library>
     <Component name="Testy">
         <Template>
-            <div class="tcls">Hello world!</div>
+            <ol>
+                {% for item in state.list %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            <div style="background: lightblue; padding: 5px">
+                <x-SubComponent></x-SubComponent>
+            </div>
+                <li>
+                    <input [state.bind] name="text" />
+                    <button @click:=script.addItem>Add</button>
+                </li>
+            </ol>
+            <div style="background: lightblue; padding: 5px">
+                <x-SubComponent></x-SubComponent>
+            </div>
         </Template>
-        <Style>
-            div {
-                color: blue;
+
+        <State
+            list:='["Milk", "Bread", "Candy"]'
+            text="Coffee"
+        ></State>
+
+        <Script>
+            function addItem() {
+                state.list.push(state.text); // add to list
+                state.text = ""; // clear input
             }
-        </Style>
+        </Script>
+    </Component>
+
+    <Component name="SubComponent">
+        <Template>
+            <button @click:=script.doSub>Sub: [{{ state.msg }}]</button>
+        </Template>
+        <State
+            msg="--------"
+        ></State>
+        <Script>
+            function doSub() {
+                state.msg = "CLICKED!"; // clear input
+            }
+        </Script>
     </Component>
 </template>
 <script src="/js/Modulo.js"></script>
@@ -16,14 +50,15 @@
 <p>Example:</p>
 <hr />
 
+<x-Testy></x-Testy>
 
+<!--
+    <Library namespace="x" -src="/libraries/globalExamples.html"></Library>
 <x-DemoModal button="Bio: Nicholas Cage" title="Biography">
     <p>Prolific and varied Hollywood actor</p>
     <img src="//i.imgur.com/hJwIMx7.png" style="width: 200px">
 </x-DemoModal>
 
-<!--
-<x-Testy></x-Testy>
 <div>not blue</div>
 -->
 

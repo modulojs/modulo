@@ -97,11 +97,14 @@ modulo.register('cpart', class TestSuite {
         const isLower = key => key[0].toLowerCase() === key[0];
         const attrs = modulo.registry.utils.keyFilter(conf, isLower);
         element.initRenderObj.props = attrs;
-        element.renderObj.props = attrs;
+        if (element.renderObj) {
+            element.renderObj.props = attrs;
+        }
         if (element.eventRenderObj) {
             element.eventRenderObj.props = attrs;
         }
-        element.cparts.props.prepareCallback = () => {}; // Turn prepare into a dummy, to avoid overriding above
+        // Turn prepare into a dummy, to avoid overriding above
+        element.cparts.props.prepareCallback = () => {};
     }
 
     static templateAssertion(modulo, element, stepConf) {
@@ -112,7 +115,12 @@ modulo.register('cpart', class TestSuite {
 
         if ('testValues' in stepConf) {
             for (const input of element.querySelectorAll('input')) {
-                input.setAttribute('value', input.value);
+                if (input.type === 'checkbox') {
+                    const methodName = input.checked ? 'setAttribute' : 'removeAttribute';
+                    input[methodName]('checked', 'checked');
+                } else {
+                    input.setAttribute('value', input.value);
+                }
             }
         }
 
@@ -706,8 +714,8 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     window._moduloMockDocument = element.mockDocument = doc;
 
     doc.body.appendChild(element);
-    element.parsedCallback(); // Ensure parsedCallback called synchronously
-    //element.parsedCallback = () => {}; // Prevent double calling
+    element.moduloMount(true); // Ensure moduloMount called synchronously
+    //element.moduloMount = () => {}; // Prevent double calling
     return element;
 });
 
@@ -719,13 +727,13 @@ modulo.register('util', function doTestRerender (elem, testInfo) {
         return String(e);
     }
 
-    // Trigger all children's parsedCallbacks
+    // Trigger all children's moduloMount
     const descendants = Array.from(elem.querySelectorAll('*'));
     const isWebComponent = ({ tagName }) => tagName.includes('-');
     for (const webComponent of descendants.filter(isWebComponent)) {
-        if (webComponent.parsedCallback) {
-            webComponent.parsedCallback(); // ensure gets immediately invoked
-            webComponent.parsedCallback = () => {}; // Prevent double calling
+        if (webComponent.moduloMount) {
+            webComponent.moduloMount(true); // ensure gets immediately invoked
+            webComponent.moduloMount = () => {}; // Prevent double calling
         }
     }
 });

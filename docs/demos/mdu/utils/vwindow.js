@@ -114,10 +114,10 @@ modulo.registry.utils.parse = function parse(parentElem, text) {
             const elem = tagStack.pop();
 
             // Handle Web Components connectedCallback, and Modulo's
-            // non-standard, synchronous "parsedCallback()"
-            if (elem.parsedCallback && !elem._hasFiredConnected) {
+            // non-standard, synchronous "moduloMount()"
+            if (elem.moduloMount && !elem._hasFiredConnected) {
                 elem._hasFiredConnected = true;
-                elem.parsedCallback();
+                elem.moduloMount();
             } else if (elem.connectedCallback && !elem._hasFiredConnected) {
                 elem._hasFiredConnected = true;
                 elem.connectedCallback();
@@ -632,8 +632,8 @@ modulo.register('engine', class VirtualWindow {
                 continue; // skip
             }
             elem._hasFiredConnected = true;
-            if (elem.parsedCallback) { // Modulo-style web component
-                elem.parsedCallback();
+            if (elem.moduloMount) { // Modulo-style web component
+                elem.moduloMount();
             } else if (elem.connectedCallback) { // Generic web component
                 elem.connectedCallback();
             } else {
@@ -642,8 +642,8 @@ modulo.register('engine', class VirtualWindow {
                 newElem.tagName = elem.tagName.toUpperCase();
                 elem.replaceWith(newElem);
                 newElem._hasFiredConnected = true;
-                if (newElem.parsedCallback) { // Modulo-style web component
-                    newElem.parsedCallback();
+                if (newElem.moduloMount) { // Modulo-style web component
+                    newElem.moduloMount();
                 } else if (newElem.connectedCallback) { // Generic web component
                     newElem.connectedCallback();
                 }
