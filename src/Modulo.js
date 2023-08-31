@@ -431,22 +431,10 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
 });
 
 modulo.register('util', function makeStore (modulo, def) {
-    const isLower = key => key[0].toLowerCase() === key[0];
-    const data = modulo.registry.utils.keyFilter(def, isLower);
-    try {
-        JSON.stringify(data);
-    } catch {
-        return {
-            boundElements: {},
-            subscribers: [],
-            data: {},
-        };
-    }
-    return {
-        boundElements: {},
-        subscribers: [],
-        data: JSON.parse(JSON.stringify(data)),
-    };
+    const isLower = key => key[0].toLowerCase() === key[0]; // skip "-prefixed"
+    let data = modulo.registry.utils.keyFilter(def, isLower); // Get defaults
+    data = JSON.parse(JSON.stringify(data)); // Deep copy to ensure primitives
+    return { data, boundElements: {}, subscribers: [] };
 });
 
 modulo.register('processor', function mainRequire (modulo, conf, value) {
