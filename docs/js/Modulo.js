@@ -249,6 +249,9 @@ modulo.register('core', class ValueResolver {
         const path = keyPath.slice(0, index - 1); // Exclude "."
         const target = index ? this.get(path, obj) : obj; // Get ctxObj or obj
         target[key] = keyPath.endsWith(':') ? this.get(val) : val;
+        if (typeof target[key] === 'function' && !target[key].prototype) {
+            target[key] = target[key].bind(target); // Unbound, bind to parent
+        }
     }
 });
 
@@ -431,13 +434,10 @@ modulo.register('util', function initComponentClass (modulo, def, cls) {
 });
 
 modulo.register('util', function makeStore (modulo, def) {
-    const isLower = key => key[0].toLowerCase() === key[0];
-    const data = modulo.registry.utils.keyFilter(def, isLower);
-    return {
-        boundElements: {},
-        subscribers: [],
-        data: JSON.parse(JSON.stringify(data)),
-    };
+    const isLower = key => key[0].toLowerCase() === key[0]; // skip "-prefixed"
+    let data = modulo.registry.utils.keyFilter(def, isLower); // Get defaults
+    data = JSON.parse(JSON.stringify(data)); // Deep copy to ensure primitives
+    return { data, boundElements: {}, subscribers: [] };
 });
 
 modulo.register('processor', function mainRequire (modulo, conf, value) {
@@ -1474,6 +1474,7 @@ modulo.register('cpart', class State {
         const store = this.conf.Store ? this.modulo.stores[this.conf.Store]
                 : this.modulo.registry.utils.makeStore(this.modulo, this.conf);
         store.subscribers.push(Object.assign(this, store));
+        this.types = { range: Number, number: Number, checkbox: (val, el) => el.checked };
         return store.data; // TODO: Possibly, push ALL sibling CParts with stateChangedCallback
     }
 
@@ -1511,7 +1512,7 @@ modulo.register('cpart', class State {
 
     stateChangedCallback(name, value, el) {
         this.modulo.registry.utils.set(this.data, name, value);
-        if (!this.conf.Only || this.conf.Only.includes(name)) { // TODO: Test & document
+        if (!this.conf.Only || this.conf.Only.includes(name)) { // TODO: Test
             this.element.rerender();
         }
     }
@@ -1522,7 +1523,7 @@ modulo.register('cpart', class State {
 
     propagate(name, val, originalEl = null) {
         const elems = (this.boundElements[name] || []).map(row => row[0]);
-        const typeConv = this.conf.types[ originalEl ? originalEl.type : null ];
+        const typeConv = this.types[ originalEl ? originalEl.type : null ];
         val = typeConv ? typeConv(val, originalEl) : val; // Apply conversion
         for (const el of this.subscribers.concat(elems)) {
             if (originalEl && el === originalEl) {
@@ -1551,7 +1552,6 @@ modulo.register('cpart', class State {
 }, {
     Directives: [ 'bindMount', 'bindUnmount' ],
     Store: null,
-    types: { range: Number, number: Number, checkbox: (val, el) => el.checked },
 });
 
 modulo.register('engine', class DOMCursor {

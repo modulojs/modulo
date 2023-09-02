@@ -249,6 +249,9 @@ modulo.register('core', class ValueResolver {
         const path = keyPath.slice(0, index - 1); // Exclude "."
         const target = index ? this.get(path, obj) : obj; // Get ctxObj or obj
         target[key] = keyPath.endsWith(':') ? this.get(val) : val;
+        if (typeof target[key] === 'function' && !target[key].prototype) {
+            target[key] = target[key].bind(target); // Unbound, bind to parent
+        }
     }
 });
 
@@ -1509,7 +1512,7 @@ modulo.register('cpart', class State {
 
     stateChangedCallback(name, value, el) {
         this.modulo.registry.utils.set(this.data, name, value);
-        if (!this.conf.Only || this.conf.Only.includes(name)) { // TODO: Test & document
+        if (!this.conf.Only || this.conf.Only.includes(name)) { // TODO: Test
             this.element.rerender();
         }
     }
