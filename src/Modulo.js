@@ -739,21 +739,14 @@ modulo.register('coreDef', class Component {
     }
 
     eventMount({ el, value, attrName, rawName }) {
-        // Note: attrName becomes "event name"
-        // TODO: Make it @click.payload, and then have this see if '.' exists
-        // in attrName and attach as payload if so
         const { resolveDataProp } = this.modulo.registry.utils;
         const get = (key, key2) => resolveDataProp(key, el, key2 && get(key2));
-        const func = get(attrName);
-        this.modulo.assert(func, `No function found for ${rawName} ${value}`);
-        if (!el.moduloEvents) {
-            el.moduloEvents = {};
-        }
-        const listen = ev => {
+        this.modulo.assert(get(attrName), `Not found: ${ rawName }=${ value }`);
+        el.moduloEvents = el.moduloEvents || {}; // Attach if not already
+        const listen = ev => { // Define a listen event func to run handleEvent
             ev.preventDefault();
             const payload = get(attrName + '.payload', 'payload');
-            const currentFunction = resolveDataProp(attrName, el);
-            this.handleEvent(currentFunction, payload, ev);
+            this.handleEvent(resolveDataProp(attrName, el), payload, ev);
         };
         el.moduloEvents[attrName] = listen;
         el.addEventListener(attrName, listen);
