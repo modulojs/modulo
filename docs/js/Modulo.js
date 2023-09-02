@@ -248,9 +248,13 @@ modulo.register('core', class ValueResolver {
         const key = keyPath.slice(index).replace(/:$/, ''); // Between "." & ":"
         const path = keyPath.slice(0, index - 1); // Exclude "."
         const target = index ? this.get(path, obj) : obj; // Get ctxObj or obj
-        target[key] = keyPath.endsWith(':') ? this.get(val) : val;
-        if (typeof target[key] === 'function' && !target[key].prototype) {
-            target[key] = target[key].bind(target); // Unbound, bind to parent
+        target[key] = val;
+        if (keyPath.endsWith(':')) { // Not a normal string setting
+            target[key] = this.get(val);
+            const parentKey = val.substr(0, val.lastIndexOf('.'));
+            if (autoBind && parentKey.includes('.')) { // Do auto-binding
+                target[key] = target[key].bind(this.get(parentKey));
+            }
         }
     }
 });
@@ -715,9 +719,8 @@ modulo.register('coreDef', class Component {
 
     handleEvent(func, payload, ev) {
         this._lifecycle([ 'event' ]);
-        const { value } = (ev.target || {}); // Get value if is <INPUT>, etc
-        func.call(null, payload === undefined ? value : payload, ev);
-        this._lifecycle([ 'eventCleanup' ]); // todo: should this go below rerender()?
+        func(payload === undefined ? ev : payload);
+        this._lifecycle([ 'eventCleanup' ]);
         if (this.attrs.rerender !== 'manual') {
             this.element.rerender(); // always rerender after events
         }
@@ -771,7 +774,7 @@ modulo.register('coreDef', class Component {
         }
         const resolver = new this.modulo.registry.core.ValueResolver(// OLD TODO: Global modulo
                       this.element && this.element.getCurrentRenderObj());
-        resolver.set(el.dataProps, attrName + ':', value);
+        resolver.set(el.dataProps, attrName + ':', value, true);
         el.dataPropsAttributeNames[rawName] = attrName;
     }
 

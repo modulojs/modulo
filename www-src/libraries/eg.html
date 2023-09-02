@@ -272,7 +272,7 @@ as static data in with JS, so it does not refresh. -->
     // (Hint: Curious how it calculates prime? See CSS!)
     script.exports.range = 
         Array.from({length: 63}, (x, i) => i + 2);
-    function setNum(payload, ev) {
+    function setNum(ev) {
         state.number = Number(ev.target.textContent);
     }
 </Script>
