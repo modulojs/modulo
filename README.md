@@ -81,9 +81,9 @@ like any normal HTML tag. E.g.:
   for your website (for example, `/static/js/Modulo.js`)
 
 
-* **Continue?** Want to try more? The tutorial picks up where this leaves off
-  starting with
-[Part 1, Section 2: CParts](https://modulojs.org/docs/tutorial_part1.html#cparts)
+* **Continue?** Want to try more? The official beginner tutorial picks up where
+  this leaves off:
+  [Ramping Up with Modulo - Part 1](https://modulojs.org/tutorial/ramping-up-1.html#)
 
 -----
 

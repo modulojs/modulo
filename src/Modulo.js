@@ -233,32 +233,31 @@ window.modulo.DEVLIB_SOURCE = (`
 modulo.register('core', class ValueResolver {
     constructor(contextObj = null) {
         this.ctxObj = contextObj;
+        this.isJSON = /^(true$|false$|null$|[^a-zA-Z])/; // "If not variable"
     }
 
     get(key, ctxObj = null) {
-        ctxObj = ctxObj || this.ctxObj;
-        if (!/^[a-z]/i.test(key) || Modulo.INVALID_WORDS.has(key)) { // XXX global ref
-            return JSON.parse(key); // Not a valid identifier, try JSON
-        }
-        return window.modulo.registry.utils.get(ctxObj, key); // Drill down
+        const { get } = window.modulo.registry.utils; // For drilling down "."
+        const obj = ctxObj || this.ctxObj; // Use given one or in general
+        return this.isJSON.test(key) ? JSON.parse(key) : get(obj, key);
     }
 
     set(obj, keyPath, val, autoBind = false) {
         const index = keyPath.lastIndexOf('.') + 1; // Index at 1 (0 if missing)
         const key = keyPath.slice(index).replace(/:$/, ''); // Between "." & ":"
-        const path = keyPath.slice(0, index - 1); // Exclude "."
-        const target = index ? this.get(path, obj) : obj; // Get ctxObj or obj
-        target[key] = val;
-        if (keyPath.endsWith(':')) { // Not a normal string setting
-            target[key] = this.get(val);
+        const prefix = keyPath.slice(0, index - 1); // Get before first "."
+        const target = index ? this.get(prefix, obj) : obj; // Drill down prefix
+
+        if (keyPath.endsWith(':')) { // If it's a dataProp style attribute
             const parentKey = val.substr(0, val.lastIndexOf('.'));
-            if (autoBind && parentKey.includes('.')) { // Do auto-binding
-                target[key] = target[key].bind(this.get(parentKey));
+            val = this.get(val); // Resolve "val" from context, or JSON literal
+            if (autoBind && !this.isJSON.test(val) && parentKey.includes('.')) {
+                val = val.bind(this.get(parentKey)); // Parent is sub-obj, bind
             }
         }
+        target[key] = val; // Assign the value to it's parent object
     }
 });
-
 
 modulo.register('core', class DOMLoader {
     constructor(modulo) {
@@ -280,7 +279,6 @@ modulo.register('core', class DOMLoader {
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) {
-        const resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
         const { defaultDef } = this.modulo.config.modulo;
         const toCamel = s => s.replace(/-([a-z])/g, g => g[1].toUpperCase());
         const tagsLower = this.getAllowedChildTags(parentName);
