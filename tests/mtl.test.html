@@ -77,7 +77,6 @@
         const template = 'This is a {{ test.thing }}, cool. {{ test.thing }}';
         const expected = 'This is a tester, cool. tester';
         const result = window._r(template, context);
-
         assert: result === expected
     </script>
 
@@ -86,9 +85,33 @@
         const template = 'This is a {{ "testing"|upper }}';
         const expected = 'This is a TESTING';
         const result = window._r(template, context);
-
         assert: result === expected
     </script>
+
+    <script name="Kebab to camel case test 1">
+        const context = {'thisIsAVariable': 'tester'};
+        const template = 'This is a {{ this-is-a-variable|upper }}';
+        const expected = 'This is a TESTER';
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
+    <script name="Kebab to camel case test 2">
+        const context = {'nestedLevels': { 'ofDelish': 'kebab'} };
+        const template = 'This is a {{ nested-levels.of-delish|upper }}';
+        const expected = 'This is a KEBAB';
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
+    <script name="Kebab to camel case test 3- mixed">
+        const context = {'nestedLevels': { 'ofDelish': 'kebab'} };
+        const template = 'This is a {{ nested-levels.ofDelish }}';
+        const expected = 'This is a kebab';
+        const result = window._r(template, context);
+        assert: result === expected
+    </script>
+
 
     <script name="Filter arguments test 1">
         const context = {'test': 'tester'};

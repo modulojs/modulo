@@ -1050,7 +1050,7 @@ modulo.register('cpart', class Style {
         }
         if (def.prefix && !selector.startsWith(def.prefix)) {
             // If it is not prefixed at this point, then be sure to prefix
-            selector = `${def.prefix} ${selector}`;
+            selector = `${ def.prefix } ${ selector }`;
         }
         return selector;
     }
@@ -1088,20 +1088,20 @@ modulo.register('cpart', class Style {
         const { mode } = modulo.definitions[this.conf.Parent] || {};
         const { innerDOM, Parent } = renderObj.component;
         const { isolateClass, isolateSelector, shadowContent } = this.conf;
-        if (isolateClass && isolateSelector) { // Attach "silo'ed" class to elem
+        if (isolateClass && isolateSelector && innerDOM) { // Attach classes
             const selector = isolateSelector.filter(s => s).join(',\n');
             for (const elem of innerDOM.querySelectorAll(selector)){
                 elem.classList.add(isolateClass);
             }
         }
-        if (shadowContent) {
+        if (shadowContent && innerDOM) {
             const style = window.document.createElement('style');
             style.textContent = shadowContent;
             innerDOM.append(style); // Append to element to reconcile
         }
     }
 }, {
-    AutoIsolate: true, // null is "default behavior" (autodetect)
+    AutoIsolate: true, // true is "default behavior" (autodetect)
     isolateSelector: null, // Later has list of selectors
     isolateClass: null, // No class-based isolate
     prefix: null, // No prefix-based isolation
@@ -1138,8 +1138,9 @@ modulo.register('cpart', class Template {
     }
 
     renderCallback(renderObj) {
-        // Set component.innerHTML (for DOM reconciliation) with render() call
-        renderObj.component.innerHTML = this.render(renderObj);
+        if (this.conf.Name === 'template' || this.conf.active) { // If primary
+            renderObj.component.innerHTML = this.render(renderObj); // Do render
+        }
     }
 
     parseExpr(text) {
@@ -1149,7 +1150,6 @@ modulo.register('cpart', class Template {
         for (const [ fName, arg ] of filters.map(s => s.trim().split(':'))) {
             // TODO: Store a list of variables / paths, so there can be
             // warnings or errors when variables are unspecified
-            // TODO: Support this-style-var being turned to thisStyleVar
             const argList = arg ? ',' + this.parseVal(arg) : '';
             results = `G.filters["${fName}"](${results}${argList})`;
         }
@@ -1162,14 +1162,18 @@ modulo.register('cpart', class Template {
         return string.split(RegExp(regExpText));
     }
 
+    toCamel(string) { // Takes kebab-case and converts toCamelCase
+        return string.replace(/-([a-z])/g, g => g[1].toUpperCase());
+    }
+
     parseVal(string) {
         // Parses str literals, de-escaping as needed, numbers, and context vars
-        const { cleanWord } = this.modulo.registry.utils;
+        const { cleanWord } = modulo.registry.utils; // TODO: RM this "safety"
         const s = string.trim();
         if (s.match(/^('.*'|".*")$/)) { // String literal
             return JSON.stringify(s.substr(1, s.length - 2));
         }
-        return s.match(/^\d+$/) ? s : `CTX.${cleanWord(s)}`
+        return s.match(/^\d+$/) ? s : `CTX.${ cleanWord(this.toCamel(s)) }`
     }
 
     escapeText(text) {

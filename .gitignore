@@ -2,6 +2,8 @@
 
 tmp-www-out
 
+docs/
+
 # dependencies
 /node_modules
 
