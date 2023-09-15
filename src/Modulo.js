@@ -34,10 +34,10 @@ window.Modulo = class Modulo {
         }
     }
 
-    instance(def, extra) {
+    instance(def, extra, inst = null) {
         const isLower = key => key[0].toLowerCase() === key[0];
         const registry = def.Type === 'Component' ? 'coreDefs' : 'cparts'; // TODO: make compatible with any registration type
-        const inst = new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
+        inst = inst || new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
         //const conf = Object.assign({}, this.config[name.toLowerCase()], def);
         const conf = Object.assign({}, def); // Just shallow copy "def"
@@ -351,7 +351,7 @@ modulo.register('processor', function srcSync (modulo, def, value) {
 });
 
 modulo.register('processor', function defTarget (modulo, def, value) {
-    const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document, make it switch to Template Resolver if there is {% or {{
+    const resolverName = def.DefResolver || 'ValueResolver'; // TODO: document
     const resolver = new modulo.registry.core[resolverName](modulo);
     const target = value === null ? def : resolver.get(value);
     for (const [ key, defValue ] of Object.entries(def)) {
@@ -1119,6 +1119,14 @@ modulo.register('cpart', class Template {
         delete def.Content;
     }
 
+    constructor(text, options = {}) {
+        if (typeof text === 'string') {
+            const DefinitionName = '_template' + this.id; // Make unique with ID
+            window.modulo.instance({ DefinitioName }, options || {}, this);
+            window.modulo.assets.define(DefinitioName, this.compileFunc(text));
+        }
+    }
+
     constructedCallback() {
         this.stack = []; // Parsing tag stack, used to detect unclosed tags
         // Combine conf from all sources: config, defaults, and "registered"
@@ -1132,8 +1140,6 @@ modulo.register('cpart', class Template {
     }
 
     initializedCallback() {
-        // When component mounts, expose a reference to the "render" function
-        this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
         return { render: this.render.bind(this) };
     }
 
@@ -1186,7 +1192,7 @@ modulo.register('cpart', class Template {
     }
 
     tokenizeText(text) {
-        // Join all modeTokens with | (OR in regex).
+        // Join all modeTokens with | (OR in regex)
         const { escapeRegExp } = this.modulo.registry.utils;
         const re = '(' + this.modeTokens.map(escapeRegExp).join('|(').replace(/ +/g, ')(.+?)');
         return text.split(RegExp(re)).filter(token => token !== undefined);
@@ -1216,6 +1222,9 @@ modulo.register('cpart', class Template {
     }
 
     render(renderObj) {
+        if (!this.renderFunc) { // Run modulo and get function
+            this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
+        }
         return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
     }
 }, {
