@@ -567,7 +567,8 @@ modulo.register('util', function runTest(modulo, discovered, skippedCount, opts)
     const failedComponents = [];
 
     if (discovered.length === 0) {
-        console.warn('OMISSION: No test suites discovered')
+        console.warn('OMISSION: No test suites discovered');
+        console.log(modulo, discovered);
         omission++;
     }
     for (const [ componentFac, suite ] of discovered) {
@@ -697,7 +698,9 @@ modulo.register('util', function registerTestElement (modulo, componentFac) {
     let componentClass;
     if (UNIFIED_DEFINITIONS) {
         modulo.definitions[componentFac.DefinitionName] = componentFac; // XXX For some reason have to re-assign
+        console.log('about to require', componentFac.DefinitionName);
         componentClass = modulo.assets.require(componentFac.DefinitionName); // Retrieved registered version
+        console.log('success:', componentClass);
     } else {
         modulo.parentDefs[componentFac.FullName] = componentFac; // XXX For some reason have to re-assign
         componentClass = modulo.assets.require(componentFac.FullName); // Retrieved registered version

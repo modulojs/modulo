@@ -531,7 +531,8 @@ modulo.config.component = {
     RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
-    DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
+    //DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
+    DefBuilders: [ 'CustomElement', 'Code', 'CodeTemplate' ],
     DefFinalizers: [ 'MainRequire' ],
     Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
 };
@@ -556,7 +557,23 @@ modulo.register('coreDef', class Component {
         def.name = def.name || def.DefName || def.Name;
         def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
         def.MainRequire = def.DefinitionName;
+        /** SNIP **/
+        /*
+        const className =  `${ def.namespace }_${ def.name }`;
+        def.Code = `
+            const def = modulo.definitions['${ def.DefinitionName }'];
+            class ${ className } extends ${ value } {
+                constructor() { super(); this.init(); }
+            }
+            modulo.registry.utils.initComponentClass(modulo, def, ${ className });
+            window.customElements.define(def.TagName, ${ className });
+           return ${ className };
+        `;
+        */
+        /** SNIP **/
         def.className =  def.className || `${ def.namespace }_${ def.name }`;
+        /** SNIP **/
+
     }
 
     rerender(original = null) {
@@ -1407,7 +1424,7 @@ modulo.config.script = {
         setLocalVariables: function (o) {
             {% for n in def.locals %}{{ n }} = o.{{ n }};{% endfor %}
         }
-    }`.replace(/\s\s+/g, ''),
+    }`.replace(/\s\s+/g, ' '),
 };
 
 modulo.register('cpart', class Script {
