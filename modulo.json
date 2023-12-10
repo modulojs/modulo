@@ -1,5 +1,5 @@
 {
-    "isCopyOnly": "^(components|libraries|demos|slides)$",
+    "isCopyOnly": ".",
     "testPath": "www-src/demos/tests/index.html",
     "output": "docs",
     "input": "www-src"

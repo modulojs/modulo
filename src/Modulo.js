@@ -521,30 +521,30 @@ modulo.register('cpart', class Artifact {
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
-/*
-modulo.config.reconciler = {
-    directiveShortcuts: [ [ /^@/, 'component.event' ],
-                          [ /:$/, 'component.dataProp' ] ],
-    directives: [ 'component.event', 'component.dataProp' ],
-};
-*/
-
 modulo.config.component = {
     mode: 'regular',
     rerender: 'event',
-    engine: 'Reconciler', // TODO: 'Engine':, depends on Instbuilders
-    // namespace: 'x',
+    engine: 'Reconciler', // TODO: rm, once test is fixed
     Contains: 'cparts',
     CustomElement: 'window.HTMLElement',
     DefinedAs: 'name',
     RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
-    DefBuilders: [ 'CustomElement', 'Code' ],
+    DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
     DefFinalizers: [ 'MainRequire' ],
     Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
-    //InstBuilders: [ 'CreateChildren' ],
 };
+
+modulo.config.component.CodeTemplate = `
+    const def = modulo.definitions['{{ def.DefinitionName }}'];
+    class {{ def.className }} extends {{ def.baseClass|default:'window.HTMLElement' }} {
+        constructor() { super(); this.init(); }
+    }
+    modulo.registry.utils.initComponentClass(modulo, def, {{ def.className }});
+    window.customElements.define(def.TagName, {{ def.className }});
+    return {{ def.className }};
+`;
 
 modulo.register('coreDef', class Component {
     static CustomElement (modulo, def, value) {
@@ -556,16 +556,7 @@ modulo.register('coreDef', class Component {
         def.name = def.name || def.DefName || def.Name;
         def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
         def.MainRequire = def.DefinitionName;
-        const className =  `${ def.namespace }_${ def.name }`;
-        def.Code = `
-            const def = modulo.definitions['${ def.DefinitionName }'];
-            class ${ className } extends ${ value } {
-                constructor() { super(); this.init(); }
-            }
-            modulo.registry.utils.initComponentClass(modulo, def, ${ className });
-            window.customElements.define(def.TagName, ${ className });
-            return ${ className };
-        `;
+        def.className =  def.className || `${ def.namespace }_${ def.name }`;
     }
 
     rerender(original = null) {
@@ -1119,11 +1110,12 @@ modulo.register('cpart', class Template {
         delete def.Content;
     }
 
-    constructor(text, options = {}) {
-        if (typeof text === 'string') {
-            const DefinitionName = '_template' + this.id; // Make unique with ID
-            window.modulo.instance({ DefinitioName }, options || {}, this);
-            window.modulo.assets.define(DefinitioName, this.compileFunc(text));
+    constructor(text, options = null) {
+        if (typeof text === 'string') { // Using "new" (direct JS interface)
+            window.modulo.instance({ }, options || { }, this); // Setup object
+            this.conf.DefinitionName = '_template_template' + this.id; // Unique
+            const code = `return function (CTX, G) { ${ this.compileFunc(text) } };`;
+            this.modulo.assets.define(this.conf.DefinitionName, code);
         }
     }
 
@@ -1222,7 +1214,7 @@ modulo.register('cpart', class Template {
     }
 
     render(renderObj) {
-        if (!this.renderFunc) { // Run modulo and get function
+        if (!this.renderFunc) { // Run module and get function
             this.renderFunc = this.modulo.assets.require(this.conf.DefinitionName);
         }
         return this.renderFunc(Object.assign({ renderObj }, renderObj), this);
@@ -1331,7 +1323,7 @@ modulo.config.template.defaultTags = {
             start += `CTX.${keyVar}=KEY;`;
         }
         start += `CTX.${valVar ? valVar : varExp}=${arrName}[KEY];`;
-        return {start, end: '}'};
+        return { start, end: '}'};
     },
     'empty': (text, {stack}) => {
         // Make variable name be based on nested-ness of tag stack
@@ -1378,9 +1370,14 @@ modulo.register('processor', function code (modulo, def, value) {
     modulo.assets.define(def.DefinitionName, value);
 });
 
+modulo.register('processor', function codeTemplate (modulo, def, value) {
+    const tmplt = new modulo.registry.cparts.Template(value); // need to render
+    modulo.assets.define(def.DefinitionName, tmplt.render({ modulo, def }));
+});
+
 modulo.register('cpart', class StaticData {
     static RequireData (modulo, def, value) {
-        def.data = modulo.assets.require(def[value]);
+        def.data = modulo.assets.require(def[value]); // TODO: Remove asset
     }
     prepareCallback() {
         return this.conf.data;
@@ -1397,27 +1394,46 @@ modulo.register('coreDef', class Configuration { }, {
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src|SrcSync', 'Content|Code', 'DefinitionName|MainRequire' ],
 });
 
+modulo.config.script = {
+    lifecycle: null,
+    DefBuilders: [ 'Content|AutoExport', 'Code' ],
+    CodeTemplate: `var script = { exports: { } };{% if def.locals.length %}
+    var {{ def.locals|join:',' }}; {% endif %}
+    {{ value|default:def.Content }}
+    ;return { exports: script.exports,
+        {% for n in def.exportNames %}
+            "{{ n }}": typeof {{ n }} !== "undefined" ? {{ n }} : undefined,
+        {% endfor %}
+        setLocalVariables: function (o) {
+            {% for n in def.locals %}{{ n }} = o.{{ n }};{% endfor %}
+        }
+    }`.replace(/\s\s+/g, ''),
+};
+
 modulo.register('cpart', class Script {
     static AutoExport (modulo, def, value) {
         const { getAutoExportNames } = modulo.registry.utils;
         if (def.lifecycle && def.lifecycle !== 'initialized') {
             value = `function ${ def.lifecycle }Callback (renderObj) {${ value }}`;
         }
-        const isDirRegEx = /(Unmount|Mount)$/;
-        def.Directives = getAutoExportNames(value).filter(s => s.match(isDirRegEx));
         const { ChildrenNames } = modulo.definitions[def.Parent] || { };
         const sibs = (ChildrenNames || []).map(n => modulo.definitions[n].Name);
         sibs.push('component', 'element', 'cparts'); // Add in extras
-        const varNames = sibs.filter(name => value.includes(name)); // Used only
+        def.exportNames = def.exportNames || getAutoExportNames(value); // Scan names
+        def.locals = def.locals || sibs.filter(name => value.includes(name));
+        def.Directives = def.exportNames.filter(s => s.match(/(Unmount|Mount)$/));
+        const tmplt = new modulo.registry.cparts.Template(def.CodeTemplate); // need to render
+        def.Code = tmplt.render({ modulo, def, value });
+        //console.log('This is Code', def.Code); // TODO: Solve why Def.Code si wrong
         // Build def.Code to wrap the user-provided code and export local vars
         def.Code = `var script = { exports: {} }; `;
-        def.Code += varNames.length ? `var ${ varNames.join(', ') };` : '';
+        def.Code += def.locals.length ? `var ${ def.locals.join(', ') };` : '';
         def.Code += '\n' + value + '\nreturn {';
         for (const s of getAutoExportNames(value)) {
             def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
         }
         def.Code += `setLocalVariables: function (o) {`
-        def.Code += varNames.map(name => `${ name }=o.${ name }`).join('; ');
+        def.Code += def.locals.map(name => `${ name }=o.${ name }`).join('; ');
         def.Code += `}, exports: script.exports }\n`
     }
 
@@ -1459,9 +1475,6 @@ modulo.register('cpart', class Script {
             };
         }
     }
-}, {
-    lifecycle: null,
-    DefBuilders: [ 'Content|AutoExport', 'Code' ],
 });
 
 
