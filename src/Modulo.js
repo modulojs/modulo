@@ -531,8 +531,7 @@ modulo.config.component = {
     RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
-    //DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
-    DefBuilders: [ 'CustomElement', 'Code', 'CodeTemplate' ],
+    DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
     DefFinalizers: [ 'MainRequire' ],
     Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
 };
@@ -1388,7 +1387,11 @@ modulo.register('processor', function code (modulo, def, value) {
 });
 
 modulo.register('processor', function codeTemplate (modulo, def, value) {
-    const tmplt = new modulo.registry.cparts.Template(value); // need to render
+    if (def.DefinitionName in modulo.assets.nameToHash) {
+        console.error("ERROR: Duped def:", def.DefinitionName);
+        return;
+    }
+    const tmplt = new modulo.registry.cparts.Template(value); // Compile Template
     modulo.assets.define(def.DefinitionName, tmplt.render({ modulo, def }));
 });
 
@@ -1413,10 +1416,11 @@ modulo.register('coreDef', class Configuration { }, {
 
 modulo.config.script = {
     lifecycle: null,
-    DefBuilders: [ 'Content|AutoExport', 'Code' ],
+    //DefBuilders: [ 'Content|AutoExport', 'Code' ],
+    DefBuilders: [ 'Content|AutoExport', 'CodeTemplate' ],
     CodeTemplate: `var script = { exports: { } };{% if def.locals.length %}
-    var {{ def.locals|join:',' }}; {% endif %}
-    {{ value|default:def.Content }}
+    var {{ def.locals|join:',' }};{% endif %}
+    {{ def.tempContent|safe }}
     ;return { exports: script.exports,
         {% for n in def.exportNames %}
             "{{ n }}": typeof {{ n }} !== "undefined" ? {{ n }} : undefined,
@@ -1439,19 +1443,7 @@ modulo.register('cpart', class Script {
         def.exportNames = def.exportNames || getAutoExportNames(value); // Scan names
         def.locals = def.locals || sibs.filter(name => value.includes(name));
         def.Directives = def.exportNames.filter(s => s.match(/(Unmount|Mount)$/));
-        const tmplt = new modulo.registry.cparts.Template(def.CodeTemplate); // need to render
-        def.Code = tmplt.render({ modulo, def, value });
-        //console.log('This is Code', def.Code); // TODO: Solve why Def.Code si wrong
-        // Build def.Code to wrap the user-provided code and export local vars
-        def.Code = `var script = { exports: {} }; `;
-        def.Code += def.locals.length ? `var ${ def.locals.join(', ') };` : '';
-        def.Code += '\n' + value + '\nreturn {';
-        for (const s of getAutoExportNames(value)) {
-            def.Code += `"${s}": typeof ${s} !== "undefined" ? ${s} : undefined, `;
-        }
-        def.Code += `setLocalVariables: function (o) {`
-        def.Code += def.locals.map(name => `${ name }=o.${ name }`).join('; ');
-        def.Code += `}, exports: script.exports }\n`
+        def.tempContent = value;
     }
 
     static factoryCallback(renderObj, def, modulo) {
