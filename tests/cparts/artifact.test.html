@@ -1,0 +1,121 @@
+<script Configuration>
+
+    modulo.register('util', function _testGetArtifacts() {
+        const filter = (({ Type }) => Type === 'Artifact_MK2');
+        const artifacts = Object.values(modulo.definitions).filter(filter);
+        return artifacts;
+    });
+
+    modulo.register('util', function _testMocks() {
+        const urls = [];
+        const fetch = url => ({ then: (() => urls.push(url)) });
+        const enqueueAll = cb => cb();
+        const fetchQueue = { fetch, enqueueAll, data: {} }; // Add dummy
+        const mockDoc = {};
+        mockDoc.querySelectorAll = query => [];
+        return { mockDoc, fetchQueue, urls };
+    });
+
+</script>
+
+<Component name="TestArtifacts_BuiltIn">
+    <Style>
+        .Should_End_Up_In_CSS { color: red; }
+    </Style>
+    <TestSuite solo>
+        <Test name="Built-in Modulo Artifacts exist">
+
+            <Script name="Three built-in artifacts exist by default (CSS, JS, and HTML)">
+                const artifacts = modulo.registry.utils._testGetArtifacts();
+                const expected = JSON.stringify([ 'css', 'js', 'html' ]);
+                const actual = JSON.stringify(artifacts.map(({ name }) => name));
+                assert: artifacts.length === 3 && expected === actual
+            </Script>
+
+            <Script name="Default Modulo artifacts can be instanced and generate expected bundle context">
+                const artifacts = modulo.registry.utils._testGetArtifacts();
+                const { fetchQueue, urls } = modulo.registry.utils._testMocks();
+                modulo.fetchQueue = fetchQueue;
+                const results = [];
+                for (const def of artifacts) {
+                    const inst = modulo.instance(def, { buildOptions: {} });
+                    results.push(inst.getTemplateContext(window.document)); // using real document!
+                }
+                const actual = JSON.stringify(results.map(({ bundle }) => bundle && bundle.length));
+                const expected = JSON.stringify([ 0, 2, null ]);
+                assert: results.length === 3 && actual === expected;
+            </Script>
+
+            <Script name="Expected Bundle fetches occur when getting context">
+                const artifacts = modulo.registry.utils._testGetArtifacts();
+                const { fetchQueue, urls } = modulo.registry.utils._testMocks()
+                modulo.fetchQueue = fetchQueue;
+                modulo.definitions = { }; // reset
+                for (const def of artifacts) {
+                    modulo.definitions[def.DefinitionName] = def; // make sure is set
+                    const inst = modulo.instance(def, { buildOptions: {} });
+                    inst.getTemplateContext(window.document); // using real document!
+                }
+                const actual = JSON.stringify(urls);
+                const expected = JSON.stringify([ '/js/Modulo.js', '/demos/mdu/cparts/TestSuite.js' ]);
+                assert: urls.length === 2 && actual === expected;
+            </Script>
+
+        </Test>
+        <Test name="Built-in Modulo Artifact build commands work">
+
+            <Script name="Expected fetches and saveas occur when building">
+                const artifacts = modulo.registry.utils._testGetArtifacts();
+                const { fetchQueue, urls } = modulo.registry.utils._testMocks()
+                modulo.fetchQueue = fetchQueue;
+
+                modulo.definitions = { }; // reset
+                for (const def of artifacts) {
+                    modulo.definitions[def.DefinitionName] = def; // make sure is set
+                    const inst = modulo.instance(def, { buildOptions: {} });
+                    inst.buildCommand(window.document); // using real document!
+                }
+
+                // now we validate
+                const defs = Object.values(modulo.definitions).filter( (({ Type }) => Type === 'Artifact_MK2'));
+                const stripHashes = path => (path || '').replace(/\-x[a-z0-9]+\./gi, '-x.');
+                const actualFetches = JSON.stringify(urls);
+                const expectedFetches = JSON.stringify([ '/js/Modulo.js', '/demos/mdu/cparts/TestSuite.js' ]);
+                const actualOutputs = JSON.stringify(defs.map(({ OutputPath }) => OutputPath).map(stripHashes));
+                const expectedOutputs = JSON.stringify([
+                    './modulo-build-xxgbamhn.css',
+                    './modulo-build-xxqv5mn2.js',
+                    //'./modulo-build-xx3v3ooa.html', // Note: Eventually, may change to this
+                    './index.html',
+                ].map(stripHashes));
+                const actualSaveCount = window._moduloMockedFileSaves.length;
+                const expectedSaveCount = 3;
+                assert: actualOutputs === expectedOutputs && actualFetches === expectedFetches && actualSaveCount === expectedSaveCount 
+            </Script>
+
+            <Script name="Produces CSS in expected location when building">
+                const artifacts = modulo.registry.utils._testGetArtifacts();
+                const { mockDoc, fetchQueue, urls } = modulo.registry.utils._testMocks()
+                modulo.fetchQueue = fetchQueue;
+                modulo.definitions = { }; // clear and reset
+                for (const def of artifacts) {
+                    modulo.definitions[def.DefinitionName] = def; // make sure is set
+                    const inst = modulo.instance(def, { buildOptions: {} });
+                    inst.buildCommand(mockDoc);
+                }
+                const results = window._moduloMockedFileSaves;
+                const [ css, js, html ] = results.map(row => row[1]);
+                const expected = '.Should_End_Up_In_CSS';
+                const cssHasIt = css && css.includes(expected);
+                const htmlHasIt = html && html.includes(expected);
+                const jsHasIt = js && js.includes(expected);
+                assert: cssHasIt && !htmlHasIt && !jsHasIt
+            </Script>
+
+
+        </Test>
+
+
+    </TestSuite>
+</Component>
+
