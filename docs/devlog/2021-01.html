@@ -1,143 +1,13 @@
-<!DOCTYPE html><html><head>
+<script Modulo
+    src="/js/Modulo.js"
+    -src="/libraries/all.html" 
+></script>
 
-<meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"><title>2021-01 - modulojs.org</title><link rel="stylesheet" href="/_modulo/modulo-build-xx2h89qi.css">
-</head><body id="">
+<mws-Page
+    pagetitle="2021-01"
+    navbar="about">
 
-
-    
-    
-    
-    
-
-    <!-- Some global CSS that is not tied to any component: -->
-    
-
-
-
-<slot name="above-navbar"></slot>
-
-<nav class="Navbar">
-    <a href="/index.html" class="Navbar-logo"><img src="/img/modulo_logo.svg" style="height:70px" alt="Modulo"></a>
-    <a href="/index.html" class="Navbar-tinyText">[%] modulo.js</a>
-    <ul>
-        <li>
-            <a href="/index.html#about" class="Navbar--selected">About</a>
-        </li>
-        <li>
-            <a href="/start.html">Start</a>
-        </li>
-        <li>
-            <a href="/docs/">Docs</a>
-        </li>
-    </ul>
-
-    <div class="Navbar-rightInfo">
-        
-        
-            v: 0.0.60<br>
-            <!--SLOC: undefined lines<br />-->
-            <a href="https://github.com/modulojs/modulo/">github</a> |
-            <a href="https://www.npmjs.com/package/mdu.js">npm mdu.js</a>
-        
-    
-        <!--
-        
-            <a href="https://github.com/modulojs/modulo/">Source Code
-                <br />
-                (on GitHub)
-            </a>
-        
-        -->
-    </div>
-</nav>
-
-
-    <main class="Main">
-        <slot>
-
-<mws-devlognav fn="2021-01" modulo-mount-html=""><nav style="border-bottom: none">
-    <h4>DEV LOG</h4>
-
-    <ul>
-        
-            <li>
-                
-                    <a href="/devlog/2023-05.html">
-                        2023-05&nbsp;(Stable API &amp; builds)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/devlog/2022-12.html">
-                        2022-12&nbsp;(Intro slides)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/devlog/2022-09.html">
-                        2022-09&nbsp;(Alpha release)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/devlog/2022-07.html">
-                        2022-07&nbsp;(HTML-first)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/devlog/2022-03.html">
-                        2022-03&nbsp;(Prealpha)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/devlog/2021-09.html">
-                        2021-09&nbsp;(Framework design)
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <span style="text-decoration: overline underline;">
-                        2021-01&nbsp;(FAQ)
-                    </span>
-                
-            </li>
-        
-    </ul>
-</nav>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h1>FAQ</h1>
-    
-
-
-</mws-devlognav>
+<mws-DevLogNav fn="2021-01"></mws-DevLogNav>
 
 
 <h3><span alt="Question mark">?</span></h3>
@@ -160,11 +30,11 @@ add an issue to the project on GitHub.</p>
 <p>By reading this FAQ, you will get a better understanding of the motivation
 of building Modulo and it's design philosophy.</p>
 
-<hr>
+<hr />
 
 <p><strong>Q: Why yet another JavaScript framework?</strong></p>
 <p>A: To me, the very idea of writing YET ANOTHER JavaScript framework
-is vomit inducing.<br>And yet here I am.</p>
+is vomit inducing.<br />And yet here I am.</p>
 
 <p>While working at Kickstart Coding, developing our Django-based
 LMS, nothing quite fit the bill for a very simple JS framework to
@@ -182,7 +52,7 @@ fuss... but also develop using hot-reloading and a bundle in the
 end. So, I gave up, gave in, and became the problem. I wrote yet
 another JavaScript component framework.</p>
 
-<hr>
+<hr />
 <p><strong>Q: Any future plans?</strong></p>
 <p>A: Yes, plenty! The three main ones: SSG, server-side, and MDU.
 Currently, this site is already getting generated with a
@@ -195,7 +65,7 @@ have time to document and release "mdu", which will be a standard
 library of Modulo components, including a Router system inspired by
 React Router.</p>
 
-<hr>
+<hr />
 <p><strong>Q: Why do you care so much about short source code
 files? Don't you want a framework that does more?</strong></p>
 
@@ -220,7 +90,7 @@ this case, when the framework is a layer on top of existing web standards (the
 web component standard). In this case, adding anything more would constitute
 over-engineering.</p>
 
-<hr>
+<hr />
 <p><strong>Q: Can't you have both, however? Maybe not as a solo project, but
 can't you have a big, extensive framework with big and extensive
 documentation?</strong></p>
@@ -231,7 +101,7 @@ approach.  See the <a href="/devlog/2021-09.html">the design philosophy "thought
 experiment"</a> article for for further and more thorough discussion of
 Modulo's approach and it's motivation.</p>
 
-<hr>
+<hr />
 <p><strong>Q: 80 char line limit? 4 space indentation? Imperative
 coding? What is this, the 90's?</strong></p>
 
@@ -242,7 +112,7 @@ exact ordering or behavior of certain operations or steps. This is contrasted
 with other libraries which seem to be designed first and foremost to go fast
 and pass tests, but not for thorough documentation, or self-documenting code.
 This is not a slight on any particular library, nor is it a claim that I write
-better code—in fact, outside of Modulo.js itself, all the tooling code in
+better code&mdash;in fact, outside of Modulo.js itself, all the tooling code in
 this repo is a mess!  However, for Modulo.js itself, I invested most of the
 development time in refactoring it over and over (and over and over), until the
 code and logical flow was as simple as possible. My goal is to make the code
@@ -261,21 +131,22 @@ not easily written.</p>
 standard is partially aspirational.</p>
 
 
-<hr>
+<hr />
 <p><strong>Q: Why call it Modulo?</strong></p>
-<p>A: From Wikipeda: “In mathematics, the term modulo is often used to
+<p>A: From Wikipeda: &ldquo;In mathematics, the term modulo is often used to
 assert that two distinct mathematical objects can be regarded as equivalent if
-their difference is accounted for by an additional factor.” Basically,
+their difference is accounted for by an additional factor.&rdquo; Basically,
 it's math jargon to say two things are equivalent in a given condition or
 context.</p>
 
 <p>So, maybe the goal of Modulo is provide that context, making a natural way
 to integrate the new and the old! Or maybe it sounded cool. Maybe that!</p>
 
-<hr>
+<hr />
 <p><strong>Q: Isn't <em>Modulo</em> already a thing in
-JavaScript?</strong>
-</p><p>Interestingly, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder">MDN's
+JavaScript?</strong></pHere>
+<p>Interestingly, <a
+href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder">MDN's
 JavaScript documentation describes it's <code>%</code> as not being a
 modulo operator</a>!
 Instead, it calls the percent sign a <em>remainder operator</em>,
@@ -287,17 +158,4 @@ development for years.">"Modulo" in JS</abbr> it <em>is not</em>
 named after the <code>%</code> operator in JavaScript, making
 the logo a bit of a tongue-in-cheek joke.</p>
 
-</slot>
-    </main>
-
-
-<footer>
-    <main>
-        (C) 2023 - Michael Bethencourt - Documentation under LGPL 2.1
-    </main>
-</footer>
-
-
-
-<script src="/_modulo/modulo-build-xxu090pc.js"></script>
-</body></html>
+</mws-Page>

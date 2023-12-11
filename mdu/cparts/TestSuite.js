@@ -304,7 +304,6 @@ modulo.register('cpart', class TestSuite {
         const testLoaderModulo = _newModulo();
         let componentFac;
 
-        // REFACTOR this garbage
         if (UNIFIED_DEFINITIONS) {
             testLoaderModulo.definitions = deepClone(modulo.definitions, modulo);
             componentFac = testLoaderModulo.definitions[name];

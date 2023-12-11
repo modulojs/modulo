@@ -38,3 +38,20 @@
 
     </TestSuite>
 </Component>
+
+<Component name="TemplateCPart_TestActive">
+    <Template -name="othertemp1"> <p>nope, not me</p> </Template>
+    <Template -name="prim" active:=true>
+        <p>Render me!</p>
+    </Template>
+    <Template -name="othertemp2"> <p>dont render me</p> </Template>
+    <TestSuite>
+
+        <Test name="Test active">
+            <template name="Successfully renders active template">
+                <p>Render me!</p>
+            </template>
+        </Test>
+
+    </TestSuite>
+</Component>

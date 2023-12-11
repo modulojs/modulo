@@ -36,7 +36,8 @@ window.Modulo = class Modulo {
 
     instance(def, extra, inst = null) {
         const isLower = key => key[0].toLowerCase() === key[0];
-        const registry = def.Type === 'Component' ? 'coreDefs' : 'cparts'; // TODO: make compatible with any registration type
+        const coreDefSet = { Component: 1, Artifact: 1, Artifact_MK2: 1 }; // TODO: make compatible with any registration type
+        const registry = (def.Type in coreDefSet) ? 'coreDefs' : 'cparts';
         inst = inst || new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
         //const conf = Object.assign({}, this.config[name.toLowerCase()], def);
@@ -186,7 +187,7 @@ modulo.register('coreDef', class Modulo {}, {
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
     defaultDef: { DefTarget: null, DefinedAs: null, DefName: null },
     defaultDefLoaders: [ 'DefTarget', 'DefinedAs', 'Src' ],
-    defaultFactory: [ 'RenderObj', 'factoryCallback' ],
+    defaultFactory: [ 'RenderObj', 'factoryCallback' ], // TODO: this might be dead code?
 });
 
 window.modulo.DEVLIB_SOURCE = (`
@@ -485,6 +486,21 @@ modulo.register('cpart', class Artifact {
                 const template2 = modulo.instance(tDef2, { });
                 template2.initializedCallback();
                 code = template2.render(ctx);
+                //renderTemplate(macro = false) {
+                //    const { Template } = this.modulo.registry.cparts;
+                //    const { template } = this.modulo.config; // get default configuration
+                //    const opts = (macro === false) ? {
+                //        modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
+                //        modes: {
+                //            ['/' + '*-{-%']: template.modes['{%'], // alias
+                //            ['/' + '*-{-{']: template.modes['{{'], // alias
+                //            ['/' + '*-{-#']: template.modes['{#'], // alias
+                //            text: template.modes.text,
+                //        },
+                //    } : null;
+                //    const tmplt = new Template(macro === false ? this.conf.Content : macro, opts);
+                //    return tmplt.render(this.templateContext);
+                //}
             }
             def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
             if (def.name === 'html') { // TODO: Make this only happen during SSG
@@ -521,6 +537,105 @@ modulo.register('cpart', class Artifact {
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
+
+// TODO: Rename Artifact_MK2 (temporary)
+modulo.config.artifact_mk2 = { }; // No default needed actually!
+modulo.register('coreDef', class Artifact_MK2 {
+    getBundle(doc) {
+        const bundledElems = [];
+        for (const elem of doc.querySelectorAll(this.conf.bundle)) {
+            const url = elem.getAttribute('src') || elem.getAttribute('href');
+            if (this.conf.exclude && elem.matches(this.conf.exclude) || !url) {
+                continue; // Needed, since otherwise it chokes on blank src
+            }
+            this.modulo.fetchQueue.fetch(url).then(text => {
+                delete this.modulo.fetchQueue.data[url]; // remove from cache
+                elem.bundledContent = text; // attach to element for later
+            });
+            bundledElems.push(elem);
+        }
+        return bundledElems;
+    }
+    getTemplateContext(doc) {
+        const head = doc.head || { innerHTML: '' };
+        const body = doc.body || { innerHTML: '', id: '' };
+        const htmlPrefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
+        const htmlInterfix = '</head><body id="' + body.id + '">' + body.innerHTML;
+        const htmlSuffix = '</body></html>';
+        const bundle = this.conf.bundle ? this.getBundle(doc) : null;
+        const extras = { htmlPrefix, htmlInterfix, htmlSuffix, bundle };
+        return Object.assign({ }, this.modulo, extras);
+    }
+    buildCommand(doc) {
+        const { Template } = this.modulo.registry.cparts;
+        const { saveFileAs, hash } = this.modulo.registry.utils;
+        const { DefinitionName, remove, urlName, name, Content } = this.conf;
+        const def = this.modulo.definitions[DefinitionName]; // Get original def
+        if (remove) { // Need to remove elements from document first
+            doc.querySelectorAll(remove).forEach(elem => elem.remove());
+        }
+        this.templateContext = this.getTemplateContext(doc); // Side-effect: Queue
+        this.modulo.fetchQueue.enqueueAll(() => { // Drain queue before continue
+            const tmplt = new Template(Content); // Render content
+            const content = tmplt.render(this.templateContext);
+            def.FileName = `modulo-build-${ hash(content) }.${ name }`;
+            if (urlName) { // Guess filename based on URL (or use as default)
+                def.FileName = window.location.pathname.split('/').pop() || urlName;
+            }
+            def.OutputPath = saveFileAs(def.FileName, content); // Attempt save
+        });
+    }
+}, { name: 'Artifact_MK2' });
+
+modulo.definitions._artifact_css_mk2 = {
+    Type: 'Artifact_MK2',
+    DefinitionName: '_artifact_css_mk2',
+    bundle: 'link[rel=stylesheet]',
+    exclude: '[modulo-asset]',
+    name: 'css',
+    Content: `{% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}{% endfor %}
+    {% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}`,
+};
+
+modulo.definitions._artifact_js_mk2 = {
+    Type: 'Artifact_MK2',
+    DefinitionName: '_artifact_js_mk2',
+    bundle: 'script[src]',
+    exclude: '[modulo-asset]',
+    name: 'js',
+    macros: 'yesplease',
+    Content: `window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
+                {{ assets.moduleSources|get:hash|safe }}
+            };
+            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
+        {% endif %}{% endif %}{% endfor %}
+        window.moduloBuild.definitions = { {% for name, value in definitions %}
+            {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %} 
+        {% endfor %} };
+        {% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}{% endfor %}
+        modulo.assets.modules = window.moduloBuild.modules;
+        modulo.assets.nameToHash = window.moduloBuild.nameToHash;
+        modulo.definitions = window.moduloBuild.definitions;
+        {% for name in assets.mainRequires %}
+            modulo.assets.require("{{ name|escapejs }}");
+        {% endfor %}`.replace(/^\s+/gm, ''),
+};
+
+modulo.definitions._artifact_html_mk2 = {
+    Type: 'Artifact_MK2',
+    DefinitionName: '_artifact_html_mk2',
+    remove: 'script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo',
+    name: 'html',
+    urlName: 'index.html',
+    Content: `
+        {{ htmlPrefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css_mk2.OutputPath }}" />
+        {{ htmlInterfix|safe }}<script src="{{ definitions._artifact_js_mk2.OutputPath }}"></s` + `cript>
+        {{ htmlSuffix|safe }}
+    `.replace(/^\s+/gm, ''),
+};
+
 modulo.config.component = {
     mode: 'regular',
     rerender: 'event',
@@ -556,23 +671,7 @@ modulo.register('coreDef', class Component {
         def.name = def.name || def.DefName || def.Name;
         def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
         def.MainRequire = def.DefinitionName;
-        /** SNIP **/
-        /*
-        const className =  `${ def.namespace }_${ def.name }`;
-        def.Code = `
-            const def = modulo.definitions['${ def.DefinitionName }'];
-            class ${ className } extends ${ value } {
-                constructor() { super(); this.init(); }
-            }
-            modulo.registry.utils.initComponentClass(modulo, def, ${ className });
-            window.customElements.define(def.TagName, ${ className });
-           return ${ className };
-        `;
-        */
-        /** SNIP **/
         def.className =  def.className || `${ def.namespace }_${ def.name }`;
-        /** SNIP **/
-
     }
 
     rerender(original = null) {
@@ -1148,7 +1247,7 @@ modulo.register('cpart', class Template {
     }
 
     initializedCallback() {
-        return { render: this.render.bind(this) };
+        return { render: this.render.bind(this) }; // Export "render" method
     }
 
     renderCallback(renderObj) {
@@ -1416,7 +1515,6 @@ modulo.register('coreDef', class Configuration { }, {
 
 modulo.config.script = {
     lifecycle: null,
-    //DefBuilders: [ 'Content|AutoExport', 'Code' ],
     DefBuilders: [ 'Content|AutoExport', 'CodeTemplate' ],
     CodeTemplate: `var script = { exports: { } };{% if def.locals.length %}
     var {{ def.locals|join:',' }};{% endif %}
@@ -1976,7 +2074,6 @@ modulo.register('util', function getAutoExportNames(contents) {
         .filter(s => s && !Modulo.INVALID_WORDS.has(s));
 });
 
-/*-{-% if not config.IS_BUILD %-}-*/
 modulo.register('util', function showDevMenu() {
     const cmd = new URLSearchParams(window.location.search).get('mod-cmd');
     const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
@@ -1996,7 +2093,6 @@ modulo.register('util', function showDevMenu() {
 
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
-    modulo.config.IS_BUILD = true;
     opts.callback = opts.callback || (() => {});
     for (const elem of document.querySelectorAll('*')) {
         if (elem.cparts && elem.cparts.component) {
@@ -2016,14 +2112,33 @@ modulo.register('command', function build (modulo, opts = {}) {
     buildNext();
 });
 
-if (typeof window.document !== 'undefined') {
-    modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
-    window.document.addEventListener('DOMContentLoaded', () => {
-        modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
-        modulo.loadFromDOM(window.document.body, null, true); // Load new tags
-        modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
-    });
-} else if (typeof module !== 'undefined') { // Node.js
-    module.exports = { Modulo, modulo, window };
+modulo.register('command', function build_mk2 (modulo, opts = {}) {
+    const filter = opts.filter || (({ Type }) => Type === 'Artifact_MK2');
+    opts.callback = opts.callback || (() => {});
+    for (const elem of document.querySelectorAll('*')) { // Loop through each elem
+        if (elem.cparts && elem.cparts.component) { // and run "build" callback
+            elem.cparts.component._lifecycle([ 'build' ]);
+        }
+    }
+    const artifacts = Object.values(modulo.definitions).filter(filter);
+    const buildNext = () => {
+        const artifact = modulo.instance(artifacts.shift(), { buildOptions: opts });
+        artifact.buildCommand(window.document);
+        modulo.fetchQueue.enqueueAll(artifacts.length > 0 ? buildNext : opts.callback);
+    };
+    modulo.assert(artifacts.length, 'Build filter produced no artifacts');
+    buildNext();
+});
+
+if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
+    if (typeof window.document !== 'undefined') {
+        modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
+        window.document.addEventListener('DOMContentLoaded', () => {
+            modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
+            modulo.loadFromDOM(window.document.body, null, true); // Load new tags
+            modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
+        });
+    } else if (typeof module !== 'undefined') { // Node.js
+        module.exports = { Modulo, modulo, window };
+    }
 }
-/*-{-% endif %-}-*/
