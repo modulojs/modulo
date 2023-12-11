@@ -36,7 +36,7 @@ window.Modulo = class Modulo {
 
     instance(def, extra, inst = null) {
         const isLower = key => key[0].toLowerCase() === key[0];
-        const coreDefSet = { Component: 1, Artifact_MK2: 1 }; // TODO: make compatible with any registration type
+        const coreDefSet = { Component: 1, Artifact: 1 }; // TODO: make compatible with any registration type
         const registry = (def.Type in coreDefSet) ? 'coreDefs' : 'cparts';
         inst = inst || new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
@@ -447,7 +447,7 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
-false && modulo.register('cpart', class Artifact {
+false && modulo.register('cpart', class OLD_ARTIFACT {
     buildCommandCallback({ modulo, def }) {
         const finish = () => {
             const { saveFileAs, hash } = modulo.registry.utils;
@@ -538,9 +538,8 @@ false && modulo.register('cpart', class Artifact {
 });
 
 
-// TODO: Rename Artifact_MK2 (temporary)
-modulo.config.artifact_mk2 = { }; // No default needed actually!
-modulo.register('coreDef', class Artifact_MK2 {
+modulo.config.artifact = { }; // No default needed actually!
+modulo.register('coreDef', class Artifact {
     getBundle(doc) {
         const bundledElems = [];
         for (const elem of doc.querySelectorAll(this.conf.bundle)) {
@@ -585,11 +584,11 @@ modulo.register('coreDef', class Artifact_MK2 {
             def.OutputPath = saveFileAs(def.FileName, content); // Attempt save
         });
     }
-}, { name: 'Artifact_MK2' });
+}, { name: 'Artifact' });
 
-modulo.definitions._artifact_css_mk2 = {
-    Type: 'Artifact_MK2',
-    DefinitionName: '_artifact_css_mk2',
+modulo.definitions._artifact_css = {
+    Type: 'Artifact',
+    DefinitionName: '_artifact_css',
     bundle: 'link[rel=stylesheet]',
     exclude: '[modulo-asset]',
     name: 'css',
@@ -598,9 +597,9 @@ modulo.definitions._artifact_css_mk2 = {
               {{ css|safe }}{% endfor %}`.replace(/^\s+/gm, ''),
 };
 
-modulo.definitions._artifact_js_mk2 = {
-    Type: 'Artifact_MK2',
-    DefinitionName: '_artifact_js_mk2',
+modulo.definitions._artifact_js = {
+    Type: 'Artifact',
+    DefinitionName: '_artifact_js',
     bundle: 'script[src]',
     exclude: '[modulo-asset]',
     name: 'js',
@@ -624,15 +623,15 @@ modulo.definitions._artifact_js_mk2 = {
         {% endfor %}`.replace(/^\s+/gm, ''),
 };
 
-modulo.definitions._artifact_html_mk2 = {
-    Type: 'Artifact_MK2',
-    DefinitionName: '_artifact_html_mk2',
+modulo.definitions._artifact_html = {
+    Type: 'Artifact',
+    DefinitionName: '_artifact_html',
     remove: 'script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo',
     name: 'html',
     urlName: 'index.html',
     Content: `
-        {{ htmlPrefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css_mk2.OutputPath }}" />
-        {{ htmlInterfix|safe }}<script src="{{ definitions._artifact_js_mk2.OutputPath }}"></s` + `cript>
+        {{ htmlPrefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
+        {{ htmlInterfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
         {{ htmlSuffix|safe }}
     `.replace(/^\s+/gm, ''),
 };
@@ -2116,7 +2115,7 @@ modulo.register('command', function build (modulo, opts = {}) {
 */
 
 modulo.register('command', function build (modulo, opts = {}) {
-    const filter = opts.filter || (({ Type }) => Type === 'Artifact_MK2');
+    const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     opts.callback = opts.callback || (() => {});
     for (const elem of document.querySelectorAll('*')) { // Loop through each elem
         if (elem.cparts && elem.cparts.component) { // and run "build" callback

@@ -1,7 +1,8 @@
 <script Configuration>
 
     modulo.register('util', function _testGetArtifacts() {
-        const filter = (({ Type }) => Type === 'Artifact_MK2');
+        //const filter = (({ Type }) => Type === 'Artifact_MK2');
+        const filter = (({ Type }) => Type === 'Artifact_MK2' || Type === 'Artifact');
         const artifacts = Object.values(modulo.definitions).filter(filter);
         return artifacts;
     });
@@ -93,7 +94,8 @@
                 }
 
                 // now we validate
-                const defs = Object.values(modulo.definitions).filter( (({ Type }) => Type === 'Artifact_MK2'));
+                const filter = (({ Type }) => Type === 'Artifact_MK2' || Type === 'Artifact');
+                const defs = Object.values(modulo.definitions).filter(filter);
                 const stripHashes = path => (path || '').replace(/\-x[a-z0-9]+\./gi, '-x.');
                 const actualFetches = JSON.stringify(urls);
                 const expectedFetches = JSON.stringify([ '/js/Modulo.js', '/example/cpart/Example.js' ]);
