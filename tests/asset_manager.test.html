@@ -2,7 +2,7 @@
     These tests are useful as unit tests testing the AssetManager core class
     and "build" command
 -->
-<Component name="BuildCommandAndAssetManager"><TestSuite >
+<Component name="BuildCommandAndAssetManager"><TestSuite>
 
 <Test name="modulo.assets unit tests">
     <script name="modulo.assets exists">
@@ -111,7 +111,8 @@ window.moduloBuild.nameToHash = {
             mod2.fetchQueue = new mod2.registry.core.FetchQueue(mod2);
 
             // Copy over devlib
-            const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_'))
+            //const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_'))
+            const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') && !key.includes('mk2'))
             for (const [ key, def ] of devlib) {
                 mod2.definitions[key] = def;
                 const hash = modulo.assets.nameToHash[key];

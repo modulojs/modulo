@@ -36,7 +36,7 @@ window.Modulo = class Modulo {
 
     instance(def, extra, inst = null) {
         const isLower = key => key[0].toLowerCase() === key[0];
-        const coreDefSet = { Component: 1, Artifact: 1, Artifact_MK2: 1 }; // TODO: make compatible with any registration type
+        const coreDefSet = { Component: 1, Artifact_MK2: 1 }; // TODO: make compatible with any registration type
         const registry = (def.Type in coreDefSet) ? 'coreDefs' : 'cparts';
         inst = inst || new this.registry[registry][def.Type](this, def, extra.element || null); // TODO rm the element arg
         const id = ++window._moduloID;
