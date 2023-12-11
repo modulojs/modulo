@@ -447,7 +447,7 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
-modulo.register('cpart', class Artifact {
+false && modulo.register('cpart', class Artifact {
     buildCommandCallback({ modulo, def }) {
         const finish = () => {
             const { saveFileAs, hash } = modulo.registry.utils;
@@ -593,8 +593,9 @@ modulo.definitions._artifact_css_mk2 = {
     bundle: 'link[rel=stylesheet]',
     exclude: '[modulo-asset]',
     name: 'css',
-    Content: `{% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}{% endfor %}
-    {% for css in assets.cssAssetsArray %}{{ css|safe }}{% endfor %}`,
+    Content: `{% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}
+              {% endfor %}{% for css in assets.cssAssetsArray %}
+              {{ css|safe }}{% endfor %}`.replace(/^\s+/gm, ''),
 };
 
 modulo.definitions._artifact_js_mk2 = {
@@ -2091,6 +2092,7 @@ modulo.register('util', function showDevMenu() {
     new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
 });
 
+/*
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     opts.callback = opts.callback || (() => {});
@@ -2111,8 +2113,9 @@ modulo.register('command', function build (modulo, opts = {}) {
     modulo.assert(artifacts.length, 'Build filter produced no artifacts');
     buildNext();
 });
+*/
 
-modulo.register('command', function build_mk2 (modulo, opts = {}) {
+modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact_MK2');
     opts.callback = opts.callback || (() => {});
     for (const elem of document.querySelectorAll('*')) { // Loop through each elem
@@ -2134,7 +2137,7 @@ if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
     if (typeof window.document !== 'undefined') {
         modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
         window.document.addEventListener('DOMContentLoaded', () => {
-            modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
+            //modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
             modulo.loadFromDOM(window.document.body, null, true); // Load new tags
             modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
         });

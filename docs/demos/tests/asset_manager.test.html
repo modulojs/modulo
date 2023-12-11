@@ -112,7 +112,8 @@ window.moduloBuild.nameToHash = {
 
             // Copy over devlib
             //const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_'))
-            const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') && !key.includes('mk2'))
+            //const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') && !key.includes('mk2'))
+            const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') || key.includes('mk2'))
             for (const [ key, def ] of devlib) {
                 mod2.definitions[key] = def;
                 const hash = modulo.assets.nameToHash[key];
