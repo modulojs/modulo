@@ -190,47 +190,6 @@ modulo.register('coreDef', class Modulo {}, {
     defaultFactory: [ 'RenderObj', 'factoryCallback' ], // TODO: this might be dead code?
 });
 
-window.modulo.DEVLIB_SOURCE = (`
-<Artifact name="css" bundle="link[rel=stylesheet]" exclude="[modulo-asset]">
-    <Template>{% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-              {% for css in assets.cssAssetsArray %}{{ css|safe }}
-              {% endfor %}</Template>
-</Artifact>
-<Artifact name="js" bundle="script[src]" exclude="[modulo-asset]">
-    <Template macros="yesplease">window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
-        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
-            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
-                {{ assets.moduleSources|get:hash|safe }}
-            };
-            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
-        {% endif %}{% endif %}{% endfor %}
-        window.moduloBuild.definitions = { {% for name, value in definitions %}
-            {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %} 
-        {% endfor %} };
-        {% for elem in bundle %}{{ elem.bundledContent|safe }}{% endfor %}
-        modulo.assets.modules = window.moduloBuild.modules;
-        modulo.assets.nameToHash = window.moduloBuild.nameToHash;
-        modulo.definitions = window.moduloBuild.definitions;
-        {% for name in assets.mainRequires %}
-            modulo.assets.require("{{ name|escapejs }}");
-        {% endfor %}
-    </Template>
-</Artifact>
-<Artifact name="html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
-    <Script>
-        const head = window.document.head || { innerHTML: '' };
-        const body = window.document.body || { innerHTML: '', id: '' };
-        script.exports.prefix = '<!DOCTYPE html><html><head>' + head.innerHTML;
-        script.exports.interfix = '</head><body id="' + body.id + '">' + body.innerHTML;
-        script.exports.suffix = '</body></html>';
-    </S` + `cript>
-    <Template>{{ script.prefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
-        {{ script.interfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
-        {{ script.suffix|safe }}</Template>
-</Artifact>
-`).replace(/^\s+/gm, '');
-
-
 modulo.register('core', class ValueResolver {
     constructor(contextObj = null) {
         this.ctxObj = contextObj;
@@ -268,7 +227,7 @@ modulo.register('core', class DOMLoader {
     getAllowedChildTags(parentName) {
         let tagsLower = this.modulo.config.domloader.topLevelTags; // "Modulo"
         if (/^_[a-z][a-zA-Z]+$/.test(parentName)) { // _likethis, e.g. _artifact
-            tagsLower = [ parentName.toLowerCase().replace('_', '') ];
+            tagsLower = [ parentName.toLowerCase().replace('_', '') ]; // Dead code?
         } else if (parentName) { // Normal parent, e.g. Library, Component etc
             const parentDef = this.modulo.definitions[parentName];
             const msg = `Invalid parent: ${ parentName } (${ parentDef })`;
@@ -447,98 +406,6 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
-false && modulo.register('cpart', class OLD_ARTIFACT {
-    buildCommandCallback({ modulo, def }) {
-        const finish = () => {
-            const { saveFileAs, hash } = modulo.registry.utils;
-            const children = (def.ChildrenNames || []).map(n => modulo.definitions[n]);
-            //for (const child of children
-            const tDef = children.filter(({ Type }) => Type === 'Template')[0] || null;
-            const sDef = children.filter(({ Type }) => Type === 'Script')[0] || null;
-            let result = { exports: {} };
-            if (sDef) {
-                result = modulo.assets.require(sDef.DefinitionName);
-            }
-            const ctx = Object.assign({}, modulo, { script: result.exports });
-            ctx.bundle = bundledElems;
-            if (!(tDef.DefinitionName in modulo.assets.nameToHash)) {
-                modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef);
-            }
-            const template = modulo.instance(tDef, { });
-            template.initializedCallback();
-            let code = template.render(ctx);
-            if (tDef && tDef.macros) { // TODO: Refactor this code, maybe turn into Template core feature to allow 2 tier / "macro" templating?
-                const tDef2 = Object.assign({}, tDef, {
-                    modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
-                    modes: {
-                        ['/' + '*-{-%']: template.modes['{%'], // alias
-                        ['/' + '*-{-{']: template.modes['{{'], // alias
-                        ['/' + '*-{-#']: template.modes['{#'], // alias
-                        text: template.modes.text,
-                    },
-                    Content: code,
-                    DefinitionName: tDef.DefinitionName + '_macro',
-                    Hash: undefined,
-                });
-                if (!(tDef2.DefinitionName in modulo.assets.nameToHash)) {
-                    modulo.registry.cparts.Template.TemplatePrebuild(modulo, tDef2);
-                }
-                const template2 = modulo.instance(tDef2, { });
-                template2.initializedCallback();
-                code = template2.render(ctx);
-                //renderTemplate(macro = false) {
-                //    const { Template } = this.modulo.registry.cparts;
-                //    const { template } = this.modulo.config; // get default configuration
-                //    const opts = (macro === false) ? {
-                //        modeTokens: ['/' + '*-{-% %-}-*/', '/' + '*-{-{ }-}-*/', '/' + '*-{-# #-}-*/'],
-                //        modes: {
-                //            ['/' + '*-{-%']: template.modes['{%'], // alias
-                //            ['/' + '*-{-{']: template.modes['{{'], // alias
-                //            ['/' + '*-{-#']: template.modes['{#'], // alias
-                //            text: template.modes.text,
-                //        },
-                //    } : null;
-                //    const tmplt = new Template(macro === false ? this.conf.Content : macro, opts);
-                //    return tmplt.render(this.templateContext);
-                //}
-            }
-            def.FileName = `modulo-build-${ hash(code) }.${ def.name }`;
-            if (def.name === 'html') { // TODO: Make this only happen during SSG
-                def.FileName = window.location.pathname.split('/').pop() || 'index.html';
-            }
-            def.OutputPath = saveFileAs(def.FileName, code);
-        }
-
-        const bundledElems = [];
-        if (def.bundle) {
-            for (const elem of document.querySelectorAll(def.bundle)) {
-                if (def.exclude && elem.matches(def.exclude)) {
-                    continue;
-                }
-                const url = elem.getAttribute('src') || elem.getAttribute('href');
-                if (url) { // Needed, since otherwise it chokes on blank src
-                    modulo.fetchQueue.fetch(url).then(text => {
-                        delete modulo.fetchQueue.data[url];
-                        elem.bundledContent = text;
-                    });
-                }
-                bundledElems.push(elem);
-            }
-        }
-        if (def.remove) {
-            document.querySelectorAll(def.remove).forEach(elem => elem.remove());
-        }
-        modulo.fetchQueue.enqueueAll(() => finish(bundledElems));
-    }
-}, {
-    Contains: 'cparts',
-    DefinedAs: 'name',
-    RenderObj: 'artifact',
-    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
-});
-
-
-modulo.config.artifact = { }; // No default needed actually!
 modulo.register('coreDef', class Artifact {
     getBundle(doc) {
         const bundledElems = [];
@@ -603,7 +470,6 @@ modulo.definitions._artifact_js = {
     bundle: 'script[src]',
     exclude: '[modulo-asset]',
     name: 'js',
-    macros: 'yesplease',
     Content: `window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
         {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
             window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
@@ -2091,29 +1957,6 @@ modulo.register('util', function showDevMenu() {
     new Function(`console.log('%c%', '${ font }', new (${ clsCode }))`)();
 });
 
-/*
-modulo.register('command', function build (modulo, opts = {}) {
-    const filter = opts.filter || (({ Type }) => Type === 'Artifact');
-    opts.callback = opts.callback || (() => {});
-    for (const elem of document.querySelectorAll('*')) {
-        if (elem.cparts && elem.cparts.component) {
-            elem.cparts.component._lifecycle([ 'build' ]); // "buildCallback"
-        }
-    }
-    const artifacts = Object.values(modulo.definitions).filter(filter);
-    const buildNext = () => {
-        const artifact = artifacts.shift();
-        const artifactParts = modulo.instanceParts(artifact, {});
-        const buildObj = { modulo, def: artifact };
-        modulo.lifecycle(artifactParts, buildObj, [ 'buildCommand' ]);
-        //modulo.repeatProcessors(artifacts, 'ArtifactBuilders');
-        modulo.fetchQueue.enqueueAll(artifacts.length > 0 ? buildNext : opts.callback);
-    };
-    modulo.assert(artifacts.length, 'Build filter produced no artifacts');
-    buildNext();
-});
-*/
-
 modulo.register('command', function build (modulo, opts = {}) {
     const filter = opts.filter || (({ Type }) => Type === 'Artifact');
     opts.callback = opts.callback || (() => {});
@@ -2136,7 +1979,6 @@ if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
     if (typeof window.document !== 'undefined') {
         modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
         window.document.addEventListener('DOMContentLoaded', () => {
-            //modulo.loadString(modulo.DEVLIB_SOURCE, '_artifact'); // Load DEV LIB
             modulo.loadFromDOM(window.document.body, null, true); // Load new tags
             modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
         });
