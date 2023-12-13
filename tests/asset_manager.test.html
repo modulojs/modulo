@@ -115,7 +115,7 @@ window.moduloBuild.nameToHash = {
             //const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') && !key.includes('mk2'))
             const devlib = Object.entries(modulo.definitions).filter(([key, value]) => key.startsWith('_') || key.includes('mk2'))
             for (const [ key, def ] of devlib) {
-                mod2.definitions[key] = def;
+                mod2.definitions[key] = deepClone(def, modulo);
                 const hash = modulo.assets.nameToHash[key];
                 if (hash) {
                     mod2.assets.nameToHash[key] = hash;
@@ -193,14 +193,17 @@ window.moduloBuild.nameToHash = {
                 files.push({ filename, text });
                 return `./${ filename }`;
             });
+
             mod.fetchQueue.fetch = (src) => ({ then: callback => {
                 callback(`/* js code for (${ src }) */\n`);
             }}); // Use then-able to do sync Promise
+
             mod.fetchQueue.enqueue = (src, callback) => {
                 callback('/* js code for (' + src + ') */\n');
-            };
+            }; /// (possibly dead code)
+
             const opts = {};
-            modulo.registry.commands.build(mod, opts); // Build, synchronously
+            mod.registry.commands.build(mod, opts); // Build, synchronously
             if (!shouldRun) {
                 return files;
             }
