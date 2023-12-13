@@ -2,39 +2,26 @@
 
 # Modulo
 
-- Get started in NPM with `npm init modulo`
+Modulo is a lightweight framework for creating **HTML Web Components**: Reusable
+snippets of HTML, CSS, and JavaScript that create new HTML-like tags that can
+be used and reused anywhere on your site.  Modulo runs entirely in the browser,
+and can be incorporated with just a couple lines of code into any HTML file
+(see the "Quick start"), such that **no terminal usage is necessary**. However,
+if you prefer, you can also start projects using NPM from the Terminal (see the
+"NPM start").
 
-- Full getting started guide on Modulo's website: <https://modulojs.org/start.html>
+- Beginner-friendly features inspired by React, Svelte, and Vue.js, in only
+  2000 lines of dependency-free, self-building JavaScript. A “no fuss” drop-in
+  for existing web apps or Jamstack static sites.
 
-----
+- Try interactive demos and learn more on the website: <https://modulojs.org/>
 
-# About
-
-**A concise JavaScript Component framework**
-
-- [X] A single file with fewer than 2000 lines as a thin layer over vanilla
-  Custom Web Components
-- [X] Components system inspired by React, Svelte, and Polymer
-- [X] Modular with opinionated defaults and few assumptions
-- [X] A "no fuss" drop-in to add JS to existing web apps
-
-- **Status**: `alpha` *(use it if you don't mind large bugs or incomplete docs
-  if you stray too far beyond the examples)*
-
+Project Status: `alpha` *(Well-documented with lots of examples, but still a
+work in progress -- help by trying it out!)*
 
 -----
 
-# Quick start
-
-Modulo is a small framework for creating custom Web Components: Reusable
-snippets of HTML, CSS, and JavaScript that create new HTML-like tags that can
-be used and reused anywhere on your site. Under the hood, it uses a widely
-compatible subset of the [customElements API](https://caniuse.com/custom-elementsv1).
-
-Modulo runs entirely in the browser, and can be incorporated with just a couple
-lines of code into any HTML file, **no terminal usage or `npm` necessary**. If,
-however, you do want to use NPM, read the "Modulo SSG" section below. However,
-the standard way to get started writing custom components requires just 3 steps:
+## Quick start
 
 
 1. Include in any HTML file the single Modulo JavaScript file loaded from a CDN:
@@ -75,49 +62,28 @@ like any normal HTML tag. E.g.:
 ```
 
 
-* *(Optional)* Download
-  [src/Modulo.js](https://github.com/modulojs/modulo/blob/main/src/Modulo.js)
-  (the single file that contains all of Modulo) to wherever you put JS files
-  for your website (for example, `/static/js/Modulo.js`)
+* *(Optional)* Download [src/Modulo.js](https://unpkg.com/mdu.js)
+  (the single 2000-line file that contains all of the framework) to wherever
+  you put JS files for your website (for example, `/static/js/Modulo.js`)
 
 
 * **Continue?** Want to try more? The official beginner tutorial picks up where
   this leaves off:
-  [Ramping Up with Modulo - Part 1](https://modulojs.org/tutorial/ramping-up-1.html#)
+  [Ramping Up with Modulo - Part 1](https://modulojs.org/tutorial/ramping-up/part1.html)
 
------
 
-### Modulo SSG
+## NPM start
 
-If you prefer using command-line scaffolding tools (e.g., just like `npx
-create-react-app`), or want to use Modulo for a SSG or [JAMStack-style
-app](https://jamstack.org/), Modulo has experimental support for this as well.
-This is experimental because of poor documentation, and an API that is likely
-to change in the future; however, it's already useful for small projects (it
-was used to make [modulojs.org](https://modulojs.org)).
-
-Generate a 3-page sample app by running `create-modulo` as such:
+Prefer command-line tools, such as NPM? Run the following, and follow the
+on-screen commands:
 
 ```bash
 npm init modulo
 ```
 
-Once created, use `npm start` to run a development server, and `npm run build`
-to SSG and/or server-side render the static site. Note that some version of
-`puppeteer` must be installed and configured for the server-side renderer to
-work.
-
-The server-side rendered version of the site has CSS and JavaScript bundled
-into a single file, and will "hydrate" upon page load, meaning adding
-JavaScript functionality and behavior on top of the "frozen" initial status of
-the HTML, for a very fast load-time. It follows the same behavior as the output
-of the Modulo `bundle` browser console command.
 
 -----
 
 ## License
 
-(C) 2023 - Michael Bethencourt
-
-[LGPL-2.1](https://github.com/modulojs/modulo/blob/main/LICENSE)
-
+(C) 2023 - Michael Bethencourt [LGPLv3](https://unpkg.com/mdu.js)

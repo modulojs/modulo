@@ -1,14 +1,6 @@
 # Contributing
 
-
 ## How do I help?
-
-Curious about how you can contribute to this exciting new free / libre open
-source software project? Given it's dense style and ambitious aims, there'll
-probably be less opportunity to contribute directly to the Modulo.js file
-itself. However, [the "code to docs" ratio that the Modulo project aims to
-achieve](https://modulojs.org/devlog/2021-09.html) means there's an even
-greater need for help everywhere else!
 
 Best ways to contribute:
 1. Build a website with it
