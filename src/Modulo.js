@@ -20,51 +20,10 @@ window.Modulo = class Modulo {
         this.stores = {}; // Global data store (by default, only used by State)
     }
 
-    mainRequire(moduleName) {
-        this.mainRequires.push(moduleName);
-        this.require(moduleName);
-    }
-
-    require(moduleName) {
-        // TODO: Don't use nameToHash for simpler look-up, but include
-        // "hashToName" for deduping during add (just create extra refs)
-        this.modulo.assert(moduleName in this.nameToHash,
-            `${ moduleName } not in ${ Object.keys(this.nameToHash).join(', ') }`);
-        const hash = this.nameToHash[moduleName];
-        this.modulo.assert(hash in this.modules,
-            `${ moduleName } / ${ hash } not in ${ Object.keys(this.modules).join(', ') }`);
-        return this.modules[hash].call(window, this.modulo);
-    }
-
-    define(name, code) {
-        const hash = this.modulo.registry.utils.hash(code);
-        this.modulo.assert(!(name in this.nameToHash), `Duplicate: ${ name }`);
-        this.nameToHash[name] = hash;
-        if (!(hash in this.modules)) {
-            this.moduleSources[hash] = code;
-            const assignee = `window.modulo.assets.modules["${ hash }"] = `;
-            const prefix = assignee + `function ${ name } (modulo) {\n`;
-            this.appendToHead('script', `"use strict";${ prefix }${ code }};\n`);
-        }
-    }
-
-    appendToHead(tagName, codeStr) {
-        const doc = window.document;
-        const elem = doc.createElement(tagName);
-        elem.setAttribute('modulo-asset', 'y'); // Mark as an "asset"
-        if (doc.head === null) {
-            console.log('Modulo WARNING: Head not ready.');
-            setTimeout(() => doc.head.append(elem), 0);
-        } else {
-            doc.head.append(elem);
-        }
-        elem.textContent = codeStr; // Blocking, causes eval
-    }
-
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // pluralize
         if (type in this.registry.registryCallbacks) {
-            this.registry.registryCallbacks[type](this,  cls, defaults);
+            cls = this.registry.registryCallbacks[type](this,  cls, defaults) || cls;
         }
         this.assert(type in this.registry, 'Unknown registry type: ' + type);
         this.registry[type][cls.name] = cls;
@@ -448,14 +407,17 @@ modulo.register('processor', function mainRequire (modulo, conf, value) {
     modulo.assets.mainRequire(value);
 });
 
+modulo.config.artifact = {
+    BuildCommandFinalizers: [ 'SaveArtifact' ],
+    SaveArtifact: null,
+    DefinedAs: 'name',
+    exclude: '[modulo-asset]',
+};
 modulo.register('coreDef', class Artifact {
     static SaveArtifact (modulo, def, value) { // Build processor
         const artifactInstance = modulo.instance(def, { });
-        const elems = value ? document.querySelectorAll(value) : [ document ];
-        for (const elem of elems) {
-            artifactInstance.buildCommand(elem); // elem is document or target
-        }
-        return true;
+        artifactInstance.buildCommand(document); // e is document or target
+        return true; // Always wait for next
     }
 
     getBundle(targetElem) { // TODO: Mix in targetElem to QSA
@@ -483,6 +445,7 @@ modulo.register('coreDef', class Artifact {
         const extras = { htmlPrefix, htmlInterfix, htmlSuffix, bundle };
         return Object.assign({ }, this.modulo, extras);
     }
+
     buildCommand(targetElem) {
         const { Template } = this.modulo.registry.cparts;
         const { saveFileAs, hash } = this.modulo.registry.utils;
@@ -502,67 +465,41 @@ modulo.register('coreDef', class Artifact {
             def.OutputPath = saveFileAs(def.FileName, content); // Attempt save
         });
     }
-}, {
-    BuildCommandFinalizers: [ 'SaveArtifact' ],
-    SaveArtifact: null,
 });
 
-modulo.definitions._artifact_css = {
-    Type: 'Artifact',
-    BuildCommandFinalizers: [ 'SaveArtifact' ],
-    DefinitionName: '_artifact_css',
-    SaveArtifact: null,
-    bundle: 'link[rel=stylesheet]', // Include stylesheet link tags
-    exclude: '[modulo-asset]', // Don't include mdulo-asset attribute
-    name: 'css', // Use the .css extension
-    Content: `{% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}
-              {% endfor %}{% for css in assets.cssAssetsArray %}
-              {{ css|safe }}{% endfor %}`.replace(/^\s+/gm, ''),
-};
-
-modulo.definitions._artifact_js = {
-    Type: 'Artifact',
-    BuildCommandFinalizers: [ 'SaveArtifact' ],
-    DefinitionName: '_artifact_js',
-    SaveArtifact: null,
-    bundle: 'script[src]', // Include all script tags with src= attributes
-    exclude: '[modulo-asset]', // Don't include anything with modulo-asset attr
-    name: 'js', // Use the .js extension
-    Content: `window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
-        {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
-            window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
-                {{ assets.moduleSources|get:hash|safe }}
-            };
-            window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
-        {% endif %}{% endif %}{% endfor %}
-        window.moduloBuild.definitions = { {% for name, value in definitions %}
-            {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %}
-        {% endfor %} };
-        {% if bundle %}
-            {% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}{% endfor %}
-            modulo.assets.modules = window.moduloBuild.modules;
-            modulo.assets.nameToHash = window.moduloBuild.nameToHash;
-            modulo.definitions = window.moduloBuild.definitions;
-        {% endif %}
-        {% for name in assets.mainRequires %}
-            modulo.assets.require("{{ name|escapejs }}");
-        {% endfor %}`.replace(/^\s+/gm, ''),
-};
-
-modulo.definitions._artifact_html = {
-    Type: 'Artifact',
-    BuildCommandFinalizers: [ 'SaveArtifact' ],
-    DefinitionName: '_artifact_html',
-    SaveArtifact: null,
-    remove: 'script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo',
-    name: 'html',
-    urlName: 'index.html',
-    Content: `
-        {{ htmlPrefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
-        {{ htmlInterfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
-        {{ htmlSuffix|safe }}
-    `.replace(/^\s+/gm, ''),
-};
+modulo._DEVLIB_SOURCE = (`
+<Artifact name="css" bundle="link[rel=stylesheet]">
+    {% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}
+    {% endfor %}{% for css in assets.cssAssetsArray %}
+    {{ css|safe }}{% endfor %}
+</Artifact>
+<Artifact name="js" bundle="script[src]">
+    window.moduloBuild = window.moduloBuild || { modules: {}, nameToHash: {} };
+    {% for name, hash in assets.nameToHash %}{% if hash in assets.moduleSources %}{% if name|first is not "_" %}
+        window.moduloBuild.modules["{{ hash }}"] = function {{ name }} (modulo) {
+            {{ assets.moduleSources|get:hash|safe }}
+        };
+        window.moduloBuild.nameToHash.{{ name }} = "{{ hash }}";
+    {% endif %}{% endif %}{% endfor %}
+    window.moduloBuild.definitions = { {% for name, value in definitions %}
+        {% if name|first is not "_" %}{{ name }}: {{ value|json|safe }},{% endif %}
+    {% endfor %} };
+    {% if bundle %}
+        {% for elem in bundle %}{{ elem.bundledContent|default:''|safe }}{% endfor %}
+        modulo.assets.modules = window.moduloBuild.modules;
+        modulo.assets.nameToHash = window.moduloBuild.nameToHash;
+        modulo.definitions = window.moduloBuild.definitions;
+    {% endif %}
+    {% for name in assets.mainRequires %}
+        modulo.assets.require("{{ name|escapejs }}");
+    {% endfor %}
+</Artifact>
+<Artifact name="html" url-name="index.html" remove="script[src],link[href],[modulo-asset],template[modulo],script[modulo],modulo">
+    {{ htmlPrefix|safe }}<link rel="stylesheet" href="{{ definitions._artifact_css.OutputPath }}" />
+    {{ htmlInterfix|safe }}<script src="{{ definitions._artifact_js.OutputPath }}"></s` + `cript>
+    {{ htmlSuffix|safe }}
+</Artifact>
+`).replace(/^\s+/gm, ''); // Removing indentation from DEVLIB_SOURCE
 
 modulo.config.component = {
     mode: 'regular',
@@ -2029,10 +1966,10 @@ modulo.register('command', function build (modulo, opts = {}) {
 
 if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
     if (typeof window.document !== 'undefined') { // Document exists
-        //modulo.loadString(modulo.config.DEVLIB_SOURCE, '_artifact');
-        modulo.loadFromDOM(window.document.head, null, true); // Head blocking load
+        modulo.loadString(modulo._DEVLIB_SOURCE, '_artifact'); // Load dev lib
+        modulo.loadFromDOM(window.document.head, null, true); // Blocking load
         window.document.addEventListener('DOMContentLoaded', () => {
-            modulo.loadFromDOM(window.document.body, null, true); // Load body
+            modulo.loadFromDOM(window.document.body, null, true); // Async load
             modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
         });
     } else if (typeof module !== 'undefined') { // Node.js
