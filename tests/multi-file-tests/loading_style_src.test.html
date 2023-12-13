@@ -1,0 +1,73 @@
+<Component name="LoadingStyleSrc">
+
+<Style
+    -name="LoadingStyleSrc_Style1"
+    -src="./loading_src_3.css"
+></Style>
+
+<Style
+    -name="LoadingStyleSrc_Style2"
+    -src="../multi-file-tests/loading_src_3.css"
+></Style>
+
+<Style
+    -name="LoadingStyleSrc_Style3"
+    -src="/demos/tests/multi-file-tests/loading_src_3.css"
+></Style>
+
+<TestSuite>
+
+    <Test name="Test Style loaded">
+        <Script name="Style loads with Source set as expected (relative)">
+            const style = Object.values(modulo.definitions)
+                .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
+            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            assert: style.Source && style.Source.endsWith(expectedSuffix)
+        </Script>
+
+        <Script name="Style loads with Source set as expected (up one)">
+            const style = Object.values(modulo.definitions)
+                .find(({ Name }) => Name === "LoadingStyleSrc_Style2");
+            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            assert: style.Source && style.Source.endsWith(expectedSuffix)
+        </Script>
+
+        <Script name="Style loads with Source set as expected (absolute)">
+            const style = Object.values(modulo.definitions)
+                .find(({ Name }) => Name === "LoadingStyleSrc_Style3");
+            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            assert: style.Source && style.Source.endsWith(expectedSuffix)
+        </Script>
+    </Test>
+
+    <Test name="Test Style replace">
+        <Script name="Style replaces URLs as expected (relative)">
+            const style = Object.values(modulo.definitions)
+                .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
+            // Normalize "localhost:" prefix
+            const _clean = text => text.replace(/(localhost|127.0.0.1):\d+/gi, 'LH:1234').trim();
+            const actual = _clean(modulo.assets.stylesheets[style.headHash]);
+            const expected = _clean(`
+x-LoadingStyleSrc .Test_Relative {
+    background: url("http://localhost:3334/demos/tests/multi-file-tests/my_img.jpg");
+}
+
+x-LoadingStyleSrc .Test_UpOne {
+    background: url("http://localhost:3334/demos/tests/some/path/to/an/image.jpg");
+}
+
+x-LoadingStyleSrc .Test_UpTwo {
+    background: url("http://localhost:3334/demos/Sal's%20Favorite%20Path.jpg");
+}
+
+x-LoadingStyleSrc .Test_Absolute {
+    background: url(/static/another_image.jpg);
+}`);
+            assert: actual === expected
+        </Script>
+    </Test>
+
+</TestSuite>
+
+</Component>
+

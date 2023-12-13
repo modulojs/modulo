@@ -1,0 +1,15 @@
+.Test_Relative {
+    background: url('./my_img.jpg');
+}
+
+.Test_UpOne {
+    background: url("../some/path/to/an/image.jpg");
+}
+
+.Test_UpTwo {
+    background: url("../../Sal's Favorite Path.jpg");
+}
+
+.Test_Absolute {
+    background: url(/static/another_image.jpg);
+}

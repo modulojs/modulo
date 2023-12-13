@@ -23,7 +23,7 @@ window.Modulo = class Modulo {
     register(type, cls, defaults = undefined) {
         type = (`${type}s` in this.registry) ? `${type}s` : type; // pluralize
         if (type in this.registry.registryCallbacks) {
-            cls = this.registry.registryCallbacks[type](this,  cls, defaults) || cls;
+            cls = this.registry.registryCallbacks[type](this,  cls) || cls;
         }
         this.assert(type in this.registry, 'Unknown registry type: ' + type);
         this.registry[type][cls.name] = cls;
@@ -988,6 +988,15 @@ modulo.register('cpart', class Props {
     }
 });
 
+modulo.config.style = {
+    AutoIsolate: true, // true is "default behavior" (autodetect)
+    urlReplace: null, // null is "default behavior" (only if -src is specified)
+    isolateSelector: null, // Later has list of selectors
+    isolateClass: null, // No class-based isolate
+    prefix: null, // No prefix-based isolation
+    corePseudo: ['before', 'after', 'first-line', 'last-line' ],
+    DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ],
+};
 modulo.register('cpart', class Style {
     static AutoIsolate(modulo, def, value) {
         const { AutoIsolate } = modulo.registry.cparts.Style; // (for recursion)
@@ -1011,10 +1020,17 @@ modulo.register('cpart', class Style {
                 return hostPrefix + (hostClause ? `:is(${ hostClause })` : '');
             });
         }
-        const selectorOnly = selector.replace(/\s*[\{,]\s*,?$/, '').trim();
+        let selectorOnly = selector.replace(/\s*[\{,]\s*,?$/, '').trim();
         if (def.isolateClass && selectorOnly !== hostPrefix) {
             // Remove extraneous characters (and strip ',' for isolateSelector)
-            const suffix = /{\s*$/.test(selector) ? ' {' : ', ';
+            let suffix = /{\s*$/.test(selector) ? ' {' : ', ';
+            selectorOnly = selectorOnly.replace(/:(:?[a-z-]+)\s*$/i, (all, pseudo) => {
+                if (pseudo.startsWith(':') || def.corePseudo.includes(pseudo)) {
+                    suffix = ':' + pseudo + suffix; // Attach to suffix, on outside
+                    return ''; // Strip pseudo from the selectorOnly variable
+                }
+                return all;
+            });
             def.isolateSelector.push(selectorOnly);
             selector = `.${ def.isolateClass }:is(${ selectorOnly })` + suffix;
         }
@@ -1038,6 +1054,14 @@ modulo.register('cpart', class Style {
                     return selector; // Skip (e.g. is @media or @keyframes)
                 }
                 return this.processSelector(modulo, def, selector);
+            });
+        }
+        if (def.urlReplace || (def.urlReplace === null && def.Source)) {
+            value = value.replace(/url\(['"]?([^)]+?)['"]?\)/gi, (all, url) => {
+                if (url.startsWith('.')) { // If relative, make absolute
+                    return `url("${ (new window.URL(url, def.Source)).href }")`;
+                }
+                return all; // Not a relative URL, return all text untampered
             });
         }
         const { mode } = modulo.definitions[def.Parent] || {};
@@ -1073,17 +1097,11 @@ modulo.register('cpart', class Style {
             this.makeStyleTag(innerDOM, shadowContent);
         }
         const devStyles = this.modulo.assets.stylesheets;
-        if (headHash && headHash in devStyles) {
+        if (headHash && headHash in devStyles) { // Add to page: Hasn't been yet
             this.makeStyleTag(window.document.head, devStyles[headHash]);
             delete this.conf.headHash; // Consume, so it only happens once
         }
     }
-}, {
-    AutoIsolate: true, // true is "default behavior" (autodetect)
-    isolateSelector: null, // Later has list of selectors
-    isolateClass: null, // No class-based isolate
-    prefix: null, // No prefix-based isolation
-    DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ]
 });
 
 modulo.register('cpart', class Template {

@@ -22,7 +22,6 @@
     </Style>
 </Component>
 
-
 <Component name="StyleCPart_TesterC">
     <Style prefix="t456-prefix-me">
       span { color: orange; }
@@ -34,6 +33,30 @@
     </Style>
 </Component>
 
+<Component name="StyleCPart_TEdgeA">
+    <Style prefix="tea-prefix-123">
+      /* TODO ... */:host { color: blue; }
+      :host.whatever { color: green; } /* another comment */
+    </Style>
+</Component>
+
+
+<Component name="StyleCPart_TEdgeB">
+    <Style isolate-class="I'm am empty CPart!"></Style>
+</Component>
+
+
+<Component name="StyleCPart_TEdgeC">
+    <Template>
+        <abbr>FOOBAR</abbr>
+    </Template>
+    <Style isolate-class="isolate-me-987">
+        abbr::before { content: 't987' }
+        abbr::after { content: 't999' }
+        abbr::first-line { color: red }
+        abbr::first-letter { color: blue }
+    </Style>
+</Component>
 
 <Component name="StyleCPart_TestFunctional">
     <Template>
@@ -43,6 +66,12 @@
             <x-StyleCPart_TesterB></x-StyleCPart_TesterB>
         {% elif state.testPrefix %}
             <x-StyleCPart_TesterC></x-StyleCPart_TesterC>
+        {% elif state.testEdgeA %}
+            <x-StyleCPart_TEdgeA></x-StyleCPart_TEdgeA>
+        {% elif state.testEdgeB %}
+            <x-StyleCPart_TEdgeB></x-StyleCPart_TEdgeB>
+        {% elif state.testEdgeC %}
+            <x-StyleCPart_TEdgeC></x-StyleCPart_TEdgeC>
         {% endif %}
     </Template>
 
@@ -50,10 +79,12 @@
         test-regular:=false
         test-isolate:=false
         test-prefix:=false
+        test-edge-a:=false
+        test-edge-b:=false
+        test-edge-c:=false
     ></State>
 
-
-    <TestSuite>
+    <TestSuite solo>
         <Test name="Testing mounting regular correct">
 
             <state test-regular:=true test-isolate:=false test-prefix:=false></state>
@@ -102,6 +133,53 @@
                     't456-prefix-me { color: blue; }\n' +
                     't456-prefix-me.withExtraStuff[type=checkbox] { color: orangered; }\n' +
                     't456-prefix-me { --color: blue; }';
+                assert: actual === expected
+            </script>
+
+
+            <state test-prefix:=false test-regular:=false test-edge-a:=true></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TEdgeA></x-StyleCPart_TEdgeA>
+            </template>
+
+            <script name="ensure comments before :host doesn't choke up parser">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[4] || '').trim();
+                const expected = 'tea-prefix-123 { color: blue; }\n' +
+                    'tea-prefix-123.whatever { color: green; }';
+                assert: actual === expected
+            </script>
+
+
+            <state test-edge-a:=false test-edge-b:=true></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TEdgeB></x-StyleCPart_TEdgeB>
+            </template>
+
+            <script name="ensure empty CPart doesn't choke up parser">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[5] || '').trim();
+                const expected = '';
+                assert: actual === expected
+            </script>
+
+
+            <state test-edge-b:=false test-edge-c:=true></state>
+            <template name="ensure subcomponent rendered dom correctly">
+                <x-StyleCPart_TEdgeC>
+                    <abbr class="isolate-me-987">FOOBAR</abbr>
+                </x-StyleCPart_TEdgeC>
+            </template>
+
+            <script name="ensure isolated class correctly re-arranges ::before and ::after">
+                const arr = modulo.assets.cssAssetsArray;
+                const actual = (arr[6] || '').trim();
+                const expected = 
+                    ".isolate-me-987:is(abbr)::before { content: 't987' }\n" +
+                    ".isolate-me-987:is(abbr)::after { content: 't999' }\n" + 
+                    ".isolate-me-987:is(abbr)::first-line { color: red }\n" + 
+                    ".isolate-me-987:is(abbr)::first-letter { color: blue }" 
+                ;
                 assert: actual === expected
             </script>
 
