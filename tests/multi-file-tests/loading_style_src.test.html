@@ -1,3 +1,35 @@
+<script Configuration>
+    // Used by the tests at the bottom
+    const expectedCSS = `
+x-LoadingStyleSrc .Test_Relative {
+    background: url("http://localhost:3334/demos/tests/multi-file-tests/my_img.jpg");
+}
+
+x-LoadingStyleSrc .Test_UpOne {
+    background: url("http://localhost:3334/demos/tests/some/path/to/an/image.jpg");
+}
+
+x-LoadingStyleSrc .Test_UpTwo {
+    background: url("http://localhost:3334/demos/Sal's%20Favorite%20Path.jpg");
+}
+
+x-LoadingStyleSrc .Test_Absolute {
+    background: url(/static/another_image.jpg);
+}
+    `.trim();
+
+    // Scrubs away references to test server, or not, depending on arg
+    function _clean(text, sub='http://LH:1234') {
+        return text.replace(/https?:..(localhost|127.0.0.1):\d+/gi, sub).trim();
+    }
+    // (ditto)
+    function _getExpected(useDomain) {
+        return _clean(expectedCSS, useDomain ? 'http://LH:1234' : '');
+    }
+    modulo.register('util', _clean);
+    modulo.register('util', _getExpected);
+</script>
+
 <Component name="LoadingStyleSrc">
 
 <Style
@@ -8,17 +40,19 @@
 <Style
     -name="LoadingStyleSrc_Style2"
     -src="../multi-file-tests/loading_src_3.css"
+    url-replace:=true
 ></Style>
 
 <Style
     -name="LoadingStyleSrc_Style3"
     -src="/demos/tests/multi-file-tests/loading_src_3.css"
+    url-replace="absolute"
 ></Style>
 
-<TestSuite>
+<TestSuite solo>
 
     <Test name="Test Style loaded">
-        <Script name="Style loads with Source set as expected (relative)">
+        <Script name="Style loads with Source set as expected (relative, default)">
             const style = Object.values(modulo.definitions)
                 .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
             const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
@@ -41,28 +75,23 @@
     </Test>
 
     <Test name="Test Style replace">
-        <Script name="Style replaces URLs as expected (relative)">
+        <Script name="Style replaces URLs as expected (relative, default)">
+            const { _clean, _getExpected } = modulo.registry.utils;
             const style = Object.values(modulo.definitions)
                 .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
             // Normalize "localhost:" prefix
-            const _clean = text => text.replace(/(localhost|127.0.0.1):\d+/gi, 'LH:1234').trim();
             const actual = _clean(modulo.assets.stylesheets[style.headHash]);
-            const expected = _clean(`
-x-LoadingStyleSrc .Test_Relative {
-    background: url("http://localhost:3334/demos/tests/multi-file-tests/my_img.jpg");
-}
+            const expected = _getExpected(false);
+            assert: actual === expected
+        </Script>
 
-x-LoadingStyleSrc .Test_UpOne {
-    background: url("http://localhost:3334/demos/tests/some/path/to/an/image.jpg");
-}
-
-x-LoadingStyleSrc .Test_UpTwo {
-    background: url("http://localhost:3334/demos/Sal's%20Favorite%20Path.jpg");
-}
-
-x-LoadingStyleSrc .Test_Absolute {
-    background: url(/static/another_image.jpg);
-}`);
+        <Script name="Style replaces URLs as expected (absolute)">
+            const { _clean, _getExpected } = modulo.registry.utils;
+            const style = Object.values(modulo.definitions)
+                .find(({ Name }) => Name === "LoadingStyleSrc_Style3");
+            // Normalize "localhost:" prefix
+            const actual = _clean(modulo.assets.stylesheets[style.headHash]);
+            const expected = _getExpected(true);
             assert: actual === expected
         </Script>
     </Test>
@@ -71,3 +100,12 @@ x-LoadingStyleSrc .Test_Absolute {
 
 </Component>
 
+<!--
+
+
+
+
+            //const convert = modulo.registry.utils[def.urlReplace || 'pathname'];
+            //return `url("${ convert(url, def.Source) }")`;
+
+-->

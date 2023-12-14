@@ -992,8 +992,8 @@ modulo.config.style = {
     AutoIsolate: true, // true is "default behavior" (autodetect)
     urlReplace: null, // null is "default behavior" (only if -src is specified)
     isolateSelector: null, // Later has list of selectors
-    isolateClass: null, // No class-based isolate
-    prefix: null, // No prefix-based isolation
+    isolateClass: null, // By default, it does not use class isolation
+    prefix: null, // Used to specify prefix-based isolation (most common)
     corePseudo: ['before', 'after', 'first-line', 'last-line' ],
     DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ],
 };
@@ -1031,11 +1031,11 @@ modulo.register('cpart', class Style {
                 }
                 return all;
             });
-            def.isolateSelector.push(selectorOnly);
+            def.isolateSelector.push(selectorOnly); // Add to array for later
             selector = `.${ def.isolateClass }:is(${ selectorOnly })` + suffix;
         }
         if (def.prefix && !selector.startsWith(def.prefix)) {
-            // If it is not prefixed at this point, then be sure to prefix
+            // A prefix was specified, so prepend it if it doesn't have it
             selector = `${ def.prefix } ${ selector }`;
         }
         return selector;
@@ -1057,9 +1057,10 @@ modulo.register('cpart', class Style {
             });
         }
         if (def.urlReplace || (def.urlReplace === null && def.Source)) {
+            const key = def.urlReplace === 'absolute' ? 'href' : 'pathname';
             value = value.replace(/url\(['"]?([^)]+?)['"]?\)/gi, (all, url) => {
                 if (url.startsWith('.')) { // If relative, make absolute
-                    return `url("${ (new window.URL(url, def.Source)).href }")`;
+                    return `url("${ (new window.URL(url, def.Source))[key] }")`;
                 }
                 return all; // Not a relative URL, return all text untampered
             });
