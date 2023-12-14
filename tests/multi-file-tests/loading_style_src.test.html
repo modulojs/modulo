@@ -26,8 +26,14 @@ x-LoadingStyleSrc .Test_Absolute {
     function _getExpected(useDomain) {
         return _clean(expectedCSS, useDomain ? 'http://LH:1234' : '');
     }
+    function _getDef(name) {
+        return Object.values(modulo.definitions).find(({ Name }) => Name === name);
+    }
     modulo.register('util', _clean);
     modulo.register('util', _getExpected);
+    modulo.register('util', _getDef);
+    // Just for convenience:
+    modulo.registry.utils.expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
 </script>
 
 <Component name="LoadingStyleSrc">
@@ -49,49 +55,42 @@ x-LoadingStyleSrc .Test_Absolute {
     url-replace="absolute"
 ></Style>
 
-<TestSuite solo>
+<TestSuite>
 
     <Test name="Test Style loaded">
         <Script name="Style loads with Source set as expected (relative, default)">
-            const style = Object.values(modulo.definitions)
-                .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
-            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            const { expectedSuffix, _getDef } = modulo.registry.utils;
+            const style = _getDef("LoadingStyleSrc_Style1");
             assert: style.Source && style.Source.endsWith(expectedSuffix)
         </Script>
 
         <Script name="Style loads with Source set as expected (up one)">
-            const style = Object.values(modulo.definitions)
-                .find(({ Name }) => Name === "LoadingStyleSrc_Style2");
-            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            const { expectedSuffix, _getDef } = modulo.registry.utils;
+            const style = _getDef("LoadingStyleSrc_Style2");
             assert: style.Source && style.Source.endsWith(expectedSuffix)
         </Script>
 
         <Script name="Style loads with Source set as expected (absolute)">
-            const style = Object.values(modulo.definitions)
-                .find(({ Name }) => Name === "LoadingStyleSrc_Style3");
-            const expectedSuffix = '/demos/tests/multi-file-tests/loading_src_3.css';
+            const { expectedSuffix, _getDef } = modulo.registry.utils;
+            const style = _getDef("LoadingStyleSrc_Style3");
             assert: style.Source && style.Source.endsWith(expectedSuffix)
         </Script>
     </Test>
 
     <Test name="Test Style replace">
         <Script name="Style replaces URLs as expected (relative, default)">
-            const { _clean, _getExpected } = modulo.registry.utils;
-            const style = Object.values(modulo.definitions)
-                .find(({ Name }) => Name === "LoadingStyleSrc_Style1");
-            // Normalize "localhost:" prefix
+            const { _clean, _getExpected, _getDef } = modulo.registry.utils;
+            const style = _getDef("LoadingStyleSrc_Style1");
             const actual = _clean(modulo.assets.stylesheets[style.headHash]);
-            const expected = _getExpected(false);
+            const expected = _getExpected(false); // scrub http etc
             assert: actual === expected
         </Script>
 
         <Script name="Style replaces URLs as expected (absolute)">
-            const { _clean, _getExpected } = modulo.registry.utils;
-            const style = Object.values(modulo.definitions)
-                .find(({ Name }) => Name === "LoadingStyleSrc_Style3");
-            // Normalize "localhost:" prefix
+            const { _clean, _getExpected, _getDef } = modulo.registry.utils;
+            const style = _getDef("LoadingStyleSrc_Style3");
             const actual = _clean(modulo.assets.stylesheets[style.headHash]);
-            const expected = _getExpected(true);
+            const expected = _getExpected(true); // Include domain
             assert: actual === expected
         </Script>
     </Test>
@@ -99,13 +98,3 @@ x-LoadingStyleSrc .Test_Absolute {
 </TestSuite>
 
 </Component>
-
-<!--
-
-
-
-
-            //const convert = modulo.registry.utils[def.urlReplace || 'pathname'];
-            //return `url("${ convert(url, def.Source) }")`;
-
--->
