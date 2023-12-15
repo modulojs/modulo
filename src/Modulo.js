@@ -151,8 +151,6 @@ window.Modulo.INVALID_WORDS = new Set((`
     typeof var let void  while with await async true false
 `).split(/\s+/ig));
 
-// TODO: Condense window.moduloBuild into window.modulo as well, gets "hydrated"
-//window.modulo = Object.assign(new Modulo(), window.modulo || {});
 // Create a new modulo instance to be the global default instance
 window.modulo = new window.Modulo();
 if (typeof modulo === "undefined" || modulo.id !== window.modulo.id) {
@@ -1992,6 +1990,6 @@ if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
             modulo.preprocessAndDefine(modulo.registry.utils.showDevMenu);
         });
     } else if (typeof module !== 'undefined') { // Node.js
-        module.exports = { Modulo, modulo, window };
+        module.exports = { modulo, window };
     }
 }
