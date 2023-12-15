@@ -96,7 +96,7 @@ window.Modulo = class Modulo {
         const defaults = this.config.modulo['default' + field] || [];
         while (changed) {
             this.assert(this._configSteps++ < 90000, 'Config steps: 90000+');
-            changed = false;
+            changed = false; // TODO: Is values deterministic in order? (Solution, if necessary: definitions key order arr)
             for (const def of (defs || Object.values(this.definitions))) {
                 const processors = def[field] || defaults;
                 //changed = changed || this.applyProcessors(def, processors);
@@ -1969,7 +1969,7 @@ modulo.register('util', function showDevMenu() {
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
         const func = () => modulo.registry.commands[cmd](modulo, { callback });
-        return window.setTimeout(func, 0); //, 1000); // TODO: Remove setTimeout
+        return window.setTimeout(func, modulo.config.commandDelay || 1000);
     } // Else: Display "COMMANDS:" menu in console
     const href = 'window.location.href += ';
     const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';
@@ -1980,7 +1980,7 @@ modulo.register('util', function showDevMenu() {
 });
 
 modulo.register('command', function build (modulo, opts = {}) {
-    modulo.preprocessAndDefine(opts.cb, 'BuildCommand');
+    modulo.preprocessAndDefine(opts.callback, 'BuildCommand');
 });
 
 if (typeof window.moduloBuild === 'undefined') { // Not in a build, try loading
