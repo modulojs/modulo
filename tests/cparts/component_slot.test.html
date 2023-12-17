@@ -1,0 +1,127 @@
+<!-- Functional testing for Style c part -->
+<Component name="ComponentSlot_TesterA">
+    <Template>
+      <a>abc</a><slot><d>I am default</d></slot><b>def</b>
+    </Template>
+</Component>
+
+<Component name="ComponentSlot_TesterB">
+    <Template>
+      <del>hij</del><slot></slot><div>klm</div>
+    </Template>
+</Component>
+
+<Component name="ComponentSlot_TesterC">
+    <Template>
+      <div>123</div>
+      <span><slot name="aaa">aaaDefault</slot></span>
+      <abbr><slot name="bbb">bbbDefault</slot></abbr>
+      <div>456</div>
+    </Template>
+</Component>
+
+
+<Component name="ComponentSlot_TesterD">
+    <Template>
+      <div>789</div>
+      <span><slot name="ccc">cccDefault</slot></span>
+      <abbr><slot>dddDefault</slot></abbr>
+      <div>111</div>
+    </Template>
+</Component>
+
+<Component name="ComponentSlot_Test">
+    <Template>
+        {% if state.test-regular %}
+            <x-ComponentSlot_TesterA><c>xyz</c></x-ComponentSlot_TesterA>
+        {% elif state.test-regular-mixed-nodes %}
+            <x-ComponentSlot_TesterA>ABC<c>X<del>Y</del><div>Z</div></c>123</x-ComponentSlot_TesterA>
+        {% elif state.test-default %}
+            <x-ComponentSlot_TesterA></x-ComponentSlot_TesterA>
+        {% elif state.test-default-empty %}
+            <x-ComponentSlot_TesterB></x-ComponentSlot_TesterB>
+        {% elif state.test-named %}
+            <x-ComponentSlot_TesterC>
+                <del slot="aaa">aaaContent</del>
+            </x-ComponentSlot_TesterB>
+        {% elif state.test-named-multiple %}
+            <x-ComponentSlot_TesterC>
+                <del>ignore me, dont get a slot</del>
+                <del slot="aaa">aaa2Content</del>
+                <span slot="bbb">bbb2Content</span>
+                <div>ignore me, dont get a slot</div>
+            </x-ComponentSlot_TesterC>
+        {% elif state.test-mixed-named %}
+            <x-ComponentSlot_TesterD><span>dddContent</span>loose text<del slot="ccc">cccContent</del></x-ComponentSlot_TesterD>
+        {% endif %}
+    </Template>
+
+    <State
+        test-regular:=false
+        test-regular-mixed-nodes:=false
+        test-default:=false
+        test-default-empty:=false
+        test-named:=false
+        test-named-multiple:=false
+        test-mixed-named:=false
+    ></State>
+
+    <TestSuite>
+
+        <Test name="Testing single slots">
+            <state test-regular:=true test-default:=false></state>
+            <template name="Unnamed regular slots mount correctly">
+                <x-ComponentSlot_TesterA><a>abc</a><slot><c>xyz</c></slot><b>def</b></x-ComponentSlot_TesterA>
+            </template>
+
+            <state test-regular-mixed-nodes:=true test-regular:=false></state>
+            <template name="Unnamed regular slots mount mixed content correctly">
+                <x-ComponentSlot_TesterA><a>abc</a><slot>ABC<c>X<del>Y</del><div>Z</div></c>123</slot><b>def</b></x-ComponentSlot_TesterA>
+            </template>
+
+            <state test-default:=true test-regular:=false test-regular-mixed-nodes:=false ></state>
+            <template name="Unnamed regular slots mounts default correctly">
+                <x-ComponentSlot_TesterA><a>abc</a><slot><d>I am default</d></slot><b>def</b></x-ComponentSlot_TesterA>
+            </template>
+
+            <state test-default-empty:=true test-default:=false></state>
+            <template name="Unnamed regular slots mounts empty defaults correctly">
+                <x-ComponentSlot_TesterB><del>hij</del><slot></slot><div>klm</div></x-ComponentSlot_TesterB>
+            </template>
+        </Test>
+
+        <Test name="Testing named slots">
+            <state test-named:=true test-regular:=false test-default:=false test-default-empty:=false></state>
+            <template name="One named regular slots mount">
+                <x-ComponentSlot_TesterC>
+                    <div>123</div>
+                    <span><slot name="aaa"><del slot="aaa">aaaContent</del></slot></span>
+                    <abbr><slot name="bbb">bbbDefault</slot></abbr>
+                    <div>456</div>
+                </x-ComponentSlot_TesterC>
+            </template>
+            <state test-named-multiple:=true test-named:=false test-named:=false></state>
+            <template name="Mutliple named regular slots mount">
+                <x-ComponentSlot_TesterC>
+                    <div>123</div>
+                    <span><slot name="aaa"><del slot="aaa">aaa2Content</del></slot></span>
+                    <abbr><slot name="bbb"><span slot="bbb">bbb2Content</span></slot></abbr>
+                    <div>456</div>
+                </x-ComponentSlot_TesterC>
+            </template>
+        </Test>
+
+        <Test name="Testing named and unnamed slots">
+            <state test-mixed-named:=true test-named-multiple:=false test-named:=false test-default:=false test-default-empty:=false></state>
+            <template name="Both named and unnamed work on same component">
+                <x-ComponentSlot_TesterD>
+                    <div>789</div>
+                    <span><slot name="ccc"><del slot="ccc">cccContent</del></slot></span>
+                    <abbr><slot><span>dddContent</span>loose text</slot></abbr>
+                    <div>111</div>
+                </x-ComponentSlot_TesterD>
+            </template>
+        </Test>
+    </TestSuite>
+</Component>
+
