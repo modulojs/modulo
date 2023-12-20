@@ -1,7 +1,7 @@
 {
   "name": "mdu.js",
   "author": "michaelb",
-  "version": "0.0.66",
+  "version": "0.0.67",
   "description": "Lightweight, easy-to-learn Web Component JavaScript framework",
   "homepage": "https://modulojs.org/",
   "main": "./src/Modulo.js",
@@ -12,7 +12,7 @@
   "scripts": {
     "serve": "npm run cli -- serve",
     "srcserve": "npm run cli -- srcserve",
-    "start": "npm run cli -- devserve",
+    "start": "npm run cli -- srcserve",
     "build": "npm run cli -- ssg -f",
     "build-docs": "npm run cli -- ssg",
     "cli": "node ./modulocli/modulocli.js",

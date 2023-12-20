@@ -1704,7 +1704,7 @@ modulo.register('engine', class Reconciler {
         this.directives = opts.directives || {};
         this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
-        if (this.directiveShortcuts.length === 0) { // TODO horrible HACK
+        if (this.directiveShortcuts.length === 0) { // TODO Remove this when tested
             this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts; // OLD TODO global modulo
         }
         this.patch = this.pushPatch;
@@ -1712,11 +1712,9 @@ modulo.register('engine', class Reconciler {
     }
 
     parseDirectives(rawName, directiveShortcuts) { //, foundDirectives) {
-        if (/^[a-z0-9-]$/i.test(rawName)) {
-            return null; // if alpha-only, stop right away
-            // TODO: If we ever support key= as a shortcut, this will break
+        if (/^[a-z0-9-]+$/i.test(rawName)) {
+            return null; // if alphanumeric-only, stop right away
         }
-
         // "Expand" shortcuts into their full versions
         let name = rawName;
         for (const [regexp, directive] of directiveShortcuts) {
@@ -1727,7 +1725,6 @@ modulo.register('engine', class Reconciler {
         if (!name.startsWith('[')) {
             return null; // There are no directives, regular attribute, skip
         }
-
         // There are directives... time to resolve them
         const { cleanWord, stripWord } = this.modulo.registry.utils; // old TODO global modulo
         const arr = [];
@@ -1781,10 +1778,9 @@ modulo.register('engine', class Reconciler {
                     }
                 } else if (!child.isEqualNode(rival)) { // sync if not equal
                     this.reconcileAttributes(child, rival);
-                    if (rival.hasAttribute('modulo-ignore')) {
+                    if (rival.hasAttribute('modulo-ignore')) { // Don't descend
                         // console.log('Skipping ignored node');
                     } else if (child.isModulo) { // is a Modulo component
-                        // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                         this.patch(child, 'rerender', rival);
                     } else if (!this.shouldNotDescend) {
                         cursor.saveToStack();
