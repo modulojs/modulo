@@ -1,38 +1,30 @@
-<!--
-Bug discovered, and fixed discovered:
-    preprocessAndDefineBroken(cb) {
-        // Preprocess And Define is what starts up the dev environment: It runs
-        // through DefBuilders, DefFinalizers, and then finally loops through
-        // resulting mainRequires, requiring each one (and thus activating
-        // those tags)
-        this.fetchQueue.wait(() => {
-            this.repeatProcessors(null, 'DefBuilders', () => {
-                this.repeatProcessors(null, 'DefFinalizers', () => {
-                    for (const name of this.assets.mainRequires) {
-                        this.assets.require(name);
-                    }
-                    if (cb) {
-                        cb();
-                    }
-                });
-            });
-        });
-    }
--->
-
-
+<!DOCTYPE html>
 <!-- Include JS source, and define a button inline -->
-<script Modulo src="/js/Modulo.js">
-    <Component name="ButtonExample">
+<template Modulo>
+    <Component name="ButtonExample1">
         <Props
             txt
         ></Props>
         <Template>
-            <button><em>{{ props.txt }}</em></button>
-            <h1>{{ staticdata.thing }}</h1>
+            <h1>{{ script.lol }}</h1>
+            <button @click:=script.clicky><em>{{ props.txt }}</em></button>
+            {% comment %}
+            {% for i, k in script.array %}
+                <tt>{{ i }}</tt>
+            {% endfor %}
+            {% endcomment %}
+            <div><slot>ignore me, i should not show</slot></div>
         </Template>
         <def Script>
-            console.log('script is getting run!');
+            console.log('script is getting run! (1)');
+            let lol = 0;
+            function prepareCallback() {
+                return { lol, array: Array.from({ length: lol }) };
+            }
+            function clicky() {
+                console.log('clicky! (1)');
+                lol++;
+            }
         </def>
         <StaticData>
         {
@@ -40,11 +32,59 @@ Bug discovered, and fixed discovered:
         }
         </StaticData>
         <Style>
+            :host {
+              display: block;
+              border: 5px solid tomato;
+              margin: 10px;
+              padding: 10px;
+            }
             em { background-color: tomato }
         </Style>
     </Component>
-</script>
+    <Component name="ButtonExample2">
+        <Props
+            txt
+        ></Props>
+        <Template>
+            <h1>{{ script.lol }}</h1>
+            <button @click:=script.clicky><em>{{ props.txt }}</em></button>
+            <div><slot></slot></div>
+            <!--<h1>{{ staticdata.thing }}</h1>-->
+        </Template>
+        <def Script>
+            console.log('script is getting run (2)!');
+            let lol = 0;
+            function prepareCallback() {
+                return { lol };
+            }
+            function clicky() {
+                console.log('clicky (2)!');
+                lol++;
+            }
+        </def>
+        <StaticData>
+        {
+          "thing": "okay"
+        }
+        </StaticData>
+        <Style>
+            :host {
+              display: block;
+              border: 5px solid green;
+              margin: 10px;
+              padding: 10px;
+            }
+            em { background-color: green }
+        </Style>
+    </Component>
+</template>
+<script src="/js/Modulo.js"></script>
+<!--<script src="https://unpkg.com/mdu.js@0.0.67/src/Modulo.js"></script>-->
 
-<!-- Use it anywhere: -->
-<p><x-ButtonExample txt="Go"></x-ButtonExample></p>
+<x-ButtonExample1 txt="Go">
+  <p>lol okay 1</p>
+  <x-ButtonExample2 txt="Go">
+    <p>lol okay 2</p>
+  </x-ButtonExample2>
+</x-ButtonExample1>
 

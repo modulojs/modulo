@@ -1,65 +1,93 @@
+<!DOCTYPE html>
+<!-- Include JS source, and define a button inline -->
 <template Modulo>
-    <Component name="Testy">
+    <Component name="ButtonExample1">
+        <Props
+            txt
+        ></Props>
         <Template>
-            <ol>
-                {% for item in state.list %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            <div style="background: lightblue; padding: 5px">
-                <x-SubComponent></x-SubComponent>
-            </div>
-                <li>
-                    <input [state.bind] name="text" />
-                    <button @click:=script.addItem>Add</button>
-                </li>
-            </ol>
-            <div style="background: lightblue; padding: 5px">
-                <x-SubComponent></x-SubComponent>
-            </div>
+            <h1>{{ script.lol }}</h1>
+            <button @click:=script.clicky><em>{{ props.txt }}</em></button>
+            {% comment %}
+            {% for i, k in script.array %}
+                <tt>{{ i }}</tt>
+            {% endfor %}
+            {% endcomment %}
+            <h5>defslot</h5>
+            <slot>ignore me, i should not show</slot>
+            <h5>fooslot</h5>
+            <slot name="fooslot">fooslot ignore me</slot>
         </Template>
-
-        <State
-            list:='["Milk", "Bread", "Candy"]'
-            text="Coffee"
-        ></State>
-
-        <Script>
-            function addItem() {
-                state.list.push(state.text); // add to list
-                state.text = ""; // clear input
+        <def Script>
+            console.log('script is getting run! (1)');
+            let lol = 0;
+            function prepareCallback() {
+                return { lol, array: Array.from({ length: lol }) };
             }
-        </Script>
+            function clicky() {
+                console.log('clicky! (1)');
+                lol++;
+            }
+        </def>
+        <StaticData>
+        {
+          "thing": "okay"
+        }
+        </StaticData>
+        <Style>
+            :host {
+              display: block;
+              border: 5px solid tomato;
+              margin: 10px;
+              padding: 10px;
+            }
+            em { background-color: tomato }
+        </Style>
     </Component>
-
-    <Component name="SubComponent">
+    <Component name="ButtonExample2">
+        <Props
+            txt
+        ></Props>
         <Template>
-            <button @click:=script.doSub>Sub: [{{ state.msg }}]</button>
+            <h1>{{ script.lol }}</h1>
+            <button @click:=script.clicky><em>{{ props.txt }}</em></button>
+            <div><slot></slot></div>
+            <!--<h1>{{ staticdata.thing }}</h1>-->
         </Template>
-        <State
-            msg="--------"
-        ></State>
-        <Script>
-            function doSub() {
-                state.msg = "CLICKED!"; // clear input
+        <def Script>
+            console.log('script is getting run (2)!');
+            let lol = 0;
+            function prepareCallback() {
+                return { lol };
             }
-        </Script>
+            function clicky() {
+                console.log('clicky (2)!');
+                lol++;
+            }
+        </def>
+        <StaticData>
+        {
+          "thing": "okay"
+        }
+        </StaticData>
+        <Style>
+            :host {
+              display: block;
+              border: 5px solid green;
+              margin: 10px;
+              padding: 10px;
+            }
+            em { background-color: green }
+        </Style>
     </Component>
 </template>
 <script src="/js/Modulo.js"></script>
+<!--<script src="https://unpkg.com/mdu.js@0.0.67/src/Modulo.js"></script>-->
 
-<p>Example:</p>
-<hr />
-
-<x-Testy></x-Testy>
-
-<!--
-    <Library namespace="x" -src="/libraries/globalExamples.html"></Library>
-<x-DemoModal button="Bio: Nicholas Cage" title="Biography">
-    <p>Prolific and varied Hollywood actor</p>
-    <img src="//i.imgur.com/hJwIMx7.png" style="width: 200px">
-</x-DemoModal>
-
-<div>not blue</div>
--->
-
+<x-ButtonExample1 txt="Go">
+  <p slot="fooslot">lol okay 1</p>
+  <x-ButtonExample2 txt="Go">
+    <p>lol okay 2</p>
+  </x-ButtonExample2>
+</x-ButtonExample1>
 

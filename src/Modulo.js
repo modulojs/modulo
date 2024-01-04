@@ -1,4 +1,4 @@
-// Copyright 2023 MichaelB | https://modulojs.org | LGPLv3
+// Copyright 2024 MichaelB | https://modulojs.org | LGPLv3
 // Modulo LGPLv3 NOTICE: Any direct modifications to the Modulo.js source code
 // must be LGPL or compatible. It is acceptable to distribute dissimilarly
 // licensed code built with the Modulo framework bundled in the same file for
@@ -454,12 +454,17 @@ modulo.register('coreDef', class Artifact {
         }
         this.templateContext = this.getTemplateContext(targetElem); // Queue up
         this.modulo.fetchQueue.enqueueAll(() => { // Drain queue before continue
-            const tmplt = new Template(Content); // Render content
+            const tmplt = new Template(Content); // Render file Artifact content
             const content = tmplt.render(this.templateContext);
             def.FileName = `modulo-build-${ hash(content) }.${ name }`;
             if (urlName) { // Guess filename based on URL (or use as default)
                 def.FileName = window.location.pathname.split('/').pop() || urlName;
             }
+            /*
+            def.FileName = urlName ? // Guess filename based on URL (or default)
+                (window.location.pathname.split('/').pop() || urlName)
+                : `modulo-build-${ hash(content) }.${ name }`;
+            */
             def.OutputPath = saveFileAs(def.FileName, content); // Attempt save
         });
     }
@@ -500,6 +505,7 @@ modulo._DEVLIB_SOURCE = (`
 `).replace(/^\s+/gm, ''); // Removing indentation from DEVLIB_SOURCE
 
 modulo.config.component = {
+    tagAliases: { },
     mode: 'regular',
     rerender: 'event',
     engine: 'Reconciler', // TODO: rm, once test is fixed
@@ -510,7 +516,7 @@ modulo.config.component = {
     RenderObj: 'component', // Make features available as "renderObj.component" 
     // Children: 'cparts', // How we can implement Parentage: Object.keys((get('modulo.registry.' + value))// cparts))
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
-    DefBuilders: [ 'CustomElement', 'CodeTemplate' ],
+    DefBuilders: [ 'CustomElement', 'AliasNamespace', 'CodeTemplate' ],
     DefFinalizers: [ 'MainRequire' ],
     BuildCommandBuilders: [ 'Prebuild|BuildLifecycle', 'BuildLifecycle' ],
     //Directives: [ 'slotLoad', 'eventMount', 'eventUnmount', 'dataPropMount', 'dataPropUnmount' ],
@@ -532,7 +538,7 @@ modulo.register('coreDef', class Component {
             console.warn('Empty ChildrenNames specified:', def.DefinitionName);
             return;
         }
-        def.namespace = def.namespace || 'x';
+        def.namespace = def.namespace || 'x'; // TODO Add auto generated, if aliased
         def.name = def.name || def.DefName || def.Name;
         def.TagName = `${ def.namespace }-${ def.name }`.toLowerCase();
         def.MainRequire = def.DefinitionName;
@@ -544,6 +550,11 @@ modulo.register('coreDef', class Component {
             elem.cparts.component._lifecycle([ value ]); // Run the lifecycle
         }
         return true;
+    }
+
+    static AliasNamespace (modulo, def, value) {
+        const fullAlias = `${ value }-${ def.name }`; // Combine new NS and name
+        modulo.config.component.tagAliases[fullAlias] = def.TagName;
     }
 
     rerender(original = null) {
@@ -587,9 +598,9 @@ modulo.register('coreDef', class Component {
         //this.element.renderObj = null; // ?rendering is over, set to null
     }
 
-    initializedCallback(renderObj) {
+    initializedCallback() {
         const { makeDiv } = this.modulo.registry.utils;
-        const opts = { directiveShortcuts: [], directives: [] };
+        const opts = { directiveShortcuts: [], directives: [] }; // TODO: Move this to reconciler
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
             for (const method of def.Directives || []) {
@@ -597,8 +608,12 @@ modulo.register('coreDef', class Component {
                 opts.directives[dirName] = cPart;
             }
         }
+        this.domPretransforms = [ 'slot' ];
         if (this.attrs.mode === 'shadow') {
             this.element.attachShadow({ mode: 'open' });
+            this.domPretransforms = []; // Skip default slot transform
+        } else if (this.attrs.mode === 'vanish-into-document') {
+            this.domPretransforms.push('script', 'link', 'title', 'meta');
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
@@ -634,35 +649,34 @@ modulo.register('coreDef', class Component {
         return { originalHTML, innerDOM: null, innerHTML: null, patches: null, id: this.id };
     }
 
+    copyToHead(el) {
+        const newParent = this.element.ownerDocument.head;
+        const newElement = window.document.createElement(el.tagName);
+        for (const attr of el.attributes) { // Copy all attributes from old elem
+            newElement.setAttributeNode(attr.cloneNode(true)); // ...to new elem
+        }
+        newElement.textContent = el.textContent; // (e.g. <title>Hi</title>)
+        if (el.tagName === 'script') { // Need to fix SCRIPT tag fluke
+            newElement.src = el.src; // (TODO: Still needed?)
+        }
+        newParent.append(newElement);
+        el.remove(); // Remove old element from old location (dom fragment)
+    }
+
     domCallback(renderObj) {
         let { root, innerHTML, innerDOM } = renderObj.component;
         if (innerHTML !== null && !innerDOM) {
             innerDOM = this.modulo.registry.utils.makeDiv(innerHTML);
             this.reconciler.patches = []; // clear
         }
-        if (innerDOM && this.attrs.mode === 'vanish-into-document') { // <head>
-            for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
-                let newScript = null; // Used if it's a script tag
-                if (el.tagName === 'SCRIPT') {
-                    newScript = window.document.createElement('script');
-                    newScript.src = el.src; // TODO: Possibly copy all attrs
-                }
-                el.remove(); // Remove element from old location (dom fragment)
-                this.element.ownerDocument.head.append(newScript || el);
-            }
-        }
-        if (innerDOM && this.attrs.mode !== 'shadow') { // Handle <slot> logic
-            for (const domSlot of innerDOM.querySelectorAll('slot')) {
-                const attr = (elem, name) => elem.getAttribute ? // Get elem att
-                        (elem.getAttribute(name) || null) : null; // Coerce null
-                for (const child of this.element.originalChildren) {
-                    if (attr(child, 'slot') === attr(domSlot, 'name')) {
-                        if (!domSlot._moduloSlotLoaded) { // Loaded this render?
-                            domSlot.innerHTML = ''; // If first encounter, clear
-                            domSlot._moduloSlotLoaded = true; // ...and mark.
-                        }
-                        domSlot.append(child); // Finally, place into slot elem
-                    }
+        const selector = (this.domPretransforms || []).join(',')
+        if (innerDOM && selector) { // dom transforms were specified, loop
+            for (const el of innerDOM.querySelectorAll(selector)) {
+                if (el.tagName === 'SLOT') { // Handle DOM slot
+                    //this.handleSlot(el); // Handle slots
+                    // TODO rm, no-op
+                } else {
+                    this.copyToHead(el); // Move to head
                 }
             }
         }
@@ -682,7 +696,8 @@ modulo.register('coreDef', class Component {
         }
         if (innerDOM) {
             this.reconciler.patches = []; // Reset reconciler patches
-            this.reconciler.reconcileChildren(root, innerDOM); // Copy innerDOM
+            const slottables = Array.from(this.element.originalChildren);
+            this.reconciler.reconcileChildren(root, innerDOM, slottables);
             patches = this.reconciler.patches;
         }
         return { patches, innerHTML }; // TODO remove innerHTML from here
@@ -691,6 +706,9 @@ modulo.register('coreDef', class Component {
     updateCallback(renderObj) {
         const { patches, innerHTML } = renderObj.component;
         if (patches) {
+            if (patches.length > 12) {// XXX XXX
+                console.table(patches);
+            }
             this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches);
         }
@@ -761,7 +779,6 @@ modulo.register('coreDef', class Component {
 modulo.register('coreDef', class Library { }, {
     Contains: 'coreDefs',
     DefTarget: 'config.component',
-    // DefinedAs: 'namespace', // TODO: Write tests for Library, the add this
     DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Content' ],
 });
 
@@ -785,6 +802,14 @@ modulo.register('util', function cleanWord (text) {
 modulo.register('util', function stripWord (text) {
     return text.replace(/^[^a-zA-Z0-9$_\.]/, '')
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
+});
+
+modulo.register('util', function tagswap (text, arg) {
+    args = Array.isArray(arg) ? arg : arg.split(' ').map(s => s.split('='));
+    const aliases = Object.fromEntries(args);
+    const regexps = Object.keys(aliases).map(a => `(</?)${ a }(\s|>)`);
+    const swap = (all, pre, tag, suff) => `${ pre }${ aliases[tag] }${ suff }`;
+    return text.replace(new RegExp(regexps.join('|')),  swap);
 });
 
 modulo.register('util', function hash (str) {
@@ -1110,6 +1135,7 @@ modulo.register('cpart', class Template {
     static TemplatePrebuild (modulo, def, value) {
         modulo.assert(def.Content, `Empty Template: ${def.DefinitionName}`);
         const template = modulo.instance(def, { });
+        // def.Content = def.Content.trim(); // XXX TODO BREAKS IA ALL?
         const compiledCode = template.compileFunc(def.Content);
         const code = `return function (CTX, G) { ${ compiledCode } };`;
         // TODO: Refactor this to use define processor?
@@ -1228,10 +1254,12 @@ modulo.register('cpart', class Template {
     }
 }, {
     TemplatePrebuild: "y", // TODO: Refactor
-    DefFinalizers: [ 'TemplatePrebuild' ],
+    DefFinalizers: [ 'FilterContent', 'TemplatePrebuild' ],
+    //FilterContent: 'trim|tagswap:config.component.tagAliases', // TODO -- Component's def.tagAliases
+    FilterContent: 'trim',
+    // textFilter: 'escape|etc', // TODO
+    // TODO: Consider reserving "x" and "y" as temp vars, e.g.  // (x = X, y = Y).includes ? y.includes(x) : (x in y)
     opTokens: '==,>,<,>=,<=,!=,not in,is not,is,in,not,gt,lt',
-    // TODO: Consider reserving "x" and "y" as temp vars, e.g.
-    // (x = X, y = Y).includes ? y.includes(x) : (x in y)
     opAliases: {
         '==': 'X === Y',
         'is': 'X === Y',
@@ -1265,9 +1293,14 @@ modulo.config.template.modes = {
     text: (text, tmplt) => text && `OUT.push(${JSON.stringify(text)});`,
 };
 
+// TODO: Tidy up: Move most or all definitions loose like modes
 modulo.config.template.defaultFilters = (function () {
-    const { get } = modulo.registry.utils;
+    const { get, tagswap } = modulo.registry.utils;
     const safe = s => Object.assign(new String(s), { safe: true });
+    const trim = (s, arg) => { // General purpose string trimming function
+        arg = (arg || ',').replace(',', '|');
+        return s.replace(new RegExp(`^\\s*${ arg }\\s*$`, 'g'), '');
+    };
     const filters = {
         add: (s, arg) => s + arg,
         allow: (s, arg) => arg.split(',').includes(s) ? s : '',
@@ -1298,7 +1331,7 @@ modulo.config.template.defaultFilters = (function () {
         yesno: (s, arg) => `${ arg || 'yes,no' },,`.split(',')[s ? 0 : s === null ? 2 : 1],
     };
     const { values, keys, entries } = Object;
-    const extra = { get, safe, values, keys, entries };
+    const extra = { trim, tagswap, get, safe, values, keys, entries };
     return Object.assign(filters, extra);
 })();
 
@@ -1368,6 +1401,14 @@ modulo.register('processor', function dataType (modulo, def, value) {
     def['Content' + value.toUpperCase()] = value;
 });
 
+modulo.register('processor', function filterContent (modulo, def, value) {
+    if (def.Content && value) { // Check if active (needs truthy value)
+        const miniTemplate = `{{ def.Content|${ value }|safe }}`;
+        const tmplt = new modulo.registry.cparts.Template(miniTemplate);
+        def.Content = tmplt.render({ def, config: modulo.config });
+    }
+});
+
 modulo.register('processor', function code (modulo, def, value) {
     if (def.DefinitionName in modulo.assets.nameToHash) {
         console.error("ERROR: Duped def:", def.DefinitionName);
@@ -1433,7 +1474,7 @@ modulo.register('cpart', class Script {
         def.exportNames = def.exportNames || getAutoExportNames(value); // Scan names
         def.locals = def.locals || sibs.filter(name => value.includes(name));
         def.Directives = def.exportNames.filter(s => s.match(/(Unmount|Mount)$/));
-        def.tempContent = value;
+        def.tempContent = value; // TODO: Refactor AutoExport + CodeTemplate
     }
 
     static factoryCallback(renderObj, def, modulo) {
@@ -1574,12 +1615,24 @@ modulo.register('cpart', class State {
 });
 
 modulo.register('engine', class DOMCursor {
-    constructor(parentNode, parentRival) {
-        this.initialize(parentNode, parentRival);
+    constructor(parentNode, parentRival, slottables) {
+        this.slots = {}; // Slottables keyed by name (default slot is '')
+        for (const elem of (slottables || []))  { // Loop through "original children"
+            const name = (elem.getAttribute && elem.getAttribute('slot')) || '';
+            if (!(name in this.slots)) {
+                this.slots[name] = [ elem ]; // Sorting into new slot arrays
+            } else {
+                this.slots[name].push(elem); // Or pushing into existing
+            }
+        }
         this.instanceStack = [];
+        this._rivalQuerySelector = parentRival.querySelector.bind(parentRival);
+        this._querySelector = parentNode.querySelector.bind(parentNode);
+        this.initialize(parentNode, parentRival);
     }
 
     initialize(parentNode, parentRival) {
+        // TODO INP: Refactor & implement directives "[ignore]" and [key]
         this.parentNode = parentNode;
         this.nextChild = parentNode.firstChild;
         this.nextRival = parentRival.firstChild;
@@ -1587,105 +1640,136 @@ modulo.register('engine', class DOMCursor {
         this.keyedRivals = {};
         this.keyedChildrenArr = null;
         this.keyedRivalsArr = null;
+        this.activeSlot = null;
+        if (parentRival.tagName === 'SLOT') { // Parent will "consume" a slot
+            const slotName = parentRival.getAttribute('name') || '';
+            this.activeSlot = this.slots[slotName] || null; // Mark active
+            if (this.activeSlot) { // Children were specified for this slot!
+                delete this.slots[slotName]; // (prevent "dupe slot" bug)
+                this._setNextRival(null); // Move the cursor to the first elem
+            }
+        }
     }
 
     saveToStack() {
-        // TODO: Once we finalize this class, write "_.pick" helper
-        const { nextChild, nextRival, keyedChildren, keyedRivals,
-                parentNode, keyedChildrenArr, keyedRivalsArr } = this;
+        const { nextChild, nextRival, keyedChildren, keyedRivals, parentNode,
+                keyedChildrenArr, keyedRivalsArr, activeSlot } = this;
         const instance = { nextChild, nextRival, keyedChildren, keyedRivals,
-                parentNode, keyedChildrenArr, keyedRivalsArr };
+                parentNode, keyedChildrenArr, keyedRivalsArr, activeSlot };
         this.instanceStack.push(instance);
     }
 
-    loadFromStack() {
+    loadFromExcessKeys() { // There were "excess" keys to deal with
+        if (!this.keyedChildrenArr) { // Convert objects into arrays to pop
+            this.keyedChildrenArr = Object.values(this.keyedChildren);
+            this.keyedRivalsArr = Object.values(this.keyedRivals);
+        }
+        return !!(this.keyedRivalsArr.length + this.keyedChildrenArr.length);
+    }
+
+    loadFromStack() { // Remaining stack to "walk back" (non-recursive DFS)
         const stack = this.instanceStack;
         return stack.length > 0 && Object.assign(this, stack.pop());
+    }
+
+    loadFromSlots() { // There are "excess" slots (copied, but deeply nested)
+        const name = Object.keys(this.slots).pop(); // Get next
+        if (name === '' || name) { // Is name valid? (String of 0 or more)
+            const sel = name ? `slot[name="${ name }"]` : 'slot:not([name])';
+            const rivalSlot = this._rivalQuerySelector(sel);
+            if (!rivalSlot) { // No slot (e.g., conditionally rendered, or typo)
+                delete this.slots[name]; // (Ensure "consumed", if not init'ed)
+                return this.loadFromSlots(); // If no elem, try popping again
+            }
+            const childSlot = this._querySelector(sel) || rivalSlot;
+            this.initialize(childSlot, rivalSlot); // Restart with slot elem
+            if (this.activeSlot && this.activeSlot.length) {
+                console.log('THIS IS IT:', this.nextRival.outerHTML);
+                console.log('THIS IS IT:', this.activeSlot[0].nodeValue);
+            }
+            return true;
+        }
     }
 
     hasNext() {
         if (this.nextChild || this.nextRival) {
             return true; // Is pointing at another node
+        } else if (this.loadFromExcessKeys()) { // Has excess keys
+            return true;
+        } else if (this.loadFromStack()) {
+            return this.hasNext(); // Since we loaded more nodes, lets repeat
+        } else if (this.loadFromSlots()) { // Walk back
+            return this.hasNext(); // Since we loaded more nodes, lets repeat
+        } else { // No more things to load, end
+            return false;
         }
+    }
 
-        // Convert objects into arrays so we can pop
-        if (!this.keyedChildrenArr) {
-            this.keyedChildrenArr = Object.values(this.keyedChildren);
+    _setNextRival(rival) { // Traverse this.nextRival based on DOM or SLOT
+        // TODO: Add in keyedRivalsArr here
+        if (this.activeSlot) { // Use activeSlot array for next instead
+            this.nextRival = this.activeSlot.length ? // Any slottables left?
+                             this.activeSlot.shift() : null; // Pop off next
+        } else {
+            this.nextRival = rival ? rival.nextSibling : null; // Normal DOM traversal
         }
-        if (!this.keyedRivalsArr) {
-            this.keyedRivalsArr = Object.values(this.keyedRivals);
-        }
-
-        if (this.keyedRivalsArr.length || this.keyedChildrenArr.length) {
-            return true; // We have queued up nodes from keyed values
-        }
-
-        return this.loadFromStack() && this.hasNext();
     }
 
     next() {
         let child = this.nextChild;
         let rival = this.nextRival;
-        if (!child && !rival) { // reached the end
-            if (!this.keyedRivalsArr) {
-                return [null, null];
+        if (!child && !rival) { // No regular DOM
+            if (this.keyedRivalsArr.length || this.keyedChildrenArr.length) {
+                // There were excess unmatched rivals OR children, pop() one
+                return this.keyedRivalsArr.length ?
+                      [ null, this.keyedRivalsArr.pop() ] :
+                      [ this.keyedChildrenArr.pop(), null ];
             }
-            // There were excess keyed rivals OR children, pop()
-            return this.keyedRivalsArr.length ?
-                  [ null, this.keyedRivalsArr.pop() ] :
-                  [ this.keyedChildrenArr.pop(), null ];
+            console.warning('Modulo WARNING: cursor.next() called at end');
+            return [ null, null ];
         }
-
-        // Handle keys
         this.nextChild = child ? child.nextSibling : null;
-        this.nextRival = rival ? rival.nextSibling : null;
-
-        let matchedRival = this.getMatchedNode(child, this.keyedChildren, this.keyedRivals);
-        let matchedChild = this.getMatchedNode(rival, this.keyedRivals, this.keyedChildren);
-        // TODO refactor this
-        if (matchedRival === false) {
-            // Child has a key, but does not match rival, so SKIP on child
-            child = this.nextChild;
-            this.nextChild = child ? child.nextSibling : null;
-        } else if (matchedChild === false) {
-            // Rival has a key, but does not match child, so SKIP on rival
-            rival = this.nextRival;
-            this.nextRival = rival ? rival.nextSibling : null;
+        this._setNextRival(rival); // Traverse initially
+        if (!this._disableKeys) { // Disable all "keyed element" logic
+            let matchedRival = this.getMatchedNode(child, this.keyedChildren, this.keyedRivals);
+            let matchedChild = this.getMatchedNode(rival, this.keyedRivals, this.keyedChildren);
+            if (matchedRival === false) { // Child has a key, but does not match
+                child = this.nextChild; // Simply ignore Child, and on to next child
+                this.nextChild = child ? child.nextSibling : null; // (repeat 1721)
+            } else if (matchedChild === false) { // Rival has key, but doesnt match
+                rival = this.nextRival; // IGNORE rival - move on to
+                this._setNextRival(rival); // (and setup next-next rival)
+            }
+            const keyWasFound = matchedRival !== null || matchedChild !== null;
+            const matchFound = matchedChild !== child && keyWasFound;
+            if (matchFound && matchedChild) { // Rival matches, but not with child
+                this.nextChild = child; // "Undo" this last "nextChild" (return it)
+                child = matchedChild; // Then substitute the matched child instead
+            }
+            if (matchFound && matchedRival) {
+                // Child matches, but not with rival. Swap in the correct one.
+                this.modulo.assert(matchedRival !== rival, 'Dupe!'); // (We know this due to ordering)
+                this.nextRival = rival; // "Undo" this last "nextRival" (return it)
+                rival = matchedRival; // Then substitute the matched rival instead
+            }
         }
-        const keyWasFound = matchedRival !== null || matchedChild !== null;
-        const matchFound = matchedChild !== child && keyWasFound;
-        if (matchFound && matchedChild) {
-            // Rival matches, but not with child. Swap in child.
-            this.nextChild = child;
-            child = matchedChild;
-        }
-
-        if (matchFound && matchedRival) {
-            // Child matches, but not with rival. Swap in rival.
-            this.modulo.assert(matchedRival !== rival, 'Dupe!'); // (We know this due to ordering)
-            this.nextRival = rival;
-            rival = matchedRival;
-        }
-
         return [ child, rival ];
     }
 
     getMatchedNode(elem, keyedElems, keyedOthers) {
+        //const key = elem && elem.nodeType === 1 && elem.getAttribute('key');
         const key = elem && elem.getAttribute && elem.getAttribute('key');
         if (!key) {
             return null;
-        }
-        if (key in keyedOthers) {
+        } else if (key in keyedOthers) {
             const matched = keyedOthers[key];
             delete keyedOthers[key];
             return matched;
-        } else {
-            if (key in keyedElems) {
-                console.error('MODULO WARNING: Duplicate key:', key);
-            }
-            keyedElems[key] = elem;
-            return false;
+        } else if (key in keyedElems) {
+            console.error('MODULO WARNING: Duplicate key:', key);
         }
+        keyedElems[key] = elem;
+        return false;
     }
 });
 
@@ -1702,7 +1786,6 @@ modulo.register('engine', class Reconciler {
         opts = opts || {};
         this.shouldNotDescend = !!opts.doNotDescend;
         this.directives = opts.directives || {};
-        this.tagTransforms = opts.tagTransforms;
         this.directiveShortcuts = opts.directiveShortcuts || [];
         if (this.directiveShortcuts.length === 0) { // TODO Remove this when tested
             this.directiveShortcuts = this.modulo.config.reconciler.directiveShortcuts; // OLD TODO global modulo
@@ -1715,10 +1798,9 @@ modulo.register('engine', class Reconciler {
         if (/^[a-z0-9-]+$/i.test(rawName)) {
             return null; // if alphanumeric-only, stop right away
         }
-        // "Expand" shortcuts into their full versions
         let name = rawName;
-        for (const [regexp, directive] of directiveShortcuts) {
-            if (rawName.match(regexp)) {
+        for (const [ regexp, directive ] of directiveShortcuts) {
+            if (rawName.match(regexp)) { // "Expand" shortcut into full version
                 name = `[${directive}]` + name.replace(regexp, '');
             }
         }
@@ -1744,9 +1826,9 @@ modulo.register('engine', class Reconciler {
         }
     }
 
-    reconcileChildren(childParent, rivalParent) {
+    reconcileChildren(childParent, rivalParent, slottables) {
         // Nonstandard nomenclature: "rival" is node we wish "child" to match
-        const cursor = new this.modulo.registry.engines.DOMCursor(childParent, rivalParent);
+        const cursor = new this.modulo.registry.engines.DOMCursor(childParent, rivalParent, slottables);
         while (cursor.hasNext()) {
             const [ child, rival ] = cursor.next();
             const needReplace = child && rival && (
@@ -1767,6 +1849,10 @@ modulo.register('engine', class Reconciler {
             if (!child && rival) { // we have less than rival, take rival
                 // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                 this.patch(cursor.parentNode, 'appendChild', rival);
+                /*if (rival.textContent === 'loose text') { // XXX get unit test to pass
+                    console.log('cursor.parentNode', cursor.parentNode);
+                    cursor.parentNode.append(rival);
+                }*/
                 this.patchAndDescendants(rival, 'Mount');
             }
 
@@ -1786,6 +1872,25 @@ modulo.register('engine', class Reconciler {
                         cursor.saveToStack();
                         cursor.initialize(child, rival);
                     }
+                }
+            }
+        }
+        return; // XXX DELETE IN PROGROESS XXX 
+
+        for (const name of Object.keys(cursor.slots)) { // Loop remaining
+            const attrSel = name ? `[name="${ name }"]` : ':not([name])';
+            const slotElem = rivalParent.querySelector('slot' + attrSel);
+            const slotElemChild = childParent.querySelector('slot' + attrSel);
+            if (slotElem && name in cursor.slots) { // Slot + children exist
+                if (slotElemChild) { // TODO rm this
+                    slotElemChild.innerHTML = ''; // Clear default slot content on rival
+                }
+                slotElem.innerHTML = ''; // Clear default slot content on rival
+                //this.patch(slotElem, 'node-value', ''); // Clear default content
+                //console.log("clearing", JSON.stringify(name), slotElem, slotElemChild );
+                for (const elem of cursor.slots[name]) { // Patch in nodes
+                    console.log("appending", JSON.stringify(name), elem);
+                    this.patch(slotElemChild || slotElem, 'appendChild', elem);
                 }
             }
         }
@@ -1870,6 +1975,7 @@ modulo.register('engine', class Reconciler {
             this.patchDirectives(parentNode, rawName, actionSuffix);
         }
         for (const child of parentNode.children) { // Loop through children
+            // TODO: Also needs: !child.isModulo -- should test
             if (!child.hasAttribute('modulo-ignore')) { // Skip ignored
                 this.patchAndDescendants(child, actionSuffix); // Recurse
             }
@@ -1890,8 +1996,8 @@ modulo.register('util', function showDevMenu() {
     const rerun = `<h1><a href="?mod-cmd=${ cmd }">&#x27F3; ${ cmd }</a></h1>`;
     if (cmd) { // Command specified, skip dev menu, run, and replace HTML after
         const callback = () => { window.document.body.innerHTML = rerun; };
-        const func = () => modulo.registry.commands[cmd](modulo, { callback });
-        return window.setTimeout(func, modulo.config.commandDelay || 1000);
+        const start = () => modulo.registry.commands[cmd](modulo, { callback });
+        return window.setTimeout(start, modulo.config.commandDelay || 1000);
     } // Else: Display "COMMANDS:" menu in console
     const href = 'window.location.href += ';
     const font = 'font-size: 28px; padding: 0 8px 0 8px; border: 2px solid black;';

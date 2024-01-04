@@ -19,7 +19,9 @@
           let newText = text.replace('src="M"', 'type="temp/modulodummy"');
           if (text !== newText) {
               const combined = closeTag + openTag + moduloText + closeTag;
-              newText = newText.replace(closeTag, combined); // Add into at next close tag
+              // NOTE: Using a () => function here because of https://stackoverflow.com/questions/9423722
+              // (JavaScript will treat $' specially, which of course appears in code)
+              newText = newText.replace(closeTag, () => combined); // Add into at next close tag
           }
           iframe = document.createElement('iframe');
           iframe.style.display = 'none'; // ensure invisible
