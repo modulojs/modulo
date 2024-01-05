@@ -2,7 +2,7 @@
 
 <test name="Test DomCursor hasNext() and next() with simple structures">
     <script name="hasNext() and next() with empty mock data">
-        const fakeNode = { firstChild: null };
+        const fakeNode = { firstChild: null, querySelector: () => null };
         const cursor = new modulo.registry.engines.DOMCursor(fakeNode, fakeNode);
         const hasNext = cursor.hasNext();
         const next = JSON.stringify(cursor.next());

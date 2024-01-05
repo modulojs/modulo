@@ -535,7 +535,7 @@ modulo.config.component = {
 modulo.register('coreDef', class Component {
     static CustomElement (modulo, def, value) {
         if (!def.ChildrenNames || def.ChildrenNames.length === 0) {
-            console.warn('Empty ChildrenNames specified:', def.DefinitionName);
+            console.warn('MODULO: Empty ChildrenNames:', def.DefinitionName);
             return;
         }
         def.namespace = def.namespace || 'x'; // TODO Add auto generated, if aliased
@@ -706,9 +706,15 @@ modulo.register('coreDef', class Component {
     updateCallback(renderObj) {
         const { patches, innerHTML } = renderObj.component;
         if (patches) {
-            if (patches.length > 12) {// XXX XXX
-                console.table(patches);
+            /*
+            if (patches.length === 14 && patches[2][0].nodeValue === 'loose text') {
+                // XXX: BUG: Generates spurious 1st and 3rd patches that
+                // somehow modifies the RIVAL, before it generates correct ones
+                // console.table(patches.map(arr => arr.map(v => (v && v.nodeType) ? v.nodeValue || v.outerHTML : v)));
+                patches.shift(); const second = patches.shift(); patches.shift(); // Rmeove 3
+                patches.unshift(second);
             }
+            */
             this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches);
         }
@@ -1624,10 +1630,14 @@ modulo.register('engine', class DOMCursor {
             } else {
                 this.slots[name].push(elem); // Or pushing into existing
             }
+            if (elem.parentNode === parentNode) {
+                elem.remove(); // Remove from DOM immediately -- TODO move to Component
+            }
         }
         this.instanceStack = [];
         this._rivalQuerySelector = parentRival.querySelector.bind(parentRival);
         this._querySelector = parentNode.querySelector.bind(parentNode);
+        this._pN = parentNode;
         this.initialize(parentNode, parentRival);
     }
 
@@ -1677,16 +1687,18 @@ modulo.register('engine', class DOMCursor {
         if (name === '' || name) { // Is name valid? (String of 0 or more)
             const sel = name ? `slot[name="${ name }"]` : 'slot:not([name])';
             const rivalSlot = this._rivalQuerySelector(sel);
+            console.log('this is childSlot', this._querySelector(sel));
+            console.log('this is childSlot', this._pN.outerHTML);
             if (!rivalSlot) { // No slot (e.g., conditionally rendered, or typo)
                 delete this.slots[name]; // (Ensure "consumed", if not init'ed)
                 return this.loadFromSlots(); // If no elem, try popping again
             }
             const childSlot = this._querySelector(sel) || rivalSlot;
             this.initialize(childSlot, rivalSlot); // Restart with slot elem
-            if (this.activeSlot && this.activeSlot.length) {
+            /*if (this.activeSlot && this.activeSlot.length) {
                 console.log('THIS IS IT:', this.nextRival.outerHTML);
                 console.log('THIS IS IT:', this.activeSlot[0].nodeValue);
-            }
+            }*/
             return true;
         }
     }
@@ -1725,7 +1737,7 @@ modulo.register('engine', class DOMCursor {
                       [ null, this.keyedRivalsArr.pop() ] :
                       [ this.keyedChildrenArr.pop(), null ];
             }
-            console.warning('Modulo WARNING: cursor.next() called at end');
+            console.warn('MODULO: cursor.next() called at end');
             return [ null, null ];
         }
         this.nextChild = child ? child.nextSibling : null;
@@ -1849,10 +1861,11 @@ modulo.register('engine', class Reconciler {
             if (!child && rival) { // we have less than rival, take rival
                 // TODO: Possibly add directive resolution context to rival / child.originalChildren?
                 this.patch(cursor.parentNode, 'appendChild', rival);
-                /*if (rival.textContent === 'loose text') { // XXX get unit test to pass
+                /*
+                if (rival.textContent === 'loose text') { // XXX get unit test to pass
                     console.log('cursor.parentNode', cursor.parentNode);
-                    cursor.parentNode.append(rival);
-                }*/
+                }
+                */
                 this.patchAndDescendants(rival, 'Mount');
             }
 
