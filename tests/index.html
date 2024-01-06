@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <template Modulo>
-    <!-- At least 295 assertions total -->
+    <!-- At least 314 assertions total -->
     <Library -src="./core_functionality.test.html"></Library>
     <Library -src="./mtl.test.html"></Library>
     <Library -src="./domcursor.test.html"></Library>
@@ -22,6 +22,7 @@
     <Library -src="./cparts/artifact.test.html"></Library>
     <Library -src="./multi-file-tests/loading_style_src.test.html"></Library>
     <Library -src="./cparts/component_slot.test.html"></Library>
+    <Library -src="./cparts/component_namespace.test.html"></Library>
 
     <!-- Also, do doc tests (note does requests) -->
     <Library -src="/libraries/docseg.html"></Library>
@@ -31,12 +32,9 @@
 <script src="/demos/mdu/cparts/TestSuite.js"></script>
 
 <!--
-Composition tests are disabled because:
-1. Require component.slot to work 100%
-2. Require <PassThrough to be rewritten as <x-PassThrough
+Following tests are disabled since they are based on old versions of the API:
 <Library -src="./browser_build.test.html"></Library>
 <Library -src="/demos/tests/composition.test.html"></Library>
-<Library -src="/demos/tests/cparts/component_mode.test.html"></Library>
 <Library -src="/demos/tests/reconciler1.test.html"></Library>
 <Library -src="/demos/tests/reconciler2.test.html"></Library>
 <Library -src="/demos/tests/reconciler3.test.html"></Library>

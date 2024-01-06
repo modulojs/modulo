@@ -1,4 +1,4 @@
-<Component name="MTLTest2"><TestSuite >
+<Component name="MTLTest2"><TestSuite>
 
 <!-- Unit tests for MTL -->
 
@@ -47,4 +47,40 @@
     </script>
 </Test>
 
+<Test name="Test new filters">
+    <script name="Trim works with basic characters">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Trim: {{ a|trim }}__{{ a|trim:'xx,xx' }}");
+        const result = instance.render({ a: ' \n xxabc 123xx  ' });
+        const expected = 'Trim: xxabc 123xx__abc 123';
+        assert: result === expected
+    </script>
+
+    <script name="Trim works with regexp special characters">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Trim: {{ a|trim }}__{{ a|trim:'[[,]]' }}");
+        const result = instance.render({ a: ' [[abc 123]] ' });
+        const expected = 'Trim: [[abc 123]]__abc 123';
+        assert: result === expected
+    </script>
+
+    <script name="Tagswap works with single swap">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Tag swap: {{ a|tagswap:'b=c' }}");
+        const result = instance.render({ a: '<b>abc<B>XYZ</B>123</b>' });
+        const expected = 'Tag swap: <c>abc<c>XYZ</c>123</c>';
+        assert: result === expected
+    </script>
+
+    <script name="Tagswap works with multi swap preserving case">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Tag swap: {{ a|tagswap:'x=TD y=x-Example' }}");
+        const result = instance.render({ a: '<x>abc<y>XYZ</y>123</x>' });
+        const expected = 'Tag swap: <TD>abc<x-Example>XYZ</x-Example>123</TD>';
+        assert: result === expected
+    </script>
+
+
+
+</Test>
 </TestSuite></Component>

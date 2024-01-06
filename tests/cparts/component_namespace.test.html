@@ -1,0 +1,91 @@
+<Component name="CNS_Test_Default">
+    <Template>ABC</Template>
+</Component>
+<Component name="CNS_Test_Custom" namespace="x">
+    <Template>XXX</Template>
+</Component>
+<Component name="CNS_Test_Custom" namespace="nstesta">
+    <Template>AAA</Template>
+</Component>
+<Component name="CNS_Test_Custom" namespace="nstestb">
+    <Template>BBB</Template>
+</Component>
+<Component name="CNS_Test_Alias" namespace="nsatest1" alias="ytestalias">
+    <Template>YYY</Template>
+</Component>
+<Component name="CNS_Test_Alias" alias="ztestalias">
+    <Template>ZZZ</Template>
+</Component>
+
+<Component name="ComponentNamespaceAndAlias_Test">
+    <Template>
+        {% if state.test-namespace %}
+            <x-CNS_Test_Default></x-CNS_Test_Default>
+            <x-CNS_Test_Custom></x-CNS_Test_Custom>
+            <nstesta-CNS_Test_Custom></nstesta-CNS_Test_Custom>
+            <nstestb-CNS_Test_Custom></nstestb-CNS_Test_Custom>
+        {% endif %}
+        {% if state.test-alias %}
+            <ytestalias-CNS_Test_Alias></ytestalias-CNS_Test_Alias>
+            <ztestalias-CNS_Test_Alias></ztestalias-CNS_Test_Alias>
+        {% endif %}
+    </Template>
+
+    <State
+        test-namespace:=false
+        test-alias:=false
+    ></State>
+
+    <TestSuite>
+        <Test name="Namespaces">
+            <script name="Element registers with default expected name">
+                assert: 'x_CNS_Test_Default' in modulo.registry.elements
+            </script>
+            <script name="Element registers with x namespace explicitly specified">
+                assert: 'x_CNS_Test_Custom' in modulo.registry.elements
+            </script>
+            <script name="Element registers with explicit namespace specified">
+                assert: 'nstesta_CNS_Test_Custom' in modulo.registry.elements
+            </script>
+            <script name="Element registers with explicit namespace specified">
+                assert: 'nstestb_CNS_Test_Custom' in modulo.registry.elements
+            </script>
+
+            <state test-namespace:=true test-alias:=false></state>
+            <Template name="Namespaced components mount correctly">
+                <x-CNS_Test_Default>ABC</x-CNS_Test_Default>
+                <x-CNS_Test_Custom>XXX</x-CNS_Test_Custom>
+                <nstesta-CNS_Test_Custom>AAA</nstesta-CNS_Test_Custom>
+                <nstestb-CNS_Test_Custom>BBB</nstestb-CNS_Test_Custom>
+            </Template>
+        </Test>
+
+        <Test name="Aliases">
+            <script name="Element registers with alias and explicit namespace specified">
+                assert: 'nsatest1_CNS_Test_Alias' in modulo.registry.elements
+            </script>
+            <script name="Element registers with alias gets unique default">
+                // NOTE: This is fragile!
+                const exp = 'library21_CNS_Test_Alias1_CNS_Test_Alias';
+                assert: exp in modulo.registry.elements
+            </script>
+            <state test-namespace:=false test-alias:=true></state>
+            <Template name="Aliased components mount correctly">
+                <nsatest1-CNS_Test_Alias>YYY</nsatest1-CNS_Test_Alias>
+                <library21_CNS_Test_Alias1-CNS_Test_Alias>ZZZ</library21_CNS_Test_Alias1-CNS_Test_Alias>
+            </Template>
+        </Test>
+
+        <Test name="Namespaces and aliases">
+            <state test-namespace:=true test-alias:=true></state>
+            <Template name="All components mount correctly">
+                <x-CNS_Test_Default>ABC</x-CNS_Test_Default>
+                <x-CNS_Test_Custom>XXX</x-CNS_Test_Custom>
+                <nstesta-CNS_Test_Custom>AAA</nstesta-CNS_Test_Custom>
+                <nstestb-CNS_Test_Custom>BBB</nstestb-CNS_Test_Custom>
+                <nsatest1-CNS_Test_Alias>YYY</nsatest1-CNS_Test_Alias>
+                <library21_CNS_Test_Alias1-CNS_Test_Alias>ZZZ</library21_CNS_Test_Alias1-CNS_Test_Alias>
+            </Template>
+        </Test>
+    </TestSuite>
+</Component>

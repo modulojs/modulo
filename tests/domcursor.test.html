@@ -49,6 +49,105 @@
         const emptyNext = JSON.stringify([null, null]);
         assert: hasNext === false && next === emptyNext;
     </script>
+
+</test>
+
+
+
+<test name="Test DomCursor hasNext() and next() with simple keys">
+
+    <script name="hasNext() and next() with first item matching">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p key="a">A</p><p>B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'A' && t1 === 'A';
+    </script>
+
+    <script name="hasNext() and next() can access second item when first matches">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="c">A</p><p>B</p>');
+        const rival = md('<p key="c">A</p><p>B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'B' && t1 === 'B';
+    </script>
+
+    <script name="hasNext() and next() with keys flipped">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p>A</p><p key="a">B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'B' && t1 === 'A'; // first item becomes B matching with A
+    </script>
+
+    <script name="hasNext() and next() can access second item with keys flipped">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p>A</p><p key="a">B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'A' && t1 === 'B';
+    </script>
+
+    <script name="hasNext() and next() with keys mismatched">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p>A</p><p key="c">B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'B' && t1 === 'A'; // first item becomes B matching with A
+    </script>
+
+    <!--
+      TODO fix this -- not sure why it's traversing in this order 
+    <script name="hasNext() and next() can access second item with keys flipped">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p>A</p><p key="c">B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && t0 === 'B' && !t1
+    </script>
+    -->
+
+    <script name="hasNext() and next() can access third item with keys flipped">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<p key="a">A</p><p>B</p>');
+        const rival = md('<p>A</p><p key="c">B</p>');
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival);
+        cursor.next(); // Skip first
+        cursor.next(); // Skip second
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === true && !t0 && t1 === 'B'
+    </script>
+
 </test>
 
 
