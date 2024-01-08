@@ -611,9 +611,6 @@ modulo.register('coreDef', class Component {
                 opts.directives[dirName] = cPart;
             }
         }
-        if (this.attrs.mode === 'shadow') {
-            this.element.attachShadow({ mode: 'open' });
-        }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
         const html = this.element.getAttribute('modulo-mount-html');
@@ -654,6 +651,9 @@ modulo.register('coreDef', class Component {
         if (this.attrs.mode === 'regular' || this.attrs.mode === 'vanish') {
             root = this.element; // default, use element as root
         } else if (this.attrs.mode === 'shadow') {
+            if (!this.element.shadowRoot) {
+                this.element.attachShadow({ mode: 'open' });
+            }
             root = this.element.shadowRoot; // render into attached shadow
         } else if (this.attrs.mode === 'vanish-into-document') {
             root = this.element.ownerDocument.body; // render into body
@@ -1600,8 +1600,8 @@ modulo.register('cpart', class State {
 
 modulo.register('engine', class DOMCursor {
     constructor(parentNode, parentRival, slots) {
-        this.slots = slots || {}; // Slottables keyed by name (default slot is '')
-        this.instanceStack = [];
+        this.slots = slots || {}; // Slottables keyed by name (default is '')
+        this.instanceStack = []; // Used for implementing DFS non-recursively
         this._rivalQuerySelector = parentRival.querySelector.bind(parentRival);
         this._querySelector = parentNode.querySelector.bind(parentNode);
         this.initialize(parentNode, parentRival);
@@ -1628,18 +1628,17 @@ modulo.register('engine', class DOMCursor {
     saveToStack() {
         const { nextChild, nextRival, keyedChildren, keyedRivals, parentNode,
                 activeExcess, activeSlot } = this;
-        const instance = { nextChild, nextRival, keyedChildren, keyedRivals,
-                          parentNode, activeExcess, activeSlot };
-        this.instanceStack.push(instance);
+        this.instanceStack.push({ nextChild, nextRival, keyedChildren,
+                          keyedRivals, parentNode, activeExcess, activeSlot });
     }
 
-    loadFromExcessKeys() { // There were "excess" keys to deal with
-        if (!this.activeExcess) { // Convert objects into arrays to pop
-            const childs = Object.values(this.keyedChildren).map(v => [v, null]);
-            const rivals = Object.values(this.keyedRivals).map(v => [null, v]);
-            this.activeExcess = rivals.concat(childs);
+    loadFromExcessKeys() { // There were "excess", unmatched keyed elements
+        if (!this.activeExcess) { // Convert needed appends and removes to array
+            const child = Object.values(this.keyedChildren).map(v => [v, null]);
+            const rival = Object.values(this.keyedRivals).map(v => [null, v]);
+            this.activeExcess = rival.concat(child); // Do appends before remove
         }
-        return this.activeExcess.length > 0;
+        return this.activeExcess.length > 0; // Return true if there is any left
     }
 
     loadFromStack() { // Remaining stack to "walk back" (non-recursive DFS)
@@ -1691,23 +1690,23 @@ modulo.register('engine', class DOMCursor {
             let matchedRival = this.getMatchedNode(child, this.keyedChildren, this.keyedRivals);
             let matchedChild = this.getMatchedNode(rival, this.keyedRivals, this.keyedChildren);
             if (matchedRival === false) { // Child has a key, but does not match
-                child = this.nextChild; // Simply ignore Child, and on to next child
-                this.nextChild = child ? child.nextSibling : null; // (repeat 1721)
-            } else if (matchedChild === false) { // Rival has key, but doesnt match
+                child = this.nextChild; // Simply ignore Child, and on to next
+                this.nextChild = child ? child.nextSibling : null; // (1687)
+            } else if (matchedChild === false) { // Rival has key, but no match
                 rival = this.nextRival; // IGNORE rival - move on to
                 this._setNextRival(rival); // (and setup next-next rival)
             }
             const keyWasFound = matchedRival !== null || matchedChild !== null;
             const matchFound = matchedChild !== child && keyWasFound;
-            if (matchFound && matchedChild) { // Rival matches, but not with child
-                this.nextChild = child; // "Undo" this last "nextChild" (return it)
-                child = matchedChild; // Then substitute the matched child instead
+            if (matchFound && matchedChild) { // Rival matches, but not child
+                this.nextChild = child; // "Undo" this last "nextChild" (return)
+                child = matchedChild; // Then substitute the matched instead
             }
             if (matchFound && matchedRival) {
                 // Child matches, but not with rival. Swap in the correct one.
-                this.modulo.assert(matchedRival !== rival, 'Dupe!'); // (We know this due to ordering)
-                this.nextRival = rival; // "Undo" this last "nextRival" (return it)
-                rival = matchedRival; // Then substitute the matched rival instead
+                this.modulo.assert(matchedRival !== rival, 'Dupe!');
+                this.nextRival = rival; // "Undo" this last "nextRival"
+                rival = matchedRival; // Then substitute the matched rival
             }
         }
         return [ child, rival ];
