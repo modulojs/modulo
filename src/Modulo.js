@@ -663,18 +663,16 @@ modulo.register('coreDef', class Component {
         if (innerHTML !== null && !innerDOM) { // Use component.innerHTML as DOM
             innerDOM = makeDiv(innerHTML);
         }
-        if (innerDOM) { // If innerDOM is truthy, user is requesting a reconcile
-            if (this.attrs.mode === 'vanish-into-document') { // Move to <head>
-                for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
-                    this.element.ownerDocument.head.append(clone(el)); // Move clone
-                    el.remove(); // Old one is removed from previous location
-                }
+        if (innerDOM && this.attrs.mode === 'vanish-into-document') {
+            for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
+                this.element.ownerDocument.head.append(clone(el)); // Move clone
+                el.remove(); // Old one is removed from previous location
             }
-            for (const elem of this.element.originalChildren)  {
+        }
+        if (innerDOM && this.attrs.mode !== 'shadow') {
+            for (const elem of this.element.originalChildren) {
                 const name = (elem.getAttribute && elem.getAttribute('slot')) || '';
-                if (elem.parentNode === root) { // Parent node is already root
-                    elem.remove(); // Remove from DOM so it can't self-match
-                }
+                elem.remove(); // Remove from DOM so it can't self-match
                 if (!(name in slots)) {
                     slots[name] = [ elem ]; // Sorting into new slot arrays
                 } else {
@@ -710,7 +708,7 @@ modulo.register('coreDef', class Component {
         this._lifecycle([ 'event' ]);
         func(payload === undefined ? ev : payload);
         this._lifecycle([ 'eventCleanup' ]);
-        if (this.attrs.rerender !== 'manual') {
+        if (this.attrs.rerender !== 'manual') { // TODO: Change patch('rerender') to "requestRerender" (or update the HTMLElement method)
             this.element.rerender(); // always rerender after events
         }
     }
