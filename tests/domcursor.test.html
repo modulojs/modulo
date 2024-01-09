@@ -151,6 +151,8 @@
 </test>
 
 
+
+
 <test name="Test DomCursor descent with nested structures">
 
     <script name="hasNext() and next() initial is as expected">
@@ -183,6 +185,72 @@
         const t3 = next2[0] && next2[0].textContent;
         const t4 = next2[1] && next2[1].textContent;
         assert: hN === true && t0 === 'B' && t1 === 'E' && lR && hN2 === false && t3 === 'D' && t4 === 'D';
+    </script>
+
+</test>
+
+<test name="Test DomCursor slot features">
+
+    <script name="hasNext() and next() compares slots as a regular element as expected">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('');
+        const rival = md('<slot></slot>');
+        const slots = { '': [ md('ABC') ] };
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival, slots);
+        const hasNext = cursor.hasNext();
+        const next = cursor.next();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].tagName;
+        assert: hasNext === true && t0 === null && t1 === 'SLOT';
+    </script>
+
+    <script name="hasNext() and next() goes into slots as expected">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('');
+        const rival = md('<slot></slot>');
+        const slots = { '': [ md('ABC') ] };
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival, slots);
+        cursor.hasNext();
+        cursor.next(); // Skip first
+        cursor.hasNext();
+        const next = cursor.next();
+        const hasNext = cursor.hasNext();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === false && t0 === null && t1 === 'ABC';
+    </script>
+
+    <script name="hasNext() and next() can handle nested named slot and default as expected">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('');
+        const rival = md('<slot name="slottytest"><p>XXX</p></slot>');
+        const slots = { 'slottytest': [ md('YYY') ] };
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival, slots);
+        cursor.hasNext();
+        cursor.next(); // Skip first
+        cursor.hasNext();
+        const next = cursor.next();
+        const hasNext = cursor.hasNext();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        assert: hasNext === false && t0 === 'XXX' && t1 === 'YYY';
+    </script>
+
+    <script name="hasNext() and next() can handle content in existing slots as expected">
+        const md = modulo.registry.utils.makeDiv;
+        const node = md('<slot name="slottytest"><p>ZZZ</p></slot>');
+        const rival = md('<slot name="slottytest"><p>XXX</p></slot>');
+        const slots = { 'slottytest': [ md('YYY') ] };
+        const cursor = new modulo.registry.engines.DOMCursor(node, rival, slots);
+        const nSlt = cursor.next(); // Skip first
+        cursor.hasNext();
+        const next = cursor.next();
+        const hasNext = cursor.hasNext();
+        const t0 = next[0] && next[0].textContent;
+        const t1 = next[1] && next[1].textContent;
+        const s0 = nSlt[0] && nSlt[0].tagName;
+        const s1 = nSlt[1] && nSlt[1].tagName;
+        assert: hasNext === false && t0 === 'ZZZ' && t1 === 'YYY' && s0 === 'SLOT' && s1 === 'SLOT'
     </script>
 
 </test>

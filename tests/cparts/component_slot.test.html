@@ -30,6 +30,35 @@
     </Template>
 </Component>
 
+<Component name="ComponentSlot_TesterPatches">
+    <Props
+        showbtn
+    ></Props>
+    <Template>
+      <div>AAA</div>
+      <div><slot>slotDefault</slot></div>
+      {% if script.dobtn %}
+        <button @click:=script.buttonClick>buttonText</button>
+      {% endif %}
+      <div>ZZZ</div>
+    </Template>
+    <Script>
+        function prepareCallback() {
+            return {
+                dobtn: (!!window.___componentSlotDoBtn) || props.showbtn,
+            };
+        }
+        function buttonClick() {
+            window.___componentSlotClicks = window.___componentSlotClicks || [];
+            window.___componentSlotClicks.push('click');
+        }
+        function reconcileCallback() {
+            window.___componentSlotPatches = window.___componentSlotPatches || [];
+            window.___componentSlotPatches.push(Array.from(component.patches));
+        }
+    </Script>
+</Component>
+
 <Component name="ComponentSlot_Test">
     <Template>
         {% if state.test-regular %}
@@ -53,8 +82,19 @@
             </x-ComponentSlot_TesterC>
         {% elif state.test-mixed-named %}
             <x-ComponentSlot_TesterD><span>dddContent</span>loose text<del slot="ccc">cccContent</del></x-ComponentSlot_TesterD>
+        {% elif state.test-patches-basic %}
+            <x-ComponentSlot_TesterPatches><span>slotContent</span></x-ComponentSlot_TesterPatches>
+        {% elif state.test-patches-nested %}
+            <x-ComponentSlot_TesterPatches><span @click:=script.buttonClick>moreContent</span></x-ComponentSlot_TesterPatches>
         {% endif %}
     </Template>
+
+    <Script>
+        function buttonClick() {
+            window.___componentSlotClicks = window.___componentSlotClicks || [];
+            window.___componentSlotClicks.push('outer-button-click');
+        }
+    </Script>
 
     <State
         test-regular:=false
@@ -64,6 +104,8 @@
         test-named:=false
         test-named-multiple:=false
         test-mixed-named:=false
+        test-patches-basic:=false
+        test-patches-nested:=false
     ></State>
 
     <TestSuite>
@@ -121,6 +163,94 @@
                     <div>111</div>
                 </x-ComponentSlot_TesterD>
             </template>
+        </Test>
+
+        <Test name="Testing basic patches">
+            <state test-mixed-named:=false test-named-multiple:=false test-named:=false test-default:=false test-default-empty:=false></state>
+
+            <state test-patches-basic:=true></state>
+            <template name="Renders as expected">
+                <x-ComponentSlot_TesterPatches>
+                  <div>AAA</div>
+                  <div><slot><span>slotContent</span></slot></div>
+                  <div>ZZZ</div>
+                </x-ComponentSlot_TesterPatches>
+            </template>
+
+            <script name="Creates expected patches to create DOM structure with slot">
+                const patches = window.___componentSlotPatches[0];
+                const expected = JSON.stringify([ 'appendChild', 'appendChild', 'appendChild', // adding content
+                            'appendChild', 'appendChild', 'removeChild', // the remove is for the default
+                            'insertBefore', ]); //  finally adding the slot child
+                delete window.___componentSlotPatches;
+                const actual = JSON.stringify(patches.map(p => p[1]));
+                assert: actual === expected
+            </script>
+
+            <template name="Re-renders as expected">
+                <x-ComponentSlot_TesterPatches>
+                  <div>AAA</div>
+                  <div><slot><span>slotContent</span></slot></div>
+                  <div>ZZZ</div>
+                </x-ComponentSlot_TesterPatches>
+            </template>
+
+
+            <script name="Creates expected patches to create DOM structure with slot (2)">
+                const patches = window.___componentSlotPatches[0];
+                const expected = JSON.stringify([ ]); // should be empty, no need for rerender
+                delete window.___componentSlotPatches;
+                const actual = JSON.stringify(patches);
+
+                window.___componentSlotDoBtn = true; //  hacky flag -- required for next assertion!
+
+                assert: actual === expected
+            </script>
+
+
+            <template name="Re-renders with button (using global from script tag)">
+                <x-ComponentSlot_TesterPatches>
+                  <div>AAA</div>
+                  <div><slot><span>slotContent</span></slot></div>
+                  <button @click:=script.buttonClick>buttonText</button>
+                  <div>ZZZ</div>
+                </x-ComponentSlot_TesterPatches>
+            </template>
+        </Test>
+
+
+        <Test name="Testing nested patches">
+            <state test-patches-basic:=false test-mixed-named:=false test-named-multiple:=false test-named:=false test-default:=false test-default-empty:=false></state>
+            <state test-patches-nested:=false></state>
+            <script>
+                delete window.___componentSlotPatches;
+                assert: true
+            </script>
+
+            <state test-patches-nested:=true></state>
+            <template name="Renders as expected">
+                <x-ComponentSlot_TesterPatches>
+                  <div>AAA</div>
+                  <div><slot><span @click:=script.buttonClick>moreContent</span></slot></div>
+                  <button @click:=script.buttonClick>buttonText</button>
+                  <div>ZZZ</div>
+                </x-ComponentSlot_TesterPatches>
+            </template>
+
+            <script name="Creates expected patches to do necessary dataprop and make dom structure">
+                const patches = window.___componentSlotPatches[0];
+                const expected = JSON.stringify([ 'appendChild', 'appendChild', 'appendChild', // adding content
+                            'appendChild', 
+                            'appendChild', // for the <button>
+                            "directive-dataPropMount","directive-eventMount", // @click:=
+                            'appendChild', // for text
+                            'appendChild', // for the <div>ZZZ</div>
+                            'removeChild', // the remove is for the default
+                            'insertBefore', ]); //  finally adding the slot child
+                delete window.___componentSlotPatches;
+                const actual = JSON.stringify(patches.map(p => p[1]));
+                assert: actual === expected
+            </script>
         </Test>
     </TestSuite>
 </Component>

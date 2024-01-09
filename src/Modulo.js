@@ -460,11 +460,6 @@ modulo.register('coreDef', class Artifact {
             if (urlName) { // Guess filename based on URL (or use as default)
                 def.FileName = window.location.pathname.split('/').pop() || urlName;
             }
-            /*
-            def.FileName = urlName ? // Guess filename based on URL (or default)
-                (window.location.pathname.split('/').pop() || urlName)
-                : `modulo-build-${ hash(content) }.${ name }`;
-            */
             def.OutputPath = saveFileAs(def.FileName, content); // Attempt save
         });
     }
@@ -942,7 +937,6 @@ modulo.register('core', class FetchQueue {
             queue.push(() => {
                 callbackCount++;
                 if (callbackCount >= allQueues.length) {
-                    //console.log(Array.from(Object.values(this.queue)).length);
                     callback();
                 }
             });
@@ -1077,7 +1071,7 @@ modulo.register('cpart', class Style {
         }
     }
 
-    makeStyleTag(parentElem, content) {
+    makeStyleTag(parentElem, content) { // Append <style> tag with content
         const style = window.document.createElement('style');
         style.setAttribute('modulo-asset', 'y');
         style.textContent = content;
@@ -1625,11 +1619,13 @@ modulo.register('engine', class DOMCursor {
         }
     }
 
-    saveToStack() {
-        const { nextChild, nextRival, keyedChildren, keyedRivals, parentNode,
-                activeExcess, activeSlot } = this;
-        this.instanceStack.push({ nextChild, nextRival, keyedChildren,
-                          keyedRivals, parentNode, activeExcess, activeSlot });
+    saveToStack() { // Creates an object copied with all cursor state
+        this.instanceStack.push(Object.assign({ }, this)); // Copy to empty obj
+    }
+
+    loadFromStack() { // Remaining stack to "walk back" (non-recursive DFS)
+        const stack = this.instanceStack;
+        return stack.length > 0 && Object.assign(this, stack.pop());
     }
 
     loadFromExcessKeys() { // There were "excess", unmatched keyed elements
@@ -1639,11 +1635,6 @@ modulo.register('engine', class DOMCursor {
             this.activeExcess = rival.concat(child); // Do appends before remove
         }
         return this.activeExcess.length > 0; // Return true if there is any left
-    }
-
-    loadFromStack() { // Remaining stack to "walk back" (non-recursive DFS)
-        const stack = this.instanceStack;
-        return stack.length > 0 && Object.assign(this, stack.pop());
     }
 
     loadFromSlots() { // There are "excess" slots (copied, but deeply nested)
@@ -1670,9 +1661,13 @@ modulo.register('engine', class DOMCursor {
     }
 
     _setNextRival(rival) { // Traverse this.nextRival based on DOM or SLOT
-        if (this.activeSlot) { // Use activeSlot array for next instead
-            this.nextRival = this.activeSlot.length ? // Any slottables left?
-                             this.activeSlot.shift() : null; // Pop off next
+        if (this.activeSlot !== null) { // Use activeSlot array for next instead
+            if (this.activeSlot.length > 0) {
+                this.nextRival = this.activeSlot.shift(); // Pop off next one
+                this.nextRival._moduloIgnoreOnce = true; // Ensure no descend
+            } else {
+                this.nextRival = null;
+            }
         } else {
             this.nextRival = rival ? rival.nextSibling : null; // Normal DOM traversal
         }
@@ -1681,6 +1676,7 @@ modulo.register('engine', class DOMCursor {
     next() {
         let child = this.nextChild;
         let rival = this.nextRival;
+        //if (!rival && !child && this.hasNext()) { return this.next(); } // TODO ALlow for calling w/o hasNext
         if (!rival && this.activeExcess && this.activeExcess.length > 0) {
             return this.activeExcess.shift(); // Return the first pair
         }
@@ -1838,7 +1834,7 @@ modulo.register('engine', class Reconciler {
         } else if (method === 'insertBefore') {
             node.insertBefore(arg, arg2); // Needs 2 arguments
         } else if (method.startsWith('directive-')) {
-            method = method.substr('directive-'.length); // TODO: RM prefix (or generalizze)
+            method = method.substr(10);//'directive-'.length); // TODO: RM prefix (or generalizze)
             node[method].call(node, arg); // invoke directive method
         } else {
             node[method].call(node, arg); // invoke method
@@ -1894,13 +1890,14 @@ modulo.register('engine', class Reconciler {
         if (parentNode.nodeType !== 1) {
             return; // Skip anything that isn't a regular HTML element
         }
-        for (const rawName of parentNode.getAttributeNames()) {
-            this.patchDirectives(parentNode, rawName, actionSuffix);
+        if (parentNode._moduloIgnoreOnce) {
+            delete parentNode._moduloIgnoreOnce; // Ensure ignore is deleted
+            return; // Skip ignored elements
         }
-        for (const child of parentNode.children) { // Loop through children
-            // TODO: Also needs: !child.isModulo -- should test
-            if (!child.hasAttribute('modulo-ignore')) { // Skip ignored
-                this.patchAndDescendants(child, actionSuffix); // Recurse
+        const searchNodes = Array.from(parentNode.querySelectorAll('*'));
+        for (const node of [ parentNode ].concat(searchNodes)) {
+            for (const rawName of node.getAttributeNames()) { // Do patches
+                this.patchDirectives(node, rawName, actionSuffix);
             }
         }
     }
