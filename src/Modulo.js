@@ -608,9 +608,9 @@ modulo.register('coreDef', class Component {
         }
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
-        const html = this.element.getAttribute('modulo-mount-html');
-        this._rival = (html !== null) ? makeDiv(html) : this.element;
-        this.element.originalHTML = html || this._rival.innerHTML;
+        const html = this.element.getAttribute('modulo-mount-html'); // Hydrate?
+        this._mountRival = html === null ? this.element : makeDiv(html);
+        this.element.originalHTML = html === null ? this.element.innerHTML : html;
     }
 
     mountCallback() { // Prepare the element, "hydrating" the "mount-patches"
@@ -631,13 +631,20 @@ modulo.register('coreDef', class Component {
 
     mountRenderCallback() { // First "mount", trigger render & hydration
         this.reconciler.applyPatches(this.reconciler.patches); // From "mount"
-        this.rerender(this._rival); // render + mount childNodes
+        this.rerender(this._mountRival); // render + mount childNodes
+        delete this._mountRival; // Clear the temporary reference
         this.element.isMounted = true; // Mark as mounted
     }
 
-    prepareCallback() { // Create the initial Component renderObj obj
-        return { originalHTML: this.element.originalHTML, id: this.id,
-                 innerDOM: null, innerHTML: null, patches: null, slots: { }};
+    prepareCallback() {
+        return { // Create the initial Component renderObj obj
+            originalHTML: this.element.originalHTML, // HTML received at mount
+            id: this.id, // Universally unique ID number
+            innerHTML: null, // String to copy (default: null is "no-op")
+            innerDOM: null, // Node to copy (default: null sets innerHTML)
+            patches: null, // Patch array (default: reconcile vs innerDOM)
+            slots: { }, // Populate with slots to be filled when reconciling
+        };
     }
 
     domCallback(renderObj) {
