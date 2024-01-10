@@ -11,7 +11,7 @@
     </script>
 
     <script name="hasNext() and next() with first item">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p>A</p><p>B</p>');
         const rival = md('<p>A</p><p>B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -24,7 +24,7 @@
 
 
     <script name="hasNext() and next() can access second item">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p>A</p><p>B</p>');
         const rival = md('<p>A</p><p>B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -37,7 +37,7 @@
     </script>
 
     <script name="hasNext() and next() reaches end">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p>A</p><p>B</p>');
         const rival = md('<p>A</p><p>B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -57,7 +57,7 @@
 <test name="Test DomCursor hasNext() and next() with simple keys">
 
     <script name="hasNext() and next() with first item matching">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p key="a">A</p><p>B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -69,7 +69,7 @@
     </script>
 
     <script name="hasNext() and next() can access second item when first matches">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="c">A</p><p>B</p>');
         const rival = md('<p key="c">A</p><p>B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -82,7 +82,7 @@
     </script>
 
     <script name="hasNext() and next() with keys flipped">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p>A</p><p key="a">B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -94,7 +94,7 @@
     </script>
 
     <script name="hasNext() and next() can access second item with keys flipped">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p>A</p><p key="a">B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -107,7 +107,7 @@
     </script>
 
     <script name="hasNext() and next() with keys mismatched">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p>A</p><p key="c">B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -121,7 +121,7 @@
     <!--
       TODO fix this -- not sure why it's traversing in this order 
     <script name="hasNext() and next() can access second item with keys flipped">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p>A</p><p key="c">B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -135,7 +135,7 @@
     -->
 
     <script name="hasNext() and next() can access third item with keys flipped">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p key="a">A</p><p>B</p>');
         const rival = md('<p>A</p><p key="c">B</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -156,7 +156,7 @@
 <test name="Test DomCursor descent with nested structures">
 
     <script name="hasNext() and next() initial is as expected">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p>A<span>B</span>C</p><p>D</p>');
         const rival = md('<p>A<span>B</span>C</p><p>D</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -168,7 +168,7 @@
     </script>
 
     <script name="saveToStack and initialize can be used to descend or move cursor">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<p>A<span>B</span>C</p><p>D</p>');
         const rival = md('<p>A<span>E</span>C</p><p>D</p>');
         const cursor = new modulo.registry.engines.DOMCursor(node, rival);
@@ -192,7 +192,7 @@
 <test name="Test DomCursor slot features">
 
     <script name="hasNext() and next() compares slots as a regular element as expected">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('');
         const rival = md('<slot></slot>');
         const slots = { '': [ md('ABC') ] };
@@ -205,7 +205,7 @@
     </script>
 
     <script name="hasNext() and next() goes into slots as expected">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('');
         const rival = md('<slot></slot>');
         const slots = { '': [ md('ABC') ] };
@@ -221,7 +221,7 @@
     </script>
 
     <script name="hasNext() and next() can handle nested named slot and default as expected">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('');
         const rival = md('<slot name="slottytest"><p>XXX</p></slot>');
         const slots = { 'slottytest': [ md('YYY') ] };
@@ -237,7 +237,7 @@
     </script>
 
     <script name="hasNext() and next() can handle content in existing slots as expected">
-        const md = modulo.registry.utils.makeDiv;
+        const md = modulo.registry.utils.newNode;
         const node = md('<slot name="slottytest"><p>ZZZ</p></slot>');
         const rival = md('<slot name="slottytest"><p>XXX</p></slot>');
         const slots = { 'slottytest': [ md('YYY') ] };

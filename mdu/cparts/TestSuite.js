@@ -108,7 +108,7 @@ modulo.register('cpart', class TestSuite {
     }
 
     static templateAssertion(modulo, element, stepConf) {
-        const { makeDiv, normalize } = modulo.registry.utils;
+        const { newNode, normalize } = modulo.registry.utils;
 
         const _process = 'testWhitespace' in stepConf ? s => s : normalize;
         const text1 = _process(stepConf.Content);
@@ -138,7 +138,7 @@ modulo.register('cpart', class TestSuite {
                 result = false;
             }
         } else {
-            result = makeDiv(text1).isEqualNode(makeDiv(text2));
+            result = newNode(text1).isEqualNode(newNode(text2));
         }
         return [result, `${text1}\n${verb}\n${text2}\n`];
     }
@@ -299,7 +299,7 @@ modulo.register('cpart', class TestSuite {
         // we can loop through after loading?
         const { Content } = suite;
         const { TestSuite } = modulo.registry.cparts;
-        const { makeDiv, deepClone, registerTestElement } = modulo.registry.utils;
+        const { newNode, deepClone, registerTestElement } = modulo.registry.utils;
         const Modulo = window.Modulo;
         const testLoaderModulo = _newModulo();
         let componentFac;
@@ -329,7 +329,7 @@ modulo.register('cpart', class TestSuite {
         const useTry = getParams.includes('stacktrace=y');
 
         //const parentNode = componentFac.loader._stringToDom(content);
-        const parentNode = makeDiv(Content);
+        const parentNode = newNode(Content);
 
         function _newModulo() {
             const mod = new Modulo(null, []); // TODO

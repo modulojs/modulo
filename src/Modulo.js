@@ -1,4 +1,4 @@
-// Copyright 2024 MichaelB | https://modulojs.org | Modulo v0.0.68 | LGPLv3
+// Copyright 2024 MichaelB | https://modulojs.org | Modulo v0.0.71 | LGPLv3
 // Modulo LGPLv3 NOTICE: Any direct modifications to the Modulo.js source code
 // must be LGPL or compatible. It is acceptable to distribute dissimilarly
 // licensed code built with the Modulo framework bundled in the same file for
@@ -83,7 +83,7 @@ window.Modulo = class Modulo {
     }
 
     loadString(text, parentName = null) { // TODO: Refactor this method away
-        return this.loadFromDOM(this.registry.utils.makeDiv(text), parentName);
+        return this.loadFromDOM(this.registry.utils.newNode(text), parentName);
     }
 
     loadFromDOM(elem, parentName = null, quietErrors = false) { // TODO: Refactor this method away
@@ -177,8 +177,6 @@ window.modulo.registry.registryCallbacks = {
     },
 };
 
-// TODO: Static: true to "squash" to a single global attached to window.
-// modulo.register('coreDef', window.Modulo, { 
 modulo.register('coreDef', class Modulo {}, {
     ChildPrefix: '', // Prevents all children from getting modulo_ prefixed
     Contains: 'coreDefs',
@@ -597,7 +595,7 @@ modulo.register('coreDef', class Component {
     }
 
     initializedCallback() {
-        const { makeDiv } = this.modulo.registry.utils;
+        const { newNode } = this.modulo.registry.utils;
         const opts = { directiveShortcuts: [], directives: [] }; // TODO: Move this to reconciler
         for (const cPart of Object.values(this.element.cparts)) {
             const def = (cPart.def || cPart.conf);
@@ -609,7 +607,7 @@ modulo.register('coreDef', class Component {
         this.reconciler = new this.modulo.registry.engines.Reconciler(this.modulo, opts);
         this.resolver = new this.modulo.registry.core.ValueResolver(this.modulo);
         const html = this.element.getAttribute('modulo-mount-html'); // Hydrate?
-        this._mountRival = html === null ? this.element : makeDiv(html);
+        this._mountRival = html === null ? this.element : newNode(html);
         this.element.originalHTML = html === null ? this.element.innerHTML : html;
     }
 
@@ -648,7 +646,7 @@ modulo.register('coreDef', class Component {
     }
 
     domCallback(renderObj) {
-        const { clone, makeDiv } = this.modulo.registry.utils;
+        const { clone, newNode } = this.modulo.registry.utils;
         let { slots, root, innerHTML, innerDOM } = renderObj.component;
         if (this.attrs.mode === 'regular' || this.attrs.mode === 'vanish') {
             root = this.element; // default, use element as root
@@ -663,7 +661,7 @@ modulo.register('coreDef', class Component {
             this.modulo.assert(this.attrs.mode === 'custom-root', 'Bad mode')
         }
         if (innerHTML !== null && !innerDOM) { // Use component.innerHTML as DOM
-            innerDOM = makeDiv(innerHTML);
+            innerDOM = newNode(innerHTML);
         }
         if (innerDOM && this.attrs.mode === 'vanish-into-document') {
             for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
@@ -808,11 +806,11 @@ modulo.register('util', function hash (str) {
     return hash8.replace(/-/g, 'x'); // Pad with 'x'
 });
 
-modulo.register('util', function makeDiv(html) {
-    const div = window.document.createElement('div');
-    div.innerHTML = html;
-    return div;
+modulo.register('util', function newNode(innerHTML, tag) {
+    const obj = { innerHTML }; // Extra properties to assign
+    return Object.assign(window.document.createElement(tag || 'div'), obj);
 });
+modulo.registry.utils.makeDiv = modulo.registry.utils.newNode; // TODO: Rm alias
 
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
@@ -1010,7 +1008,6 @@ modulo.register('cpart', class Style {
             def.isolateClass = def.isolateClass || def.Parent;
         }
     }
-
     static processSelector (modulo, def, selector) {
         const hostPrefix = def.prefix || ('.' + def.isolateClass);
         if (def.isolateClass || def.prefix) {
@@ -1041,7 +1038,6 @@ modulo.register('cpart', class Style {
         }
         return selector;
     }
-
     static ProcessCSS (modulo, def, value) {
         if (def.isolateClass || def.prefix) {
             if (!def.keepComments) {
@@ -1077,14 +1073,12 @@ modulo.register('cpart', class Style {
             }
         }
     }
-
     makeStyleTag(parentElem, content) { // Append <style> tag with content
         const style = window.document.createElement('style');
         style.setAttribute('modulo-asset', 'y');
         style.textContent = content;
         parentElem.append(style);
     }
-
     domCallback(renderObj) {
         const { mode } = modulo.definitions[this.conf.Parent] || {};
         const { innerDOM, Parent } = renderObj.component;
@@ -1117,7 +1111,6 @@ modulo.register('cpart', class Template {
         modulo.assets.define(def.DefinitionName, code);
         delete def.Content;
     }
-
     constructor(text, options = null) {
         if (typeof text === 'string') { // Using "new" (direct JS interface)
             window.modulo.instance({ }, options || { }, this); // Setup object
@@ -1290,7 +1283,6 @@ modulo.config.template.defaultFilters = (function () {
         allow: (s, arg) => arg.split(',').includes(s) ? s : '',
         camelcase: s => s.replace(/-([a-z])/g, g => g[1].toUpperCase()),
         capfirst: s => s.charAt(0).toUpperCase() + s.slice(1),
-        concat: (s, arg) => s.concat ? s.concat(arg) : s + arg,
         combine: (s, arg) => s.concat ? s.concat(arg) : Object.assign({}, s, arg),
         default: (s, arg) => s || arg,
         divisibleby: (s, arg) => ((s * 1) % (arg * 1)) === 0,

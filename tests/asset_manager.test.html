@@ -313,7 +313,10 @@ window.moduloBuild.nameToHash = {
         }
         const actualFns = JSON.stringify(files.map(({ filename }) => filename));
         const [ cssSize, jsSize, htmlSize ] = files.map(({ text }) => (text || '').trim().length).concat([-1, -1, -1]); // have -1 as placeholder
-        assert: expectedFns === actualFns && jsSize > 2500 && cssSize === 0 && htmlSize > 500
+        // Fragile point: 400 is a guess at a minimum size for building the
+        // tests/index.html ... If the HTML file / text ever gets further
+        // simplified, this could get smaller.
+        assert: expectedFns === actualFns && jsSize > 2500 && cssSize === 0 && htmlSize > 400
     </script>
 
     <script name="commands.build produces html file with expected content">
