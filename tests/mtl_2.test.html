@@ -81,6 +81,23 @@
     </script>
 
 
+    <script name="Tagswap works with attributes">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Tag swap: {{ a|tagswap:'x=td y=strong' }}");
+        const result = instance.render({ a: '<x href="#" data-target="<y>">abc<y class="whatever">XYZ</y>123</x>' });
+        const expected = 'Tag swap: <td href="#" data-target="<strong>">abc<strong class="whatever">XYZ</strong>123</td>';
+        assert: result === expected
+    </script>
+
+    <script name="Tagswap works with dashes in search tag (and attributes)">
+        const { Template } = modulo.registry.cparts;
+        const instance = new Template("Tag swap: {{ a|tagswap:'my-Swapper=abc-RealThing another-swappy_Thingie=p' }}");
+        const result = instance.render({ a: '<my-swapper href="#">abc<another-swappy_thingie>XYZ</another-swappy_thingie>123</my-swapper>' });
+        const expected = 'Tag swap: <abc-RealThing href="#">abc<p>XYZ</p>123</abc-RealThing>';
+        assert: result === expected
+    </script>
+
+
 
 </Test>
 </TestSuite></Component>

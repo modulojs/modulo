@@ -994,7 +994,7 @@ modulo.config.style = {
     isolateClass: null, // By default, it does not use class isolation
     prefix: null, // Used to specify prefix-based isolation (most common)
     corePseudo: ['before', 'after', 'first-line', 'last-line' ],
-    DefBuilders: [ 'AutoIsolate', 'Content|ProcessCSS' ],
+    DefBuilders: [ 'FilterContent', 'AutoIsolate', 'Content|ProcessCSS' ],
 };
 modulo.register('cpart', class Style {
     static AutoIsolate(modulo, def, value) {
@@ -1274,7 +1274,8 @@ modulo.config.template.defaultFilters = (function () {
         for (const row of arg) { // Loop through each replacement pair
             const [ tag, val ] = typeof row === 'string' ? row.split('=') : row;
             const swap = (a, prefix, suffix) => prefix + val + suffix;
-            s = s.replace(RegExp('(</?)' + tag + '(\s|>)', 'gi'),  swap);
+            //s = s.replace(RegExp('(</?)' + tag + '(\s|>)', 'gi'),  swap);
+            s = s.replace(RegExp('(</?)' + tag + '(\\s|>)', 'gi'),  swap);
         }
         return safe(s); // Always mark as safe, since for HTML tags
     };
@@ -1414,7 +1415,7 @@ modulo.register('cpart', class StaticData {
 }, {
     DataType: '?', // Default behavior is to guess based on Src ext
     RequireData: 'DefinitionName',
-    DefLoaders: [ 'DefTarget', 'DefinedAs', 'DataType', 'Src' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'DataType', 'Src', 'FilterContent' ],
     DefBuilders: [ 'ContentCSV', 'ContentTXT', 'ContentJSON', 'ContentJS', 'Code', 'RequireData' ],
 });
 
