@@ -1,4 +1,4 @@
-// Copyright 2024 MichaelB | https://modulojs.org | Modulo v0.0.71 | LGPLv3
+// Copyright 2024 MichaelB | https://modulojs.org | Modulo v0.0.72 | LGPLv3
 // Modulo LGPLv3 NOTICE: Any direct modifications to the Modulo.js source code
 // must be LGPL or compatible. It is acceptable to distribute dissimilarly
 // licensed code built with the Modulo framework bundled in the same file for
@@ -910,11 +910,9 @@ modulo.register('core', class FetchQueue {
             resolve(this.data[src], src); // (sync route)
         } else if (!(src in this.queue)) { // No cache, no queue
             this.queue[src] = [ resolve ]; // First time, create the queue Array
-            const { force, filePadding } = this.modulo.config.fetchqueue;
-            if (filePadding && (src.startsWith('file:/') || force === 'file')) {
-                const { prefix, callbackName } = filePadding; // JSONP callback
-                const auto = this.modulo.registry.utils.stripWord(prefix);
-                window[callbackName || auto] = str => { this.__data = str };
+            const { force, callbackName } = this.modulo.config.fetchqueue;
+            if ((!force && src.startsWith('file:/')) || force === 'file') {
+                window[callbackName] = str => { this.__data = str };
                 const elem = window.document.createElement('SCRIPT');
                 elem.onload = () => this.receiveData(this.__data, src);
                 elem.src = src + (src.endsWith('/') ? 'index.html' : '');
@@ -956,7 +954,10 @@ modulo.register('core', class FetchQueue {
         const check = () => ((++count >= allQueues.length) ? callback() : 0);
         allQueues.forEach(queue => queue.push(check)); // Add to every queue
     }
-}, { filePadding: { prefix: '!DOCTYPE_MODULO(`', suffix: '`)' } });
+}, {
+    callbackName: 'DOCTYPE_MODULO',
+    filePadding: { prefix: '!DOCTYPE_MODULO(`', suffix: '`)' },
+});
 
 modulo.register('cpart', class Props {
     initializedCallback(renderObj) {

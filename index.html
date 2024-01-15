@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<script Modulo src="./src/Modulo.js">
+    <Component name="Readme">
+        <StaticData -data-type="txt" -src="./README.mdp"></StaticData>
+        <Script -src="https://unpkg.com/snarkdown">
+            function renderCallback() {
+                component.innerHTML = component.originalHTML || '';
+                component.innerHTML += snarkdown(staticdata);
+            }
+        </Script>
+    </Component>
+</script>
+<x-Readme></x-Readme>

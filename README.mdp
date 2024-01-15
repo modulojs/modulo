@@ -1,0 +1,93 @@
+!DOCTYPE_MODULO(`
+
+![](www-src/img/mono_logo_percent_only.png)
+
+# Modulo
+
+Modulo is a lightweight framework for creating **HTML Web Components**: Reusable
+snippets of HTML, CSS, and JavaScript that create new HTML-like tags that can
+be used and reused anywhere on your site.  Modulo runs entirely in the browser,
+and can be incorporated with just a couple lines of code into any HTML file
+(see the "Quick start"), such that **no terminal usage is necessary**. However,
+if you prefer, you can also start projects using NPM from the Terminal (see the
+"NPM start").
+
+- Beginner-friendly features inspired by React, Svelte, and Vue.js, in only
+  2000 lines of dependency-free, self-building JavaScript. A “no fuss” drop-in
+  for existing web apps or Jamstack static sites.
+
+- Try interactive demos and learn more on the website: <https://modulojs.org/>
+
+Project Status: \`alpha\` *(Well-documented with lots of examples, but still a
+work in progress -- help by trying it out!)*
+
+-----
+
+## Quick start
+
+
+1. Include in any HTML file the single Modulo JavaScript file loaded from a CDN:
+
+\`\`\`html
+<script src="https://unpkg.com/mdu.js"></script>
+\`\`\`
+
+
+2. Now define one or more Modulo web components (custom HTML elements).  First,
+use \`<template Modulo>\` and \`</template>\` to mark where in your HTML you are
+defining our components.  Then, add "Template", "Script", and "Style" tags, to
+incorporate HTML, JavaScript, and CSS respectively into your component. E.g.:
+
+\`\`\`html
+<template Modulo>
+    <Component name="HelloWorld">
+        <Template>
+            Hello <strong>Modulo</strong> World!
+        </Template>
+        <Script>
+            console.log('Hello Modulo JS world!');
+        </Script>
+        <Style>
+            strong { color: purple; }
+        </Style>
+    </Component>
+</template>
+<script src="https://unpkg.com/mdu.js"></script>
+\`\`\`
+
+3. Now, you can use and reuse this new custom element wherever you want, just
+like any normal HTML tag. E.g.:
+
+\`\`\`html
+<x-HelloWorld></x-HelloWorld>
+<p>In a P tag: <x-HelloWorld></x-HelloWorld></p>
+\`\`\`
+
+
+* *(Optional)* Download [src/Modulo.js](https://unpkg.com/mdu.js)
+  (the single 2000-line file that contains all of the framework) to wherever
+  you put JS files for your website (for example, \`/static/js/Modulo.js\`)
+
+
+* **Continue?** Want to try more? The official beginner tutorial picks up where
+  this leaves off:
+  [Ramping Up with Modulo - Part 1](https://modulojs.org/tutorial/ramping-up/part1.html)
+
+
+## NPM start
+
+Prefer command-line tools, such as NPM? Run the following, and follow the
+on-screen commands:
+
+\`\`\`bash
+npm init modulo
+\`\`\`
+
+
+-----
+
+## License
+
+(C) 2023 - Michael Bethencourt [LGPLv3](https://unpkg.com/mdu.js)
+
+`)
