@@ -10,8 +10,8 @@
     modulo.register('util', function _testMocks() {
         const urls = [];
         const fetch = url => ({ then: (() => urls.push(url)) });
-        const enqueueAll = cb => cb();
-        const fetchQueue = { fetch, enqueueAll, data: {} }; // Add dummy
+        const enqueue = cb => cb();
+        const fetchQueue = { fetch, enqueue, data: {} }; // Add dummy
         const mockDoc = { queryElemSources: [] };
         mockDoc.querySelectorAll = query => mockDoc.queryElemSources.map(src =>
             ({ getAttribute: () => src, matches: () => false, remove: () => {} }));

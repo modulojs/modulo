@@ -25,6 +25,12 @@
 }
 </StaticData>
 
+<!-- Testing static data with !DOCTYPE_MODULO JSONP format -->
+<StaticData
+    -name="staticdata_jsonp"
+    -src="/demos/tests/multi-file-tests/loading_src_4.json"
+></StaticData>
+
 <TestSuite>
     <Test name="Test StaticData and Template loaded">
         <Script name="static data loaded">
@@ -59,6 +65,13 @@
             const { foo, bar, quux } = modulo.config.component;
             assert: foo === 'bif' && bar === 'baf' && quux === 'mux';
         </Script>
+
+        <Script name="static data loads with padded json">
+            const actual = JSON.stringify(staticdata_jsonp);
+            const expected = JSON.stringify({ testingLoadingObj: 123123 });
+            assert: actual === expected;
+        </Script>
+
     </Test>
 </TestSuite>
 </Component>

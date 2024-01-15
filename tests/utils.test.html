@@ -5,7 +5,7 @@
         // TODO: Move from utils to a new Reconciler unit test
         const directiveShortcuts = [ [ /^@/, 'component.event' ],
                                      [ /:$/, 'component.dataProp' ] ];
-        const rec = new modulo.registry.engines.Reconciler(modulo, { directiveShortcuts });
+        const rec = new modulo.registry.core.Reconciler(modulo, { directiveShortcuts });
         // helper utility function:
         element.parseDir = function parseDir (rawName, value) {
             // TODO: not sure why value gets passed in here

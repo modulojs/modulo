@@ -198,10 +198,6 @@ window.moduloBuild.nameToHash = {
                 callback(`/* js code for (${ src }) */\n`);
             }}); // Use then-able to do sync Promise
 
-            mod.fetchQueue.enqueue = (src, callback) => {
-                callback('/* js code for (' + src + ') */\n');
-            }; /// (possibly dead code)
-
             const opts = {};
             mod.registry.commands.build(mod, opts); // Build, synchronously
             if (!shouldRun) {
