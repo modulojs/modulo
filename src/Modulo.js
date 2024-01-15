@@ -12,6 +12,7 @@ window.moduloPrevious = window.modulo;
 window.Modulo = class Modulo {
     constructor() {
         window._moduloID = (window._moduloID || 0) + 1;
+        this.window = window;
         this.id = window._moduloID; // Every Modulo instance gets a unique ID.
         this._configSteps = 0; // Used to check for an infinite loop during load
         this.registry = { cparts: { }, coreDefs: { }, utils: { }, core: { },
@@ -909,10 +910,11 @@ modulo.register('core', class FetchQueue {
             resolve(this.data[src], src); // (sync route)
         } else if (!(src in this.queue)) { // No cache, no queue
             this.queue[src] = [ resolve ]; // First time, create the queue Array
-            let { callback, filePadding, force } = this.modulo.config.fetchqueue;
-            if (src.startsWith('file://') || force === 'file') {
-                const auto = this.modulo.registry.stripWord(filePadding.prefix);
-                window[callback || auto] = str => { this.__data = str };
+            const { force, filePadding } = this.modulo.config.fetchqueue;
+            if (filePadding && (src.startsWith('file:/') || force === 'file')) {
+                const { prefix, callbackName } = filePadding; // JSONP callback
+                const auto = this.modulo.registry.utils.stripWord(prefix);
+                window[callbackName || auto] = str => { this.__data = str };
                 const elem = window.document.createElement('SCRIPT');
                 elem.onload = () => this.receiveData(this.__data, src);
                 elem.src = src + (src.endsWith('/') ? 'index.html' : '');
@@ -931,7 +933,7 @@ modulo.register('core', class FetchQueue {
 
     receiveData(text, src) { // Receive data, optionally trimming padding
         const { prefix, suffix } = this.modulo.config.fetchqueue.filePadding;
-        if (text.startsWith(prefix) && prefix && text.trim().endsWith(suffix)) {
+        if (text && text.startsWith(prefix) && prefix && text.trim().endsWith(suffix)) {
             text = text.trim().slice(prefix.length, 0 - suffix.length); // Clean
         }
         this.data[src] = text; // Keep retrieved data cached here for sync route

@@ -31,7 +31,7 @@
     -src="/demos/tests/multi-file-tests/loading_src_4.json"
 ></StaticData>
 
-<TestSuite>
+<TestSuite solo>
     <Test name="Test StaticData and Template loaded">
         <Script name="static data loaded">
             const actual = JSON.stringify(staticdata);
@@ -70,6 +70,49 @@
             const actual = JSON.stringify(staticdata_jsonp);
             const expected = JSON.stringify({ testingLoadingObj: 123123 });
             assert: actual === expected;
+        </Script>
+
+    </Test>
+    <Test name="Test Script-tag file protocol loading">
+
+        <Script name="Creates script tag with expected attributes">
+            window.DOCTYPE_MODULO = () => { throw new Error('DOCTYPE_MODULO leaking'); };
+
+            modulo.config.fetchqueue.force = 'file'; // force to use file protocol
+            modulo.register('core', modulo.registry.core.FetchQueue); // Ensure is constructed
+            const p = modulo.fetchQueue.fetch('/demos/tests/multi-file-tests/loading_src_4.json');
+            p.then(data => { throw new Error('Should not see this since we disable onload') });
+            const scriptTag = window.document.querySelector('script[src="/demos/tests/multi-file-tests/loading_src_4.json"]')
+            scriptTag.onload = () => {} ; // prevent onload
+            delete modulo.config.fetchqueue.force; // unset just in case
+            const actual = scriptTag && scriptTag.outerHTML;
+            scriptTag.remove(); // clean up so it doesnt mess up later tests
+            const expected = '<script src="/demos/tests/multi-file-tests/loading_src_4.json" ' +
+                             'modulo-asset="y"><' + '/script>';
+            assert: actual === expected
+        </Script>
+
+
+        <Script name="Calls receive data when script loads">
+            window.DOCTYPE_MODULO = () => { throw new Error('DOCTYPE_MODULO leaking'); };
+
+            modulo.config.fetchqueue.force = 'file'; // force to use file protocol
+            modulo.register('core', modulo.registry.core.FetchQueue); // Ensure is constructed
+            const p = modulo.fetchQueue.fetch('/demos/tests/multi-file-tests/loading_src_4.json');
+
+            let cbCount = 0;
+            p.then(() => { cbCount++; });
+            delete modulo.config.fetchqueue.force; // unset just in case
+
+            //const scriptTag = window.document.querySelector('script[src="/demos/tests/multi-file-tests/loading_src_4.json"]')
+            const scriptTag = window.document.querySelector('script[src="/demos/tests/multi-file-tests/loading_src_4.json"]')
+            scriptTag.onload(); // Trigger cbCount
+            scriptTag.onload = () => {}; // prevent future onload events
+
+            // Assign to no-op, to prevent errors (due to how the test
+            // works, there will be still stray  setTimeouts)
+            window.DOCTYPE_MODULO = () => { };
+            assert: cbCount === 1
         </Script>
 
     </Test>
