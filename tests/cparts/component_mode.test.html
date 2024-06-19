@@ -140,11 +140,11 @@
             </script>
 
             <script name="HTML head element is as expected" skip-rerender>
-                const expectedHead = '<link href="whatevs.css"><title>Hello Vanish</title>';
+                const expectedHead = '<link href="whatevs.css" id="x1jirbkk"><title id="xxu3uhhn">Hello Vanish</title>';
                 const actual = document.head.innerHTML;
                 const testTitle = '<title>testworld</title>'; // used in new tests
 
-                assert: actual === expectedHead || actual === (testTitle + expectedHead)
+                assert: actual === (testTitle + expectedHead)
             </script>
         </test>
 

@@ -33,7 +33,7 @@ window.Modulo = class Modulo {
         }
         this.assert(type in this.registry, 'Unknown registry type: ' + type);
         this.registry[type][cls.name] = cls;
-        //this.tools[cls.name] = () => this.registry[type][cls.name](this, ...args); // TODO: FINISH
+        //this.tools[cls.name] = (...args) => this.registry[type][cls.name](this, ...args); // TODO: FINISH
         if (cls.name[0].toUpperCase() === cls.name[0]) { // e.g. class FooBar
             const conf = this.config[cls.name.toLowerCase()] || {};
             Object.assign(conf, { Type: cls.name }, cls.defaults, defaults);
@@ -656,7 +656,6 @@ modulo.register('coreDef', class Component {
     }
 
     domCallback(renderObj) {
-        const { clone, newNode } = this.modulo.registry.utils;
         let { slots, root, innerHTML, innerDOM } = renderObj.component;
         if (this.attrs.mode === 'regular' || this.attrs.mode === 'vanish' || this.attrs.mode === 'vanish-into-document') {
             root = this.element; // default, use element as root
@@ -669,11 +668,11 @@ modulo.register('coreDef', class Component {
             this.modulo.assert(this.attrs.mode === 'custom-root', 'Bad mode')
         }
         if (innerHTML !== null && !innerDOM) { // Use component.innerHTML as DOM
-            innerDOM = newNode(innerHTML);
+            innerDOM = this.modulo.registry.utils.newNode(innerHTML);
         }
         if (innerDOM && this.attrs.mode === 'vanish-into-document') {
             for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
-                this.element.ownerDocument.head.append(clone(el)); // Move clone
+                this.modulo.registry.utils.loadHead(this.modulo, 'bundle', el, {}, this.element.ownerDocument);
                 el.remove(); // Old one is removed from previous location
             }
         }
@@ -711,7 +710,7 @@ modulo.register('coreDef', class Component {
             this.element.replaceWith(...this.element.childNodes);
         } else if (this.attrs.mode === 'vanish-into-document') { // If we need to vanish, do it now // TODO rm vid
             this.element.ownerDocument.body.innerHTML = '';
-            this.element.ownerDocument.body.append(...this.element.childNodes); // Move clone
+            this.element.ownerDocument.body.append(...this.element.childNodes);
         }
     }
 
@@ -794,18 +793,6 @@ modulo.register('util', function stripWord (text) {
                .replace(/[^a-zA-Z0-9$_\.]$/, '');
 });
 
-modulo.register('util', function clone (el) { // Clones an element
-    const newElement = window.document.createElement(el.tagName);
-    for (const attr of el.attributes) { // Copy all attributes from old elem
-        newElement.setAttributeNode(attr.cloneNode(true)); // ...to new elem
-    }
-    newElement.textContent = el.textContent; // (e.g. <title>Hi</title>)
-    if (el.tagName === 'SCRIPT') { // Need to fix SCRIPT tag fluke
-        newElement.src = el.src; // (TODO: Still needed?)
-    }
-    return newElement;
-});
-
 modulo.register('util', function hash (str) {
     // Simple, insecure, "hashCode()" implementation. Returns base32 hash
     let h = 0;
@@ -820,13 +807,13 @@ modulo.register('util', function hash (str) {
 modulo.register('util', function newNode(innerHTML, tag) {
     const obj = { innerHTML }; // Extra properties to assign
     return Object.assign(window.document.createElement(tag || 'div'), obj);
-});
-modulo.registry.utils.makeDiv = modulo.registry.utils.newNode; // TODO: Rm alias
+}); modulo.registry.utils.makeDiv = modulo.registry.utils.newNode; // TODO: Find and replace wehre this is used
 
-modulo.register('util', function loadHead(modulo, loadMode, elem, knownBundled) { // TODO refactor with AssetManager?
+modulo.register('util', function loadHead(modulo, loadMode, elem, knownBundled, doc = null) {
+    doc = doc || window.document;
     const { newNode, hash } = modulo.registry.utils;
     const id = hash(elem.name || elem.src || elem.href || elem.innerHTML);
-    if (window.document.getElementById(id) || knownBundled[id]) {
+    if (doc.getElementById(id) || knownBundled[id]) {
         return; // already exists, never add twice
     }
     knownBundled[id] = loadMode === 'bundle'; // (set to true if bundling this)
@@ -841,9 +828,9 @@ modulo.register('util', function loadHead(modulo, loadMode, elem, knownBundled) 
     /*if (elem.tagName === 'SCRIPT') { // Need to fix SCRIPT tag fluke
         newElem.src = elem.src; // (TODO: Still needed?)
     }*/
-    window.document.head.append(newElem);
+    newElem.textContent = elem.textContent; // Evaluate code
+    doc.head.append(newElem);
 });
-
 
 modulo.register('util', function normalize(html) {
     // Normalize space to ' ' & trim around tags
@@ -881,7 +868,7 @@ modulo.register('util', function getParentDefPath(modulo, def) {
 });
 
 modulo.register('core', class AssetManager {
-    constructor (modulo) { // TODO: Refactor this class into util / processors
+    constructor (modulo) { // TODO: Delete this, replace with loadHead + extras
         this.modulo = modulo;
         this.stylesheets = {}; // Object with hash of CSS (prevents double add)
         this.cssAssetsArray = []; // List of CSS assets added, in order
@@ -1482,7 +1469,7 @@ modulo.register('cpart', class Include {
         Include.LoadMode(this.modulo, this.attrs, 'lazy', { }); // Always load if ID not exist
     }
 });
-modulo.register('coreDef', modulo.registry.cparts.Include);
+modulo.register('coreDef', modulo.registry.cparts.Include); // Allow globally
 
 modulo.config.script = {
     lifecycle: null,

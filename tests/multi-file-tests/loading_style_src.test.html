@@ -20,7 +20,7 @@ x-LoadingStyleSrc .Test_Absolute {
 
     // Scrubs away references to test server, or not, depending on arg
     function _clean(text, sub='http://LH:1234') {
-        return text.replace(/https?:..(localhost|127.0.0.1):\d+/gi, sub).trim();
+        return text.replace(/https?:..(localhost|127.0.0.1|arfour.local):\d+/gi, sub).trim();
     }
     // (ditto)
     function _getExpected(useDomain) {
