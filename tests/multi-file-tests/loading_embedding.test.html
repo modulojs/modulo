@@ -6,7 +6,8 @@
     //modulo.fetchQueue.fetch('/js/Modulo.older.js').then(text => {
     modulo.fetchQueue.fetch('/js/Modulo.js').then(text => {
         moduloText = text + `
-            modulo.register('util', function showDevMenu() {
+            modulo.registry.send.load = () => window._testModLoaded(modulo); // >0.0.73
+            modulo.register('util', function showDevMenu() { // <0.0.72
                 window._testModLoaded(modulo);
             });
         `;
@@ -138,7 +139,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 3; // _artifact namespace starts with 3
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._noEmbedCount === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 
@@ -147,7 +148,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 4; // adds in modulo
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._emptyEmbedCount === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 
@@ -156,7 +157,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 5; // adds in configuration
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._singleConfEmbedCount === 1 && mod._singleConfEmbedCountTag === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 
@@ -166,7 +167,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 7; // adds in Component, _script, and _template (?)
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._sinComponentStatic === 1 && mod._sinConfEmbed === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 
@@ -178,7 +179,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 7;
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._sinComponentTemplateStatic === 1 && mod._sinConfTemplateEmbed  === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 
@@ -189,7 +190,7 @@
                 const defActual = Object.keys(mod.definitions).length;
                 const conActual = Object.keys(mod.config).length;
                 const defExpected = 9; // adds in Component, _props, _template, _script, and _state
-                const conExpected = 17;
+                const conExpected = 18;
                 assert: mod._basicStarter === 1 && defActual === defExpected && conActual === conExpected
             </Script>
 

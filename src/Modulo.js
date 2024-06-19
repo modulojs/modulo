@@ -17,7 +17,7 @@ window.Modulo = class Modulo {
         this._configSteps = 0; // Used to check for an infinite loop during load
         this.registry = { cparts: { }, coreDefs: { }, utils: { }, core: { },
                            engines: { }, commands: { }, templateFilters: { },
-                           templateTags: { }, processors: { }, elements: { }
+                           templateTags: { }, processors: { }, elements: { },
                            events: { }, listeners: { }, send: { } };
         this.registered = {}; // TODO Have this get populated with injected versions after full config (maybe in a Modulo CodeTemplate -> Main?) -- could just subclass everything and attach modulo etc
         this.config = {}; // Default confs for classes (e.g. all Components)
@@ -658,7 +658,7 @@ modulo.register('coreDef', class Component {
     domCallback(renderObj) {
         const { clone, newNode } = this.modulo.registry.utils;
         let { slots, root, innerHTML, innerDOM } = renderObj.component;
-        if (this.attrs.mode === 'regular' || this.attrs.mode === 'vanish' || this.attrs.mode === 'vanish-into-document') { // TODO rm vid?
+        if (this.attrs.mode === 'regular' || this.attrs.mode === 'vanish' || this.attrs.mode === 'vanish-into-document') {
             root = this.element; // default, use element as root
         } else if (this.attrs.mode === 'shadow') {
             if (!this.element.shadowRoot) {
@@ -670,6 +670,12 @@ modulo.register('coreDef', class Component {
         }
         if (innerHTML !== null && !innerDOM) { // Use component.innerHTML as DOM
             innerDOM = newNode(innerHTML);
+        }
+        if (innerDOM && this.attrs.mode === 'vanish-into-document') {
+            for (const el of innerDOM.querySelectorAll('script,link,title,meta')) {
+                this.element.ownerDocument.head.append(clone(el)); // Move clone
+                el.remove(); // Old one is removed from previous location
+            }
         }
         if (innerDOM && this.attrs.mode !== 'shadow') {
             for (const elem of this.element.originalChildren) {
@@ -701,8 +707,11 @@ modulo.register('coreDef', class Component {
             this._mountPatchset = this._mountPatchset || patches; // 1st render
             this.reconciler.applyPatches(patches); // Apply patches to DOM
         }
-        if (this.attrs.mode === 'vanish' || this.attrs.mode === 'vanish-into-document') { // If we need to vanish, do it now // TODO rm vid
+        if (this.attrs.mode === 'vanish') {
             this.element.replaceWith(...this.element.childNodes);
+        } else if (this.attrs.mode === 'vanish-into-document') { // If we need to vanish, do it now // TODO rm vid
+            this.element.ownerDocument.body.innerHTML = '';
+            this.element.ownerDocument.body.append(...this.element.childNodes); // Move clone
         }
     }
 
@@ -720,11 +729,11 @@ modulo.register('coreDef', class Component {
         const get = (key, key2) => resolveDataProp(key, el, key2 && get(key2));
         this.modulo.assert(get(attrName), `Not found: ${ rawName }=${ value }`);
         el.moduloEvents = el.moduloEvents || {}; // Attach if not already
-        listen = listen || ev => { // Define a event func to run handleEvent
+        listen = listen ? listen : (ev) => { // Define a event func to run handleEvent
             ev.preventDefault();
             const payload = get(attrName + '.payload', 'payload');
             this.handleEvent(resolveDataProp(attrName, el), payload, ev);
-        };
+        }
         el.moduloEvents[attrName] = listen;
         el.addEventListener(attrName, listen);
     }
@@ -1488,8 +1497,7 @@ modulo.config.script = {
         setLocalVariables: function (o) {
             {% for n in def.locals %}{{ n }} = o.{{ n }};{% endfor %}
         }
-    }`.replace(/\s\s+/g, ' '),
-      // TODO : High prio to add Source URL https://firefox-source-docs.mozilla.org/devtools-user/debugger/how_to/debug_eval_sources/index.html
+    }`.replace(/\s\s+/g, ' ') /* + '{% if def.Source %}\n//# sourceURL={{ def.Source }}{% endif %}'*/,
 };
 
 modulo.register('cpart', class Script {
@@ -1578,7 +1586,7 @@ modulo.register('cpart', class State {
             this.boundElements[name] = [];
         }
         // Bind the "listen" event to propagate to all, and trigger initial vals
-        listen = listen || () => this.propagate(name, el.value, el);
+        listen = listen ? listen : () => this.propagate(name, el.value, el);
         this.boundElements[name].push([ el, evName, listen ]);
         el.addEventListener(evName, listen); // TODO: Document that it is now optional, e.g. to support cparts or threading
         this.propagate(name, val, this); // trigger initial assignment(s)
