@@ -812,11 +812,12 @@ modulo.register('util', function newNode(innerHTML, tag) {
 modulo.register('util', function loadHead(modulo, loadMode, elem, knownBundled, doc = null) {
     doc = doc || window.document;
     const { newNode, hash } = modulo.registry.utils;
-    const id = hash(elem.name || elem.src || elem.href || elem.innerHTML);
+    const url = elem.getAttribute('src') || elem.getAttribute('href') || null;
+    const id = hash(elem.name || url || elem.textContent);
     if (doc.getElementById(id) || knownBundled[id]) {
         return; // already exists, never add twice
     }
-    knownBundled[id] = loadMode === 'bundle'; // (set to true if bundling this)
+    knownBundled[id] = loadMode === 'bundle' ? url : false; // (if bundling this)
     const newElem = newNode(elem.innerHTML, elem.tagName);
     for (const attr of elem.attributes || []) { // Copy all attributes from old elem
         newElem.setAttributeNode(attr.cloneNode(true)); // ...to new elem
@@ -1444,29 +1445,34 @@ modulo.config.include = {
     GlobalBundled: { },
     LoadMode: 'bundle',
     ServerTemplate: 'https://{{ server }}/{{ path }}',
-    TagTemplate: '{% if isCSS %}<link name="{{ package }}" rel="stylesheet" href="{{ url }}" />' +
-                  '{% else %}<script name="{{ package }}" src="{{ url }}"></' + 'script>{% endif %}',
-    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Server', 'LoadMode' ],
+    TagTemplate: '{% if isCSS %}<link rel="stylesheet" href="{{ url }}" />' +
+                 '{% else %}<script src="{{ url }}"></' + 'script>{% endif %}',
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Server' ],
+    DefBuilders: [ 'LoadMode' ],
 };
 modulo.register('cpart', class Include {
-    static LoadMode(modulo, def, value) { // Loads given Include def
-        const { loadHead, newNode, keyFilter } = modulo.registry.utils;
+    static Server(modulo, def, value) { // Loads given Include def
+        const { keyFilter } = modulo.registry.utils;
         const lower = key => key[0].toLowerCase() === key[0]; // skip "-prefixed"
-        const ctx = { def, modulo, headContent: def.Content || ''  };
+        const ctx = { def, modulo, server: value };
         const render = code => new modulo.registry.cparts.Template(code).render(ctx);
+        def.Content = def.Content || '';
         for (const [ pkg, v ] of Object.entries(keyFilter(def, lower))) {
             ctx.path = v.contains('@') ? v : pkg + (v ? ('@' + v) : '');
             ctx.isCSS = (ctx.path.contains('/') && ctx.path.endsWith('.css'));
             ctx.url = render(def.ServerTemplate); // Render URL using ServerTemplate
-            ctx.headContent += render(def.TagTemplate); // Append tag to head Content
+            def.Content += render(def.TagTemplate); // Append tag to head Content
         }
-        for (const elem of newNode(ctx.headContent).children) { // Loop through combined
+    }
+    static LoadMode(modulo, def, value) { // Loads given Include def
+        const { loadHead, newNode } = modulo.registry.utils;
+        for (const elem of newNode(def.Content).children) { // Loop through combined
             loadHead(modulo, value, elem, modulo.config.include.GlobalBundled);
         }
     }
     intitializedCallback(renderObj) {
         const { Include } = this.modulo.registry.cparts; // Can I use self. reliably?
-        Include.LoadMode(this.modulo, this.attrs, 'lazy', { }); // Always load if ID not exist
+        Include.LoadMode(this.modulo, this.conf, 'lazy', { }); // Always load if ID not exist
     }
 });
 modulo.register('coreDef', modulo.registry.cparts.Include); // Allow globally

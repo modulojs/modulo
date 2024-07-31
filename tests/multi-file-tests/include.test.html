@@ -1,0 +1,89 @@
+
+<script Configuration>
+    modulo.config.include.quux = 'mux'
+    /*
+    const originalHash = modulo.registry.utils.hash;
+    modulo.register('util', function hash (str) {
+        if (str.startsWith('http')) {
+            console.log(str);
+        }
+        str = str.replace(/^https?...[a-z0-9]+\.[a-z0-9]+:?[0-9]* ?/i, '');
+        return originalHash(str);
+    });
+    */
+</script>
+
+<Include -name="IncludeTestGlobalInclude">
+    <script src="/demos/tests/multi-file-tests/include_script_src.js"></script>
+    <link rel="stylesheet" href="/demos/tests/multi-file-tests/include_style_src.css" />
+    <script>
+        modulo.config.include.E_SE = modulo.config.include.E_SE || 0;
+        modulo.config.include.E_SE++;
+    </script>
+</Include>
+
+
+<Component name="GlobalInclude_Test">
+
+<TestSuite>
+    <Test name="Global Include works">
+        <Script name="Global settings register">
+            assert: modulo.config.include.quux === 'mux'
+        </Script>
+
+        <Script name="Global include runs">
+            const se = modulo.config.include.GLOBAL_SIDEEFFECT;
+            assert: se === 'include_script_src'
+        </Script>
+
+        <Script name="Global include runs once">
+            const count = modulo.config.include.GLOBAL_SIDEEFFECT_COUNT;
+            assert: count === 1
+        </Script>
+
+        <Script name="Global generates expected global bundle stuff">
+            const gb = modulo.config.include.GlobalBundled;
+            const actual = Object.entries(gb).filter(([k, v]) => v || v === null).map(([k, v]) => k).join(',');
+            const expected = 'x1l3gfn1,xxbha5e5,x11e84tr';
+            assert: actual === expected
+        </Script>
+    </Test>
+    <Test name="Global Include of script tag works">
+        <Script name="Global include runs once">
+            const count = modulo.config.include.E_SE;
+            assert: count === 1
+        </Script>
+    </Test>
+</TestSuite>
+</Component>
+
+
+<Component name="IncludeComponentLazy_Test">
+  <Include -name="IncludeComponentLazy" -load-mode="lazy">
+      <script src="/demos/tests/multi-file-tests/include_script_src.js"></script>
+      <script src="/demos/tests/multi-file-tests/include_script_src_2.js"></script>
+      <link rel="stylesheet" href="/demos/tests/multi-file-tests/include_style_src_2.css" />
+  </Include>
+
+  <TestSuite>
+      <Test name="Component Include works">
+        <Script name="Component include runs">
+            const se = modulo.config.include.SIDEEFFECT;
+            assert: se === 'include_script_src_2'
+        </Script>
+
+        <Script name="Component include runs once">
+            const count = modulo.config.include.SIDEEFFECT_COUNT;
+            assert: count === 1
+        </Script>
+
+        <Script name="Component generates expected global bundle stuff">
+            const gb = modulo.config.include.GlobalBundled;
+            const actual = Array.from(Object.keys(gb)).join(',');
+            const expected = 'x1l3gfn1,xxbha5e5,x11e84tr,x1047o1i,xx4grn08';
+            assert: actual === expected
+        </Script>
+      </Test>
+  </TestSuite>
+</Component>
+
