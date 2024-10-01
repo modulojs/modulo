@@ -1389,10 +1389,10 @@ modulo.register('processor', function contentTXT (modulo, def, value) {
 
 modulo.register('processor', function dataType (modulo, def, value) {
     if (value === '?') { // '?' means determine based on extension
-        const ext = def.Src && def.Src.match(/(?<=\.)[a-z]+$/i);
-        value = ext ? ext[0] : 'json';
+        const ext = def.Src && def.Src.match(/\.([a-z]+)$/i);
+        value = ext ? ext[1] : 'json'; // If extension, use; else use "json"
     }
-    def['Content' + value.toUpperCase()] = value;
+    def['Content' + value.toUpperCase()] = value; // Check for processor
 });
 
 modulo.register('processor', function filterContent (modulo, def, value) {
@@ -1447,8 +1447,7 @@ modulo.config.include = {
     ServerTemplate: 'https://{{ server }}/{{ path }}',
     TagTemplate: '{% if isCSS %}<link rel="stylesheet" href="{{ url }}" />' +
                  '{% else %}<script src="{{ url }}"></' + 'script>{% endif %}',
-    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Server' ],
-    DefBuilders: [ 'LoadMode' ],
+    DefLoaders: [ 'DefTarget', 'DefinedAs', 'Src', 'Server', 'LoadMode' ], // TODO: Test 'LoadMode' here
 };
 modulo.register('cpart', class Include {
     static Server(modulo, def, value) { // Loads given Include def
